@@ -8,7 +8,7 @@ exports.handler=async(event)=>{
   const {image,mimeType,language}=JSON.parse(event.body||'{}');
   if(!image||!/^image\/(jpeg|png|webp)$/.test(mimeType||'')||!(/^[A-Za-z0-9+/=]+$/.test(image)))return json(400,{error:'Niepoprawne zdjęcie. Wybierz JPG, PNG lub WEBP.'});
   const prompt=`Przepisz dokładnie WSZYSTKIE czytelne fragmenty tekstu z tej fotografii strony podręcznika w języku ${language==='angielski'?'angielskim':'polskim'}. Zachowaj kolejność czytania, polskie znaki, interpunkcję, podział na zwrotki i akapity. Nie opisuj ilustracji, nie rozwiązuj zadań, nie dopisuj tekstu, którego nie widać. Miejsca nieczytelne oznacz [nieczytelne]. Zwróć wyłącznie transkrypcję.`;
-  const model='gemini-2.5-flash';
+  const model='gemini-3.8-flash';
   const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),25000);
   let res;
   try{res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':key},body:JSON.stringify({contents:[{parts:[{text:prompt},{inline_data:{mime_type:mimeType,data:image}}]}],generationConfig:{temperature:0,maxOutputTokens:3000}}),signal:controller.signal})}finally{clearTimeout(timer)}
