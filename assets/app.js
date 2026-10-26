@@ -481,13 +481,28 @@ function showMicBubble(answer){
 }
 function microphone(){
  const answer=q=>{
-  const question=String(q||'').trim();if(!question)return;
+  const question=String(q||'').trim();
+  if(!question)return;
+
+  if(tab==='mentor' && $('question')){
+   $('question').value=question;
+   const output=$('mentoranswer');
+   if(output)output.textContent='🎙️ Usłyszałem: '+question;
+   handle('mentor:answer');
+   return;
+  }
+
   const guide=helpForQuestion(question);
-  const prefix=profile().mentor==='fun'?'Hej, młody pajęczaku! ':'JARVIS znalazł wskazówkę. ';
-  const ans=prefix+(guide||explanation(question));
-  showMicBubble(ans);
+  const prefix=profile().mentor==='fun'
+   ?'Hej, młody pajęczaku! '
+   :'JARVIS znalazł wskazówkę. ';
+  showMicBubble(prefix+(guide||explanation(question)));
  };
- listen(answer,msg=>{const q=prompt(msg+'\nMożesz wpisać pytanie do mentora:');if(q)answer(q)});
+
+ listen(answer,msg=>{
+  const q=prompt(msg+'\\nMożesz wpisać pytanie do mentora:');
+  if(q)answer(q);
+ });
 }
 
 document.addEventListener('click',ev=>{const btn=ev.target.closest('[data-action]');if(btn){if(ev.target.closest('[data-speak]'))return;handle(btn.dataset.action,btn)}});
