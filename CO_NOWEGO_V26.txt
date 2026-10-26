@@ -1,0 +1,1 @@
+V26: W obu grach przyciski kierunkowe są ułożone w krzyż: góra, lewo, prawo, dół. Bez zmian w zapisanych postępach.

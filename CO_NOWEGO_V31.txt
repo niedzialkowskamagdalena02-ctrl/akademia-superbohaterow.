@@ -1,0 +1,1 @@
+V31: Misje dziecka są pogrupowane na sprawdziany i ważne terminy, misje szkolne oraz misje domowe. Karty wyświetlają termin i ostrzegają o zbliżającym się lub przekroczonym terminie. W formularzu mamy typy misji mają czytelniejsze nazwy. Zmiana nie usuwa starych misji.

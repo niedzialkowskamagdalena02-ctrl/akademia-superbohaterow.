@@ -1,0 +1,1 @@
+V25: nowy model bazy z bryłami 3D, obracaniem kamery, przybliżaniem, umeblowanymi pomieszczeniami i elementami odblokowywanymi przez dzieci. Zachowano gablotę Rękawicy Nieskończoności.

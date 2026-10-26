@@ -1,0 +1,1 @@
+V28: W Panelu mamy → Ustawienia można dodać własny tekst piosenki, link do filmu YouTube oraz utworzyć misję muzyczną dla dziecka. W misji dziecko widzi osadzony film i wersy tekstu do ręcznego wyróżniania. Nie ma automatycznej synchronizacji tekstu z filmem. Osadzanie zależy od ustawień właściciela filmu i dostępu do YouTube.

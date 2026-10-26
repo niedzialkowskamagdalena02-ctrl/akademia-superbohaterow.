@@ -1,0 +1,1 @@
+V19: izometryczna scena bazy, osobna gablota Rękawicy Nieskończoności, 6 gniazd i kolory kamieni, po zakupie kamienie pojawiają się na rękawicy. Zachowano identyfikatory zakupów.

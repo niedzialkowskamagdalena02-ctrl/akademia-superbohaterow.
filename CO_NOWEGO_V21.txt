@@ -1,0 +1,1 @@
+V21: Mikrofon odpowiada na pytania nawigacyjne (testy, gry, trening, książki, misje, baza, angielski). Dymek ma X i przycisk ponownego odsłuchania. Nie zmienia zakładki ani zadania.\n

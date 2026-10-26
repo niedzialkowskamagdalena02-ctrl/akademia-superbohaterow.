@@ -1,0 +1,11 @@
+AKADEMIA SUPERBOHATERÓW — V13
+
+NOWE:
+1. "Sala Odkrywców" w menu dziecka: 10 interaktywnych lekcji o rzeczowniku, przymiotniku, czasowniku, zasadach ó/u i rz/ż, dodawaniu, odejmowaniu, mnożeniu, ułamkach i figurach. Każda ma opowieść, zasadę, przykłady, odczyt na głos i pytanie sprawdzające.
+2. Animacje bohaterów w bazie: Iron Man podlatuje, Thor wykonuje ruch rzutu, Spider-Man strzela stylizowaną siecią. Użytkownicy z ograniczeniem animacji systemowych widzą nieruchome postacie.
+3. W Bazie Avengersów "Sektor gier": Kosmiczny Wąż (20 złotych) i Wieża Klocków (30 złotych). Gry działają na ekranie dotykowym, z przyciskami kierunków; zakup odblokowuje grę na stałe dla danego profilu. Gry nie przyznają dodatkowych złotych, aby uniknąć nieograniczonego zarabiania.
+4. Dotychczasowe profile, książki, misje, waluta i zakupy są zachowane; nowy atrybut arcadeUnlocked dodawany dopiero przy zakupie.
+
+WDROŻENIE: w istniejącym projekcie Netlify -> Deploys -> browse files to upload -> ten ZIP. Przed aktualizacją wykonaj kopię danych JSON w panelu mamy. Nie usuwaj danych strony.
+
+UWAGA: animacje to ruchy istniejących ilustracji SVG z dodatkowymi efektami CSS, nie pełne animacje szkieletowe 3D. Test na urządzeniu docelowym jest zalecany.

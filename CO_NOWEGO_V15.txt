@@ -1,0 +1,1 @@
+V15: kolorowe, jasne karty angielskiego; poprawione czytanie lektora bez zdradzania odpowiedzi; osobne przyciski wymowy en-US; poprawiony opis złotych. Pozostałe funkcje V14 zachowane.

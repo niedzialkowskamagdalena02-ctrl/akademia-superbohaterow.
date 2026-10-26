@@ -1,0 +1,9 @@
+V32: Gemini AI OCR (darmowy limit Gemini API)
+
+1. Otwórz https://aistudio.google.com/apikey i utwórz klucz API w darmowym projekcie. Nie przesyłaj klucza nikomu.
+2. W Netlify otwórz istniejący projekt → Project configuration → Environment variables. Dodaj zmienną GEMINI_API_KEY i wklej klucz jako wartość.
+3. Wgraj ZIP V32 do TEGO SAMEGO projektu Netlify przez Deploys. Funkcja serwerowa jest w katalogu netlify/functions/ocr-ai.js. Uwaga: manualny upload ZIP w Netlify Drop może NIE wdrożyć funkcji serwerowych. Jeśli tak się stanie, wdrożenie musi być przez Git lub Netlify CLI (netlify deploy --prod --dir=. --functions=netlify/functions).
+4. Panel mamy → Książki → Edytuj stronę → ✨ Odczytaj przez AI.
+
+Odczyt zdjęć trafia do Google Gemini; w bezpłatnym planie dane mogą być używane do ulepszania produktów Google. Nie wysyłaj zdjęć zawierających dane osobowe dzieci.
+Dla ochrony kosztów i danych w publicznej aplikacji zalecane jest uwierzytelnienie po stronie serwera; obecny endpoint jest dostępny publicznie, więc nie włączaj płatnego klucza bez dodatkowych zabezpieczeń.

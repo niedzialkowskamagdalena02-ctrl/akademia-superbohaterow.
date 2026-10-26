@@ -1,0 +1,1 @@
+V22: Naprawiony mechanizm OCR oparty na Tesseract.js v5: jawne ładowanie języka polskiego lub angielskiego, pasek postępu, błędy, zapis do istniejących stron i odsłuch. Pierwsze uruchomienie wymaga internetu.

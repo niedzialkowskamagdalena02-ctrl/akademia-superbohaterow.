@@ -1,0 +1,1 @@
+V24: Interaktywna Baza Avengersów — przeciąganie palcem, powiększanie, widok pełnoekranowy, wybór pomieszczeń i podgląd odblokowanego wyposażenia. Zachowano OCR i funkcje V23. Grafika nadal jest izometryczną ilustracją 2D, nie grą 3D.

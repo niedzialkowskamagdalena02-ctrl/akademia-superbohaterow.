@@ -1,0 +1,1 @@
+V29: W Trening → Język angielski → Słówka i wymowa dodano odsłuch wzorca i wielokrotne ćwiczenie słów z mikrofonem. Telefon rozpoznaje słowo w języku en-US, ale nie wykonuje rzetelnej analizy fonetycznej ani nie przyznaje złotych za samo rozpoznanie. Wymaga obsługi Web Speech API i dostępu do mikrofonu.

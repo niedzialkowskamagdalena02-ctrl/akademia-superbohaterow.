@@ -1,0 +1,1 @@
+V16: Trening podzielony na przedmioty. Najpierw wybór przedmiotu, potem odpowiednie ćwiczenia. Zachowano uruchamianie quizów i testów z misji.

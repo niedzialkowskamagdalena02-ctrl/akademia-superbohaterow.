@@ -1,0 +1,1 @@
+V14: Sala Odkrywców: najpierw wybór przedmiotu (język polski, matematyka, język angielski), następnie lista zagadnień. Dodano cztery lekcje angielskiego: powitania, zwierzęta, kolory i liczby 1–10. Pozostałe funkcje V13 zachowane.

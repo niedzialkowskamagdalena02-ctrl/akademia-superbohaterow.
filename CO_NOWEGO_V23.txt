@@ -1,0 +1,1 @@
+V23: OCR analizuje stronę trzema metodami (oryginał, poprawiony kontrast, szarość), wybiera wynik z najwyższą pewnością, nie nadpisuje istniejącego tekstu bez potwierdzenia. Uwaga: nie prostuje automatycznie perspektywy, a wynik należy sprawdzić.
