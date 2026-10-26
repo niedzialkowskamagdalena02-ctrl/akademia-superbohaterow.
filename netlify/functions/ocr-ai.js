@@ -11,7 +11,7 @@ exports.handler=async(event)=>{
   const model='gemini-3.8-flash';
   const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),25000);
   let res;
-  try{res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':key},body:JSON.stringify({contents:[{parts:[{text:prompt},{inline_data:{mime_type:mimeType,data:image}}]}],generationConfig:{temperature:0,maxOutputTokens:3000}}),signal:controller.signal})}finally{clearTimeout(timer)}
+  try{for(let i=0;i<3;i++){res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':key},body:JSON.stringify({contents:[{parts:[{text:prompt},{inline_data:{mime_type:mimeType,data:image}}]}],generationConfig:{temperature:0,maxOutputTokens:3000}}),signal:controller.signal});if(res.status!==503||i===2)break;await new Promise(r=>setTimeout(r,1500*(i+1)))}}finally{clearTimeout(timer)}
   const obj=await res.json();
   if(!res.ok){if(res.status===429)return json(429,{error:'Wyczerpano limit darmowych zapytań Gemini. Spróbuj później.'});return json(502,{error:'Gemini odmówiło odczytu ('+res.status+'): '+String(obj.error?.message||'sprawdź klucz API').slice(0,220)})}
   const text=(obj.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join('\n').trim();
