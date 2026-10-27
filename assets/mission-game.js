@@ -1,3 +1,4 @@
+// V46_AI_SCOPE
 // V45_CHAPTER_SELECTION_VERIFIED
 // V43_JSON_REPAIR
 // V42_CHAPTER_SELECTION
@@ -68,12 +69,14 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
  }
  async function start(){
   if(busy)return;
-  const source=material();if(!source){alert('Wybierz strony z rozpoznanym tekstem.');return setup();}
+  const source=material().slice(0,7000);if(!source){alert('Wybierz strony z rozpoznanym tekstem.');return setup();}
   busy=true;root.innerHTML='<section class="mg-panel"><h2>🧠 Mentor AI tworzy misję...</h2><p>Przygotowuję zagadki, interakcje i finał.</p></section>';
-  const difficulty=(()=>{try{return JSON.parse(localStorage.getItem(storeKey())||'{}').weak||[]}catch{return []}})();const taskCount=Math.min(8,Math.max(2,scopePages().length*2));
+  const difficulty=(()=>{try{return JSON.parse(localStorage.getItem(storeKey())||'{}').weak||[]}catch{return []}})();const taskCount=Math.min(6,Math.max(2,scopePages().length*2));
   const prompt=`Jesteś doświadczonym nauczycielem klasy 2 szkoły podstawowej. Tworzysz ${taskCount} zadań dla dziecka. Przy krótkim materiale możesz zwrócić nawet 1-2 zadania, tylko z podanego tekstu, przedmiot: ${subject()}. ZADANIA MUSZĄ WYNIKAĆ Z MATERIAŁU. Kolejne rodzaje: ${plan[subject()].join(', ')}. Każde zadanie ma być INNE. Dla polskiego ćwicz czytanie ze zrozumieniem, ortografię, rzeczowniki, czasowniki, przymiotniki, sylaby, głoski i krzyżówki. Dla matematyki: działania, zakupy, zegar, porównania, zadania tekstowe, geometrię, logiczne myślenie. Dla angielskiego: słówka, tłumaczenia, wymowę, rozumienie ze słuchu, pisownię, układanie zdań i dialogi. Uczeń wcześniej mylił: ${difficulty.join('; ')}. W odpowiedzi zwróć TYLKO JSON: {"tasks":[{"question":"krótkie polecenie","answer":"jedna poprawna odpowiedź","options":["cztery","różne","możliwe","odpowiedzi"],"explanation":"krótkie wyjaśnienie po polsku","audio":"słowo do odsłuchania"}]}. Każda tablica options MUSI zawierać answer dokładnie raz. Dla zadań typu safe i shop odpowiedź to liczba. Dla clock odpowiedź to godzina HH:MM. Dla memory: options to 4 różne pary w formacie "polski=english"; answer to pierwsza para dokładnie. Dla crossword: options to 4 hasła "SŁOWO=wskazówka", answer to pierwsze słowo. Dla order: answer to 2-5 wyrazów, których kolejność uczeń ułoży. Dla spelling: answer to 3-10 liter. Dla syllables: answer to liczba sylab. Dla reading: question to krótki fragment do przeczytania i pytanie, answer do wyboru z options. Dla dictation: audio to słowo do zapisania, answer to to słowo. Dla listening: audio to angielskie słowo, answer to polskie znaczenie. Unikaj niejednoznaczności i błędów w liczeniu głosek. Nie wstawiaj znaków nowej linii wewnątrz stringów JSON. MATERIAŁ: ${source}`;
   try{
-   let raw=await ask(prompt);
+   let raw;
+    try{raw=await ask(prompt)}catch(err){throw Error('Nie udało się połączyć z AI: '+(err?.message||'spróbuj ponownie'))}
+    if(!String(raw||'').trim())throw Error('AI nie przesłało odpowiedzi. Spróbuj ponownie.');
    if(typeof raw==='object'&&raw!==null)raw=JSON.stringify(raw);
    tasks=parse(raw);idx=0;points=0;award=false;reset();draw();
   }
