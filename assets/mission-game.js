@@ -1,3 +1,4 @@
+// V45_CHAPTER_SELECTION_VERIFIED
 // V43_JSON_REPAIR
 // V42_CHAPTER_SELECTION
 // V41: interaktywne misje z podrecznikow, AI generuje tresc, aplikacja mechanike.
