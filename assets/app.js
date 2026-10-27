@@ -95,7 +95,7 @@ async function recognizePageAI(page,language='pol'){
   if(blob.size>7*1024*1024)throw Error('Zdjęcie jest za duże (maksymalnie 7 MB).');
   const b64=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result).split(',')[1]);r.onerror=()=>reject(Error('Nie udało się odczytać zdjęcia.'));r.readAsDataURL(blob)});
   ocrStatus('AI czyta stronę. To może potrwać kilkanaście sekund…');
-  const response=await fetch('/.netlify/functions/ocr-ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:b64,mimeType:blob.type||'image/jpeg',language:language==='eng'?'angielski':'polski'})});
+  const response=await fetch('https://akademia-ai.niedzialkowskamagdalena02.workers.dev/ocr-ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:b64,mimeType:blob.type||'image/jpeg',language:language==='eng'?'angielski':'polski'})});
   let result;try{result=await response.json()}catch{throw Error('Serwer nie zwrócił poprawnej odpowiedzi. Sprawdź wdrożenie Netlify Functions.')}
   if(!response.ok)throw Error(result.error||'Błąd usługi AI: '+response.status);
   const text=String(result.text||'').trim();if(!text)throw Error('AI nie znalazło czytelnego tekstu na zdjęciu.');
@@ -632,7 +632,7 @@ if(action==='game:crossword'){tab='crossword';return render()}if(action==='game:
  const output=$('mentoranswer');
  output.textContent='⏳ Mentor zastanawia się...';
  try{
-  const response=await fetch('/.netlify/functions/mentor-ai',{
+  const response=await fetch('https://akademia-ai.niedzialkowskamagdalena02.workers.dev/mentor-ai',{
    method:'POST',
    headers:{'Content-Type':'application/json'},
    body:JSON.stringify({
@@ -708,7 +708,7 @@ async function helpWithExerciseAI(question){
  bubble.textContent='🧠 Bohater zastanawia się...';
 
  try{
-  const response=await fetch('/.netlify/functions/mentor-ai',{
+  const response=await fetch('https://akademia-ai.niedzialkowskamagdalena02.workers.dev/mentor-ai',{
    method:'POST',
    headers:{'Content-Type':'application/json'},
    body:JSON.stringify({question:context,mentor:style,history:[]})
@@ -732,7 +732,7 @@ async function helpWithGeneralAI(question){
   .slice(0,2500);
  showMicBubble('🧠 Bohater szuka odpowiedzi...');
  try{
-  const response=await fetch('/.netlify/functions/mentor-ai',{
+  const response=await fetch('https://akademia-ai.niedzialkowskamagdalena02.workers.dev/mentor-ai',{
    method:'POST',
    headers:{'Content-Type':'application/json'},
    body:JSON.stringify({
