@@ -1,3 +1,4 @@
+// V48_BANK_AI
 // V47_INTERACTIVE_MISSIONS
 // V46_AI_SCOPE
 // V45_CHAPTER_SELECTION_VERIFIED
@@ -56,32 +57,62 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
   root.querySelectorAll('[data-mg-mode]').forEach(el=>el.onclick=()=>{mode=el.dataset.mgMode;setup()});
   root.querySelectorAll('[data-mg-chapter]').forEach(el=>el.onclick=()=>{scope='chapter:'+el.dataset.mgChapter;setup()});
  }
+ // V48_BANK_AI: zapis lokalny w przegladarce, osobny dla kazdego dziecka i podrecznika
+ const bankKey=()=>`academy-v48-bank-${child}-${bookId}`;
+ const selectionIds=()=>new Set(scopePages().map(p=>String(p.number)));
+ const fingerprint=t=>norm(t.question)+'|'+norm(t.answer);
+ function readBank(){try{const v=JSON.parse(localStorage.getItem(bankKey())||'[]');return Array.isArray(v)?v:[]}catch{return []}}
+ function writeBank(items){try{localStorage.setItem(bankKey(),JSON.stringify(items.slice(-350)))}catch(e){console.warn('Nie mozna zapisac banku zadan',e)}}
+ function storeTasks(items){
+  const bank=readBank();const ids=[...selectionIds()];
+  for(const t of items){
+   if(!t||!t.question||!t.answer||!Array.isArray(t.options))continue;
+   const key=fingerprint(t);const prev=bank.find(x=>x.key===key);
+   if(prev){prev.pageIds=[...new Set([...(prev.pageIds||[]),...ids])];continue}
+   bank.push({key,subject:subject(),pageIds:ids,task:{question:t.question,answer:t.answer,options:t.options,explanation:t.explanation||'',audio:t.audio||'',type:t.type},seen:0,wrong:0,last:0});
+  }writeBank(bank);
+ }
+ function pickSaved(count=5){
+  const ids=selectionIds();
+  const eligible=readBank().filter(x=>x.subject===subject()&&Array.isArray(x.pageIds)&&x.pageIds.some(n=>ids.has(String(n)))&&x.task?.question&&x.task?.answer&&Array.isArray(x.task.options));
+  eligible.sort((a,b)=>((b.wrong||0)*3-(b.seen||0)) - ((a.wrong||0)*3-(a.seen||0)) + (Math.random()-.5)*4);
+  return eligible.slice(0,count).map(x=>({...x.task,_bankKey:x.key,done:false,correct:false}));
+ }
+ function recordResult(t){
+  const bank=readBank();const x=bank.find(v=>v.key===(t._bankKey||fingerprint(t)));
+  if(x){x.seen=(x.seen||0)+1;if(!t.correct)x.wrong=(x.wrong||0)+1;else x.wrong=Math.max(0,(x.wrong||0)-1);x.last=Date.now();writeBank(bank)}
+ }
  function parse(raw){
-  let s=String(raw).replace(/```(?:json)?/gi,'').replace(/```/g,'');
-  const begin=s.indexOf('{'),end=s.lastIndexOf('}');
-  if(begin<0||end<begin)throw Error('AI zwróciło pustą lub niekompletną odpowiedź. Spróbuj ponownie.');
-  s=s.slice(begin,end+1);
-  let obj;try{obj=JSON.parse(s)}catch(e){throw Error('Odpowiedź AI była niepoprawna lub ucięta. Spróbuj ponownie.')}
-
-  if(!Array.isArray(obj.tasks))throw Error('AI nie zwróciło listy zadań');
-  const good=obj.tasks.filter(t=>t&&typeof t.question==='string'&&typeof t.answer==='string'&&typeof t.explanation==='string'&&Array.isArray(t.options)&&t.options.length===4&&t.options.every(x=>typeof x==='string'));
-  if(good.length<1)throw Error('AI nie przygotowało poprawnego zadania');
-  return good.slice(0,8).map((t,i)=>({...t,type:plan[subject()][i%plan[subject()].length],options:t.options.slice(0,4),done:false,correct:false}));
+  let s=typeof raw==='string'?raw:JSON.stringify(raw);
+  s=s.replace(/```(?:json)?/gi,'').replace(/```/g,'').trim();
+  let obj;
+  try{obj=JSON.parse(s)}catch(e){
+   const start=s.indexOf('{'),end=s.lastIndexOf('}');
+   if(start<0||end<=start)throw Error('AI zwrocilo pusta lub ucieta odpowiedz');
+   try{obj=JSON.parse(s.slice(start,end+1))}catch{throw Error('AI przeslalo niepelny JSON')}
+  }
+  const rawTasks=Array.isArray(obj)?obj:obj?.tasks;
+  if(!Array.isArray(rawTasks))throw Error('AI nie zwrocilo listy zadan');
+  const good=rawTasks.filter(t=>t&&typeof t.question==='string'&&typeof t.answer==='string'&&Array.isArray(t.options)&&t.options.length===4&&t.options.every(x=>typeof x==='string')&&t.options.includes(t.answer));
+  if(!good.length)throw Error('AI nie zwrocilo poprawnego zadania');
+  return good.slice(0,6).map((t,i)=>({...t,explanation:t.explanation||'Sprawdz odpowiedz w podreczniku.',type:'choice',done:false,correct:false}));
  }
  async function start(){
   if(busy)return;
-  const source=material().slice(0,7000);if(!source){alert('Wybierz strony z rozpoznanym tekstem.');return setup();}
-  busy=true;root.innerHTML='<section class="mg-panel"><h2>🧠 Mentor AI tworzy misję...</h2><p>Przygotowuję zagadki, interakcje i finał.</p></section>';
-  const difficulty=(()=>{try{return JSON.parse(localStorage.getItem(storeKey())||'{}').weak||[]}catch{return []}})();const taskCount=Math.min(6,Math.max(2,scopePages().length*2));
-  const prompt=`Jesteś doświadczonym nauczycielem klasy 2 szkoły podstawowej. Tworzysz ${taskCount} zadań dla dziecka. Przy krótkim materiale możesz zwrócić nawet 1-2 zadania, tylko z podanego tekstu, przedmiot: ${subject()}. ZADANIA MUSZĄ WYNIKAĆ Z MATERIAŁU. Kolejne rodzaje: ${plan[subject()].join(', ')}. Każde zadanie ma być INNE. Dla polskiego ćwicz czytanie ze zrozumieniem, ortografię, rzeczowniki, czasowniki, przymiotniki, sylaby, głoski i krzyżówki. Dla matematyki: działania, zakupy, zegar, porównania, zadania tekstowe, geometrię, logiczne myślenie. Dla angielskiego: słówka, tłumaczenia, wymowę, rozumienie ze słuchu, pisownię, układanie zdań i dialogi. Uczeń wcześniej mylił: ${difficulty.join('; ')}. W odpowiedzi zwróć TYLKO JSON: {"tasks":[{"question":"krótkie polecenie","answer":"jedna poprawna odpowiedź","options":["cztery","różne","możliwe","odpowiedzi"],"explanation":"krótkie wyjaśnienie po polsku","audio":"słowo do odsłuchania"}]}. Każda tablica options MUSI zawierać answer dokładnie raz. Dla zadań typu safe i shop odpowiedź to liczba. Dla clock odpowiedź to godzina HH:MM. Dla memory: options to 4 różne pary w formacie "polski=english"; answer to pierwsza para dokładnie. Dla crossword: options to 4 hasła "SŁOWO=wskazówka", answer to pierwsze słowo. Dla order: answer to 2-5 wyrazów, których kolejność uczeń ułoży. Dla spelling: answer to 3-10 liter. Dla syllables: answer to liczba sylab. Dla reading: question to krótki fragment do przeczytania i pytanie, answer do wyboru z options. Dla dictation: audio to słowo do zapisania, answer to to słowo. Dla listening: audio to angielskie słowo, answer to polskie znaczenie. Unikaj niejednoznaczności i błędów w liczeniu głosek. Nie wstawiaj znaków nowej linii wewnątrz stringów JSON. MATERIAŁ: ${source}`;
+  const source=material().slice(0,2600);
+  if(!source){alert('Wybierz strony z rozpoznanym tekstem.');return setup()}
+  busy=true;
+  const saved=pickSaved(5);
+  root.innerHTML='<section class="mg-panel"><h2>🧠 Przygotowuję misję...</h2><p>Łączę zapisane zagadki z nowymi pytaniami AI.</p></section>';
   try{
-   let raw;
-    try{raw=await ask(prompt)}catch(err){throw Error('Nie udało się połączyć z AI: '+(err?.message||'spróbuj ponownie'))}
-    if(!String(raw||'').trim())throw Error('AI nie przesłało odpowiedzi. Spróbuj ponownie.');
-   if(typeof raw==='object'&&raw!==null)raw=JSON.stringify(raw);
-   tasks=parse(raw);idx=0;points=0;award=false;reset();draw();
-  }
-  catch(err){root.innerHTML=`<section class="mg-panel"><h2>⚠️ AI nie przygotowało misji</h2><p>${escape(err.message)}</p>${btn('Spróbuj ponownie','start')}${btn('Wróć','back')}</section>`}
+   let fresh=[],error='';
+   // Prosba o maksymalnie 2 zadania zmniejsza ryzyko uciecia odpowiedzi.
+   const prompt=`Jestes nauczycielem klasy 2. Na podstawie materialu przygotuj DWA proste, rozne pytania wielokrotnego wyboru po polsku. Przedmiot: ${subject()}. ZWROC TYLKO POPRAWNY KROTKI JSON: {"tasks":[{"question":"Pytanie","answer":"A","options":["A","B","C","D"],"explanation":"Wyjasnienie"}]}. W kazdym zadaniu answer musi byc identyczne z jednym z czterech options. Bez markdown. MATERIAL: ${source}`;
+   try{fresh=parse(await ask(prompt));storeTasks(fresh)}catch(e){error=e?.message||String(e);console.warn('V48 AI:',error)}
+   const all=shuffle([...fresh,...saved.filter(t=>!fresh.some(n=>fingerprint(n)===fingerprint(t)))]);
+   if(!all.length)throw Error(error||'Nie ma jeszcze zapisanych zadan, a AI nie odpowiedzialo');
+   tasks=all.slice(0,7);idx=0;points=0;award=false;reset();draw();
+  }catch(e){root.innerHTML=`<section class="mg-panel"><h2>⚠️ Nie udalo sie przygotowac misji</h2><p>${escape(e.message)}</p><p>Gdy AI po raz pierwszy wygeneruje zadania, beda zapisywane do powtorek.</p>${btn('Sprobuj ponownie','start')}${btn('Wroc','back')}</section>`}
   finally{busy=false}
  }
  function reset(){choice=null;answered=false;tiles=[]}
@@ -91,6 +122,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
   const t=task();choice=String(value);answered=true;t.done=true;
   t.correct=norm(choice)===norm(t.answer);
   if(t.correct)points++;
+  recordResult(t);
   draw();
  }
  function stage(){const t=task();let html='';

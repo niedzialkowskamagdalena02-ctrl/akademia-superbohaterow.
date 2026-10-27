@@ -1,3 +1,4 @@
+// V48_AI_RESPONSE_DIAGNOSTICS
 // V44_BULK_CHAPTERS
 // V42_CHAPTERS
 import {mountMissionGame} from './mission-game.js';
@@ -350,8 +351,12 @@ function smOpen(initialBookId=''){
     method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({question,mentor:profile().mentor||'tech',history:[]})
    });
-   const result=await response.json();
-   if(!response.ok||!result.answer)throw Error(result.error||'Brak odpowiedzi AI');
+   const body=await response.text();
+   if(!body.trim())throw Error('Serwer AI zwrocil pusta odpowiedz (HTTP '+response.status+').');
+   let result;
+   try{result=JSON.parse(body)}catch{throw Error('Serwer AI zwrocil niepoprawny JSON (HTTP '+response.status+').')}
+   if(!response.ok)throw Error(result?.error||'Serwer AI: HTTP '+response.status);
+   if(!result?.answer)throw Error(result?.error||'Brak pola answer w odpowiedzi serwera AI');
    return result.answer;
   },
   speak:(text,lang)=>speak(text,lang,profile().mentor,data.settings.rate||1),
