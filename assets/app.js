@@ -353,6 +353,30 @@ function v37Hub(){
      <small>${desc}</small>
     </button>`).join('')}
   </div>
+  <!-- V38_BOOK_PORTAL -->
+  <div class="v38-books">
+    <div class="v38-books-heading">
+      <span class="v38-kicker">⭐ MISJA SPECJALNA</span>
+      <h3>📚 TAJNA BIBLIOTEKA AVENGERSÓW</h3>
+      <p>Twoje szkolne podręczniki zamieniają się w misje bohaterów!</p>
+    </div>
+    <div class="v38-book-grid">
+      ${books().filter(b=>!b.archived).map((b,i)=>`
+        <button class="v38-book-card" data-action="reader:${e(b.id)}">
+          <span class="v38-book-icon">${['📘','📗','📙','📕'][i%4]}</span>
+          <strong>${e(b.title)}</strong>
+          <small>${e(b.subject)} · Otwórz misje</small>
+          <span class="v38-book-go">⚡ ROZPOCZNIJ →</span>
+        </button>`).join('') || `<div class="v38-empty">
+          <span>📸</span>
+          <strong>Twoja pierwsza misja czeka!</strong>
+          <p>Poproś mamę o dodanie podręcznika i zdjęć stron.</p>
+        </div>`}
+    </div>
+    <button class="v38-all-books" data-action="child:books">
+      📖 ZOBACZ WSZYSTKIE PODRĘCZNIKI
+    </button>
+  </div>
   <div class="v37-launch">
    <h3>${selected[1]} ${selected[2]}</h3>
    <p>6 wyzwań • Avengersi • punkty • głos</p>

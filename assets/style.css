@@ -554,3 +554,39 @@ body:has(.learning-exercise) {
  .v37-hero,.v37-icon,.v37-launch>button,
  .avengers-v36 .av36-hero{animation:none}
 }
+
+
+/* V38: Tajna biblioteka Avengersow */
+.v38-books{
+ margin:20px 0;padding:18px 14px;
+ border:2px solid #eac35e;border-radius:24px;
+ background:radial-gradient(circle at 85% 0%,#344b96 0%,transparent 55%),
+ linear-gradient(145deg,#101a4a,#160d35 75%);
+ box-shadow:0 0 26px #eac35e25,inset 0 0 24px #263c8c45;
+ color:#f4f6ff
+}
+.v38-books-heading{text-align:center;padding:12px 4px 18px}
+.v38-kicker{display:inline-block;background:#f4c85e;color:#182044;
+ border-radius:30px;padding:7px 13px;font-size:12px;font-weight:900;
+ letter-spacing:1px}
+.v38-books h3{color:#ffe38b;font-size:clamp(19px,5vw,26px);
+ margin:14px 0 8px;text-shadow:0 2px 12px #0008}
+.v38-books-heading p{color:#d5e4ff;font-size:14px;margin:0}
+.v38-book-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+.v38-book-card{min-width:0;display:flex;flex-direction:column;align-items:center;
+ justify-content:space-between;gap:9px;min-height:185px;
+ padding:16px 10px;border:1px solid #7a83d3;border-radius:19px;
+ background:linear-gradient(155deg,#263e8c,#261947);
+ color:white;text-align:center;box-shadow:0 8px 20px #0005}
+.v38-book-card:active{transform:scale(.97)}
+.v38-book-icon{font-size:45px;filter:drop-shadow(0 4px 7px #0008)}
+.v38-book-card strong{font-size:14px;overflow-wrap:anywhere}
+.v38-book-card small{font-size:11px;color:#c6d8ff}
+.v38-book-go{color:#ffe38b;font-size:11px;font-weight:900}
+.v38-empty{grid-column:1/-1;text-align:center;padding:20px}
+.v38-empty span{display:block;font-size:45px}
+.v38-empty strong{display:block;color:#ffe38b;margin:8px}
+.v38-empty p{font-size:13px}
+.v38-all-books{width:100%;margin-top:15px;border-radius:15px;
+ background:linear-gradient(100deg,#f5d477,#e8a848);
+ color:#18213c;font-weight:900;padding:15px 9px}
