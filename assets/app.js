@@ -1,3 +1,4 @@
+import {mountMissionGame} from './mission-game.js';
 import { initHeadquarters3D } from './headquarters3d.js';
 import {initial,get,put,del,allRecords,replaceRecords,compress,uid,gradeName} from './data.js';
 import {speak,listen} from './voice.js';
@@ -331,6 +332,35 @@ function v37Voice(text,lang='pl-PL'){
  aria-label="Odczytaj na głos">🔊</button>`;
 }
 
+
+// V41_INTERACTIVE_AI_MISSIONS
+function smOpen(initialBookId=''){
+ tab='subjectmissions';
+ avengersRun=null;
+ render();
+ const root=document.getElementById('subject-missions-root');
+ if(!root)return;
+ mountMissionGame(root,{
+  books:books().filter(b=>!b.archived),pages:data.bookPages,
+  child:who,initialBookId,
+  ask:async question=>{
+   const response=await fetch('https://akademia-ai.niedzialkowskamagdalena02.workers.dev/mentor-ai',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({question,mentor:profile().mentor||'tech',history:[]})
+   });
+   const result=await response.json();
+   if(!response.ok||!result.answer)throw Error(result.error||'Brak odpowiedzi AI');
+   return result.answer;
+  },
+  speak:(text,lang)=>speak(text,lang,profile().mentor,data.settings.rate||1),
+  reward:async n=>{
+   const key='v41:'+who+':'+new Date().toISOString().slice(0,10)+':'+(initialBookId||'all');
+   const ok=await grant(who,n,'Misja specjalna z podrecznika',key);
+   if(ok)note('🏆 +'+n+' monet za misje!');
+  }
+ });
+}
+
 function v37Hub(){
  const selected=v37Subjects.find(x=>x[0]===v37Subject)
    ||v37Subjects[0];
@@ -362,7 +392,7 @@ function v37Hub(){
     </div>
     <div class="v38-book-grid">
       ${books().filter(b=>!b.archived).map((b,i)=>`
-        <button class="v38-book-card" data-action="reader:${e(b.id)}">
+        <button class="v38-book-card" data-action="sm:book:${e(b.id)}">
           <span class="v38-book-icon">${['📘','📗','📙','📕'][i%4]}</span>
           <strong>${e(b.title)}</strong>
           <small>${e(b.subject)} · Otwórz misje</small>
@@ -377,13 +407,14 @@ function v37Hub(){
       📖 ZOBACZ WSZYSTKIE PODRĘCZNIKI
     </button>
   </div>
+  <button class="v37-classic" data-action="sm:open">⚡ ROZPOCZNIJ MISJĘ SPECJALNĄ Z PODRĘCZNIKA</button>
   <div class="v37-launch">
    <h3>${selected[1]} ${selected[2]}</h3>
    <p>6 wyzwań • Avengersi • punkty • głos</p>
    <button data-action="v37:play">⚡ START MISJI</button>
   </div>
   <button class="v37-classic" data-action="v37:classic">
-   📚 Pozostałe ćwiczenia i podręczniki
+   📚 Klasyczne treningi i ćwiczenia
   </button>
  </section>`;
 }
@@ -392,6 +423,7 @@ function childRender(){const p=profile();let html=`<section class="card"><div cl
 if(tab==='song'){const mission=data.missions.find(m=>m.id===missionId);const song=data.settings.songs.find(x=>x.id===mission?.songId);html+=song?songScreen(song,mission):'<section class="card">Nie znaleziono piosenki.</section>'}
 if(tab==='home')html+=`<section class="card"><h2>🎯 Twoje misje ${speakBtn('Twoje misje')}</h2>${missionBoard(who)}</section><section class="card"><h3>Ostatnie osiągnięcia</h3>${data.history.filter(h=>h.child===who).slice(0,5).map(h=>`<p>+${h.points} złotych · ${e(h.reason)}</p>`).join('')||'Jeszcze brak.'}</section>`;
 if(tab==='books')html+=`<section class="card"><h2>📚 Moje podręczniki ${speakBtn('Moje podręczniki')}</h2>${books().filter(b=>!b.archived).map(b=>`<div class="item"><div><b>${e(b.title)}</b><small>${e(b.subject)} · ${gradeName(b.grade)}</small></div>${button('Otwórz','reader:'+b.id)}</div>`).join('')||'Mama jeszcze nie dodała książek.'}</section>`;
+if(tab==='subjectmissions')html+='<section id="subject-missions-root"></section>';
 if(tab==='reader'){let b=data.books.find(b=>b.id===bookId),ps=data.bookPages.filter(p=>p.bookId===bookId).sort((a,b)=>a.number-b.number);let pg=data.bookPages.find(p=>p.id===pageId)||ps[0];html+=`<section class="card">${button('← Książki','child:books')}<h2>${e(b?.title||'Podręcznik')}</h2>${select('readerpage','Strona',ps.map(p=>[p.id,'Strona '+p.number]),pg?.id)}${pg?`<img class="pagephoto" data-image="${pg.imageId}" alt="Strona podręcznika"><p class="guide">${e(pg.text||'Tekst nie jest jeszcze rozpoznany. Możesz oglądać zdjęcie strony.')}</p>${speakBtn(pg.text||'Brak zapisanego tekstu')}<label for="ocrlang">Język strony</label><select id="ocrlang"><option value="pol">Polski</option><option value="eng">Angielski</option></select><p id="ocrstatus" class="guide" role="status" hidden></p>${button('🔎 Rozpoznaj tekst ze zdjęcia','reader:ocr','gold')}${button('✨ Odczytaj przez AI','reader:ai','gold')}<p class="muted">Rozpoznawanie wymaga internetu. Sprawdź poprawność tekstu przed odczytem.</p>`:'Brak stron.'}${input('tasks','Numery zadań, np. 1, 2, 3, 5')}${button('Dodaj do moich misji','homework:create','gold')}${button('🤖 Zapytaj mentora','child:mentor')}</section>`}
 if(tab==='submission'){let m=data.missions.find(m=>m.id===missionId);html+=`<section class="card">${button('← Misje','child:home')}<h2>${e(m?.title)}</h2><p>Prześlij zdjęcie pracy. Mama sprawdzi ją przed przyznaniem punktów.</p><label>Galeria</label><input type="file" accept="image/*" id="workfile"><label>Aparat</label><input type="file" accept="image/*" capture="environment" id="workcamera"><label>Wiadomość do mamy</label><textarea id="workcomment"></textarea>${button('📤 Zgłoś wykonanie','mission:send','gold')}</section>`}
 if(tab==='learn'&&v37Classic)html+=`<section class="card"><h2>🎓 Akademia wiedzy ${speakBtn('Trening bohatera')}</h2><div class="learning-banner"><span>📚</span><div><strong>Ucz się jak superbohater!</strong><small>Obrazki • słuchanie • quizy • sprawdziany</small></div><span>⭐</span></div><p>Ucz się także bez pracy domowej. Za poprawne zadania zdobywasz złote. Dzienny limit nagród chroni przed powtarzaniem najłatwiejszych ćwiczeń.</p>${speakBtn('Wybierz rodzaj treningu. Możesz ćwiczyć matematykę, czytanie, angielski, quizy, dyktanda i krzyżówki.')} ${select('trainingSubject','Wybierz przedmiot',trainingSubjects(), 'polski')}<div id="trainingKinds">${trainingKindSelect('polski')}</div><div class="learning-exercise" id="exercise"></div>${button('🔄 Nowe ćwiczenie','exercise:new')}</section><section class="card"><h3>🎵 Muzyczne nagrody</h3><p class="muted">Lista zaakceptowana przez mamę. Linki otwierają YouTube — rodzic powinien nadzorować korzystanie.</p>${data.settings.songs.map(s=>`<p><a href="${e(s.url)}" target="_blank" rel="noopener noreferrer">🎶 ${e(s.title)}</a></p>`).join('')}</section>`;
@@ -598,6 +630,9 @@ async function traceSubmit(){
 async function exportBackup(){const records=await allRecords();const encoded=[];for(const [k,v] of records){if(v instanceof Blob){const base64=await new Promise(ok=>{const r=new FileReader();r.onload=()=>ok(r.result);r.readAsDataURL(v)});encoded.push([k,{__blob:base64}])}else encoded.push([k,v])}const url=URL.createObjectURL(new Blob([JSON.stringify({format:'academy-backup-1',records:encoded})],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='akademia-pelna-kopia-'+date()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),10000)}
 async function importBackup(){const f=$('backupfile').files[0];if(!f)return note('Wybierz plik kopii.');try{const raw=JSON.parse(await f.text());if(raw.format!=='academy-backup-1'||!Array.isArray(raw.records)||!raw.records.some(([k,v])=>k==='state'&&v.profiles?.pawel&&v.profiles?.patryk))throw Error('To nie jest poprawna kopia');if(!confirm('Zastąpić wszystkie lokalne dane tą kopią?'))return;const records=[];for(const [k,v] of raw.records){if(v?.__blob){const res=await fetch(v.__blob);records.push([k,await res.blob()])}else records.push([k,v])}await replaceRecords(records);data=await get('state');role='';render();note('Przywrócono pełną kopię.')}catch(err){note('Nie udało się przywrócić kopii: '+err.message)}}
 async function handle(action,target){
+if(action==='sm:open')return smOpen();
+if(action.startsWith('sm:book:'))return smOpen(action.slice(8));
+
 if(action.startsWith('v37:say:')){
  const parts=action.split(':');
  const lang=parts[2];

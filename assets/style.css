@@ -590,3 +590,27 @@ body:has(.learning-exercise) {
 .v38-all-books{width:100%;margin-top:15px;border-radius:15px;
  background:linear-gradient(100deg,#f5d477,#e8a848);
  color:#18213c;font-weight:900;padding:15px 9px}
+
+/* V41 - gry edukacyjne AI */
+.mg-panel{margin:14px 0;padding:17px;border:2px solid #e8c56b;border-radius:22px;background:linear-gradient(145deg,#1b3064,#15152e);color:#f4f6ff}
+.mg-header{text-align:center;padding:20px 8px;border-radius:17px;background:radial-gradient(ellipse at top,#4265ae,transparent 75%)}
+.mg-header small{color:#ffdf83;font-weight:900;letter-spacing:1px}.mg-header h2{font-size:24px;color:#ffdf83}
+.mg-panel label{display:block;margin-top:12px;color:#e9edff}.mg-panel select,.mg-panel input{width:100%;padding:12px;border-radius:12px;margin:5px 0 12px;color:#17233e;background:white}
+.mg-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:18px 0}
+.mg-gallery div{border-radius:12px;background:#294678;border:1px solid #6382ba;text-align:center;padding:13px 5px;font-size:12px;font-weight:700}
+.mg-panel button{border-radius:12px;margin:5px 4px 5px 0;padding:12px;background:#345a9d;color:white;border:1px solid #7792c4;cursor:pointer}
+.mg-panel button.mg-primary{background:#edc65f;color:#19213b;font-weight:900;border:0;padding:15px}
+.mg-hint{color:#c8d5ee;font-size:12px}.mg-bar{height:10px;background:#34445c;border-radius:20px;overflow:hidden}.mg-bar div{height:100%;background:#f4cb5f}
+.mg-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:15px 0}
+.mg-panel button.mg-choice{min-height:55px;background:#294679;overflow-wrap:anywhere}.mg-panel button.mg-tile-used{opacity:.3;pointer-events:none}
+.mg-built{padding:18px;background:#091c3e;border:2px dashed #d1b45b;border-radius:12px;min-height:62px;margin:15px 0;overflow-wrap:anywhere}
+.mg-feedback{background:#163f46;border-left:5px solid #60d7aa;padding:15px;border-radius:12px;margin:14px 0}
+.mg-scene{text-align:center;font-size:48px;margin:16px 0}.mg-vault{width:200px;height:180px;margin:18px auto;background:#0d213c;border:9px solid #8294ae;border-radius:17px;position:relative;perspective:350px;overflow:visible}
+.mg-vault-door{position:absolute;inset:0;background:linear-gradient(135deg,#738eaf,#263e5d);border-radius:8px;display:grid;place-items:center;font-size:76px;transform-origin:left;transition:transform 1s}
+.mg-vault-gold{position:absolute;top:45px;left:20px;font-size:26px;opacity:0;transform:translateY(25px);transition:all .9s}
+.mg-unlocked .mg-vault-door{transform:rotateY(-105deg)}.mg-unlocked .mg-vault-gold{opacity:1;transform:translateY(-45px);animation:mg-coin 1.2s infinite alternate}
+@keyframes mg-coin{to{transform:translateY(-65px) rotate(8deg)}}
+.mg-memory{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:16px 0}.mg-panel button.mg-memory-card{min-height:78px;padding:6px;font-size:12px;overflow-wrap:anywhere;background:#35518c}
+.mg-panel button.mg-matched{background:#2b7c68}.mg-cross{display:grid;grid-template-columns:1fr;gap:4px}.mg-cross label{font-size:13px}
+.mg-final{text-align:center}.mg-final strong{font-size:45px;color:#ffe083}.mg-fireworks{font-size:32px;animation:mg-coin 1.1s infinite alternate}
+.mg-panel details{text-align:left;margin:8px 0;padding:10px;background:#263b65;border-radius:10px}
