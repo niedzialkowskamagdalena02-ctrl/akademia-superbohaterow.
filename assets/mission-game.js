@@ -1,3 +1,4 @@
+// V43_JSON_REPAIR
 // V42_CHAPTER_SELECTION
 // V41: interaktywne misje z podrecznikow, AI generuje tresc, aplikacja mechanike.
 export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initialBookId}){
@@ -54,8 +55,11 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
  }
  function parse(raw){
   let s=String(raw).replace(/```(?:json)?/gi,'').replace(/```/g,'');
-  s=s.slice(s.indexOf('{'),s.lastIndexOf('}')+1);
-  const obj=JSON.parse(s);
+  const begin=s.indexOf('{'),end=s.lastIndexOf('}');
+  if(begin<0||end<begin)throw Error('AI zwróciło pustą lub niekompletną odpowiedź. Spróbuj ponownie.');
+  s=s.slice(begin,end+1);
+  let obj;try{obj=JSON.parse(s)}catch(e){throw Error('Odpowiedź AI była niepoprawna lub ucięta. Spróbuj ponownie.')}
+
   if(!Array.isArray(obj.tasks))throw Error('AI nie zwróciło listy zadań');
   const good=obj.tasks.filter(t=>t&&typeof t.question==='string'&&typeof t.answer==='string'&&typeof t.explanation==='string'&&Array.isArray(t.options)&&t.options.length===4&&t.options.every(x=>typeof x==='string'));
   if(good.length<1)throw Error('AI nie przygotowało poprawnego zadania');
@@ -67,7 +71,11 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
   busy=true;root.innerHTML='<section class="mg-panel"><h2>🧠 Mentor AI tworzy misję...</h2><p>Przygotowuję zagadki, interakcje i finał.</p></section>';
   const difficulty=(()=>{try{return JSON.parse(localStorage.getItem(storeKey())||'{}').weak||[]}catch{return []}})();const taskCount=Math.min(8,Math.max(2,scopePages().length*2));
   const prompt=`Jesteś doświadczonym nauczycielem klasy 2 szkoły podstawowej. Tworzysz ${taskCount} zadań dla dziecka. Przy krótkim materiale możesz zwrócić nawet 1-2 zadania, tylko z podanego tekstu, przedmiot: ${subject()}. ZADANIA MUSZĄ WYNIKAĆ Z MATERIAŁU. Kolejne rodzaje: ${plan[subject()].join(', ')}. Każde zadanie ma być INNE. Dla polskiego ćwicz czytanie ze zrozumieniem, ortografię, rzeczowniki, czasowniki, przymiotniki, sylaby, głoski i krzyżówki. Dla matematyki: działania, zakupy, zegar, porównania, zadania tekstowe, geometrię, logiczne myślenie. Dla angielskiego: słówka, tłumaczenia, wymowę, rozumienie ze słuchu, pisownię, układanie zdań i dialogi. Uczeń wcześniej mylił: ${difficulty.join('; ')}. W odpowiedzi zwróć TYLKO JSON: {"tasks":[{"question":"krótkie polecenie","answer":"jedna poprawna odpowiedź","options":["cztery","różne","możliwe","odpowiedzi"],"explanation":"krótkie wyjaśnienie po polsku","audio":"słowo do odsłuchania"}]}. Każda tablica options MUSI zawierać answer dokładnie raz. Dla zadań typu safe i shop odpowiedź to liczba. Dla clock odpowiedź to godzina HH:MM. Dla memory: options to 4 różne pary w formacie "polski=english"; answer to pierwsza para dokładnie. Dla crossword: options to 4 hasła "SŁOWO=wskazówka", answer to pierwsze słowo. Dla order: answer to 2-5 wyrazów, których kolejność uczeń ułoży. Dla spelling: answer to 3-10 liter. Dla syllables: answer to liczba sylab. Dla reading: question to krótki fragment do przeczytania i pytanie, answer do wyboru z options. Dla dictation: audio to słowo do zapisania, answer to to słowo. Dla listening: audio to angielskie słowo, answer to polskie znaczenie. Unikaj niejednoznaczności i błędów w liczeniu głosek. Nie wstawiaj znaków nowej linii wewnątrz stringów JSON. MATERIAŁ: ${source}`;
-  try{tasks=parse(await ask(prompt));idx=0;points=0;award=false;reset();draw()}
+  try{
+   let raw=await ask(prompt);
+   if(typeof raw==='object'&&raw!==null)raw=JSON.stringify(raw);
+   tasks=parse(raw);idx=0;points=0;award=false;reset();draw();
+  }
   catch(err){root.innerHTML=`<section class="mg-panel"><h2>⚠️ AI nie przygotowało misji</h2><p>${escape(err.message)}</p>${btn('Spróbuj ponownie','start')}${btn('Wróć','back')}</section>`}
   finally{busy=false}
  }
