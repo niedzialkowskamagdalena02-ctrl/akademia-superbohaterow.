@@ -620,3 +620,6 @@ body:has(.learning-exercise) {
 
 /* V47: efekty nagrod */
 .mg-v47-celebrate{font-size:32px;animation:mgV47Pulse 1.2s ease-in-out infinite alternate}@keyframes mgV47Pulse{from{transform:scale(1);filter:brightness(1)}to{transform:scale(1.13);filter:brightness(1.4)}}
+
+/* V49 page adventures */
+.mg-reading-text{white-space:pre-wrap;text-align:left;line-height:1.7;padding:16px;border-radius:14px;background:#f1f5ff;color:#16244b;font-size:1.1rem;margin:12px 0}.mg-wordgrid{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:2px;max-width:440px;margin:14px auto}.mg-grid-cell{min-width:0;padding:6px 0!important;font-weight:bold;font-size:1rem!important;background:#e8efff!important;color:#182955!important;border:1px solid #a6b6db!important;border-radius:5px!important}.mg-feedback{white-space:pre-wrap}

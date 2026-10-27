@@ -3,19 +3,19 @@ export function speak(text,lang='pl-PL',style='tech',rate=1){
  const synth=window.speechSynthesis;
  synth.cancel();
 
- const u=new SpeechSynthesisUtterance(String(text));
+ const u=new SpeechSynthesisUtterance(String(text).replace(/\*\*|__|[`#]/g,'').replace(/\[(.*?)\]\([^)]*\)/g,'$1').replace(/["“”]/g,'').replace(/\s+/g,' ').trim());
  u.lang=lang;
 
  if(style==='fun'){
-  u.rate=rate*1.12;
-  u.pitch=1.25;
+  u.rate=Math.min(1.15,rate*1.02);
+  u.pitch=1.02;
  }else{
-  u.rate=rate*0.88;
-  u.pitch=0.75;
+  u.rate=Math.min(1.1,rate*0.98);
+  u.pitch=0.98;
  }
 
  const voices=synth.getVoices().filter(v=>
-  v.lang.toLowerCase().startsWith('pl')
+  v.lang.toLowerCase().startsWith(String(lang).slice(0,2).toLowerCase())
  );
 
  if(voices.length){
