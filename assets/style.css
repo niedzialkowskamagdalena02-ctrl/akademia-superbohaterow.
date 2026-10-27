@@ -257,3 +257,67 @@ button.alt{background:#345caa;border:1px solid #7299e8}
 
 /* V31: czytelna tablica misji i terminów */
 .mission-dashboard{display:grid;gap:20px}.mission-zone{border-radius:24px;padding:16px;border:2px solid #77baff;background:linear-gradient(145deg,#203d75,#1b2c5d);box-shadow:0 10px 24px #09112a55}.mission-zone h3{margin:0;font-size:1.25rem;letter-spacing:.01em}.mission-zone>p{margin:8px 0 16px;color:#d8eaff}.zone-test{border-color:#ff9e72;background:linear-gradient(140deg,#6e2445,#3c244e)}.zone-school{border-color:#73caff;background:linear-gradient(140deg,#1c5077,#223567)}.zone-home{border-color:#8be6b4;background:linear-gradient(140deg,#205e54,#223c5d)}.mission-count{display:inline-flex;align-items:center;justify-content:center;min-width:28px;padding:3px 9px;background:#ffffff2c;border-radius:999px;font-size:.85rem}.mission-zone .mission{background:#ffffff12;border:1px solid #ffffff45;border-radius:17px;padding:14px;margin:12px 0}.mission-deadline{display:inline-block;margin:9px 0;padding:8px 12px;background:#264b77;color:#f7faff;border:2px solid #8bc9ff;border-radius:12px;font-weight:900;letter-spacing:.025em}.mission-deadline.urgent{background:#ffdb73;color:#593106;border-color:#fff2ac;animation:deadline-pulse 2.3s ease-in-out infinite}.mission-deadline.late{background:#b92f4a;color:#fff;border-color:#ffadb8}.mission-empty{background:#ffffff13;padding:14px;border-radius:12px}@keyframes deadline-pulse{50%{box-shadow:0 0 0 5px #ffdb7325}}
+
+/* V33 — animowany ekran wyboru bohatera */
+body:has(.profile-hero) {
+  background:
+    radial-gradient(circle at 15% 20%, #183f80 0%, transparent 40%),
+    radial-gradient(circle at 85% 70%, #5c194e 0%, transparent 40%),
+    #080e21;
+}
+
+.tile:has(.profile-hero) {
+  position: relative;
+  overflow: hidden;
+  min-height: 250px;
+  border: 2px solid rgba(115, 200, 255, .5);
+  border-radius: 26px;
+  background: linear-gradient(145deg, #203f78, #151d42 75%);
+  box-shadow: 0 12px 30px #0007, inset 0 1px #ffffff30;
+  transition: transform .25s ease, box-shadow .25s ease;
+  animation: hero-enter .65s ease both;
+}
+
+.tile:has(.profile-hero):nth-child(2) {
+  background: linear-gradient(145deg, #762848, #27173f 75%);
+  animation-delay: .12s;
+}
+
+.tile:has(.profile-hero):active {
+  transform: scale(.96);
+}
+
+.tile .profile-hero {
+  width: min(70%, 180px);
+  height: 160px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 18px #65baff88);
+  animation: hero-float 3s ease-in-out infinite;
+}
+
+.tile:has(.profile-hero) h2 {
+  font-size: clamp(1.5rem, 5vw, 2rem);
+  margin: 12px 0 5px;
+  color: #fff;
+}
+
+.tile:has(.profile-hero) small {
+  color: #e4efff;
+}
+
+@keyframes hero-enter {
+  from { opacity: 0; transform: translateY(24px) scale(.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes hero-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-9px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile:has(.profile-hero),
+  .tile .profile-hero {
+    animation: none;
+  }
+}
