@@ -1,3 +1,4 @@
+// V42_CHAPTER_SELECTION
 // V41: interaktywne misje z podrecznikow, AI generuje tresc, aplikacja mechanike.
 export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initialBookId}){
  const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -9,26 +10,47 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
  const subject=()=>/ang|english/i.test(book()?.subject||'')?'angielski':/mat/i.test(book()?.subject||'')?'matematyka':'polski';
  const available=()=>books.filter(b=>pages.some(p=>p.bookId===b.id&&p.text?.trim()));
  const pagesFor=()=>pages.filter(p=>p.bookId===bookId&&p.text?.trim()).sort((a,b)=>a.number-b.number);
- const material=()=>pagesFor().filter(p=>scope==='all'||String(p.number)===scope).map(p=>`STRONA ${p.number}: ${p.text}`).join('\n').slice(0,15000);
+ const material=()=>scopePages().map(p=>`STRONA ${p.number}${p.chapter?' | DZIAŁ '+p.chapter:''}: ${p.text}`).join('\n').slice(0,15000);
  const themes={polski:['🕵️ Detektyw Spider-Mana','🦹 Pułapka Lokiego','🎙️ Laboratorium czytania','🧩 Szyfr Avengersów','✍️ Dyktando Kapitana','🔠 Sylaby i głoski','📝 Krzyżówka'],matematyka:['🔐 Sejf Iron Mana','🛒 Sklep Avengersów','⏰ Zegar misji','📐 Geometria','🧮 Działania','🧠 Logiczne zagadki'],angielski:['🎧 Słuchanie','🎙️ Wymowa','🃏 Memory','🧩 Rozsypanki','✍️ Pisownia','🦹 Pułapka Lokiego','🗣️ Dialogi']};
  const plan={polski:['detective','loki','reading','order','dictation','syllables','crossword','choice'],matematyka:['safe','shop','clock','choice','safe','order','choice','shop'],angielski:['listening','memory','order','spelling','loki','reading','choice','listening']};
  const storeKey=()=>`academy-v41-${child}-${bookId}-${scope}`;
+
+ function chapterOf(p){return String(p.chapter||'').trim()}
+ function chapters(){return [...new Set(pagesFor().map(chapterOf).filter(Boolean))]}
+ function scopePages(){
+  const ps=pagesFor();if(scope==='all')return ps;
+  if(scope.startsWith('chapter:'))return ps.filter(p=>chapterOf(p)===scope.slice(8));
+  if(scope.startsWith('pages:')){
+   const nums=new Set();scope.slice(6).split(/[,;\s]+/).forEach(x=>{
+    const m=x.match(/^(\d+)-(\d+)$/);
+    if(m){const lo=+m[1],hi=+m[2];if(Math.abs(lo-hi)<=100)for(let n=Math.min(lo,hi);n<=Math.max(lo,hi);n++)nums.add(n)}
+    else if(/^\d+$/.test(x))nums.add(+x);
+   });return ps.filter(p=>nums.has(+p.number));
+  }return [];
+ }
+ function voiceGuide(){speak('Witaj w Akademii Superbohaterów! Wybierz podręcznik. Następnie wybierz całą książkę, jeden dział albo konkretne strony. Na końcu wybierz przygodę lub sprawdzian i rozpocznij misję!','pl-PL')}
  function setup(){
-  const bs=available();
-  if(!bs.length){root.innerHTML='<section class="mg-panel"><h2>📚 Brakuje tekstu z podręcznika</h2><p>Dodaj strony i uruchom rozpoznawanie tekstu AI w panelu książek.</p></section>';return}
+  const bs=available();if(!bs.length){root.innerHTML='<section class="mg-panel"><h2>📚 Dodaj stronę z rozpoznanym tekstem</h2></section>';return}
   if(!bs.some(b=>b.id===bookId))bookId=bs[0].id;
-  root.innerHTML=`<section class="mg-panel"><header class="mg-header"><small>⚡ AKADEMIA SUPERBOHATERÓW</small><h2>🎮 Misje specjalne</h2><p>Jedna książka. Nieskończenie wiele wariantów przygód!</p></header>
-  <label>📚 Podręcznik</label><select id="mg-book">${bs.map(b=>`<option value="${escape(b.id)}">${escape(b.title)} · ${escape(b.subject)}</option>`).join('')}</select>
-  <label>📖 Dział lub strona</label><select id="mg-scope"><option value="all">Wszystkie dostępne strony (cały dział)</option>${pagesFor().map(p=>`<option value="${escape(p.number)}">Strona ${escape(p.number)}</option>`).join('')}</select>
-  <label>🎯 Rodzaj misji</label><select id="mg-mode"><option value="game">🎮 Przygoda z wyjaśnieniami</option><option value="test">🏆 Próbny sprawdzian</option></select>
-  <div class="mg-gallery">${themes[subject()].map(t=>`<div>${t}</div>`).join('')}</div>${btn('⚡ ROZPOCZNIJ MISJĘ SPECJALNĄ','start','mg-primary')}
-  <p class="mg-hint">AI tworzy zadania z rozpoznanych stron. Przed nauką sprawdź, czy tekst ze zdjęć został prawidłowo odczytany.</p></section>`;
-  root.querySelector('#mg-book').value=bookId;
-  root.querySelector('#mg-scope').value=scope;
-  root.querySelector('#mg-mode').value=mode;
-  root.querySelector('#mg-book').onchange=e=>{bookId=e.target.value;scope='all';setup()};
-  root.querySelector('#mg-scope').onchange=e=>{scope=e.target.value};
-  root.querySelector('#mg-mode').onchange=e=>{mode=e.target.value};
+  const ch=chapters();
+  root.innerHTML='<section class="mg-panel mg-v42"><header class="mg-header"><small>⚡ AKADEMIA SUPERBOHATERÓW</small><h2>🚀 Wybierz przygodę!</h2><p>Posłuchaj instrukcji!</p></header>'
+  +btn('🔊 Opowiedz mi, co mam zrobić','guide','mg-primary')
+  +'<h3>📚 Wybierz podręcznik</h3><div class="mg-v42-grid">'+bs.map(b=>'<button type="button" class="mg-v42-card '+(b.id===bookId?'active':'')+'" data-mg-book="'+escape(b.id)+'"><span>📘</span><strong>'+escape(b.title)+'</strong><small>'+escape(b.subject)+'</small></button>').join('')+'</div>'
+  +'<h3>🗺️ Wybierz materiał</h3><div class="mg-v42-grid">'
+  +[['all','🌍','Cała książka'],['chapter','📚','Jeden dział'],['pages','🔢','Wybrane strony']].map(x=>'<button type="button" data-mg-scope="'+x[0]+'" class="mg-v42-card '+((x[0]==='all'&&scope==='all')||(x[0]==='chapter'&&(scope==='choosechapter'||scope.startsWith('chapter:')))||(x[0]==='pages'&&(scope==='choosepages'||scope.startsWith('pages:')))?'active':'')+'"><span>'+x[1]+'</span><strong>'+x[2]+'</strong></button>').join('')+'</div>'
+  +'<div id="mg-v42-detail"></div><p class="mg-v42-count">📄 Dostępne strony: <strong id="mg-v42-count">'+scopePages().length+'</strong></p>'
+  +'<h3>🎯 Rodzaj misji</h3><div class="mg-v42-grid">'+[['game','🎮','Przygoda'],['test','🏆','Sprawdzian']].map(x=>'<button type="button" data-mg-mode="'+x[0]+'" class="mg-v42-card '+(mode===x[0]?'active':'')+'"><span>'+x[1]+'</span><strong>'+x[2]+'</strong></button>').join('')+'</div>'
+  +btn('⚡ ROZPOCZNIJ MISJĘ','start','mg-primary')+'<p class="mg-hint">AI dopasuje liczbę zadań do materiału.</p></section>';
+  const detail=root.querySelector('#mg-v42-detail');
+  if(scope==='choosechapter'||scope.startsWith('chapter:'))detail.innerHTML=ch.length?'<div class="mg-v42-grid">'+ch.map(x=>'<button type="button" data-mg-chapter="'+escape(x)+'" class="mg-v42-card '+(scope==='chapter:'+x?'active':'')+'">📖 '+escape(x)+'</button>').join('')+'</div>':'<p class="mg-hint">Przypisz strony do działów w bibliotece.</p>';
+  else if(scope==='choosepages'||scope.startsWith('pages:')){
+   detail.innerHTML='<label for="mg-v42-pages">Wpisz numery stron, np. 2, 5, 8-10</label><input id="mg-v42-pages" type="text" placeholder="2, 5, 8-10" value="'+escape(scope.startsWith('pages:')?scope.slice(6):'')+'">';
+   detail.querySelector('input').oninput=e=>{scope='pages:'+e.target.value;root.querySelector('#mg-v42-count').textContent=scopePages().length};
+  }
+  root.querySelectorAll('[data-mg-book]').forEach(el=>el.onclick=()=>{bookId=el.dataset.mgBook;scope='all';setup()});
+  root.querySelectorAll('[data-mg-scope]').forEach(el=>el.onclick=()=>{scope=el.dataset.mgScope==='all'?'all':el.dataset.mgScope==='chapter'?'choosechapter':'choosepages';setup()});
+  root.querySelectorAll('[data-mg-mode]').forEach(el=>el.onclick=()=>{mode=el.dataset.mgMode;setup()});
+  root.querySelectorAll('[data-mg-chapter]').forEach(el=>el.onclick=()=>{scope='chapter:'+el.dataset.mgChapter;setup()});
  }
  function parse(raw){
   let s=String(raw).replace(/```(?:json)?/gi,'').replace(/```/g,'');
@@ -36,15 +58,15 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
   const obj=JSON.parse(s);
   if(!Array.isArray(obj.tasks))throw Error('AI nie zwróciło listy zadań');
   const good=obj.tasks.filter(t=>t&&typeof t.question==='string'&&typeof t.answer==='string'&&typeof t.explanation==='string'&&Array.isArray(t.options)&&t.options.length===4&&t.options.every(x=>typeof x==='string'));
-  if(good.length<5)throw Error('AI przygotowało zbyt mało poprawnych zadań');
+  if(good.length<1)throw Error('AI nie przygotowało poprawnego zadania');
   return good.slice(0,8).map((t,i)=>({...t,type:plan[subject()][i],options:t.options.slice(0,4),done:false,correct:false}));
  }
  async function start(){
   if(busy)return;
-  const source=material();if(!source)return setup();
+  const source=material();if(!source){alert('Wybierz strony z rozpoznanym tekstem.');return setup();}
   busy=true;root.innerHTML='<section class="mg-panel"><h2>🧠 Mentor AI tworzy misję...</h2><p>Przygotowuję zagadki, interakcje i finał.</p></section>';
-  const difficulty=(()=>{try{return JSON.parse(localStorage.getItem(storeKey())||'{}').weak||[]}catch{return []}})();
-  const prompt=`Jesteś doświadczonym nauczycielem klasy 2 szkoły podstawowej. Tworzysz 8 zadań dla dziecka, przedmiot: ${subject()}. ZADANIA MUSZĄ WYNIKAĆ Z MATERIAŁU. Kolejne rodzaje: ${plan[subject()].join(', ')}. Każde zadanie ma być INNE. Dla polskiego ćwicz czytanie ze zrozumieniem, ortografię, rzeczowniki, czasowniki, przymiotniki, sylaby, głoski i krzyżówki. Dla matematyki: działania, zakupy, zegar, porównania, zadania tekstowe, geometrię, logiczne myślenie. Dla angielskiego: słówka, tłumaczenia, wymowę, rozumienie ze słuchu, pisownię, układanie zdań i dialogi. Uczeń wcześniej mylił: ${difficulty.join('; ')}. W odpowiedzi zwróć TYLKO JSON: {"tasks":[{"question":"krótkie polecenie","answer":"jedna poprawna odpowiedź","options":["cztery","różne","możliwe","odpowiedzi"],"explanation":"krótkie wyjaśnienie po polsku","audio":"słowo do odsłuchania"}]}. Każda tablica options MUSI zawierać answer dokładnie raz. Dla zadań typu safe i shop odpowiedź to liczba. Dla clock odpowiedź to godzina HH:MM. Dla memory: options to 4 różne pary w formacie "polski=english"; answer to pierwsza para dokładnie. Dla crossword: options to 4 hasła "SŁOWO=wskazówka", answer to pierwsze słowo. Dla order: answer to 2-5 wyrazów, których kolejność uczeń ułoży. Dla spelling: answer to 3-10 liter. Dla syllables: answer to liczba sylab. Dla reading: question to krótki fragment do przeczytania i pytanie, answer do wyboru z options. Dla dictation: audio to słowo do zapisania, answer to to słowo. Dla listening: audio to angielskie słowo, answer to polskie znaczenie. Unikaj niejednoznaczności i błędów w liczeniu głosek. Nie wstawiaj znaków nowej linii wewnątrz stringów JSON. MATERIAŁ: ${source}`;
+  const difficulty=(()=>{try{return JSON.parse(localStorage.getItem(storeKey())||'{}').weak||[]}catch{return []}})();const taskCount=Math.min(8,Math.max(2,scopePages().length*2));
+  const prompt=`Jesteś doświadczonym nauczycielem klasy 2 szkoły podstawowej. Tworzysz ${taskCount} zadań dla dziecka. Przy krótkim materiale możesz zwrócić nawet 1-2 zadania, tylko z podanego tekstu, przedmiot: ${subject()}. ZADANIA MUSZĄ WYNIKAĆ Z MATERIAŁU. Kolejne rodzaje: ${plan[subject()].join(', ')}. Każde zadanie ma być INNE. Dla polskiego ćwicz czytanie ze zrozumieniem, ortografię, rzeczowniki, czasowniki, przymiotniki, sylaby, głoski i krzyżówki. Dla matematyki: działania, zakupy, zegar, porównania, zadania tekstowe, geometrię, logiczne myślenie. Dla angielskiego: słówka, tłumaczenia, wymowę, rozumienie ze słuchu, pisownię, układanie zdań i dialogi. Uczeń wcześniej mylił: ${difficulty.join('; ')}. W odpowiedzi zwróć TYLKO JSON: {"tasks":[{"question":"krótkie polecenie","answer":"jedna poprawna odpowiedź","options":["cztery","różne","możliwe","odpowiedzi"],"explanation":"krótkie wyjaśnienie po polsku","audio":"słowo do odsłuchania"}]}. Każda tablica options MUSI zawierać answer dokładnie raz. Dla zadań typu safe i shop odpowiedź to liczba. Dla clock odpowiedź to godzina HH:MM. Dla memory: options to 4 różne pary w formacie "polski=english"; answer to pierwsza para dokładnie. Dla crossword: options to 4 hasła "SŁOWO=wskazówka", answer to pierwsze słowo. Dla order: answer to 2-5 wyrazów, których kolejność uczeń ułoży. Dla spelling: answer to 3-10 liter. Dla syllables: answer to liczba sylab. Dla reading: question to krótki fragment do przeczytania i pytanie, answer do wyboru z options. Dla dictation: audio to słowo do zapisania, answer to to słowo. Dla listening: audio to angielskie słowo, answer to polskie znaczenie. Unikaj niejednoznaczności i błędów w liczeniu głosek. Nie wstawiaj znaków nowej linii wewnątrz stringów JSON. MATERIAŁ: ${source}`;
   try{tasks=parse(await ask(prompt));idx=0;points=0;award=false;reset();draw()}
   catch(err){root.innerHTML=`<section class="mg-panel"><h2>⚠️ AI nie przygotowało misji</h2><p>${escape(err.message)}</p>${btn('Spróbuj ponownie','start')}${btn('Wróć','back')}</section>`}
   finally{busy=false}
@@ -95,7 +117,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
  root.addEventListener('click',ev=>{
   const b=ev.target.closest('[data-mg]');if(!b||busy)return;
   const act=b.dataset.mg,t=task();
-  if(act==='start')return start();if(act==='back')return setup();
+  if(act==='guide')return voiceGuide();if(act==='start')return start();if(act==='back')return setup();
   if(act==='next'){idx++;reset();return draw()}
   if(act==='audio')return speak(t.audio||t.question,subject()==='angielski'?'en-US':'pl-PL');
   if(answered)return;
