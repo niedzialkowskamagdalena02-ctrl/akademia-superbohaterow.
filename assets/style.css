@@ -398,3 +398,28 @@ body:has(.learning-exercise) {
   .learning-exercise button,
   .learning-exercise .btn { transition: none; }
 }
+
+/* V36 — interaktywna arena */
+.avengers-v36{
+ margin:22px 0;padding:24px 18px;text-align:center;
+ border-radius:26px;border:2px solid #6cdbff;
+ background:linear-gradient(145deg,#124b95,#29215e 65%,#712958);
+ color:#fff;box-shadow:0 14px 34px #0007;
+}
+.avengers-v36 h2{color:#fff;font-size:clamp(1.4rem,5vw,2rem)}
+.avengers-v36 button{
+ min-height:54px;padding:12px 18px;margin:6px;
+ border-radius:16px;font-weight:900;
+}
+.av36-top{display:flex;justify-content:space-between;gap:10px;font-weight:900;color:#ffe37b}
+.av36-progress{height:12px;border-radius:20px;background:#ffffff30;margin:16px 0;overflow:hidden}
+.av36-progress div{height:100%;background:linear-gradient(90deg,#4ee6ff,#ffdc61)}
+.av36-hero{display:block;width:190px;max-width:80%;height:180px;object-fit:contain;margin:auto;filter:drop-shadow(0 0 18px #6adfff)}
+.av36-answers{display:grid;gap:12px;margin:20px 0}
+.av36-answers button{
+ background:#ffffff20!important;color:#fff!important;
+ border:2px solid #a7e7ff!important;font-size:1.2rem;
+}
+.av36-answers button:active{transform:scale(.96)}
+.av36-result{padding:15px;border-radius:15px;background:#ffffff2a;font-weight:900}
+.av36-close{display:block;margin:14px auto 0!important;background:transparent!important;color:#e3f2ff!important}
