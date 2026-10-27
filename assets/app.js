@@ -247,11 +247,120 @@ function avengersPanel(){
   <div class="av36-progress"><div style="width:${g.i/g.items.length*100}%"></div></div>
   <img class="av36-hero" src="assets/art/${q.hero}.svg" alt="Avenger">
   <p>Wyzwanie ${g.i+1} z ${g.items.length}</p>
-  <h2>${e(q.q)}</h2>
-  <div class="av36-answers">${q.a.map((answer,i)=>`<button data-action="av36:answer:${i}" ${g.done?'disabled':''}>${e(answer)}</button>`).join('')}</div>
+  <h2>${e(q.q)} ${v37Voice(q.q)}</h2>
+  <div class="av36-answers">${q.a.map((answer,i)=>`<div class="v37-answer">
+ <button data-action="av36:answer:${i}" ${g.done?'disabled':''}>${e(answer)}</button>
+ ${v37Voice(answer,q.lang||'pl-PL')}
+ </div>`).join('')}</div>
   ${g.done?`<p class="av36-result">${g.good?'🎉 Brawo!':'💡 Poprawna odpowiedź: '+e(q.a[q.ok])}</p>
   <button data-action="av36:next">➡️ Dalej</button>`:''}
   <button class="av36-close" data-action="av36:close">✖ Zamknij</button>
+ </section>`;
+}
+
+
+// V37_CHALLENGE_HUB
+let v37Subject='all';
+let v37Classic=false;
+
+const v37Subjects=[
+ ['all','🌌','Cała wiedza','Misja mieszana'],
+ ['polski','📖','Polski','Słowa i zagadki'],
+ ['matematyka','🔢','Matematyka','Liczby i logika'],
+ ['angielski','🇬🇧','Angielski','Słówka i wymowa'],
+ ['przyroda','🌿','Przyroda','Odkrywaj świat']
+];
+
+const v37Bank={
+ polski:[
+ ['Ile sylab ma słowo motyl?',['1','2','3'],1],
+ ['Które słowo oznacza zwierzę?',['kot','dom','las'],0],
+ ['Który wyraz jest poprawny?',['ksionszka','książka','ksionżka'],1],
+ ['Które słowo jest czasownikiem?',['biega','zielony','szkoła'],0],
+ ['Co jest przeciwieństwem słowa wysoki?',['niski','szeroki','długi'],0],
+ ['Ile liter ma słowo las?',['2','3','4'],1]
+ ],
+ matematyka:[
+ ['Ile to 7 + 5?',['10','12','14'],1],
+ ['Ile to 20 - 8?',['14','12','10'],1],
+ ['Ile to 9 razy 3?',['18','27','36'],1],
+ ['Która liczba jest parzysta?',['7','11','12'],2],
+ ['Ile boków ma trójkąt?',['3','4','5'],0],
+ ['Ile to 6 razy 4?',['20','24','28'],1]
+ ],
+ angielski:[
+ ['Co oznacza CAT?',['pies','kot','dom'],1],
+ ['Co oznacza HOUSE?',['dom','drzewo','książka'],0],
+ ['Co oznacza WATER?',['mleko','woda','słońce'],1],
+ ['Co oznacza BOOK?',['szkoła','piłka','książka'],2],
+ ['Co oznacza DOG?',['kot','pies','ptak'],1],
+ ['Co oznacza SUN?',['słońce','księżyc','deszcz'],0]
+ ],
+ przyroda:[
+ ['Na jakiej planecie żyjemy?',['Mars','Ziemia','Wenus'],1],
+ ['Co zbiera pszczoła z kwiatów?',['Nektar','Piasek','Kamienie'],0],
+ ['Czego potrzebuje roślina?',['Wody i światła','Plastiku','Ciemności'],0],
+ ['Ile mamy pór roku?',['2','4','6'],1],
+ ['Które zwierzę jest ssakiem?',['Żaba','Delfin','Motyl'],1],
+ ['Co daje nam Słońce?',['Światło i ciepło','Śnieg','Piasek'],0]
+ ]
+};
+
+function v37Questions(subject){
+ const ids=subject==='all'
+  ?Object.keys(v37Bank):[subject];
+ let questions=ids.flatMap(id=>
+  (v37Bank[id]||[]).map(q=>({
+   q:q[0],a:q[1],ok:q[2],
+   lang:id==='angielski'?'en-US':'pl-PL',
+   hero:id==='angielski'?'spider':
+        id==='matematyka'?'iron':
+        id==='przyroda'?'groot':'captain'
+  }))
+ );
+ for(let i=questions.length-1;i>0;i--){
+  const j=Math.floor(Math.random()*(i+1));
+  [questions[i],questions[j]]=[questions[j],questions[i]];
+ }
+ return questions.slice(0,6);
+}
+
+function v37Voice(text,lang='pl-PL'){
+ return `<button type="button" class="v37-voice"
+ data-action="v37:say:${lang}:${encodeURIComponent(text)}"
+ aria-label="Odczytaj na głos">🔊</button>`;
+}
+
+function v37Hub(){
+ const selected=v37Subjects.find(x=>x[0]===v37Subject)
+   ||v37Subjects[0];
+ return `<section class="v37-hub">
+  <div class="v37-heading">
+   <div class="v37-label">⚡ STREFA AVENGERSÓW</div>
+   <h2>🚀 SALA WYZWAŃ</h2>
+   <p>Wybierz portal i rozpocznij przygodę!</p>
+   <img src="assets/art/${who==='patryk'?'spider':'iron'}.svg"
+    alt="Bohater Avengersów" class="v37-hero">
+  </div>
+  <div class="v37-portals">
+   ${v37Subjects.map(([id,icon,name,desc])=>`
+    <button type="button"
+     class="v37-portal v37-${id} ${v37Subject===id?'selected':''}"
+     data-action="v37:subject:${id}"
+     aria-pressed="${v37Subject===id}">
+     <span class="v37-icon">${icon}</span>
+     <b>${name}</b>
+     <small>${desc}</small>
+    </button>`).join('')}
+  </div>
+  <div class="v37-launch">
+   <h3>${selected[1]} ${selected[2]}</h3>
+   <p>6 wyzwań • Avengersi • punkty • głos</p>
+   <button data-action="v37:play">⚡ START MISJI</button>
+  </div>
+  <button class="v37-classic" data-action="v37:classic">
+   📚 Pozostałe ćwiczenia i podręczniki
+  </button>
  </section>`;
 }
 
@@ -261,14 +370,23 @@ if(tab==='home')html+=`<section class="card"><h2>🎯 Twoje misje ${speakBtn('Tw
 if(tab==='books')html+=`<section class="card"><h2>📚 Moje podręczniki ${speakBtn('Moje podręczniki')}</h2>${books().filter(b=>!b.archived).map(b=>`<div class="item"><div><b>${e(b.title)}</b><small>${e(b.subject)} · ${gradeName(b.grade)}</small></div>${button('Otwórz','reader:'+b.id)}</div>`).join('')||'Mama jeszcze nie dodała książek.'}</section>`;
 if(tab==='reader'){let b=data.books.find(b=>b.id===bookId),ps=data.bookPages.filter(p=>p.bookId===bookId).sort((a,b)=>a.number-b.number);let pg=data.bookPages.find(p=>p.id===pageId)||ps[0];html+=`<section class="card">${button('← Książki','child:books')}<h2>${e(b?.title||'Podręcznik')}</h2>${select('readerpage','Strona',ps.map(p=>[p.id,'Strona '+p.number]),pg?.id)}${pg?`<img class="pagephoto" data-image="${pg.imageId}" alt="Strona podręcznika"><p class="guide">${e(pg.text||'Tekst nie jest jeszcze rozpoznany. Możesz oglądać zdjęcie strony.')}</p>${speakBtn(pg.text||'Brak zapisanego tekstu')}<label for="ocrlang">Język strony</label><select id="ocrlang"><option value="pol">Polski</option><option value="eng">Angielski</option></select><p id="ocrstatus" class="guide" role="status" hidden></p>${button('🔎 Rozpoznaj tekst ze zdjęcia','reader:ocr','gold')}${button('✨ Odczytaj przez AI','reader:ai','gold')}<p class="muted">Rozpoznawanie wymaga internetu. Sprawdź poprawność tekstu przed odczytem.</p>`:'Brak stron.'}${input('tasks','Numery zadań, np. 1, 2, 3, 5')}${button('Dodaj do moich misji','homework:create','gold')}${button('🤖 Zapytaj mentora','child:mentor')}</section>`}
 if(tab==='submission'){let m=data.missions.find(m=>m.id===missionId);html+=`<section class="card">${button('← Misje','child:home')}<h2>${e(m?.title)}</h2><p>Prześlij zdjęcie pracy. Mama sprawdzi ją przed przyznaniem punktów.</p><label>Galeria</label><input type="file" accept="image/*" id="workfile"><label>Aparat</label><input type="file" accept="image/*" capture="environment" id="workcamera"><label>Wiadomość do mamy</label><textarea id="workcomment"></textarea>${button('📤 Zgłoś wykonanie','mission:send','gold')}</section>`}
-if(tab==='learn')html+=`<section class="card"><h2>🎓 Akademia wiedzy ${speakBtn('Trening bohatera')}</h2><div class="learning-banner"><span>📚</span><div><strong>Ucz się jak superbohater!</strong><small>Obrazki • słuchanie • quizy • sprawdziany</small></div><span>⭐</span></div><p>Ucz się także bez pracy domowej. Za poprawne zadania zdobywasz złote. Dzienny limit nagród chroni przed powtarzaniem najłatwiejszych ćwiczeń.</p>${speakBtn('Wybierz rodzaj treningu. Możesz ćwiczyć matematykę, czytanie, angielski, quizy, dyktanda i krzyżówki.')} ${select('trainingSubject','Wybierz przedmiot',trainingSubjects(), 'polski')}<div id="trainingKinds">${trainingKindSelect('polski')}</div><div class="learning-exercise" id="exercise"></div>${button('🔄 Nowe ćwiczenie','exercise:new')}</section><section class="card"><h3>🎵 Muzyczne nagrody</h3><p class="muted">Lista zaakceptowana przez mamę. Linki otwierają YouTube — rodzic powinien nadzorować korzystanie.</p>${data.settings.songs.map(s=>`<p><a href="${e(s.url)}" target="_blank" rel="noopener noreferrer">🎶 ${e(s.title)}</a></p>`).join('')}</section>`;
+if(tab==='learn'&&v37Classic)html+=`<section class="card"><h2>🎓 Akademia wiedzy ${speakBtn('Trening bohatera')}</h2><div class="learning-banner"><span>📚</span><div><strong>Ucz się jak superbohater!</strong><small>Obrazki • słuchanie • quizy • sprawdziany</small></div><span>⭐</span></div><p>Ucz się także bez pracy domowej. Za poprawne zadania zdobywasz złote. Dzienny limit nagród chroni przed powtarzaniem najłatwiejszych ćwiczeń.</p>${speakBtn('Wybierz rodzaj treningu. Możesz ćwiczyć matematykę, czytanie, angielski, quizy, dyktanda i krzyżówki.')} ${select('trainingSubject','Wybierz przedmiot',trainingSubjects(), 'polski')}<div id="trainingKinds">${trainingKindSelect('polski')}</div><div class="learning-exercise" id="exercise"></div>${button('🔄 Nowe ćwiczenie','exercise:new')}</section><section class="card"><h3>🎵 Muzyczne nagrody</h3><p class="muted">Lista zaakceptowana przez mamę. Linki otwierają YouTube — rodzic powinien nadzorować korzystanie.</p>${data.settings.songs.map(s=>`<p><a href="${e(s.url)}" target="_blank" rel="noopener noreferrer">🎶 ${e(s.title)}</a></p>`).join('')}</section>`;
 if(tab==='academy'){const subjects=[['polish','📖','Język polski','Gramatyka i ortografia'],['math','🧮','Matematyka','Liczby, działania i figury'],['english','🇬🇧','Język angielski','Słówka i podstawowe zwroty']];const belongs=(l,i)=>l.subject==='english'?'english':i<5?'polish':'math';const chosen=subjects.find(x=>x[0]===academySubject);html+=`<section class="card discovery-head"><h2>🚀 Sala Odkrywców</h2>${chosen?`${button('← Wybierz przedmiot','academy:subjects')}<h3>${chosen[1]} ${chosen[2]}</h3><p>${chosen[3]}. Wybierz zagadnienie, poznaj zasadę i rozwiąż miniwyzwanie.</p><div class="discovery-grid">${LESSONS.map((l,i)=>belongs(l,i)===academySubject?`<button class="discovery-tile" data-action="lesson:open:${i}"><span>${l.icon}</span><b>${l.title}</b><small>${l.subtitle}</small></button>`:'').join('')}</div>`:`<p>Wybierz przedmiot, a potem zagadnienie, którego chcesz się nauczyć.</p><div class="discovery-grid">${subjects.map(([id,icon,title,subtitle])=>`<button class="discovery-tile" data-action="academy:subject:${id}"><span>${icon}</span><b>${title}</b><small>${subtitle}</small></button>`).join('')}</div>`}</section>`;}
 if(tab==='lesson'){const l=LESSONS[lessonIndex]||LESSONS[0];html+=`<section class="card lesson-card">${button('← Zagadnienia','child:academy')}<div class="lesson-art">${l.icon}</div><h2>${l.title}</h2><p class="lesson-story">${e(l.story)}</p><div class="lesson-rule"><strong>Zapamiętaj!</strong><p>${e(l.rule)}</p></div><p><strong>Przykłady:</strong> ${e(l.examples)}</p>${speakBtn(l.story+' '+l.rule+' Przykłady: '+l.examples)}<h3>🎯 Miniwyzwanie</h3><p>${e(l.question)} ${speakBtn(l.question)}</p><div class="discovery-grid">${l.answers.map((x,i)=>button(e(x),'lesson:answer:'+i)).join('')}</div><p id="lesson-feedback" role="status"></p><div class="discovery-playground"><h3>🎮 Zagraj i utrwal wiedzę!</h3><p>Wybierz grę. Każda runda ma inne pytania i kolorowe odpowiedzi.</p><div class="discovery-actions">${button('🔗 Dopasuj pary','discovery:start:match','gold')}${button('⚡ Szybka misja','discovery:start:quick','gold')}</div><div id="discovery-game"></div></div>${button('🔄 Inny temat','child:academy')}</section>`}
 if(tab==='mentor')html+=`<section class="card mentor-room"><div class="mentor-header"><span class="mentor-tag">⚡ STREFA MENTORA</span><h2>Spotkaj swojego supermentora!</h2><p>Wybierz bohatera i zobacz jego supermoc.</p></div><div class="mentor-choices"><button type="button" class="mentor-choice ${p.mentor==='tech'?'selected':''}" data-action="mentor:choose:tech">🦾 Iron Man</button><button type="button" class="mentor-choice ${p.mentor==='fun'?'selected':''}" data-action="mentor:choose:fun">🕸️ Spider-Man</button></div><div class="mentor-stage ${p.mentor==='fun'?'stage-spider':'stage-iron'}" id="mentor-stage" aria-label="Animacja wybranego mentora"><div class="mentor-stars">✦ ✧ ✦</div><div class="mentor-flight-lines"></div><div class="mentor-web" aria-hidden="true"><svg viewBox="0 0 500 280" preserveAspectRatio="none"><path d="M230 170 L480 18 M230 170 L498 85 M230 170 L498 160 M230 170 L488 248 M230 170 L370 0 M230 170 L310 0 M230 170 L490 280 M230 170 L360 280" stroke="white" stroke-width="3" fill="none"/><path d="M332 108 Q370 123 390 80 M355 134 Q415 158 442 110 M350 170 Q420 190 470 175 M345 203 Q400 210 442 234 M285 140 Q315 160 330 95" stroke="white" stroke-width="2" fill="none"/></svg></div><img class="mentor-figure" src="assets/art/${p.mentor==='fun'?'spider':'iron'}.svg" alt="${p.mentor==='fun'?'Spider-Man':'Iron Man'}"><div class="mentor-floor"></div><div class="mentor-power-caption">${p.mentor==='fun'?'🕸️ Uwaga, leci sieć!':'🚀 Start silników! Iron Man leci!'}</div></div><div class="mentor-talk"><h3>${p.mentor==='fun'?'🕷️ Spider-Man mówi:':'🦾 Iron Man mówi:'}</h3><p>${p.mentor==='fun'?'Hej! Masz pytanie? Dawaj, zanim znowu zaplączę się w sieć!':'System gotowy. Zadaj pytanie, młody wynalazco.'}</p></div><p class="muted">Mentor korzysta z AI Gemini. Możesz pytać o naukę i superbohaterów.</p><label for="question">Twoje pytanie</label><input id="question" placeholder="Np. Co to rzeczownik? Jak mnożyć?"><div class="row">${button('💡 Wyjaśnij','mentor:answer','gold')}${button('🎙️ Zapytaj głosem','mic')}</div><p id="mentoranswer" class="guide">Zapytaj o rzeczowniki, czasowniki, sylaby, dodawanie, odejmowanie lub mnożenie.</p>${button('🔊 Odczytaj wyjaśnienie','mentor:speak')}</section>`;
 if(tab==='base'){html+=`<section class="card"><h3>🦸 Wybierz swojego bohatera</h3><p>Możesz zmienić bohatera w każdej chwili.</p>${heroPicker(who)}</section>`+baseMarkup(p,button)+`<section class="card"><h2>🎮 Salon gier Avengersów</h2><p>Gry są dostępne także bez wydawania złotych.</p>${button('🧩 Prawdziwa krzyżówka','game:crossword','gold')}${button('🏆 Quiz superbohatera','game:quiz')}${button('🧠 Zagadki logiczne','game:logic')}<div class="arcade-shop"><h3>🕹️ Sektor gier</h3><p>Odblokuj grę raz za złote zdobyte w misjach. Po zakupie możesz grać bez limitu.</p>${ARCADE_GAMES.map(g=>`<div class="arcade-offer"><div><b>${g.icon} ${g.title}</b><small>${g.desc}</small></div>${(p.arcadeUnlocked||[]).includes(g.id)?button('▶ Graj','arcade:open:'+g.id,'gold'):button('🔓 '+g.cost+' złotych','arcade:buy:'+g.id,p.coins>=g.cost?'gold':'alt')}</div>`).join('')}</div></section>`}
 if(tab==='crossword'){html+=crosswordView()}
 if(tab==='arcade'){html+=`<section class="card">${button('← Baza Avengersów','child:base')}<h2>🕹️ ${e(ARCADE_GAMES.find(x=>x.id===arcadeId)?.title||'Gra')}</h2><div id="arcade-root"></div><p class="muted">Graj dla zabawy — bez automatycznego zarabiania złotych.</p></section>`}
-if(tab==='learn')html+=avengersPanel();layout('Akademia '+p.name,html);if(tab==='arcade')mountArcade(arcadeId,$('arcade-root'));if(tab==='learn')newExercise();if(tab==='trace')drawTrace()}
+if(tab==='learn'){
+  if(v37Classic){
+   html+=`<div class="v37-return">
+    <button data-action="v37:hub">← Sala Wyzwań</button>
+   </div>`;
+  }else{
+   html+=v37Hub();
+  }
+  if(avengersRun)html+=avengersPanel();
+ }layout('Akademia '+p.name,html);if(tab==='arcade')mountArcade(arcadeId,$('arcade-root'));if(tab==='learn'&&v37Classic)newExercise();if(tab==='trace')drawTrace()}
 const CROSSWORDS=[
  {word:'KOT',clue:'Miauczy i mruczy',r:0,c:2,dir:'v'},
  {word:'DOM',clue:'Mieszkamy w nim',r:1,c:1,dir:'h'},
@@ -456,6 +574,36 @@ async function traceSubmit(){
 async function exportBackup(){const records=await allRecords();const encoded=[];for(const [k,v] of records){if(v instanceof Blob){const base64=await new Promise(ok=>{const r=new FileReader();r.onload=()=>ok(r.result);r.readAsDataURL(v)});encoded.push([k,{__blob:base64}])}else encoded.push([k,v])}const url=URL.createObjectURL(new Blob([JSON.stringify({format:'academy-backup-1',records:encoded})],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='akademia-pelna-kopia-'+date()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),10000)}
 async function importBackup(){const f=$('backupfile').files[0];if(!f)return note('Wybierz plik kopii.');try{const raw=JSON.parse(await f.text());if(raw.format!=='academy-backup-1'||!Array.isArray(raw.records)||!raw.records.some(([k,v])=>k==='state'&&v.profiles?.pawel&&v.profiles?.patryk))throw Error('To nie jest poprawna kopia');if(!confirm('Zastąpić wszystkie lokalne dane tą kopią?'))return;const records=[];for(const [k,v] of raw.records){if(v?.__blob){const res=await fetch(v.__blob);records.push([k,await res.blob()])}else records.push([k,v])}await replaceRecords(records);data=await get('state');role='';render();note('Przywrócono pełną kopię.')}catch(err){note('Nie udało się przywrócić kopii: '+err.message)}}
 async function handle(action,target){
+if(action.startsWith('v37:say:')){
+ const parts=action.split(':');
+ const lang=parts[2];
+ const text=decodeURIComponent(parts.slice(3).join(':'));
+ speak(text,lang,profile().mentor,data.settings.rate||1);
+ return;
+}
+if(action.startsWith('v37:subject:')){
+ v37Subject=action.split(':')[2];
+ return render();
+}
+if(action==='v37:play'){
+ avengersRun={
+  items:v37Questions(v37Subject),
+  i:0,points:0,done:false,good:false
+ };
+ v37Classic=false;
+ return render();
+}
+if(action==='v37:classic'){
+ avengersRun=null;
+ v37Classic=true;
+ return render();
+}
+if(action==='v37:hub'){
+ avengersRun=null;
+ v37Classic=false;
+ return render();
+}
+
 if(action==='av36:start'){
  avengersRun={items:[...avengersQuiz].sort(()=>Math.random()-.5),i:0,points:0,done:false,good:false};
  return render();
