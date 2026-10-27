@@ -479,6 +479,49 @@ function showMicBubble(answer){
  const replay=document.createElement('button');replay.type='button';replay.className='mic-answer-replay';replay.textContent='🔊 Odsłuchaj ponownie';replay.addEventListener('click',()=>speak(answer,'pl-PL',profile().mentor));
  box.append(heading,text,replay);document.body.appendChild(box);speak(answer,'pl-PL',profile().mentor);
 }
+async function helpWithExerciseAI(question){
+ const style=profile().mentor==='fun'?'fun':'tech';
+ const exercise=practice;
+ const choices=[...document.querySelectorAll('#exercise [data-choice]')]
+  .map(b=>b.dataset.choice);
+
+ const context=[
+  'Jesteś nauczycielem pomagającym dziecku w ćwiczeniu.',
+  'Aktualne zadanie: '+exercise.question,
+  'Rodzaj ćwiczenia: '+exercise.kind,
+  'Odpowiedzi do wyboru: '+choices.join(', '),
+  'Nie podawaj od razu poprawnej odpowiedzi.',
+  'Wyjaśniaj prosto, krok po kroku.',
+  'Prośba dziecka: '+question
+ ].join('\\n');
+
+ let bubble=document.getElementById('ai-exercise-help');
+ if(!bubble){
+  bubble=document.createElement('div');
+  bubble.id='ai-exercise-help';
+  bubble.className='card';
+  document.getElementById('exercise')?.appendChild(bubble);
+ }
+ bubble.textContent='🧠 Bohater zastanawia się...';
+
+ try{
+  const response=await fetch('/.netlify/functions/mentor-ai',{
+   method:'POST',
+   headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({question:context,mentor:style,history:[]})
+  });
+  const result=await response.json();
+  if(!response.ok||!result.answer)
+   throw new Error(result.error||'Brak odpowiedzi AI');
+
+  if(bubble.isConnected)bubble.textContent=result.answer;
+  speak(result.answer,'pl-PL',style);
+ }catch(err){
+  if(bubble.isConnected)
+   bubble.textContent='Nie udało się połączyć z AI: '+err.message;
+ }
+}
+
 function microphone(){
  const answer=q=>{
   const question=String(q||'').trim();
@@ -489,6 +532,11 @@ function microphone(){
    const output=$('mentoranswer');
    if(output)output.textContent='🎙️ Usłyszałem: '+question;
    handle('mentor:answer');
+   return;
+  }
+
+  if(tab==='learn' && practice){
+   helpWithExerciseAI(question);
    return;
   }
 
