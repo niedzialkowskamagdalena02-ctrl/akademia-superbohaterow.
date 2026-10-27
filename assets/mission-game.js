@@ -1,3 +1,4 @@
+// V47_INTERACTIVE_MISSIONS
 // V46_AI_SCOPE
 // V45_CHAPTER_SELECTION_VERIFIED
 // V43_JSON_REPAIR
@@ -65,7 +66,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
   if(!Array.isArray(obj.tasks))throw Error('AI nie zwróciło listy zadań');
   const good=obj.tasks.filter(t=>t&&typeof t.question==='string'&&typeof t.answer==='string'&&typeof t.explanation==='string'&&Array.isArray(t.options)&&t.options.length===4&&t.options.every(x=>typeof x==='string'));
   if(good.length<1)throw Error('AI nie przygotowało poprawnego zadania');
-  return good.slice(0,8).map((t,i)=>({...t,type:plan[subject()][i],options:t.options.slice(0,4),done:false,correct:false}));
+  return good.slice(0,8).map((t,i)=>({...t,type:plan[subject()][i%plan[subject()].length],options:t.options.slice(0,4),done:false,correct:false}));
  }
  async function start(){
   if(busy)return;
@@ -124,7 +125,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
  function finish(){
   if(!award){award=true;const weak=tasks.filter(t=>!t.correct).map(t=>t.question).slice(0,8);try{localStorage.setItem(storeKey(),JSON.stringify({weak,date:Date.now(),score:points,total:tasks.length}))}catch{}
    if(points>0)reward(Math.min(12,points));}
-  root.innerHTML=`<section class="mg-panel mg-final"><div class="mg-fireworks">✨ 🪙 ⭐ 🪙 ✨</div><h2>🏆 Misja ukończona!</h2><strong>${points} / ${tasks.length}</strong><p>Monety za misję: ${Math.min(12,points)}. Wróć do błędów lub rozpocznij nową przygodę.</p>${tasks.map(t=>`<details><summary>${t.correct?'✅':'📖'} ${escape(t.question)}</summary><p>Odpowiedź: ${escape(t.answer)}</p><p>${escape(t.explanation)}</p></details>`).join('')}${btn('🔄 Nowa misja AI','start','mg-primary')}${btn('📚 Zmień dział','back')}</section>`;
+  root.innerHTML=`<section class="mg-panel mg-final"><div class="mg-fireworks mg-v47-celebrate">✨ 🪙 ⭐ 🏆 🚀 ⭐ 🪙 ✨</div><h2>🏆 Misja ukończona!</h2><strong>${points} / ${tasks.length}</strong><p>Monety za misję: ${Math.min(12,points)}. Wróć do błędów lub rozpocznij nową przygodę.</p>${tasks.map(t=>`<details><summary>${t.correct?'✅':'📖'} ${escape(t.question)}</summary><p>Odpowiedź: ${escape(t.answer)}</p><p>${escape(t.explanation)}</p></details>`).join('')}${btn('🔄 Nowa misja AI','start','mg-primary')}${btn('📚 Zmień dział','back')}</section>`;
  }
  root.addEventListener('click',ev=>{
   const b=ev.target.closest('[data-mg]');if(!b||busy)return;

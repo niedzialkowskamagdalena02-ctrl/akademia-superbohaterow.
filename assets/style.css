@@ -617,3 +617,6 @@ body:has(.learning-exercise) {
 
 /* V42 */
 .mg-v42 h3{margin:23px 0 12px}.mg-v42-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0}.mg-v42-card{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;min-height:105px;padding:14px 10px;border:2px solid #6d83c0;border-radius:20px;background:linear-gradient(145deg,#304b88,#172b53);color:white;text-align:center}.mg-v42-card span{font-size:30px}.mg-v42-card strong{font-size:15px}.mg-v42-card small{font-size:12px;color:#d4e3ff}.mg-v42-card.active{border-color:#ffdc70;box-shadow:0 0 0 2px #ffdc7044;background:linear-gradient(145deg,#7956b8,#263e86)}.mg-v42-count{padding:13px;background:#233b69;border-radius:15px;color:#ffe19b}.mg-v42 input{width:100%;padding:15px;font-size:17px;border-radius:14px;background:white;color:#172544}@media(max-width:350px){.mg-v42-grid{grid-template-columns:1fr}}
+
+/* V47: efekty nagrod */
+.mg-v47-celebrate{font-size:32px;animation:mgV47Pulse 1.2s ease-in-out infinite alternate}@keyframes mgV47Pulse{from{transform:scale(1);filter:brightness(1)}to{transform:scale(1.13);filter:brightness(1.4)}}
