@@ -522,6 +522,32 @@ async function helpWithExerciseAI(question){
  }
 }
 
+async function helpWithGeneralAI(question){
+ const style=profile().mentor==='fun'?'fun':'tech';
+ const screen=document.querySelector('main');
+ const visibleText=String(screen?.innerText||'')
+  .slice(0,2500);
+ showMicBubble('🧠 Bohater szuka odpowiedzi...');
+ try{
+  const response=await fetch('/.netlify/functions/mentor-ai',{
+   method:'POST',
+   headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({
+    question:'Pomóż dziecku. Oto tekst aktualnego ekranu: '
+     +visibleText+'\\nPytanie dziecka: '+question,
+    mentor:style,
+    history:[]
+   })
+  });
+  const result=await response.json();
+  if(!response.ok||!result.answer)
+   throw new Error(result.error||'Brak odpowiedzi AI');
+  showMicBubble(result.answer);
+ }catch(err){
+  showMicBubble('Nie udało się połączyć z AI: '+err.message);
+ }
+}
+
 function microphone(){
  const answer=q=>{
   const question=String(q||'').trim();
@@ -535,16 +561,12 @@ function microphone(){
    return;
   }
 
-  if(tab==='learn' && practice){
+  if(practice && document.getElementById('exercise')){
    helpWithExerciseAI(question);
    return;
   }
 
-  const guide=helpForQuestion(question);
-  const prefix=profile().mentor==='fun'
-   ?'Hej, młody pajęczaku! '
-   :'JARVIS znalazł wskazówkę. ';
-  showMicBubble(prefix+(guide||explanation(question)));
+  helpWithGeneralAI(question);
  };
 
  listen(answer,msg=>{
