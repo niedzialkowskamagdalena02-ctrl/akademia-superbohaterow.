@@ -10,6 +10,46 @@ import {syncAdapter} from './sync.js';
 import {BASE_ITEMS,baseMarkup,migrateBase} from './base.js';
 import {mountArcade,stopArcade} from './arcade.js';
 let mentorHistory={tech:[],fun:[]};
+// V53_AI_RETRY_ONLY — prawdziwe odpowiedzi AI, anulowanie starych zapytań
+const AI_MENTOR_URL='https://akademia-ai.niedzialkowskamagdalena02.workers.dev/mentor-ai';
+const AI_FRIENDLY_MESSAGE='🦸 Mentor chwilowo nie może odpowiedzieć. Spróbuj jeszcze raz za moment.';
+const aiRequests=new Map();
+function cancelAIRequests(){for(const controller of aiRequests.values())controller.abort();aiRequests.clear()}
+function beginAIRequest(key){aiRequests.get(key)?.abort();const controller=new AbortController();aiRequests.set(key,controller);return controller}
+function finishAIRequest(key,controller){if(aiRequests.get(key)===controller)aiRequests.delete(key)}
+function aiWait(ms,signal){return new Promise((resolve,reject)=>{
+ let done=false;
+ const onAbort=()=>{if(done)return;done=true;clearTimeout(timer);reject(new DOMException('Cancelled','AbortError'))};
+ if(signal?.aborted){reject(new DOMException('Cancelled','AbortError'));return}
+ const timer=setTimeout(()=>{done=true;signal?.removeEventListener('abort',onAbort);resolve()},ms);
+ signal?.addEventListener('abort',onAbort,{once:true});
+})}
+async function askMentorAI(question,mentor,history=[],signal){
+ for(let attempt=0;attempt<4;attempt++){
+  if(signal?.aborted)throw new DOMException('Cancelled','AbortError');
+  const request=new AbortController();
+  let timedOut=false;
+  const onAbort=()=>request.abort();
+  signal?.addEventListener('abort',onAbort,{once:true});
+  const timer=setTimeout(()=>{timedOut=true;request.abort()},15000);
+  try{
+   const response=await fetch(AI_MENTOR_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({question,mentor,history}),signal:request.signal});
+   let result=null;
+   try{result=await response.json()}catch{}
+   if(response.ok&&typeof result?.answer==='string'&&result.answer.trim())return result.answer.trim();
+   const error=new Error('AI HTTP '+response.status);
+   error.retryable=(!response.ok&&(response.status===408||response.status===425||response.status===429||response.status>=500));
+   throw error;
+  }catch(error){
+   if(signal?.aborted)throw error;
+   if(attempt===3||!(error.retryable||timedOut||error.name==='TypeError'))throw error;
+  }finally{clearTimeout(timer);signal?.removeEventListener('abort',onAbort)}
+  await aiWait([900,1900,3600][attempt],signal);
+ }
+ throw Error('AI unavailable');
+}
+
 let testMode=false,testSnapshot=null;let previewAll=false;let data,role='',who='',tab='home',adminTab='home',bookId='',pageId='',missionId='',practice=null,practiceAnswered=false,tracePoints=[],traceDown=false,traceMask=null;
 const app=document.querySelector('#app'), $=id=>document.getElementById(id), e=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const date=()=>new Date().toISOString().slice(0,10), profile=()=>data.profiles[who], books=()=>data.books.filter(b=>b.child===who), pages=id=>data.books.length?null:null;
@@ -109,7 +149,7 @@ async function recognizePageAI(page,language='pol'){
  finally{ocrBusy=false;document.querySelectorAll('[data-action="page:ai"],[data-action="reader:ai"]').forEach(b=>b.disabled=false)}
 }
 const grant=async(child,points,reason,key)=>{if(data.history.some(h=>h.key===key))return false;data.profiles[child].xp+=points;data.profiles[child].coins+=points;data.history.unshift({id:uid(),key,child,points,reason,at:new Date().toISOString()});await save();return true};
-function layout(title,content){app.innerHTML=`<main class="wrap"><header class="head"><div><div class="brand">⚡ AKADEMIA SUPERBOHATERÓW</div><div class="sub">${e(title)}</div></div>${role?button(testMode?'← Zakończ test':'← Profile','exit','alt'):''}</header>${testMode?'<div class="test-banner">🧪 TRYB MAMY — BEZPŁATNY TEST • POSTĘPY NIE SĄ ZAPISYWANE</div>':''}${content}</main>${role==='child'?'<button class="mic" data-action="mic" aria-label="Sterowanie głosowe">🎙️</button>':''}`;document.querySelectorAll('[data-speak]').forEach(b=>b.addEventListener('click',()=>speak(b.dataset.speak,b.dataset.lang,role==='child'?profile().mentor:'tech',data.settings.rate||1)));hydrateImages()}
+function layout(title,content){cancelAIRequests();closeMicBubble();app.innerHTML=`<main class="wrap"><header class="head"><div><div class="brand">⚡ AKADEMIA SUPERBOHATERÓW</div><div class="sub">${e(title)}</div></div>${role?button(testMode?'← Zakończ test':'← Profile','exit','alt'):''}</header>${testMode?'<div class="test-banner">🧪 TRYB MAMY — BEZPŁATNY TEST • POSTĘPY NIE SĄ ZAPISYWANE</div>':''}${content}</main>${role==='child'?'<button class="mic" data-action="mic" aria-label="Sterowanie głosowe">🎙️</button>':''}`;document.querySelectorAll('[data-speak]').forEach(b=>b.addEventListener('click',()=>speak(b.dataset.speak,b.dataset.lang,role==='child'?profile().mentor:'tech',data.settings.rate||1)));hydrateImages()}
 async function hydrateImages(){for(const el of document.querySelectorAll('[data-image]')){const src=await img(el.dataset.image);if(el.isConnected&&src){el.src=src;el.onload=()=>URL.revokeObjectURL(src)}}}
 function nav(){return role==='admin'?`<div class="tabs">${[['home','Przegląd'],['books','📚 Książki'],['missions','📋 Misje'],['settings','⚙️ Ustawienia'],['test','🧪 Testuj wszystko'],['backup','💾 Kopia']].map(([k,n])=>button(n,'admin:'+k,adminTab===k?'gold':'alt')).join('')}</div>`:`<div class="tabs">${[['home','🎯 Misje'],['books','📚 Książki'],['learn','🧠 Trening'],['academy','📖 Sala odkrywców'],['mentor','🤖 Mentor'],['base','🏙️ Baza Avengersów i gry']].map(([k,n])=>button(n,'child:'+k,tab===k?'gold':'alt')).join('')}</div>`}
 function render(){if(tab!=='arcade')stopArcade();if(!role){layout('Wybierz swoją bazę',`<section class="card"><h1>Witaj w Akademii! 🛡️</h1><p>Każdy bohater ma własne misje i nagrody.</p></section><div class="grid">${people.map(([id,name])=>`<button class="tile" data-action="enter:${id}"><img class="profile-hero" src="assets/art/${data.profiles[id].hero||(id==='pawel'?'iron':'spider')}.svg" alt=""><h2>${name}</h2><small>${gradeName(data.profiles[id].grade)} · ${data.profiles[id].coins} złotych</small></button>`).join('')}</div><section class="card">${button('🔐 Centrum dowodzenia mamy','enter:admin','gold')}<p class="muted">Tryb lokalny: dane z tego telefonu nie synchronizują się jeszcze z innymi urządzeniami. ${syncAdapter.status()}</p></section>`);return}if(role==='admin')adminRender();else childRender()}
@@ -353,17 +393,9 @@ function smOpen(initialBookId=''){
   books:books().filter(b=>!b.archived),pages:data.bookPages,
   child:who,initialBookId,
   ask:async question=>{
-   const response=await fetch('https://akademia-ai.niedzialkowskamagdalena02.workers.dev/mentor-ai',{
-    method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({question,mentor:profile().mentor||'tech',history:[]})
-   });
-   const body=await response.text();
-   if(!body.trim())throw Error('Serwer AI zwrocil pusta odpowiedz (HTTP '+response.status+').');
-   let result;
-   try{result=JSON.parse(body)}catch{throw Error('Serwer AI zwrocil niepoprawny JSON (HTTP '+response.status+').')}
-   if(!response.ok)throw Error(result?.error||'Serwer AI: HTTP '+response.status);
-   if(!result?.answer)throw Error(result?.error||'Brak pola answer w odpowiedzi serwera AI');
-   return result.answer;
+   const controller=beginAIRequest('mission');
+   try{return await askMentorAI(question,profile().mentor||'tech',[],controller.signal)}
+   finally{finishAIRequest('mission',controller)}
   },
   speak:(text,lang)=>speak(text,lang,profile().mentor,data.settings.rate||1),
   reward:async n=>{
@@ -711,31 +743,21 @@ if(action==='game:crossword'){tab='crossword';return render()}if(action==='game:
  if(!q)return note('Najpierw wpisz pytanie.');
  const style=profile().mentor==='fun'?'fun':'tech';
  const output=$('mentoranswer');
+ if(!output)return;
+ const controller=beginAIRequest('mentor');
+ const expectedWho=who;
  output.textContent='⏳ Mentor zastanawia się...';
+ const isCurrent=()=>!controller.signal.aborted&&tab==='mentor'&&who===expectedWho&&$('mentoranswer')===output&&output.isConnected;
  try{
-  const response=await fetch('https://akademia-ai.niedzialkowskamagdalena02.workers.dev/mentor-ai',{
-   method:'POST',
-   headers:{'Content-Type':'application/json'},
-   body:JSON.stringify({
-    question:q,
-    mentor:style,
-    history:mentorHistory[style]
-   })
-  });
-  const result=await response.json();
-  if(!response.ok||!result.answer)
-   throw new Error(result.error||'Brak odpowiedzi AI');
-  const answer=String(result.answer);
-  mentorHistory[style].push(
-   {role:'user',text:q},
-   {role:'model',text:answer}
-  );
+  const answer=await askMentorAI(q,style,mentorHistory[style],controller.signal);
+  if(!isCurrent())return;
+  mentorHistory[style].push({role:'user',text:q},{role:'model',text:answer});
   mentorHistory[style]=mentorHistory[style].slice(-8);
   output.textContent=answer;
   speak(answer,'pl-PL',style);
- }catch(err){
-  output.textContent='Błąd połączenia z AI: '+err.message;
- }
+ }catch(error){
+  if(isCurrent()){console.warn('Mentor AI:',error);output.textContent=AI_FRIENDLY_MESSAGE}
+ }finally{finishAIRequest('mentor',controller)}
  return;
 }if(action.startsWith('mentor:choose:')){const style=action.split(':')[2];if(!['tech','fun'].includes(style))return;profile().mentor=style;await save();render();return}if(action==='mentor:speak')return speak($('mentoranswer').textContent,'pl-PL',profile().mentor);if(a==='base'&&b==='buy'){const item=BASE_ITEMS.find(x=>x.id===c),p=profile(),base=migrateBase(p);if(!item)return note('Nieznany element');if(base.owned.includes(item.id))return note('To już jest w Twojej bazie');if(p.coins<item.cost)return note('Potrzebujesz jeszcze '+(item.cost-p.coins)+' złotych');p.coins-=item.cost;base.owned.push(item.id);await save();speak('Brawo! Odblokowano '+item.name,'pl-PL',p.mentor);return render()}if(action==='mic')return microphone();}catch(err){console.error(err);note('Nie udało się wykonać operacji: '+err.message)}}
 function helpForQuestion(question){
@@ -752,23 +774,23 @@ function helpForQuestion(question){
  return null;
 }
 function closeMicBubble(){const box=document.getElementById('micanswer');if(box)box.remove();}
-function showMicBubble(answer){
+function showMicBubble(answer,readAloud=true){
  closeMicBubble();
  const box=document.createElement('aside');box.id='micanswer';box.className='mic-answer-card';box.setAttribute('role','status');
  const heading=document.createElement('div');heading.className='mic-answer-heading';
  const title=document.createElement('strong');title.textContent=profile().mentor==='fun'?'🕷️ Spider-Man podpowiada':'🦾 Iron Man podpowiada';
- const close=document.createElement('button');close.type='button';close.className='mic-answer-close';close.setAttribute('aria-label','Zamknij podpowiedź');close.textContent='✕';close.addEventListener('click',()=>{if('speechSynthesis'in window)speechSynthesis.cancel();closeMicBubble()});
+ const close=document.createElement('button');close.type='button';close.className='mic-answer-close';close.setAttribute('aria-label','Zamknij podpowiedź');close.textContent='✕';close.addEventListener('click',()=>{aiRequests.get('mic-general')?.abort();if('speechSynthesis'in window)speechSynthesis.cancel();closeMicBubble()});
  heading.append(title,close);
  const text=document.createElement('p');text.textContent=answer;
  const replay=document.createElement('button');replay.type='button';replay.className='mic-answer-replay';replay.textContent='🔊 Odsłuchaj ponownie';replay.addEventListener('click',()=>speak(answer,'pl-PL',profile().mentor));
- box.append(heading,text,replay);document.body.appendChild(box);speak(answer,'pl-PL',profile().mentor);
+ box.append(heading,text,replay);document.body.appendChild(box);if(readAloud)speak(answer,'pl-PL',profile().mentor);
 }
 async function helpWithExerciseAI(question){
- const style=profile().mentor==='fun'?'fun':'tech';
  const exercise=practice;
- const choices=[...document.querySelectorAll('#exercise [data-choice]')]
-  .map(b=>b.dataset.choice);
-
+ const exerciseBox=document.getElementById('exercise');
+ if(!exercise||!exerciseBox)return;
+ const style=profile().mentor==='fun'?'fun':'tech';
+ const choices=[...document.querySelectorAll('#exercise [data-choice]')].map(b=>b.dataset.choice);
  const context=[
   'Jesteś nauczycielem pomagającym dziecku w ćwiczeniu.',
   'Aktualne zadanie: '+exercise.question,
@@ -777,61 +799,38 @@ async function helpWithExerciseAI(question){
   'Nie podawaj od razu poprawnej odpowiedzi.',
   'Wyjaśniaj prosto, krok po kroku.',
   'Prośba dziecka: '+question
- ].join('\\n');
-
+ ].join('\n');
  let bubble=document.getElementById('ai-exercise-help');
- if(!bubble){
-  bubble=document.createElement('div');
-  bubble.id='ai-exercise-help';
-  bubble.className='card';
-  document.getElementById('exercise')?.appendChild(bubble);
- }
- bubble.textContent='🧠 Bohater zastanawia się...';
-
+ if(!bubble){bubble=document.createElement('div');bubble.id='ai-exercise-help';bubble.className='card';exerciseBox.appendChild(bubble)}
+ bubble.textContent='⏳ Mentor zastanawia się...';
+ const controller=beginAIRequest('exercise');
+ const expectedWho=who;
+ const isCurrent=()=>!controller.signal.aborted&&who===expectedWho&&practice===exercise&&exerciseBox.isConnected&&document.getElementById('exercise')===exerciseBox&&bubble.isConnected;
  try{
-  const response=await fetch('https://akademia-ai.niedzialkowskamagdalena02.workers.dev/mentor-ai',{
-   method:'POST',
-   headers:{'Content-Type':'application/json'},
-   body:JSON.stringify({question:context,mentor:style,history:[]})
-  });
-  const result=await response.json();
-  if(!response.ok||!result.answer)
-   throw new Error(result.error||'Brak odpowiedzi AI');
-
-  if(bubble.isConnected)bubble.textContent=result.answer;
-  speak(result.answer,'pl-PL',style);
- }catch(err){
-  if(bubble.isConnected)
-   bubble.textContent='Nie udało się połączyć z AI: '+err.message;
- }
+  const answer=await askMentorAI(context,style,[],controller.signal);
+  if(!isCurrent())return;
+  bubble.textContent=answer;
+  speak(answer,'pl-PL',style);
+ }catch(error){
+  if(isCurrent()){console.warn('Ćwiczenie AI:',error);bubble.textContent=AI_FRIENDLY_MESSAGE}
+ }finally{finishAIRequest('exercise',controller)}
 }
-
 async function helpWithGeneralAI(question){
  const style=profile().mentor==='fun'?'fun':'tech';
  const screen=document.querySelector('main');
- const visibleText=String(screen?.innerText||'')
-  .slice(0,2500);
- showMicBubble('🧠 Bohater szuka odpowiedzi...');
+ const visibleText=String(screen?.innerText||'').slice(0,2500);
+ const expectedTab=tab,expectedWho=who;
+ const controller=beginAIRequest('mic-general');
+ const isCurrent=()=>!controller.signal.aborted&&tab===expectedTab&&who===expectedWho&&document.querySelector('main')===screen;
+ showMicBubble('⏳ Mentor zastanawia się...',false);
  try{
-  const response=await fetch('https://akademia-ai.niedzialkowskamagdalena02.workers.dev/mentor-ai',{
-   method:'POST',
-   headers:{'Content-Type':'application/json'},
-   body:JSON.stringify({
-    question:'Pomóż dziecku. Oto tekst aktualnego ekranu: '
-     +visibleText+'\\nPytanie dziecka: '+question,
-    mentor:style,
-    history:[]
-   })
-  });
-  const result=await response.json();
-  if(!response.ok||!result.answer)
-   throw new Error(result.error||'Brak odpowiedzi AI');
-  showMicBubble(result.answer);
- }catch(err){
-  showMicBubble('Nie udało się połączyć z AI: '+err.message);
- }
+  const answer=await askMentorAI('Pomóż dziecku. Oto tekst aktualnego ekranu: '+visibleText+'\nPytanie dziecka: '+question,style,[],controller.signal);
+  if(!isCurrent())return;
+  showMicBubble(answer);
+ }catch(error){
+  if(isCurrent()){console.warn('Mikrofon AI:',error);closeMicBubble();note(AI_FRIENDLY_MESSAGE)}
+ }finally{finishAIRequest('mic-general',controller)}
 }
-
 function microphone(){
  const answer=q=>{
   const question=String(q||'').trim();
@@ -855,8 +854,8 @@ function microphone(){
   helpWithGeneralAI(question);
  };
 
- listen(answer,msg=>{
-  const q=prompt(msg+'\\nMożesz wpisać pytanie do mentora:');
+ listen(answer,()=>{
+  const q=prompt('🎙️ Nie usłyszałem pytania. Możesz je tutaj wpisać:');
   if(q)answer(q);
  });
 }

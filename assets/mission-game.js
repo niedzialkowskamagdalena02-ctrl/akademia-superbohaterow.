@@ -16,7 +16,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
  const norm=s=>String(s??'').trim().toLocaleLowerCase('pl-PL').replace(/\s*,\s*/g,', ').replace(/\s+/g,' ');
  const btn=(label,act,cls='')=>`<button type="button" class="${cls}" data-mg="${act}">${label}</button>`;
  const shuffle=a=>[...a].sort(()=>Math.random()-.5);
- let tutorMessages=[],tutorBusy=false,tutorListening=false;
+ let tutorMessages=[],tutorBusy=false,tutorListening=false,stageEpoch=0;
  let bookId=initialBookId||'',scope='all',mode='game',tasks=[],idx=0,points=0,choice=null,answered=false,tiles=[],busy=false,award=false,progress={},hintLevel=0,paused=false,wrongAttempts=0;
  const book=()=>books.find(b=>b.id===bookId);
  const subject=()=>/ang|english/i.test(book()?.subject||'')?'angielski':/mat/i.test(book()?.subject||'')?'matematyka':'polski';
@@ -45,8 +45,9 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
   }return [];
  }
  function voiceGuide(){speak('Witaj w Akademii Superbohaterów! Wybierz podręcznik. Następnie wybierz całą książkę, jeden dział albo konkretne strony. Na końcu wybierz przygodę lub sprawdzian i rozpocznij misję!','pl-PL')}
- function report(){const v=stats();const rows=v.slice(-80).reverse();root.innerHTML='<section class="mg-panel"><h2>📋 Trudności i pominięte zadania</h2><p>Raport zapisany na tym urządzeniu. Pokazuje błędne próby i pominięcia w tej książce.</p>'+rows.map(x=>'<div class="mg-feedback"><strong>Strona '+escape(x.page)+'</strong> · '+escape(x.type)+'<p>'+escape(x.question)+'</p><small>'+escape(x.reason)+'</small></div>').join('')+btn('Wróć','back')+'</section>'}
+ function report(){stageEpoch++;tutorBusy=false;const v=stats();const rows=v.slice(-80).reverse();root.innerHTML='<section class="mg-panel"><h2>📋 Trudności i pominięte zadania</h2><p>Raport zapisany na tym urządzeniu. Pokazuje błędne próby i pominięcia w tej książce.</p>'+rows.map(x=>'<div class="mg-feedback"><strong>Strona '+escape(x.page)+'</strong> · '+escape(x.type)+'<p>'+escape(x.question)+'</p><small>'+escape(x.reason)+'</small></div>').join('')+btn('Wróć','back')+'</section>'}
  function setup(){
+  stageEpoch++;tutorBusy=false;
   const bs=available();if(!bs.length){root.innerHTML='<section class="mg-panel"><h2>📚 Dodaj stronę z rozpoznanym tekstem</h2></section>';return}
   if(!bs.some(b=>b.id===bookId))bookId=bs[0].id;
   const ch=chapters();
@@ -227,6 +228,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
  }
  async function start(){
   if(busy)return;
+  stageEpoch++;tutorBusy=false;
   const ps=scopePages();if(!ps.length){alert('Wybierz strony z rozpoznanym tekstem.');return setup()}
   busy=true;root.innerHTML='<section class="mg-panel"><h2>🦸 Tworzę przygodę ze stron podręcznika...</h2><p>Każda strona będzie osobnym etapem. Zapisane zadania będą wykorzystywane ponownie.</p></section>';
   try{
@@ -249,10 +251,10 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
    if(!all.length)throw Error(errors.join('; ')||'Brak zadań i brak odpowiedzi AI');
    if(all.length>1){let prev='';try{prev=localStorage.getItem('academy-v53-last-opening-'+child+'-'+bookId)||''}catch{}const pos=all.findIndex(t=>(t.type+'|'+t.question)!==prev);if(pos>0)all.unshift(...all.splice(pos,1));try{localStorage.setItem('academy-v53-last-opening-'+child+'-'+bookId,all[0].type+'|'+all[0].question)}catch{}}
    tasks=all.map(t=>{const p=ps.find(p=>Number(p.number)===Number(t.pageNumber)&&(t.sourceBookId?p.bookId===t.sourceBookId:true));return {...t,sourceBookId:t.sourceBookId||p?.bookId||bookId,sourceTitle:t.sourceTitle||(p?sourceLabel(p):'Strona '+t.pageNumber)}});idx=0;points=0;award=false;hintLevel=0;wrongAttempts=0;reset();remember();draw();
-  }catch(e){root.innerHTML=`<section class="mg-panel"><h2>⚠️ Nie udało się przygotować misji</h2><p>${escape(e.message)}</p>${btn('Spróbuj ponownie','start')}${btn('Wróć','back')}</section>`}
+  }catch(e){console.warn('Tworzenie misji:',e);if(root.isConnected)root.innerHTML=`<section class="mg-panel"><h2>🦸 Nie udało się teraz przygotować misji</h2><p>Spróbuj za chwilę.</p>${btn('Spróbuj ponownie','start')}${btn('Wróć','back')}</section>`}
   finally{busy=false}
  }
- function reset(){choice=null;answered=false;tiles=[];hintLevel=0;wrongAttempts=0;tutorMessages=[]}
+ function reset(){stageEpoch++;tutorBusy=false;choice=null;answered=false;tiles=[];hintLevel=0;wrongAttempts=0;tutorMessages=[]}
  const task=()=>tasks[idx];
  function answer(value){
   if(answered)return;
@@ -267,7 +269,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
     if(typeof obj.correct!=='boolean'||typeof obj.feedback!=='string')throw Error('Niepełna ocena');
     if(obj.correct){t.correct=true;answered=true;t.done=true;points++;audioCue(true);sayFeedback('Dobra odpowiedź!');recordResult(t);remember()}
     else{wrongAttempts++;audioCue(false);if(wrongAttempts>=2)logDifficulty(t,'odpowiedź otwarta');tutorMessages.push({who:'ai',text:obj.feedback.slice(0,500)})}
-   }catch(e){tutorMessages.push({who:'ai',text:'Nie mogę teraz sprawdzić odpowiedzi. Spróbuj jeszcze raz albo wybierz następne zadanie.'})}
+   }catch(e){tutorMessages.push({who:'system',text:'🦸 Nie udało się teraz sprawdzić odpowiedzi. Spróbuj ponownie.'})}
    finally{busy=false;draw()}})();return;
   }
   if(!t.correct){wrongAttempts++;audioCue(false);if(wrongAttempts>=2)logDifficulty(t,'błędne próby');hintLevel=Math.min(3,hintLevel+1);draw();return}
@@ -286,32 +288,36 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
   return `Jesteś nauczycielem wspierającym ośmioletniego ucznia Pawła w Akademii Superbohaterów. Rozmawiasz po polsku, krótko, serdecznie i rzeczowo. Nie podawaj gotowej odpowiedzi, zanim uczeń sam nie spróbuje. Wyjaśniaj krok po kroku, wskaż dokładnie miejsce czytania i sposób wykonania zadania. Jeśli uczeń pyta o błąd, wyjaśnij przyczynę, nie oceniaj jego osoby. Nie mów, że widzisz ekran na żywo: znasz tylko podany kontekst. Nie wymyślaj treści spoza strony. Jeśli pytanie jest niezwiązane z ćwiczeniem, możesz normalnie odpowiedzieć odpowiednio do wieku. Mentor: ${document.querySelector('[data-mentor]')?.dataset.mentor||'superbohater'}. Przedmiot: ${subject()}. Strona: ${t.pageNumber||'nieznana'}. Typ ćwiczenia: ${t.type}. Polecenie: ${t.question}. Fragment do przeczytania: ${t.passage||p?.text?.slice(0,1800)||'brak'}. Poprawne rozwiązanie WYŁĄCZNIE DLA CIEBIE (nie zdradzaj): ${t.answer}. Ostatnia próba ucznia: ${choice||'brak'}. Historia rozmowy: ${history}. Odpowiedz na najnowszą wypowiedź ucznia.`;
  }
  function tutorPanel(){
-  const messages=tutorMessages.slice(-6).map(m=>'<p class="mg-tutor-message"><strong>'+(m.who==='uczen'?'Paweł':'Nauczyciel AI')+':</strong> '+escape(m.text)+'</p>').join('');
+  const messages=tutorMessages.slice(-6).map(m=>'<p class="mg-tutor-message"><strong>'+(m.who==='uczen'?'Paweł':m.who==='system'?'Komunikat':'Nauczyciel AI')+':</strong> '+escape(m.text)+'</p>').join('');
   return '<section class="mg-tutor" style="margin-top:18px;padding:14px;border:2px solid #64748b;border-radius:16px"><h3>💬 Zapytaj nauczyciela AI '+btn('🔊','tutor-instruction')+'</h3><p>Naciśnij czerwony mikrofon z boku ekranu, żeby zapytać o zadanie. Możesz też napisać pytanie.</p><div aria-live="polite">'+messages+'</div><textarea id="mg-tutor-input" rows="2" placeholder="Wpisz pytanie do nauczyciela..."></textarea>'+btn(tutorBusy?'⏳ Odpowiadam...':'Wyślij pytanie','tutor-send','mg-primary')+'</section>';
  }
  async function tutorAsk(question){
   const q=String(question||'').trim();if(!q||tutorBusy)return;
+  const expectedEpoch=stageEpoch,expectedIndex=idx,expectedTask=task();
+  const isCurrent=()=>root.isConnected&&stageEpoch===expectedEpoch&&idx===expectedIndex&&task()===expectedTask;
   tutorMessages.push({who:'uczen',text:q});tutorBusy=true;draw();
   try{
    const prompt=tutorContext()+'\nNAJNOWSZE PYTANIE UCZNIA: '+q+'\nOdpowiedz zwykłym tekstem, bez JSON i bez znaków markdown. Maksymalnie 5 zdań.';
-   let raw;try{raw=await ask(prompt)}catch(first){await new Promise(r=>setTimeout(r,750));raw=await ask(prompt)}
-   let response=String(raw||'').replace(/\*\*|__|[`#]/g,'').trim();
-   if(!response)throw Error('AI nie przesłało odpowiedzi');
+   const raw=await ask(prompt);
+   if(!isCurrent())return;
+   const response=String(raw||'').replace(/\*\*|__|[`#]/g,'').trim();
+   if(!response)throw Error('AI empty');
    tutorMessages.push({who:'ai',text:response.slice(0,1600)});
-   try{speak(response,subject()==='angielski'?'pl-PL':'pl-PL')}catch(e){}
-  }catch(e){tutorMessages.push({who:'ai',text:'Nie mogę teraz odpowiedzieć: '+(e.message||'błąd połączenia')+'. Spróbuj ponownie.'})}
-  finally{tutorBusy=false;draw()}
+   try{speak(response,'pl-PL')}catch(e){}
+  }catch(error){
+   if(isCurrent()){console.warn('Tutor AI:',error);tutorMessages.push({who:'system',text:'🦸 Mentor chwilowo nie może odpowiedzieć. Spróbuj jeszcze raz za moment.'})}
+  }finally{if(isCurrent()){tutorBusy=false;draw()}}
  }
  function tutorMic(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){tutorMessages.push({who:'ai',text:'Ta przeglądarka nie obsługuje mikrofonu. Wpisz pytanie w polu poniżej.'});draw();return}
+  if(!SR){tutorMessages.push({who:'system',text:'🎙️ Możesz wpisać pytanie w polu poniżej.'});draw();return}
   if(tutorListening)return;
   try{const rec=new SR();rec.lang='pl-PL';rec.interimResults=false;tutorListening=true;
    rec.onresult=e=>{const q=e.results[0][0].transcript;tutorListening=false;tutorAsk(q)};
-   rec.onerror=e=>{tutorListening=false;tutorMessages.push({who:'ai',text:'Nie udało się rozpoznać głosu ('+e.error+'). Możesz napisać pytanie.'});draw()};
+   rec.onerror=()=>{tutorListening=false;tutorMessages.push({who:'system',text:'🎙️ Nie usłyszałem pytania. Możesz je napisać.'});draw()};
    rec.onend=()=>{tutorListening=false};rec.start();
    const box=root.querySelector('#mg-tutor-input');if(box)box.placeholder='🎤 Słucham pytania...';
-  }catch(e){tutorListening=false;tutorMessages.push({who:'ai',text:'Mikrofon: '+e.message});draw()}
+  }catch(e){tutorListening=false;console.warn('Mikrofon misji:',e);tutorMessages.push({who:'system',text:'🎙️ Możesz wpisać pytanie.'});draw()}
  }
  function stage(){
   const t=task();let html='<style>.mg-panel [data-mg]{transition:transform .13s ease,filter .13s ease,box-shadow .13s ease}.mg-panel [data-mg]:active{transform:scale(.94);filter:brightness(1.35)}.mg-panel [data-mg]:focus-visible{outline:3px solid #fbbf24;outline-offset:3px}.mg-panel input:focus,.mg-panel textarea:focus{outline:3px solid #fbbf24}.mg-panel .mg-feedback{animation:mg-pop .35s ease-out}@keyframes mg-pop{from{opacity:.2;transform:scale(.94)}to{opacity:1;transform:scale(1)}}</style><h3>'+escape(t.question)+'</h3>';
@@ -360,6 +366,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
  }
  function finish(){
   if(award)return;
+  stageEpoch++;tutorBusy=false;
   award=true;
   const total=tasks.length;
   const pct=total?Math.round(points/total*100):0;
@@ -403,7 +410,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
   if(act==='tutor-speak'){const last=[...tutorMessages].reverse().find(m=>m.who==='ai');if(last)return speak(last.text,'pl-PL');return}
   if(act==='report')return report();
   if(act==='guide')return voiceGuide();if(act==='start')return start();if(act==='resume')return resume();if(act==='back')return setup();
-  if(act==='pause'){remember();root.innerHTML='<section class="mg-panel"><h2>⏸ Misja zatrzymana</h2><p>Postęp zapisany na tym urządzeniu.</p>'+btn('▶️ Wznów','resume','mg-primary')+btn('📚 Wróć do wyboru','back')+'</section>';return}
+  if(act==='pause'){stageEpoch++;tutorBusy=false;remember();root.innerHTML='<section class="mg-panel"><h2>⏸ Misja zatrzymana</h2><p>Postęp zapisany na tym urządzeniu.</p>'+btn('▶️ Wznów','resume','mg-primary')+btn('📚 Wróć do wyboru','back')+'</section>';return}
   if(act==='hint'){hintLevel=Math.min(3,hintLevel+1);return draw()}
   if(act==='read-done')return answer('Przeczytane');
   if(act==='draw-done'){answered=true;t.done=true;t.correct=true;points++;remember();return draw()}
