@@ -109,8 +109,22 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
   return good.slice(0,5).map((t,i)=>({...t,explanation:t.explanation||'Sprawdź fragment w podręczniku.',hint:t.hint||'Przeczytaj uważnie jeszcze raz odpowiedni fragment.',type:allowed.includes(t.type)?t.type:'choice',done:false,correct:false}));
  }
  function makeReading(p){
-  const passage=String(p.text||'').trim().slice(0,850);
-  return {type:'reading',question:'📜 Tajny przekaz Avengersów. Przeczytaj fragment: '+sourceLabel(p)+':',passage,answer:'Przeczytane',options:['Przeczytane','Jeszcze czytam','Powtórz','Dalej'],explanation:'Teraz wykorzystaj przeczytany tekst w kolejnych zadaniach.',hint:'Czytaj spokojnie, zdanie po zdaniu.',pageNumber:p.number,sourceBookId:p.bookId,sourceTitle:sourceLabel(p),done:false,correct:false};
+  // Nie męcz dziecka całym wierszem: wybieramy kilka sąsiednich wersów lub zdań.
+  const lines=String(p.text||'').split(/\n+|(?<=[.!?])\s+/).map(x=>x.trim()).filter(x=>spokenWords(x).length>=3);
+  const key=`academy-v60-reading-${child}-${bookId}-${p.number}`;
+  let run=0;try{run=Number(localStorage.getItem(key)||0);localStorage.setItem(key,String(run+1))}catch{}
+  let passage='';
+  if(lines.length){
+   const start=(run*3)%lines.length;let length=0;
+   for(let n=0;n<Math.min(5,lines.length);n++){
+    const line=lines[(start+n)%lines.length],wordCount=spokenWords(line).length;
+    if(length>=22&&length+wordCount>38)break;
+    passage+=(passage?'\n':'')+line;length+=wordCount;
+    if(length>=32)break;
+   }
+  }
+  if(!passage)passage=String(p.text||'').trim().slice(0,400);
+  return {type:'reading',question:'📖 Przeczytaj krótki fragment po kolei. Potem sprawdź wynik.',passage,answer:'Przeczytane',options:[],pageNumber:p.number,sourceBookId:p.bookId,sourceTitle:sourceLabel(p),done:false,correct:false};
  }
  function pagePrompt(p,history=[]){
   const kinds=subject()==='matematyka'?'choice, safe, shop, clock, write, order':subject()==='angielski'?'listening, dictation, spelling, order, choice, write':'detective, loki, syllables, order, dictation, write, choice';
@@ -156,31 +170,62 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
   }catch(e){console.warn('Fanfara niedostępna')}
  }
  function spokenWords(text){return (String(text||'').toLocaleLowerCase('pl-PL').match(/[a-ząćęłńóśźż]+/g)||[])}
- function readingCoverage(sourceText,spokenText){
-  const reference=spokenWords(sourceText),spoken=spokenWords(spokenText);
-  if(!reference.length)return {score:0,hits:0,total:0,heard:spoken.length,matched:[]};
-  // Czytanie musi iść od początku i zachować kolejność. Toleruj pojedynczą
-  // pominiętą głoskę/słowo przy niedoskonałym rozpoznawaniu mowy.
-  let pos=0,hits=0,miss=0,bad=0;const matched=Array(reference.length).fill(false);
-  for(const word of spoken){
-   if(pos>=reference.length)break;
-   if(word===reference[pos]){matched[pos]=true;hits++;pos++;miss=0;bad=0;continue}
-   if(pos+1<reference.length&&word===reference[pos+1]&&miss<2){pos++;matched[pos]=true;hits++;pos++;miss++;bad=0;continue}
-   bad++;
-   if(bad>=3)break; // Nie przeskakuj losowo do innych fragmentów czytanki.
+ function readingWord(word){return String(word).toLocaleLowerCase('pl-PL').replace(/ł/g,'l').normalize('NFD').replace(/[\u0300-\u036f]/g,'')}
+ function speechClose(a,b){
+  if(a===b)return true;
+  const x=readingWord(a),y=readingWord(b);
+  if(x===y)return true;
+  if(Math.min(x.length,y.length)<5||Math.abs(x.length-y.length)>1)return false;
+  // Jedna literówka w dłuższym wyrazie: błędy rozpoznawania, nie dowolna odpowiedź.
+  let i=0,j=0,changes=0;
+  while(i<x.length&&j<y.length){
+   if(x[i]===y[j]){i++;j++;continue}
+   if(++changes>1)return false;
+   if(x.length>y.length)i++;else if(y.length>x.length)j++;else{i++;j++}
   }
-  const score=Math.min(100,Math.round(100*hits/Math.max(reference.length,spoken.length)));
-  return {score,hits,total:reference.length,heard:spoken.length,matched};
+  return changes+((i<x.length||j<y.length)?1:0)<=1;
+ }
+ function readingCoverage(sourceText,spokenText){
+  const expected=spokenWords(sourceText),spoken=spokenWords(spokenText);
+  const len=expected.length;
+  if(!len)return {score:0,hits:0,total:0,heard:spoken.length,matched:[]};
+  // Dynamiczne dopasowanie kolejności. Nie zatrzymuje się po trzech źle rozpoznanych
+  // słowach i nie zalicza tekstu czytanego na wyrywki jako całego fragmentu.
+  let previous=new Uint16Array(len+1);
+  for(const heard of spoken){
+   const next=new Uint16Array(len+1);
+   for(let i=1;i<=len;i++){
+    next[i]=speechClose(heard,expected[i-1])?previous[i-1]+1:Math.max(next[i-1],previous[i]);
+   }
+   previous=next;
+  }
+  const hits=previous[len];
+  return {score:Math.round(100*hits/Math.max(len,spoken.length)),hits,total:len,heard:spoken.length,matched:[]};
+ }
+ function miniCoverage(sourceText,spokenText){
+  const expected=spokenWords(sourceText),spoken=spokenWords(spokenText);
+  let hits=0;
+  for(const word of spoken){
+   if(hits>=expected.length)break;
+   if(speechClose(word,expected[hits]))hits++;
+  }
+  return {score:Math.round(100*hits/Math.max(1,expected.length)),hits,total:expected.length,heard:spoken.length,matched:expected.map((_,i)=>i<hits)};
  }
  function makeMiniReading(p){
   if(subject()!=='polski')return null;
-  const sentences=String(p.text||'').replace(/\s+/g,' ').split(/(?<=[.!?])\s+/).map(s=>s.trim());
-  const candidates=sentences.filter(s=>{const n=spokenWords(s).length;return n>=3&&n<=9});
-  if(!candidates.length)return null;
-  const key=`academy-v59-mini-${child}-${bookId}-${p.number}`;
+  // Krótkie, pełne zdania do ćwiczenia płynnego czytania, niezależne od czytanki.
+  const sentences=[
+   'Ala czyta nową książkę.','Mały lis biegnie szybko.','Olek lubi czerwone jabłka.',
+   'Zosia rysuje piękny dom.','Wesoły pies goni piłkę.','Dzieci obserwują kolorowe motyle.',
+   'Rano świeci jasne słońce.','Paweł buduje wielką rakietę.','Babcia podlewa zielone kwiaty.',
+   'Złoty smok pilnuje skarbu.','Mądra sowa siedzi cicho.','Bohater znajduje stary klucz.',
+   'Kotek śpi na poduszce.','Tomek maluje niebieski statek.','Wiewiórka zbiera małe orzechy.',
+   'Kasia pisze krótkie zdanie.','Dzielny rycerz otwiera bramę.','Ptaki śpiewają piękną melodię.'
+  ];
+  const key=`academy-v60-mini-${child}-${bookId}`;
   let n=0;try{n=Number(localStorage.getItem(key)||0);localStorage.setItem(key,String(n+1))}catch{}
-  const passage=candidates[n%candidates.length];
-  return {type:'reading-mini',question:'🎙️ Mała misja: przeczytaj krótkie zdanie po kolei, słowo po słowie.',passage,answer:'Przeczytane',options:[],pageNumber:p.number,done:false,correct:false};
+  const passage=sentences[n%sentences.length];
+  return {type:'reading-mini',question:'🎙️ Przeczytaj kolejno podświetlane słowa.',passage,answer:'Przeczytane',options:[],pageNumber:p.number,done:false,correct:false,readProgress:0};
  }
  function sayFeedback(message){try{speak(String(message).replace(/[\*#_`]/g,''),'pl-PL')}catch(e){console.warn('Mowa niedostępna',e)}}
  function audioCue(ok){try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;const c=new C(),o=c.createOscillator(),g=c.createGain();o.type=ok?'sine':'triangle';o.frequency.setValueAtTime(ok?660:240,c.currentTime);if(ok)o.frequency.exponentialRampToValueAtTime(990,c.currentTime+.13);g.gain.setValueAtTime(.035,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.19);o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.2);o.onended=()=>c.close()}catch(e){}}
@@ -212,17 +257,33 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
   return {type:'wordsearch',question:'🔎 Znajdź 6 słów. Szukaj poziomo i pionowo.',answer:chosen.join(', '),words:chosen,pageNumber:p.number,options:[],hint:'Zacznij od pierwszej litery i zaznaczaj kolejne.',done:false,correct:false};
  }
  function initWordGrid(t){
-  const size=12,abc='AĄBCĆDEĘFGHIJKLŁMNŃOÓPRSŚTUWYZŹŻ';
-  const grid=Array.from({length:size},()=>Array(size).fill(''));
-  const placed=[];
-  // Poziome słowa w górnej części, pionowe w dolnej: 3+3 bez kolizji.
-  for(let k=0;k<Math.min(6,(t.words||[]).length);k++){
-   const word=t.words[k],letters=[...word.toUpperCase()],vertical=k%2===1;
-   const slot=Math.floor(k/2);
-   const row=vertical?4:slot;
-   const col=vertical?slot*4:Math.floor(Math.random()*(size-letters.length+1));
-   letters.forEach((ch,i)=>grid[row+(vertical?i:0)][col+(vertical?0:i)]=ch);
-   placed.push({word,row,col,dir:vertical?'v':'h',found:false});
+  const size=10,abc='AĄBCĆDEĘFGHIJKLŁMNŃOÓPRSŚTUWYZŹŻ';
+  // Sześć słów w zwartej siatce 10x10; słowa mogą się przecinać wspólną literą.
+  const words=(t.words||[]).slice(0,6);
+  let grid,placed;
+  // W rzadkim nieudanym układzie spróbuj jeszcze raz, nie gub słów.
+  for(let attempt=0;attempt<25;attempt++){
+   grid=Array.from({length:size},()=>Array(size).fill(''));placed=[];
+   for(let k=0;k<words.length;k++){
+   const word=words[k],letters=[...word.toUpperCase()],vertical=k%2===1;
+   const candidates=[];
+   for(let row=0;row<size;row++)for(let col=0;col<size;col++){
+    if(row+(vertical?letters.length:1)>size||col+(vertical?1:letters.length)>size)continue;
+    let intersections=0,possible=true;
+    for(let i=0;i<letters.length;i++){
+     const old=grid[row+(vertical?i:0)][col+(vertical?0:i)];
+     if(old&&old!==letters[i]){possible=false;break}
+     if(old)intersections++;
+    }
+    if(possible)candidates.push({row,col,score:intersections*20+Math.random()*5});
+   }
+   if(!candidates.length)continue;
+   candidates.sort((a,b)=>b.score-a.score);
+   const at=candidates[0];
+   letters.forEach((ch,i)=>{grid[at.row+(vertical?i:0)][at.col+(vertical?0:i)]=ch});
+   placed.push({word,row:at.row,col:at.col,dir:vertical?'v':'h',found:false});
+   }
+   if(placed.length===words.length)break;
   }
   grid.forEach(row=>row.forEach((x,i)=>{if(!x)row[i]=abc[Math.floor(Math.random()*abc.length)]}));
   t.words=placed.map(x=>x.word);t.placements=placed;t.grid=grid;t.picked=[];
@@ -257,7 +318,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
    ['biblioteka','Gdzie można wypożyczać książki?'],
    ['pisownia','Jak nazywa się sposób zapisywania wyrazów literami?'],
    ['dyktando','Jak nazywa się ćwiczenie, w którym zapisujesz słowa czytane przez nauczyciela?'],
-   ['litery','Z czego składają się zapisane wyrazy: z cyfr czy z ...?'],
+   ['litery','Jak nazywamy znaki alfabetu, z których składamy wyrazy?'],
    ['wielka','Jaką literą rozpoczynamy imię? Wpisz: małą czy wielką.'],
    ['mała','Jaką literą zwykle zapisujemy nazwy pospolite w środku zdania? Wpisz: małą czy wielką.'],
    ['kropki','Jak nazywamy znaki na końcu zdania oznajmującego? Wpisz liczbę mnogą.'],
@@ -297,11 +358,19 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
    ['wakanda','Wakanda to fikcyjna ojczyzna Czarnej Pantery.'],
    ['groot','Groot to bohater Strażników Galaktyki.'],
    ['stark','Tony Stark zbudował zbroję Iron Mana.'],
-   ['tarcza','Tarcza jest znakiem rozpoznawczym Kapitana Ameryki.']
+   ['tarcza','Tarcza jest znakiem rozpoznawczym Kapitana Ameryki.'],
+   ['kosmos','Kosmos to ogromna przestrzeń pełna gwiazd i planet.'],
+   ['kometa','Kometa to małe ciało niebieskie, które może mieć jasny warkocz.'],
+   ['odwaga','Odwaga pomaga działać nawet wtedy, gdy czegoś się boimy.'],
+   ['planeta','Planeta to ciało niebieskie krążące wokół gwiazdy.'],
+   ['przygoda','Przygoda to niezwykłe, ciekawe wydarzenie.'],
+   ['tajemnica','Tajemnica to coś, co jeszcze nie zostało odkryte.'],
+   ['rakieta','Rakieta może wynosić statki kosmiczne w przestrzeń.'],
+   ['księżyc','Księżyc to naturalny satelita Ziemi.']
   ];
   // Angielski ma wlasne hasla, aby litery pasowaly do slow angielskich.
   const availableSecrets=subject()==='angielski'?[['stark','Tony Stark to Iron Man.'],['groot','Groot należy do Strażników Galaktyki.']]:secrets;
-  const key=`academy-v58-cross-${child}-${bookId}-${subject()}`;
+  const key=`academy-v60-cross-${child}-${bookId}-${subject()}`;
   let n=0;try{n=Number(localStorage.getItem(key)||0)}catch{}
   const sorted=[...availableSecrets.slice(n%availableSecrets.length),...availableSecrets.slice(0,n%availableSecrets.length)];
   for(const [secret,info] of sorted){
@@ -342,15 +411,25 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
   return {type:'rebus',question:'🧩 Rebus Avengersów: jakie słowo powstanie?',rebus:ex.operation,rebusPicture:ex.picture,rebusHint:ex.tip,answer:ex.answer.toLocaleLowerCase('pl-PL'),options:[],hint:ex.tip,pageNumber:p.number,done:false,correct:false};
  }
  function makeMemory(p){
-  const words=wordPieces(p.text).filter(w=>[...w].length<=8);
-  const subjects=subject()==='matematyka'?['liczba','figura','zegarek','kwadrat','trójkąt']:subject()==='angielski'?['apple','school','yellow','green','water']:['sylaba','litera','zdanie','kropka','wyraz'];
-  const pool=[...new Set([...shuffle(words),...subjects])];
-  if(pool.length<3)return null;
-  const key=`academy-v59-memory-${child}-${bookId}`;let n=0;
+  // 12 kart (6 par). Na zmianę: słowo-słowo oraz obrazek-słowo.
+  const gallery=[['🐝','pszczoła'],['🌹','róża'],['🐟','ryba'],['🐈','kot'],['🐄','krowa'],['🌳','drzewo'],['🐻','niedźwiedź'],['🏠','dom'],['☀️','słońce'],['🚂','pociąg'],['🐸','żaba'],['🐘','słoń'],['🦊','lis'],['🌼','kwiat']];
+  const subjects=subject()==='matematyka'?['dodawanie','liczba','kwadrat','trójkąt','zegar','wynik','godzina','minuta','figura','linijka']:subject()==='angielski'?['apple','school','yellow','green','water','cat','book','red','blue','tree']:['sylaba','litera','zdanie','kropka','wyraz','alfabet','wiersz','głoska','książka','czytanie'];
+  const source=wordPieces(p.text).filter(w=>[...w].length>=4&&[...w].length<=10);
+  const pool=[...new Set([...source,...subjects])];
+  const key=`academy-v60-memory-${child}-${bookId}`;let n=0;
   try{n=Number(localStorage.getItem(key)||0);localStorage.setItem(key,String(n+1))}catch{}
-  const trio=[...pool.slice(n%pool.length),...pool.slice(0,n%pool.length)].slice(0,3);
-  const cards=shuffle(trio.flatMap((w,i)=>[{pair:i,label:w},{pair:i,label:w}]));
-  return {type:'memory',question:'🃏 Memory Avengersów: odkryj trzy pary identycznych słów.',answer:'Wszystkie pary',options:[],cards,matched:[],flipped:[],pageNumber:p.number,done:false,correct:false};
+  const pictures=subject()==='polski'&&n%3===1;
+  let pairs;
+  if(pictures){
+   const choices=[...gallery.slice(n%gallery.length),...gallery.slice(0,n%gallery.length)].slice(0,6);
+   pairs=choices.map(([emoji,word])=>({front:emoji,back:word}));
+  }else{
+   const choices=[...pool.slice(n%Math.max(1,pool.length)),...pool.slice(0,n%Math.max(1,pool.length))].slice(0,6);
+   if(choices.length<6)return null;
+   pairs=choices.map(word=>({front:word,back:word}));
+  }
+  const cards=shuffle(pairs.flatMap((entry,i)=>[{pair:i,label:entry.front},{pair:i,label:entry.back}]));
+  return {type:'memory',question:pictures?'🃏 Memory: połącz obrazki z nazwami.':'🃏 Memory: znajdź sześć par słów.',answer:'Wszystkie pary',options:[],cards,matched:[],flipped:[],pageNumber:p.number,done:false,correct:false};
  }
  function makePuzzle(p){
   const sentence=String(p.text||'').split(/(?<=[.!?])\s+/).find(x=>x.trim().split(/\s+/).length>=4&&x.trim().split(/\s+/).length<=9);
@@ -492,7 +571,8 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
  function tutorContext(){
   const t=task();if(!t)return '';
   const crossword=t.type==='crossword'?(t.crossWords||[]).map((e,i)=>`${i+1}. PYTANIE: ${e.clue}. Wpis ucznia: ${t.crossTyped?.[i]||'(pusto)'}. Prawidlowa odpowiedz TYLKO DLA MENTORA: ${e.word}`).join('\n'):'';
-  const rebus=t.type==='rebus'?`WIDOCZNY REBUS: ${t.rebus}. Obrazek przedstawia: ${t.rebusPicture||'nieznany'}. ZADANA ODPOWIEDZ tylko dla ciebie: ${t.answer}. Wskazowka do tego rebusu: ${t.rebusHint||''}. Nie wymyslaj innego rebusu ani innych liter.`:'';
+  const pictureName=({'🦊':'lis','🐈':'kot','🌲':'las','🐮':'krowa','🐟':'ryba'})[t.rebusPicture]||'obiekt na obrazku';
+  const rebus=t.type==='rebus'?`WIDOCZNY REBUS: ${t.rebus}. Obrazek przedstawia: ${t.rebusPicture||'nieznany'}, nazwa: ${pictureName}. Jeżeli uczeń pyta co jest na obrazku, powiedz nazwę, ale nie rozwiązuj pozostałych operacji. ZADANA ODPOWIEDZ tylko dla ciebie: ${t.answer}. Wskazowka do tego rebusu: ${t.rebusHint||''}. Nie wymyslaj innego rebusu ani innych liter.`:'';
   const history=tutorMessages.slice(-5).map(m=>(m.who==='uczen'?'Uczeń: ':'Nauczyciel: ')+m.text).join('\n');
   return `Jestes nauczycielem ośmiolatka w Akademii Superbohaterów. Tryb: ${mode==='test'?'SPRAWDZIAN bez podpowiedzi':'TRENING'}. Aktualne zadanie: ${t.question}. Typ: ${t.type}. Przedmiot: ${subject()}. Pytania krzyżówki: ${crossword||'nie dotyczy'}. ${rebus} Tekst z materiału (tylko kontekst): ${pageText(t).slice(0,1100)}. Ostatnia odpowiedz: ${choice||'brak'}. Historia: ${history}. Skup się tylko na aktualnym zadaniu. W treningu wyjaśnij sens polecenia i naprowadzaj, nie dopowiadaj losowych wskazówek. Nie twierdź, że widzisz ekran na żywo.`;
  }
@@ -506,7 +586,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
    const t=task();
    const isProcedure=/polecen|co mam|co zrobić|jak (?:wykon|zrobi|wpisa|zaznacz|rozwiąza)|nie rozumiem|instrukcj/i.test(q);
    const isWriting=/kolej|przecin|spacj|wpis/i.test(q);
-   let reply='To sprawdzian, więc nie mogę zdradzić rozwiązania ani wyjaśniać teraz materiału. Spróbuj odpowiedzieć samodzielnie. Wszystko omówimy po sprawdzianie.';
+   let reply='To sprawdzian, więc nie mogę zdradzić rozwiązania ani wyjaśniać teraz materiału. Jeśli nie rozumiesz polecenia, zapytaj mnie, co dokładnie masz zrobić. Z chęcią wyjaśnię sposób wykonania zadania. Odpowiedzi omówimy po sprawdzianie.';
    if(isProcedure){
     const steps={crossword:'Przeczytaj każde pytanie na górze, potem znajdź jego numer i wpisz odpowiedź w kratki na dole.',wordsearch:'Znajdź wskazane słowa na planszy i zaznacz kolejno ich litery.',rebus:'Spójrz na obrazek i symbole dodawania lub usuwania liter, a potem wpisz powstały wyraz.',syllables:'Wpisz odpowiedź w pole pod poleceniem i naciśnij Sprawdź.',reading:'Naciśnij Rozpocznij czytanie, przeczytaj tekst po kolei, zatrzymaj mikrofon i naciśnij Sprawdź czytanie.',"reading-mini":'Czytaj wyrazy po kolei, zatrzymaj mikrofon i naciśnij Sprawdź czytanie.',write:'Przeczytaj, o co pytamy, wpisz odpowiedź w pole i naciśnij Sprawdź.',choice:'Przeczytaj pytanie i wybierz jedną z dostępnych odpowiedzi.',memory:'Odkrywaj po dwie karty i szukaj pasujących par.'};
     reply=steps[t.type]||'Przeczytaj całe polecenie. Wybierz odpowiedź albo wpisz ją w wyznaczonym miejscu i naciśnij Sprawdź. Nie mogę teraz podpowiadać rozwiązania.';
@@ -540,54 +620,71 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
    const box=root.querySelector('#mg-tutor-input');if(box)box.placeholder='🎤 Słucham pytania...';
   }catch(e){tutorListening=false;console.warn('Mikrofon misji:',e);tutorMessages.push({who:'system',text:'🎙️ Możesz wpisać pytanie.'});draw()}
  }
+ function shortSource(t){
+  const full=pageText(t),chunks=full.split(/\n{1,}|(?<=[.!?])\s+/).map(s=>s.trim()).filter(s=>spokenWords(s).length>=2);
+  if(!chunks.length)return full.slice(0,500);
+  const answer=String(t.answer||'').toLocaleLowerCase('pl-PL');
+  let at=chunks.findIndex(s=>answer.length>=3&&s.toLocaleLowerCase('pl-PL').includes(answer));
+  if(at<0){
+   const words=spokenWords(t.question).filter(w=>w.length>=5&&!['jakie','które','czego','który','odpowiedź','tekstu','czytanki'].includes(w));
+   let best=-1;
+   for(let i=0;i<chunks.length;i++){
+    const score=words.filter(w=>chunks[i].toLocaleLowerCase('pl-PL').includes(w)).length;
+    if(score>best){best=score;at=i}
+   }
+  }
+  if(at<0)at=0;
+  const from=Math.max(0,at-1),to=Math.min(chunks.length,at+3);
+  return chunks.slice(from,to).join('\n').slice(0,650);
+ }
  function stage(){
   const t=task();let html='<style>.mg-panel [data-mg]{transition:transform .13s ease,filter .13s ease,box-shadow .13s ease}.mg-panel [data-mg]:active{transform:scale(.94);filter:brightness(1.35)}.mg-panel [data-mg]:focus-visible{outline:3px solid #fbbf24;outline-offset:3px}.mg-panel input:focus,.mg-panel textarea:focus{outline:3px solid #fbbf24}.mg-panel .mg-feedback{animation:mg-pop .35s ease-out}@keyframes mg-pop{from{opacity:.2;transform:scale(.94)}to{opacity:1;transform:scale(1)}}</style><h3>'+escape(t.question)+'</h3>';
   const q=String(t.question||'').toLocaleLowerCase('pl-PL');
   const storyHint=/(czytank|tekst|wiersz|opowiadani|bohater|autor|narrator|histori|według|na podstawie|co (?:się|robi|zrobił|zrobiła|zauważył|powiedział|woła|nawołuje)|kto (?:powiedział|woła|spotkał|zobaczył|zrobił)|dlaczego|w jaki sposób|co wydarzyło|o czym)/i.test(q);
   const noSource=['reading','wordsearch','crossword','rebus','syllables','dictation','listening','spelling','order'].includes(t.type)||/(sylab|głosk|samogłosk|spółgłosk|liter|alfabet|ortografi|wyraz[ieyu]? [„"'])/i.test(q);
   if(!noSource&&(t.needsSource===true||storyHint||t.type==='detective'||t.type==='loki')){
-   const excerpt=pageText(t).slice(0,3800);
+   const excerpt=shortSource(t);
    if(excerpt)html+='<details class="mg-source" open><summary>📖 Tekst źródłowy — znajdź odpowiedź</summary><p style="max-height:330px;overflow:auto;white-space:pre-wrap">'+escape(excerpt)+'</p></details>';
   }
 
   if(t.type==='reading'||t.type==='reading-mini'){
    const mini=t.type==='reading-mini';
-   html+='<p>📖 '+(mini?'Przeczytaj wyrazy po kolei. Poprawnie rozpoznane słowa zaświecą się na zielono.':'Przeczytaj cały widoczny tekst od początku, po kolei. Możesz zatrzymać mikrofon i kontynuować.')+' Po zatrzymaniu naciśnij <strong>Sprawdź czytanie</strong>, aby poznać wynik.</p>';
+   html+='<p>📖 '+(mini?'Przeczytaj podświetlone na <strong>żółto</strong> słowo. Kiedy aplikacja je rozpozna, zrobi się <strong>zielone</strong>, a kolejne podświetli się na żółto. Czytaj bez ponownego klikania mikrofonu.':'Przeczytaj widoczny krótki fragment po kolei. Możesz zatrzymać mikrofon i kontynuować. Po zakończeniu naciśnij <strong>Sprawdź czytanie</strong>.')+'</p>';
    const text=t.passage||pageText(t);
    if(mini){
-    const c=readingCoverage(text,t.readTranscript||'');
-    html+='<div class="mg-reading-text" style="display:flex;flex-wrap:wrap;gap:8px;line-height:1.7">'+spokenWords(text).map((w,i)=>'<span data-mg-rw="'+i+'" style="padding:3px 8px;border-radius:7px;background:'+(c.matched[i]?'#16803b':'#293850')+';color:white">'+escape(w)+'</span>').join('')+'</div>';
+    const c=miniCoverage(text,t.readTranscript||'');
+    html+='<div class="mg-reading-text" style="display:flex;flex-wrap:wrap;gap:8px;line-height:1.7">'+spokenWords(text).map((w,i)=>'<span data-mg-rw="'+i+'" style="padding:3px 8px;border-radius:7px;background:'+(c.matched[i]?'#16803b':i===c.hits?'#d29b00':'#293850')+';color:white">'+escape(w)+'</span>').join('')+'</div>';
    }else html+='<div class="mg-reading-text" style="white-space:pre-wrap">'+escape(text)+'</div>';
    html+=btn(t.readActive?'⏹ Zatrzymaj mikrofon':'🎙️ '+(t.readTranscript?'Kontynuuj czytanie':'Rozpocznij czytanie'),t.readActive?'read-stop':'read-aloud','mg-primary');
-   if(t.readTranscript&&!t.readActive&&!answered)html+=btn('✅ Sprawdź czytanie','read-check','mg-primary');
+   if(!mini&&t.readTranscript&&!t.readActive&&!answered)html+=btn('✅ Sprawdź czytanie','read-check','mg-primary');
    if(Number.isFinite(t.readScore))html+='<div class="mg-feedback" role="status"><strong>'+ (t.readChecked?'Wynik próby: ':'Dotychczas rozpoznano: ')+(t.readHits||0)+' z '+(t.readTotal||0)+' słów — '+t.readScore+'%</strong><p>'+escape(!t.readChecked?'Zatrzymaj mikrofon i naciśnij Sprawdź czytanie.':t.readScore>=70?'🎉 Brawo, czytanie zaliczone!':'🌱 Dobry początek! Poćwicz i spróbuj ponownie.')+'</p><small>Rozpoznawanie mowy może się mylić; to nie jest ocena wymowy.</small></div>';
    if(t.readError)html+='<p role="status">🎙️ '+escape(t.readError)+'</p>';
    if(!t.readActive&&!answered)html+=btn('↺ Zacznij od początku','read-reset');
   }else if(t.type==='wordsearch'){
    if(!t.words?.length)t.words=wordPieces(pageText(t)).slice(0,6);
    if(!t.grid)initWordGrid(t);
-   html+='<p>Znajdź sześć słów w poziomie i pionie. Poprawne litery są niebieskie, ukończone słowa zielone.</p><p><strong>Do znalezienia:</strong> '+t.placements.map(p=>p.found?'✅ '+escape(p.word):escape(p.word)).join(' • ')+'</p>';
+   html+='<p>Znajdź sześć słów poziomo i pionowo na mniejszej planszy. Niektóre słowa mogą się przecinać. Poprawne litery są niebieskie, ukończone słowa zielone.</p><p><strong>Do znalezienia:</strong> '+t.placements.map(p=>p.found?'✅ '+escape(p.word):escape(p.word)).join(' • ')+'</p>';
    html+='<div class="mg-wordgrid" style="display:grid;grid-template-columns:repeat('+t.grid[0].length+',minmax(0,1fr));gap:3px">'+t.grid.map((r,y)=>r.map((v,x)=>{const found=t.placements.some(p=>p.found&&[...p.word].some((_,i)=>{const z=wordCell(p,i);return z[0]===y&&z[1]===x}));const selected=(t.picked||[]).some(z=>z[0]===y&&z[1]===x);return '<button type="button" data-mg="grid:'+y+':'+x+'" style="padding:5px 1px;min-width:0;background:'+(found?'#16803b':selected?'#075cff':'#394969')+' !important;color:white;border-radius:6px;'+(selected&&!found?'box-shadow:inset 0 0 0 3px #dbeafe,0 0 12px #60a5fa;outline:2px solid #93c5fd;':'')+'">'+escape(v)+'</button>'}).join('')).join('')+'</div>';
   }else if(t.type==='crossword'&&t.crossWords?.length){
    if(!Array.isArray(t.crossTyped))t.crossTyped=t.crossWords.map(()=>'');
-   html+='<p>📋 <strong>Pytania do krzyżówki</strong> — przeczytaj pytanie, a następnie wpisz odpowiedź w kratkach niżej. Możesz nacisnąć numer pytania, by przejść prosto do jego kratek.</p>';
-   html+='<div class="mg-cross-questions" style="padding:12px;border:1px solid #64748b;border-radius:12px">'+t.crossWords.map((entry,i)=>'<div style="margin:8px 0">'+btn((i+1)+'. '+escape(entry.clue),'cross-go:'+i)+'</div>').join('')+'</div>';
-   html+='<h3 style="margin-top:24px">📝 Wpisz odpowiedzi w krzyżówce</h3><p>Poprawne litery są niebieskie, całe słowa — zielone. Żółte pola utworzą hasło końcowe.</p>';
-   const width=t.crossGrid[0]?.length||0;
+   html+='<p>📋 <strong>Pytania do krzyżówki</strong>. Naciśnij numer pytania, aby przejść do jego kratek. Przesuń planszę palcem w bok, aby zobaczyć wszystkie litery.</p>';
+   html+='<div class="mg-cross-questions" style="padding:10px;border:1px solid #64748b;border-radius:12px">'+t.crossWords.map((entry,i)=>'<div style="margin:6px 0">'+btn((i+1)+'. '+escape(entry.clue)+' ('+[...entry.word].length+' liter)','cross-go:'+i)+'</div>').join('')+'</div>';
+   html+='<h3 style="margin-top:18px">📝 Wpisz odpowiedzi w krzyżówce</h3><p>Poprawna litera — niebieska, cały wyraz — zielony. Żółte przecięcia tworzą hasło.</p>';
+   const width=t.crossGrid[0]?.length||0,cellSize=30;
+   html+='<div class="mg-cross-board" style="overflow-x:auto;max-width:100%;touch-action:pan-x pan-y;padding:6px 0">';
+   html+='<div role="grid" aria-label="Krzyżówka" style="display:grid;grid-template-columns:28px repeat('+width+','+cellSize+'px);gap:1px;width:max-content;margin:0">';
    t.crossWords.forEach((entry,i)=>{
-    html+='<div class="mg-cross-row" id="mg-cross-row-'+i+'" style="margin:16px 0"><strong>'+(i+1)+'.</strong> <small>('+[...entry.word].length+' liter)</small>';
-    html+='<div style="overflow-x:auto;max-width:100%;padding:4px 0"><div style="display:grid;grid-template-columns:repeat('+width+',35px);gap:3px;width:max-content">';
+    html+='<strong role="rowheader" style="font-size:14px;display:flex;align-items:center;justify-content:center;height:34px;color:#fcd34d">'+(i+1)+'.</strong>';
     const correct=lettersMatch(t.crossTyped[i]||'',entry.word);
     html+=t.crossGrid[i].map((cell,col)=>{
-     if(!cell)return '<span aria-hidden="true"></span>';
-     const pos=col-(t.crossColumn-entry.index);
-     const letter=Array.from(t.crossTyped[i]||'')[pos]||'';
+     if(!cell)return '<span aria-hidden="true" style="width:30px;height:34px"></span>';
+     const pos=col-(t.crossColumn-entry.index),letter=Array.from(t.crossTyped[i]||'')[pos]||'';
      const match=letter&&lettersMatch(letter,cell.letter);
      const bg=correct?'#16803b':match?'#075cff':cell.cross?'#66500a':'#263550';
-     return '<input data-mg-cell="'+i+':'+pos+'" maxlength="1" value="'+escape(letter)+'" aria-label="Hasło '+(i+1)+', litera '+(pos+1)+'" autocomplete="off" autocapitalize="characters" style="box-sizing:border-box;margin:0;width:35px;height:40px;padding:0;text-align:center;font-size:20px;font-weight:800;color:white;border:2px solid '+(cell.cross?'#facc15':'#8ca2c6')+';border-radius:5px;background:'+bg+' !important">';
+     return '<input data-mg-cell="'+i+':'+pos+'" maxlength="1" value="'+escape(letter)+'" aria-label="Hasło '+(i+1)+', litera '+(pos+1)+' z '+[...entry.word].length+'" autocomplete="off" autocapitalize="characters" style="box-sizing:border-box;margin:0;width:30px;height:34px;padding:0;text-align:center;font-size:17px;font-weight:800;color:white;border:1px solid '+(cell.cross?'#facc15':'#8ca2c6')+';border-radius:2px;background:'+bg+' !important">';
     }).join('');
-    html+='</div></div></div>';
    });
+   html+='</div></div>';
    html+='<p>Hasło pionowe: '+(t.crossWords.every((w,i)=>lettersMatch(t.crossTyped[i]||'',w.word))?'<strong>'+escape(t.answer.toUpperCase())+'</strong>':'<strong>odkryj po rozwiązaniu wszystkich słów</strong>')+'</p>';
    html+=btn('✓ Sprawdź krzyżówkę','cross-new','mg-primary')+'<p id="mg-cross-feedback" role="status"></p>';
   }else if(t.type==='order'||t.type==='spelling'){
@@ -603,8 +700,8 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
   }else if(t.type==='memory'){
    if(!t.cards?.length){html+='<p>Nie udało się utworzyć kart. Przejdź do następnego zadania.</p>';}
    else{
-    html+='<p>Odkrywaj po dwie karty i szukaj identycznych słów. Znalezione pary pozostaną zielone.</p>';
-    html+='<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">'+t.cards.map((c,i)=>{const hit=(t.matched||[]).includes(i),open=hit||(t.flipped||[]).includes(i);return '<button type="button" data-mg="flip:'+i+'" style="min-width:0;padding:20px 4px;min-height:85px;background:'+(hit?'#16803b':open?'#075cff':'#203c73')+' !important;border:2px solid #7aa1e2;border-radius:12px;color:white;font-size:clamp(17px,3.4vw,25px);font-weight:700">'+escape(open?c.label:'❔')+'</button>'}).join('')+'</div>';
+    html+='<p>Odkrywaj po dwie karty i szukaj sześciu pasujących par słów albo słów z obrazkami. Znalezione pary pozostaną zielone.</p>';
+    html+='<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px">'+t.cards.map((c,i)=>{const hit=(t.matched||[]).includes(i),open=hit||(t.flipped||[]).includes(i);return '<button type="button" data-mg="flip:'+i+'" style="min-width:0;padding:10px 2px;min-height:72px;background:'+(hit?'#16803b':open?'#075cff':'#203c73')+' !important;border:2px solid #7aa1e2;border-radius:12px;color:white;font-size:clamp(13px,2.8vw,21px);font-weight:700">'+escape(open?c.label:'❔')+'</button>'}).join('')+'</div>';
    }
   }else{
    html+='<div class="mg-choices">'+(t.options||[]).map((v,i)=>btn(escape(v),'pick:'+i,'mg-choice')).join('')+'</div>';
@@ -688,9 +785,9 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
    let finalPart='';
    const base=String(t.readTranscript||'');
    const preview=(pending='')=>{
-    const c=readingCoverage(t.passage||pageText(t),base+' '+finalPart+' '+pending);
+    const c=(t.type==='reading-mini'?miniCoverage:readingCoverage)(t.passage||pageText(t),base+' '+finalPart+' '+pending);
     t.readHits=c.hits;t.readTotal=c.total;t.readHeard=c.heard;
-    if(t.type==='reading-mini')root.querySelectorAll('[data-mg-rw]').forEach((el,i)=>{el.style.background=c.matched[i]?'#16803b':'#293850'});
+    if(t.type==='reading-mini')root.querySelectorAll('[data-mg-rw]').forEach((el,i)=>{el.style.background=c.matched[i]?'#16803b':i===c.hits?'#d29b00':'#293850'});
    };
    r.onresult=e=>{
     let partial='',pending='';
@@ -699,6 +796,16 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
      if(e.results[i].isFinal)partial+=' '+tx;else pending+=' '+tx;
     }
     finalPart=partial.trim();preview(pending);
+    if(t.type==='reading-mini'&&!t.correct){
+     const c=miniCoverage(t.passage||'',base+' '+finalPart+' '+pending);
+     if(c.hits===c.total&&c.total>0){
+      t.readTranscript=(base+' '+finalPart+' '+pending).trim();t.readChecked=true;
+      t.readScore=100;t.readHits=c.hits;t.readTotal=c.total;t.readHeard=c.heard;
+      t.correct=true;t.done=true;answered=true;points++;recordResult(t);remember();
+      try{r.stop()}catch{}
+      celebrateReading();sayFeedback('Brawo! Wszystkie słowa przeczytane w kolejności!');
+     }
+    }
    };
    r.onerror=e=>{const kind=String(e.error||'');
     if(kind==='not-allowed'||kind==='service-not-allowed')t.readError='Zezwól na dostęp do mikrofonu.';
@@ -706,8 +813,8 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
    };
    r.onend=()=>{
     if(readingRec===r)readingRec=null;
-    t.readTranscript=(base+' '+finalPart).trim();t.readActive=false;
-    const c=readingCoverage(t.passage||pageText(t),t.readTranscript);
+    t.readTranscript=t.type==='reading-mini'&&t.correct?String(t.readTranscript||''):(base+' '+finalPart).trim();t.readActive=false;
+    const c=(t.type==='reading-mini'?miniCoverage:readingCoverage)(t.passage||pageText(t),t.readTranscript);
     t.readScore=c.score;t.readHits=c.hits;t.readTotal=c.total;t.readHeard=c.heard;
     remember();if(root.isConnected&&task()===current&&stageEpoch===epoch)draw();
    };
@@ -720,7 +827,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
   }
   if(act==='read-check'){
    if(t.readActive||readingRec)return;
-   const c=readingCoverage(t.passage||pageText(t),t.readTranscript||'');
+   const c=(t.type==='reading-mini'?miniCoverage:readingCoverage)(t.passage||pageText(t),t.readTranscript||'');
    t.readScore=c.score;t.readHits=c.hits;t.readTotal=c.total;t.readHeard=c.heard;t.readChecked=true;
    if(c.score>=70&&!t.correct){t.correct=true;t.done=true;answered=true;points++;recordResult(t);celebrateReading();sayFeedback('Brawo! Czytanie zaliczone!');}
    else if(c.score<70){wrongAttempts++;audioCue(false);sayFeedback('Świetnie, że próbujesz! Poćwicz i spróbuj jeszcze raz.')}
