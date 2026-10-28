@@ -145,7 +145,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
  }
  function makeWordsearch(p){
   const words=wordPieces(p.text).filter(w=>w.length>=4&&w.length<=8);
-  if(words.length<2)return null;
+  if(words.length<3)return null;
   const offset=Math.floor(Math.random()*words.length);
   const chosen=[...words.slice(offset),...words.slice(0,offset)].slice(0,Math.min(4,words.length));
   return {type:'wordsearch',question:'🔎 Znajdź i zaznacz na planszy wszystkie słowa: '+chosen.join(', ')+'.',answer:chosen.join(', '),words:chosen,pageNumber:p.number,options:[],hint:'Dotykaj kolejnych liter słowa, od pierwszej do ostatniej.',done:false,correct:false};
@@ -235,12 +235,14 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
    const all=[];let errors=[];
    for(const p of ps.slice(0,12)){
     const saved=readBank().filter(x=>x.subject===subject()&&x.pageIds?.includes(String(p.number))&&x.task?.question);
-    const chosen=shuffle(saved).filter(x=>!x.task?.selfCheck).slice(0,3).map(x=>({...x.task,_bankKey:x.key,pageNumber:p.number,done:false,correct:false}));
+    const rotationTick=Number(localStorage.getItem(`academy-v53-rotation-${child}-${bookId}-${p.number}-${mode}`)||0);
+    const chosen=shuffle(saved).filter(x=>!x.task?.selfCheck).slice(0,15).map(x=>({...x.task,_bankKey:x.key,pageNumber:p.number,done:false,correct:false}));
     let fresh=[];
-    if(chosen.length<3){
+    if(chosen.length<4 || rotationTick%4===0){
      try{fresh=parse(await ask(pagePrompt(p))).map(t=>({...t,pageNumber:p.number}));storeTasks(fresh.map(t=>({...t,pageNumber:p.number})));}
      catch(e){errors.push('Strona '+p.number+': '+(e?.message||e))}
     }
+    if(!fresh.length&&!chosen.length)throw Error('Brak łączności z AI — nie wygenerowano zadań dla strony '+p.number);
     const local=curriculumTasks(p);
     const extras=[makeWordsearch(p),makeCrossword(p),makePuzzle(p),makeAdjective(p)].filter(Boolean);
     const pool=[...extras,...local,...fresh,...chosen.filter(x=>!fresh.some(y=>fingerprint(x)===fingerprint(y)))];
@@ -251,7 +253,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
    if(!all.length)throw Error(errors.join('; ')||'Brak zadań i brak odpowiedzi AI');
    if(all.length>1){let prev='';try{prev=localStorage.getItem('academy-v53-last-opening-'+child+'-'+bookId)||''}catch{}const pos=all.findIndex(t=>(t.type+'|'+t.question)!==prev);if(pos>0)all.unshift(...all.splice(pos,1));try{localStorage.setItem('academy-v53-last-opening-'+child+'-'+bookId,all[0].type+'|'+all[0].question)}catch{}}
    tasks=all.map(t=>{const p=ps.find(p=>Number(p.number)===Number(t.pageNumber)&&(t.sourceBookId?p.bookId===t.sourceBookId:true));return {...t,sourceBookId:t.sourceBookId||p?.bookId||bookId,sourceTitle:t.sourceTitle||(p?sourceLabel(p):'Strona '+t.pageNumber)}});idx=0;points=0;award=false;hintLevel=0;wrongAttempts=0;reset();remember();draw();
-  }catch(e){console.warn('Tworzenie misji:',e);if(root.isConnected)root.innerHTML=`<section class="mg-panel"><h2>🦸 Nie udało się teraz przygotować misji</h2><p>Spróbuj za chwilę.</p>${btn('Spróbuj ponownie','start')}${btn('Wróć','back')}</section>`}
+  }catch(e){console.warn('Tworzenie misji:',e);if(root.isConnected)root.innerHTML=`<section class="mg-panel"><h2>🦸 Brak łączności z AI</h2><p>Spróbuj za chwilę.</p>${btn('Spróbuj ponownie','start')}${btn('Wróć','back')}</section>`}
   finally{busy=false}
  }
  function reset(){stageEpoch++;tutorBusy=false;choice=null;answered=false;tiles=[];hintLevel=0;wrongAttempts=0;tutorMessages=[]}
@@ -324,13 +326,14 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
   if(['crossword','detective','loki'].includes(t.type)||(/rzeczownik|przymiotnik|odpowiedz na pytanie|na podstawie tekstu|z tekstu|z czytanki/i.test(t.question)&&!['syllables','spelling','wordsearch'].includes(t.type))){const excerpt=pageText(t).slice(0,550);if(excerpt)html+='<details class="mg-source" open><summary>📖 Fragment materiału: '+escape(t.sourceTitle||'')+'</summary><p>'+escape(excerpt)+'</p></details>'; }
   if(t.type==='reading'){
    html+='<div class="mg-reading-text">'+escape(t.passage||pageText(t))+'</div>';
-   html+=btn('🎙️ Przeczytaj na głos','read-aloud','mg-primary')+'<div id="mg-reading-result" aria-live="polite"></div>'+btn('Przejdź dalej','read-done');
+   html+=btn('🎙️ Przeczytaj na głos','read-aloud','mg-primary');
+   if(Number.isFinite(t.readScore))html+='<div class="mg-feedback" aria-live="polite"><strong>Rozpoznane czytanie: '+t.readScore+'%</strong><p>'+escape(t.readScore>=70?'🎉 Brawo! Świetnie sobie radzisz. Zadanie zaliczone!':'🌱 Dobry początek! Poćwicz jeszcze trochę i spróbuj ponownie.')+'</p><small>To wynik automatycznego rozpoznawania mowy, nie ocena wymowy.</small></div>';
   }else if(t.type==='wordsearch'){
    if(!t.words?.length)t.words=wordPieces(pageText(t)).slice(0,3);
    if(!t.grid){const abc='AĄBCĆDEĘFGHIJKLŁMNŃOÓPRSŚTUWYZŹŻ';const g=Array.from({length:10},()=>Array.from({length:10},()=>abc[Math.floor(Math.random()*abc.length)]));t.placements=[];
     t.words.slice(0,4).forEach((w,i)=>{const row=i*2,col=Math.floor(Math.random()*Math.max(1,11-w.length));const letters=Array.from(w.toUpperCase());letters.forEach((v,j)=>g[row][col+j]=v);t.placements.push({word:w,row,col,found:false})});t.grid=g;t.picked=[];}
    html+='<p>Zaznaczaj kolejne litery każdego słowa. Znalezione słowa zaświecą się na zielono.</p><p><strong>Do znalezienia:</strong> '+t.placements.map(p=>p.found?'✅ '+escape(p.word):escape(p.word)).join(' • ')+'</p>';
-   html+='<div class="mg-wordgrid" style="display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:3px">'+t.grid.map((r,y)=>r.map((v,x)=>{const found=t.placements.some(p=>p.found&&p.row===y&&x>=p.col&&x<p.col+p.word.length);const selected=(t.picked||[]).some(z=>z[0]===y&&z[1]===x);return '<button type="button" data-mg="grid:'+y+':'+x+'" style="padding:5px 1px;min-width:0;background:'+(found?'#16803b':selected?'#64748b':'#394969')+';color:white;border-radius:6px">'+escape(v)+'</button>'}).join('')).join('')+'</div>';
+   html+='<div class="mg-wordgrid" style="display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:3px">'+t.grid.map((r,y)=>r.map((v,x)=>{const found=t.placements.some(p=>p.found&&p.row===y&&x>=p.col&&x<p.col+p.word.length);const selected=(t.picked||[]).some(z=>z[0]===y&&z[1]===x);return '<button type="button" data-mg="grid:'+y+':'+x+'" style="padding:5px 1px;min-width:0;background:'+(found?'#16803b':selected?'#2563eb':'#394969')+';color:white;border-radius:6px;">'+escape(v)+'</button>'}).join('')).join('')+'</div>';
   }else if(t.type==='crossword'&&t.crossWords?.length){
    html+='<p>Odgadnij słowa z czytanki. Kolorowe pole w każdym wierszu utworzy hasło końcowe.</p>';
    t.crossWords.forEach((entry,i)=>{const w=entry.word,text=pageText(t);const excerpt=(text.split(/(?<=[.!?])\s+/).find(x=>x.toLocaleLowerCase('pl-PL').includes(w))||text.slice(0,90)).replace(new RegExp(w,'gi'),'_____');html+='<label>Hasło '+(i+1)+': '+escape(excerpt)+' ('+w.length+' liter, kolorowe pole nr '+(entry.index+1)+')</label><input data-mg-cross="'+i+'" maxlength="'+w.length+'" autocomplete="off" placeholder="'+('□'.repeat(w.length))+'">'});
@@ -353,7 +356,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
    html+='<div class="mg-choices">'+(t.options||[]).map((v,i)=>btn(escape(v),'pick:'+i,'mg-choice')).join('')+'</div>';
   }
   if(hintLevel&&!answered)html+='<div class="mg-feedback">💡 '+escape(hintText(t))+'</div>';
-  if(!answered&&t.type!=='reading')html+=btn('Nie dam rady — następne zadanie','skip');
+  if(!answered)html+=btn('Pomiń bez zaliczenia — następne zadanie','skip');
   if(answered)html+='<div class="mg-feedback">🌟 Dobra robota!</div>'+btn(idx===tasks.length-1?'🏆 Zakończ misję':'➡️ Następne zadanie','next','mg-primary');
   html+=tutorPanel();return html;
  }
@@ -389,7 +392,30 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){alert('Rozpoznawanie mowy nie jest dostępne w tej przeglądarce.');return}
    const r=new SR();r.lang='pl-PL';r.continuous=true;r.interimResults=false;let heard='';
    r.onresult=e=>{for(let i=e.resultIndex;i<e.results.length;i++)if(e.results[i].isFinal)heard+=' '+e.results[i][0].transcript};
-   r.onend=()=>{const words=lettersOnly(t.passage||pageText(t)).length;if(!heard.trim()){alert('Nie udało się rozpoznać czytania. Spróbuj ponownie.');return}const source=(t.passage||pageText(t)).toLocaleLowerCase('pl-PL').split(/\s+/).map(lettersOnly).filter(Boolean),spoken=heard.toLocaleLowerCase('pl-PL').split(/\s+/).map(lettersOnly).filter(Boolean);const hits=spoken.filter(w=>source.includes(w)).length;const score=Math.round(100*hits/Math.max(1,spoken.length));{const el=root.querySelector('#mg-reading-result');if(el){el.innerHTML='<div style="border:2px solid #a78bfa;border-radius:16px;padding:14px;background:#f5f3ff;color:#312e81"><div style="font-size:30px">🎙️ 🌟 📖</div><h3>Misja czytania zakończona!</h3><p>Rozpoznane słowa: '+escape(heard)+'</p><div style="background:#ddd6fe;border-radius:20px;height:16px;overflow:hidden"><div style="background:#7c3aed;height:100%;width:'+Math.min(100,score)+'%"></div></div><p>Orientacyjna zgodność rozpoznanych słów: <strong>'+score+'%</strong></p><small>To wynik automatycznego rozpoznawania mowy, nie ocena wymowy. Możesz spróbować jeszcze raz.</small></div>';el.scrollIntoView({block:'nearest',behavior:'smooth'})}else alert('Rozpoznano: '+heard+'; orientacyjna zgodność: '+score+'%');}};
+   const expectedEpoch=stageEpoch,expectedIdx=idx,expectedTask=t;
+   r.onend=()=>{
+    if(!root.isConnected||expectedEpoch!==stageEpoch||expectedIdx!==idx||task()!==expectedTask)return;
+    if(!heard.trim()){
+     const el=root.querySelector('#mg-reading-result');
+     if(el)el.textContent='🎙️ Nie udało się rozpoznać czytania. Spróbuj ponownie.';
+     return;
+    }
+    const source=(t.passage||pageText(t)).toLocaleLowerCase('pl-PL').split(/\s+/).map(lettersOnly).filter(Boolean);
+    const spoken=heard.toLocaleLowerCase('pl-PL').split(/\s+/).map(lettersOnly).filter(Boolean);
+    // Longest common subsequence: respects order and does not count repeated words indefinitely.
+    let previous=new Uint16Array(source.length+1);
+    for(const word of spoken){const current=new Uint16Array(source.length+1);
+      for(let j=1;j<=source.length;j++)current[j]=word===source[j-1]?previous[j-1]+1:Math.max(previous[j],current[j-1]);
+      previous=current;
+    }
+    const score=Math.round(100*previous[source.length]/Math.max(1,source.length,spoken.length));
+    t.readScore=score;
+    if(score>=70){
+      if(!answered){t.correct=true;t.done=true;answered=true;points++;recordResult(t);audioCue(true);
+        sayFeedback('Brawo! Super sobie radzisz! Czytanie zaliczone!');remember()}
+    }else{wrongAttempts++;audioCue(false);sayFeedback('Dobry początek! Jeszcze troszeczkę poćwicz i spróbuj ponownie.');}
+    draw();
+   };
    r.onerror=e=>alert('Mikrofon: '+e.error);r.start();return;
   }
   if(act.startsWith('grid:')){
@@ -412,7 +438,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
   if(act==='guide')return voiceGuide();if(act==='start')return start();if(act==='resume')return resume();if(act==='back')return setup();
   if(act==='pause'){stageEpoch++;tutorBusy=false;remember();root.innerHTML='<section class="mg-panel"><h2>⏸ Misja zatrzymana</h2><p>Postęp zapisany na tym urządzeniu.</p>'+btn('▶️ Wznów','resume','mg-primary')+btn('📚 Wróć do wyboru','back')+'</section>';return}
   if(act==='hint'){hintLevel=Math.min(3,hintLevel+1);return draw()}
-  if(act==='read-done')return answer('Przeczytane');
+  if(act==='read-done')return; // V56: przycisk nie może zaliczyć czytania bez 70%
   if(act==='draw-done'){answered=true;t.done=true;t.correct=true;points++;remember();return draw()}
   if(act==='clear-draw'){const c=root.querySelector('#mg-draw');c?.getContext('2d')?.clearRect(0,0,c.width,c.height);return}
   if(act==='next'){idx++;reset();remember();return draw()}
