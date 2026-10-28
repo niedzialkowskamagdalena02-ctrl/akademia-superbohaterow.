@@ -818,13 +818,13 @@ async function helpWithExerciseAI(question){
 async function helpWithGeneralAI(question){
  const style=profile().mentor==='fun'?'fun':'tech';
  const screen=document.querySelector('main');
- const visibleText=String(screen?.innerText||'').slice(0,2500);
+ const visibleText=String(screen?.innerText||'').replace(/\s+/g,' ').slice(0,150);
  const expectedTab=tab,expectedWho=who;
  const controller=beginAIRequest('mic-general');
  const isCurrent=()=>!controller.signal.aborted&&tab===expectedTab&&who===expectedWho&&document.querySelector('main')===screen;
  showMicBubble('⏳ Mentor zastanawia się...',false);
  try{
-  const answer=await askMentorAI('Pomóż dziecku. Oto tekst aktualnego ekranu: '+visibleText+'\nPytanie dziecka: '+question,style,[],controller.signal);
+  const answer=await askMentorAI('Pytanie dziecka: '+question.slice(0,390)+'\nOdpowiedz wprost na pytanie, bez przywitania i bez proponowania menu.\nTekst ekranu (wyłącznie pomocniczo): '+visibleText,style,[],controller.signal);
   if(!isCurrent())return;
   showMicBubble(answer);
  }catch(error){
