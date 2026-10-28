@@ -1,3 +1,4 @@
+// V55_INTERFACE_AI_GUARD
 // V54_SEVEN_LEARNING_FIXES
 // V53_TEST_FIXES_01
 // V53_CONSOLIDATED_CROSSING_CHAPTERS
@@ -17,7 +18,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
  const norm=s=>String(s??'').trim().toLocaleLowerCase('pl-PL').replace(/\s*,\s*/g,', ').replace(/\s+/g,' ');
  const btn=(label,act,cls='')=>`<button type="button" class="${cls}" data-mg="${act}">${label}</button>`;
  const shuffle=a=>[...a].sort(()=>Math.random()-.5);
- let tutorMessages=[],tutorBusy=false,tutorListening=false;
+ let tutorMessages=[],tutorBusy=false,tutorListening=false,tutorGeneration=0;
  let bookId=initialBookId||'',scope='all',mode='game',tasks=[],idx=0,points=0,choice=null,answered=false,tiles=[],busy=false,award=false,progress={},hintLevel=0,paused=false,wrongAttempts=0;
  const book=()=>books.find(b=>b.id===bookId);
  const subject=()=>/ang|english/i.test(book()?.subject||'')?'angielski':/mat/i.test(book()?.subject||'')?'matematyka':'polski';
@@ -48,6 +49,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
  function voiceGuide(){speak('Witaj w Akademii Superbohaterów! Wybierz podręcznik. Następnie wybierz całą książkę, jeden dział albo konkretne strony. Na końcu wybierz przygodę lub sprawdzian i rozpocznij misję!','pl-PL')}
  function report(){const v=stats();const rows=v.slice(-80).reverse();root.innerHTML='<section class="mg-panel"><h2>📋 Trudności i pominięte zadania</h2><p>Raport zapisany na tym urządzeniu. Pokazuje błędne próby i pominięcia w tej książce.</p>'+rows.map(x=>'<div class="mg-feedback"><strong>Strona '+escape(x.page)+'</strong> · '+escape(x.type)+'<p>'+escape(x.question)+'</p><small>'+escape(x.reason)+'</small></div>').join('')+btn('Wróć','back')+'</section>'}
  function setup(){
+  tutorGeneration++;
   const bs=available();if(!bs.length){root.innerHTML='<section class="mg-panel"><h2>📚 Dodaj stronę z rozpoznanym tekstem</h2></section>';return}
   if(!bs.some(b=>b.id===bookId))bookId=bs[0].id;
   const ch=chapters();
@@ -296,16 +298,23 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
  }
  async function tutorAsk(question){
   const q=String(question||'').trim();if(!q||tutorBusy)return;
+  const generation=tutorGeneration,questionTask=idx;
   tutorMessages.push({who:'uczen',text:q});tutorBusy=true;draw();
   try{
    const prompt=tutorContext()+'\nNAJNOWSZE PYTANIE UCZNIA: '+q+'\nOdpowiedz zwykłym tekstem, bez JSON i bez znaków markdown. Maksymalnie 5 zdań.';
    let raw;try{raw=await ask(prompt)}catch(first){await new Promise(r=>setTimeout(r,750));raw=await ask(prompt)}
    let response=String(raw||'').replace(/\*\*|__|[`#]/g,'').trim();
    if(!response)throw Error('AI nie przesłało odpowiedzi');
+   if(generation!==tutorGeneration||idx!==questionTask||!root.isConnected)return;
    tutorMessages.push({who:'ai',text:response.slice(0,1600)});
    try{speak(response,subject()==='angielski'?'pl-PL':'pl-PL')}catch(e){}
-  }catch(e){tutorMessages.push({who:'ai',text:'Nie mogę teraz odpowiedzieć: '+(e.message||'błąd połączenia')+'. Spróbuj ponownie.'})}
-  finally{tutorBusy=false;draw()}
+  }catch(e){
+   if(generation!==tutorGeneration||idx!==questionTask||!root.isConnected)return;
+   tutorMessages.push({who:'ai',text:'Nie mogę teraz odpowiedzieć: '+(e.message||'błąd połączenia')+'. Spróbuj ponownie.'})}
+  finally{
+    tutorBusy=false;
+    if(generation===tutorGeneration&&idx===questionTask&&root.isConnected)draw();
+   }
  }
  function tutorMic(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
