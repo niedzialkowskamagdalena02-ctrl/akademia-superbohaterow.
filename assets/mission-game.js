@@ -1,3 +1,4 @@
+// V53_TEST_FIXES_01
 // V53_CONSOLIDATED_CROSSING_CHAPTERS
 // V55_FULL_REVIEW
 // V52_DIVERSE_LEARNING
@@ -22,7 +23,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
  const available=()=>books.filter(b=>pages.some(p=>p.bookId===b.id&&p.text?.trim()));
  const pagesFor=()=>pages.filter(p=>p.bookId===bookId&&p.text?.trim()).sort((a,b)=>a.number-b.number);
  const sourceBook=p=>books.find(b=>b.id===p.bookId);
- const sourceLabel=p=>{const b=sourceBook(p);return (b?.kind||'Podręcznik')+' — '+(b?.title||'Materiał')+', strona '+p.number};
+ const sourceLabel=p=>{const b=sourceBook(p);return (b?.title||'Materiał bez tytułu')+' · strona '+p.number};
  const comparable=(a,b)=>String(a||'').trim().toLocaleLowerCase('pl-PL')===String(b||'').trim().toLocaleLowerCase('pl-PL');
  const sharedChapterPages=chapter=>{const base=book();return pages.filter(p=>p.text?.trim()&&comparable(p.chapter,chapter)&&books.some(b=>b.id===p.bookId&&!b.archived&&b.child===base?.child&&comparable(b.subject,base?.subject)&&String(b.grade||'')===String(base?.grade||''))).sort((a,b)=>String(sourceBook(a)?.title||'').localeCompare(String(sourceBook(b)?.title||''))||a.number-b.number)};
  const material=()=>scopePages().map(p=>`STRONA ${p.number}${p.chapter?' | DZIAŁ '+p.chapter:''}: ${p.text}`).join('\n').slice(0,15000);
@@ -139,7 +140,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
   }
   if(selected.length<4){const rest=unique.filter(t=>!selected.includes(t));selected.push(...rest.slice(n%Math.max(1,rest.length)).slice(0,4-selected.length))}
   try{localStorage.setItem(key,String(n+1))}catch{}
-  return selected.slice(0,5);
+  return selected.slice(0,5).sort((a,b)=>((a.type.charCodeAt(0)+n*17)%37)-((b.type.charCodeAt(0)+n*17)%37));
  }
  function makeWordsearch(p){
   const words=wordPieces(p.text).filter(w=>w.length>=4&&w.length<=8);
@@ -246,6 +247,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
     all.push(...rotatePool(pool,p));
    }
    if(!all.length)throw Error(errors.join('; ')||'Brak zadań i brak odpowiedzi AI');
+   if(all.length>1){let prev='';try{prev=localStorage.getItem('academy-v53-last-opening-'+child+'-'+bookId)||''}catch{}const pos=all.findIndex(t=>(t.type+'|'+t.question)!==prev);if(pos>0)all.unshift(...all.splice(pos,1));try{localStorage.setItem('academy-v53-last-opening-'+child+'-'+bookId,all[0].type+'|'+all[0].question)}catch{}}
    tasks=all.map(t=>{const p=ps.find(p=>Number(p.number)===Number(t.pageNumber)&&(t.sourceBookId?p.bookId===t.sourceBookId:true));return {...t,sourceBookId:t.sourceBookId||p?.bookId||bookId,sourceTitle:t.sourceTitle||(p?sourceLabel(p):'Strona '+t.pageNumber)}});idx=0;points=0;award=false;hintLevel=0;wrongAttempts=0;reset();remember();draw();
   }catch(e){root.innerHTML=`<section class="mg-panel"><h2>⚠️ Nie udało się przygotować misji</h2><p>${escape(e.message)}</p>${btn('Spróbuj ponownie','start')}${btn('Wróć','back')}</section>`}
   finally{busy=false}
@@ -313,10 +315,10 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
  }
  function stage(){
   const t=task();let html='<style>.mg-panel [data-mg]{transition:transform .13s ease,filter .13s ease,box-shadow .13s ease}.mg-panel [data-mg]:active{transform:scale(.94);filter:brightness(1.35)}.mg-panel [data-mg]:focus-visible{outline:3px solid #fbbf24;outline-offset:3px}.mg-panel input:focus,.mg-panel textarea:focus{outline:3px solid #fbbf24}.mg-panel .mg-feedback{animation:mg-pop .35s ease-out}@keyframes mg-pop{from{opacity:.2;transform:scale(.94)}to{opacity:1;transform:scale(1)}}</style><h3>'+escape(t.question)+'</h3>';
-  if(!['reading','wordsearch','crossword','dictation','listening'].includes(t.type)){const excerpt=pageText(t).slice(0,550);if(excerpt)html+='<details class="mg-source" open><summary>📖 Fragment materiału: '+escape(t.sourceTitle||'')+'</summary><p>'+escape(excerpt)+'</p></details>'; }
+  if(['crossword','detective','loki'].includes(t.type)||(/rzeczownik|przymiotnik|odpowiedz na pytanie|na podstawie tekstu|z tekstu|z czytanki/i.test(t.question)&&!['syllables','spelling','wordsearch'].includes(t.type))){const excerpt=pageText(t).slice(0,550);if(excerpt)html+='<details class="mg-source" open><summary>📖 Fragment materiału: '+escape(t.sourceTitle||'')+'</summary><p>'+escape(excerpt)+'</p></details>'; }
   if(t.type==='reading'){
    html+='<div class="mg-reading-text">'+escape(t.passage||pageText(t))+'</div>';
-   html+=btn('🎙️ Przeczytaj na głos','read-aloud','mg-primary')+btn('Przejdź dalej','read-done');
+   html+=btn('🎙️ Przeczytaj na głos','read-aloud','mg-primary')+'<div id="mg-reading-result" aria-live="polite"></div>'+btn('Przejdź dalej','read-done');
   }else if(t.type==='wordsearch'){
    if(!t.words?.length)t.words=wordPieces(pageText(t)).slice(0,3);
    if(!t.grid){const abc='AĄBCĆDEĘFGHIJKLŁMNŃOÓPRSŚTUWYZŹŻ';const g=Array.from({length:10},()=>Array.from({length:10},()=>abc[Math.floor(Math.random()*abc.length)]));t.placements=[];
@@ -335,7 +337,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
    html+='<div class="mg-built">'+escape(tiles.map(i=>t.chunks[i]).join(t.type==='order'?' ':'')||'Ułóż puzzle, dotykając kafelków')+'</div><div class="mg-choices">'+t.chunks.map((v,i)=>btn(escape(v),'tile:'+i,'mg-choice '+(tiles.includes(i)?'mg-tile-used':''))).join('')+'</div>'+btn('↩ Cofnij','undo')+btn('✓ Sprawdź','submit','mg-primary');
   }else if(['write','dictation','listening','syllables'].includes(t.type)){
    if(t.type==='dictation'||t.type==='listening')html+=btn('🔊 Posłuchaj','audio');
-   if(/rzeczownik|przymiotnik/i.test(t.question))html+='<div class="mg-reading-text"><strong>Fragment podręcznika:</strong> '+escape(pageText(t).slice(0,550))+'</div>';
+   if(/rzeczownik|przymiotnik/i.test(t.question)&&!html.includes('mg-source'))html+='<div class="mg-reading-text"><strong>Fragment materiału:</strong> '+escape(pageText(t).slice(0,550))+'</div>';
    html+='<input id="mg-written" autocomplete="off" placeholder="Wpisz odpowiedź">'+btn('✓ Sprawdź','written','mg-primary');
   }else if(t.type==='draw'){
    html+='<p>Rysunki zostawiamy na później.</p>'+btn('Pomiń','skip');
@@ -380,10 +382,22 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){alert('Rozpoznawanie mowy nie jest dostępne w tej przeglądarce.');return}
    const r=new SR();r.lang='pl-PL';r.continuous=true;r.interimResults=false;let heard='';
    r.onresult=e=>{for(let i=e.resultIndex;i<e.results.length;i++)if(e.results[i].isFinal)heard+=' '+e.results[i][0].transcript};
-   r.onend=()=>{const words=lettersOnly(t.passage||pageText(t)).length;if(!heard.trim()){alert('Nie udało się rozpoznać czytania. Spróbuj ponownie.');return}const source=(t.passage||pageText(t)).toLocaleLowerCase('pl-PL').split(/\s+/).map(lettersOnly).filter(Boolean),spoken=heard.toLocaleLowerCase('pl-PL').split(/\s+/).map(lettersOnly).filter(Boolean);const hits=spoken.filter(w=>source.includes(w)).length;const score=Math.round(100*hits/Math.max(1,spoken.length));alert('Rozpoznano: '+heard+'\nZgodność orientacyjna: '+score+'%. Możesz przeczytać ponownie lub przejść dalej.');};
+   r.onend=()=>{const words=lettersOnly(t.passage||pageText(t)).length;if(!heard.trim()){alert('Nie udało się rozpoznać czytania. Spróbuj ponownie.');return}const source=(t.passage||pageText(t)).toLocaleLowerCase('pl-PL').split(/\s+/).map(lettersOnly).filter(Boolean),spoken=heard.toLocaleLowerCase('pl-PL').split(/\s+/).map(lettersOnly).filter(Boolean);const hits=spoken.filter(w=>source.includes(w)).length;const score=Math.round(100*hits/Math.max(1,spoken.length));{const el=root.querySelector('#mg-reading-result');if(el){el.innerHTML='<div style="border:2px solid #a78bfa;border-radius:16px;padding:14px;background:#f5f3ff;color:#312e81"><div style="font-size:30px">🎙️ 🌟 📖</div><h3>Misja czytania zakończona!</h3><p>Rozpoznane słowa: '+escape(heard)+'</p><div style="background:#ddd6fe;border-radius:20px;height:16px;overflow:hidden"><div style="background:#7c3aed;height:100%;width:'+Math.min(100,score)+'%"></div></div><p>Orientacyjna zgodność rozpoznanych słów: <strong>'+score+'%</strong></p><small>To wynik automatycznego rozpoznawania mowy, nie ocena wymowy. Możesz spróbować jeszcze raz.</small></div>';el.scrollIntoView({block:'nearest',behavior:'smooth'})}else alert('Rozpoznano: '+heard+'; orientacyjna zgodność: '+score+'%');}};
    r.onerror=e=>alert('Mikrofon: '+e.error);r.start();return;
   }
-  if(act.startsWith('grid:')){const [y,x]=act.slice(5).split(':').map(Number);const picked=t.picked||(t.picked=[]);const matched=t.placements.find(p=>!p.found&&p.row===y&&x===p.col+picked.length&&picked.every((z,i)=>z[0]===p.row&&z[1]===p.col+i));if(matched){picked.push([y,x]);audioCue(true);if(picked.length===matched.word.length){matched.found=true;t.picked=[];if(t.placements.every(p=>p.found)){answered=true;t.done=true;t.correct=true;points++;recordResult(t);remember()}}draw();return}t.picked=[];audioCue(false);draw();return}
+  if(act.startsWith('grid:')){
+   const [y,x]=act.slice(5).split(':').map(Number);
+   const available=t.placements.filter(p=>!p.found);
+   let picked=t.picked||(t.picked=[]);
+   const next=[...picked,[y,x]];
+   let matches=available.filter(p=>next.every((z,i)=>z[0]===p.row&&z[1]===p.col+i));
+   if(!matches.length){picked=[];matches=available.filter(p=>p.row===y&&p.col===x);if(matches.length)picked=[[y,x]];audioCue(matches.length>0);}
+   else{picked=next;audioCue(true)}
+   t.picked=picked;
+   const completed=matches.find(p=>picked.length===Array.from(p.word).length);
+   if(completed){completed.found=true;t.picked=[];if(t.placements.every(p=>p.found)){answered=true;t.done=true;t.correct=true;points++;recordResult(t);remember();sayFeedback('Wszystkie słowa odnalezione! Świetna robota!')}}
+   draw();return;
+  }
   if(act==='tutor-send')return tutorAsk(root.querySelector('#mg-tutor-input')?.value||'');
   if(act==='tutor-mic')return tutorMic();
   if(act==='tutor-speak'){const last=[...tutorMessages].reverse().find(m=>m.who==='ai');if(last)return speak(last.text,'pl-PL');return}
