@@ -123,6 +123,12 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
    const count=options.filter(x=>String(x).toLocaleLowerCase('pl-PL').includes(part)).length;
    if(count!==1)return false;
   }
+  // V64: pisownia to wiedza słownikowa. Nie oceniaj automatycznie pytań AI
+  // typu 'poprawnie zapisano ó', jeśli mogą mieć 0 lub kilka prawidłowych opcji.
+  // Zastępujemy je lokalnymi, ręcznie sprawdzonymi ćwiczeniami ortograficznymi.
+  const orthoRule=/(?:ortograf|pisown|poprawnie\s+(?:zapis\w*|napis\w*)|prawidłowo\s+(?:zapis\w*|napis\w*)|wymian\w*\s+(?:na|z)|wymienia\s+się)/i.test(q);
+  const orthoWords=/(?:wyraz|słow|głosk|liter|cząstk|dwuznak|ortograf|pisown)/i.test(q);
+  if(subject()==='polski'&&orthoRule&&orthoWords)return false;
   if(sourceQuestion(t)){
    const page=String(p.text||'');
    if(!visibleInText(page,t.answer))return false;
@@ -229,6 +235,37 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
    if(speechClose(word,expected[hits]))hits++;
   }
   return {score:Math.round(100*hits/Math.max(1,expected.length)),hits,total:expected.length,heard:spoken.length,matched:expected.map((_,i)=>i<hits)};
+ }
+ // V64: bezpieczne, różnorodne ćwiczenia ortograficzne (po jednej poprawnej wersji).
+ function makeSafeSpelling(p){
+  if(subject()!=='polski')return null;
+  const examples=[
+   ['ogród',['ogród','ogrut','ogrod','ogródt']],
+   ['róża',['róża','ruża','róza','rurza']],
+   ['rzeka',['rzeka','żeka','rzęka','rzegka']],
+   ['drzewo',['drzewo','dżewo','dzrewo','drzewwo']],
+   ['król',['król','krul','króll','krol']],
+   ['góra',['góra','gura','góóra','gora']],
+   ['żaba',['żaba','rzaba','żabba','zaba']],
+   ['chleb',['chleb','hleb','chlepp','chlep']],
+   ['książka',['książka','ksiąszka','ksiąrzka','ksionżka']],
+   ['pszczoła',['pszczoła','pszcoła','pszczuła','pszczołła']],
+   ['mróz',['mróz','mruz','mrós','mrurz']],
+   ['pióro',['pióro','piuro','piórro','pjoro']],
+   ['szkoła',['szkoła','szkuła','skzoła','szkola']],
+   ['jabłko',['jabłko','jabko','japłko','jabłkko']],
+   ['wóz',['wóz','wuz','wózz','woz']],
+   ['jaskółka',['jaskółka','jaskułka','jaskólka','jaskółkka']]
+  ];
+  const key=`academy-v64-spelling-${child}-${bookId}`;
+  let n=0;
+  try{n=Number(localStorage.getItem(key)||0);localStorage.setItem(key,String(n+1))}catch(e){}
+  const item=examples[n%examples.length];
+  return {type:'choice',question:'✍️ Wskaż poprawną pisownię tego samego wyrazu.',
+   answer:item[0],options:shuffle([...item[1]]),
+   hint:'Porównaj pisownię czterech propozycji. Przypomnij sobie zasady ortografii.',
+   explanation:'Poprawny zapis to: '+item[0]+'.',needsSource:false,
+   pageNumber:p.number,done:false,correct:false};
  }
  function makeMiniReading(p){
   if(subject()!=='polski')return null;
@@ -615,6 +652,9 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
      if(t&&!picked.some(x=>fingerprint(x)===fingerprint(t))){picked.push(t);usedTypes.add(t.type);return true}
      return false;
     };
+    // V64: co czwarta misja może ćwiczyć ortografię z pewnym rozwiązaniem.
+    // Nie zmienia częstotliwości, wyglądu ani liczby słów w wykreślance.
+    if(mode==='game'&&subject()==='polski'&&hist.runs%4===1)add(makeSafeSpelling(p));
     // Minimum dwa typy: nowa wiedza z AI plus wybrana gra.
     const diverseFresh=shuffle(fresh).sort((a,b)=>Number(usedTypes.has(a.type))-Number(usedTypes.has(b.type)));
     for(const t of diverseFresh){if(picked.length>=3)break;if(!usedTypes.has(t.type))add(t)}
