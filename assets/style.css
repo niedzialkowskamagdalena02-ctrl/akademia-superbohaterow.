@@ -623,3 +623,13 @@ body:has(.learning-exercise) {
 
 /* V49 page adventures */
 .mg-reading-text{white-space:pre-wrap;text-align:left;line-height:1.7;padding:16px;border-radius:14px;background:#f1f5ff;color:#16244b;font-size:1.1rem;margin:12px 0}.mg-wordgrid{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:2px;max-width:440px;margin:14px auto}.mg-grid-cell{min-width:0;padding:6px 0!important;font-weight:bold;font-size:1rem!important;background:#e8efff!important;color:#182955!important;border:1px solid #a6b6db!important;border-radius:5px!important}.mg-feedback{white-space:pre-wrap}
+
+/* V67: tylko przyciski i edytory panelu mamy. */
+button[data-action^="book:"]:active,
+button[data-action^="page:"]:active{transform:translateY(2px) scale(.975);filter:brightness(1.22);transition:transform .12s ease,filter .12s ease}
+button[data-action^="book:"][disabled],button[data-action^="page:"][disabled]{opacity:.67;cursor:progress}
+.admin-cover,.admin-bulk{margin:16px 0;padding:14px;border:1px solid #5870a7;border-radius:14px;background:rgba(28,55,112,.25)}
+.admin-cover-img{display:block;width:min(160px,50%);max-height:225px;object-fit:cover;border-radius:12px;margin-bottom:12px}
+.admin-page-arrows{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.admin-page-arrows button{flex:1 1 135px}
+@media(prefers-reduced-motion:reduce){button[data-action^="book:"]:active,button[data-action^="page:"]:active{transition:none}}
