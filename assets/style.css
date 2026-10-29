@@ -633,3 +633,11 @@ button[data-action^="book:"][disabled],button[data-action^="page:"][disabled]{op
 .admin-page-arrows{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
 .admin-page-arrows button{flex:1 1 135px}
 @media(prefers-reduced-motion:reduce){button[data-action^="book:"]:active,button[data-action^="page:"]:active{transition:none}}
+
+/* V68: panel mamy — zaznaczanie stron, kasowanie i pauza AI */
+.admin-page-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:12px 0 16px}
+.admin-page-actions small{width:100%;opacity:.85}
+.admin-page-item{gap:10px}
+.admin-page-check{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:57px;font-size:12px;font-weight:700;cursor:pointer}
+.admin-page-check input{width:24px;height:24px;accent-color:#fbbf24;cursor:pointer}
+#bulk-ai-pause:disabled{opacity:.5;cursor:not-allowed}
