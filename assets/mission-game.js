@@ -148,7 +148,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
  function pagePrompt(p,history=[]){
   const kinds=subject()==='matematyka'?'choice, safe, shop, clock, write, order':subject()==='angielski'?'listening, dictation, spelling, order, choice, write':'detective, loki, syllables, order, dictation, write, choice';
   const excluded=history.slice(-24).map((q,i)=>`${i+1}. ${String(q).slice(0,60)}`).join(' | ');
-  const prompt=`Jestes dobrym nauczycielem 8-latka. Utworz 5 NOWYCH, bardzo roznorodnych i jednoznacznych zadan w jezyku polskim, dopasowanych do PRZEDMIOTU ${subject()}. Dla polskiego: gramatyka, sylaby, litery, ortografia, przymiotniki, rozumienie czytanki; ZADNYCH rachunkow. Dla matematyki: rachunki i logika liczbowa, bez gramatyki. Kazde zadanie powinno uzywac innych slow i innego fragmentu strony. Unikaj ciaglego 'drugiej'. Poziom klasy drugiej. Co najmniej dwa rozne pytania o tresc czytanki, jesli strona zawiera opowiadanie lub wiersz. Dla kazdego pytania o to, co jest w tekscie lub ktore slowo pochodzi Z WIERSZA ustaw "needsSource":true i "sourceQuote": cytat DOSLOWNIE skopiowany z materialu (maksymalnie 100 znakow), ktory zawiera informacje potrzebna do odpowiedzi. Nie wymyslaj cytatow. Gdy nie ma w tekscie odpowiedzi, nie tworz tego pytania. Dla sylab, gloskowania, liczenia, rebusow i ortografii slowa podanego W SAMYM POLECENIU ustaw "needsSource":false. Gdy pytanie brzmi "ktore slowo z wiersza", potrzebny jest cytat, nawet jesli pytanie dotyczy pisowni. Nie wolno zadac pytania, ktorego odpowiedz nie wynika ze strony, chyba ze to wiedza szkolna wyraznie znana dziecku. Typy: ${kinds}. Kazde pytanie: DOKLADNIE jedna merytorycznie poprawna odpowiedz; 3 pozostale opcje musza byc NAPRAWDE bledne, nie tylko inne. UWAGA: pytanie o to, ktory wyraz zawiera poprawne "rz", gdy kilka opcji ma poprawne "rz", jest wadliwe — NIE generuj go. Jesli pytanie dotyczy tresci czytanki albo szukania wyrazu Z TEKSTU, poprawna odpowiedz ma byc DOKLADNIE obecnym w tekscie slowem lub zwrotem (ta sama forma i odmiana), a sourceQuote musi zawierac podstawe tej odpowiedzi. Nie wymyslaj odpowiedzi z ogolnej wiedzy. Zamiast niepewnego pytania utworz inne. Cztery ROZNE opcje musza zawierac tylko jedna pasujaca odpowiedz, doslownie rowna polu answer. Bez zdradzania odpowiedzi w pytaniu czy podpowiedzi. Zwroc tylko JSON, bez markdown, dokladnie wedlug schematu: {"tasks":[{"type":"choice","question":"...","answer":"...","options":["...","...","...","..."],"needsSource":true,"sourceQuote":"dokładny krótki cytat z tekstu, zawierający podstawę odpowiedzi","hint":"...","explanation":"..."}]}. NIE POWTARZAJ ostatnich zadan: ${excluded||'brak'}. STRONA ${p.number}, MATERIAL: ${String(p.text||'').slice(0,2400)}`;
+  const prompt=`Jestes dobrym nauczycielem 8-latka. Utworz 5 NOWYCH, bardzo roznorodnych i jednoznacznych zadan w jezyku polskim, dopasowanych do PRZEDMIOTU ${subject()}. Dla polskiego: gramatyka, sylaby, litery, ortografia, przymiotniki, rozumienie czytanki; ZADNYCH rachunkow. Dla matematyki: rachunki i logika liczbowa, bez gramatyki. Kazde zadanie powinno uzywac innych slow i innego fragmentu strony. Unikaj ciaglego 'drugiej'. Poziom klasy drugiej. Co najmniej dwa rozne pytania o tresc czytanki, jesli strona zawiera opowiadanie lub wiersz. Dla kazdego pytania o to, co jest w tekscie lub ktore slowo pochodzi Z WIERSZA ustaw "needsSource":true i "sourceQuote": cytat DOSLOWNIE skopiowany z materialu (maksymalnie 100 znakow), ktory zawiera informacje potrzebna do odpowiedzi. Nie wymyslaj cytatow. Gdy nie ma w tekscie odpowiedzi, nie tworz tego pytania. Dla sylab, gloskowania, liczenia, rebusow i ortografii slowa podanego W SAMYM POLECENIU ustaw "needsSource":false. Gdy pytanie brzmi "ktore slowo z wiersza", potrzebny jest cytat, nawet jesli pytanie dotyczy pisowni. Nie wolno zadac pytania, ktorego odpowiedz nie wynika ze strony, chyba ze to wiedza szkolna wyraznie znana dziecku. Typy: ${kinds}. Kazde pytanie: DOKLADNIE jedna merytorycznie poprawna odpowiedz; 3 pozostale opcje musza byc NAPRAWDE bledne, nie tylko inne. UWAGA: pytanie o to, ktory wyraz zawiera poprawne "rz", gdy kilka opcji ma poprawne "rz", jest wadliwe — NIE generuj go. Jesli pytanie dotyczy tresci czytanki albo szukania wyrazu Z TEKSTU, poprawna odpowiedz ma byc DOKLADNIE obecnym w tekscie slowem lub zwrotem (ta sama forma i odmiana), a sourceQuote musi zawierac podstawe tej odpowiedzi. Nie wymyslaj odpowiedzi z ogolnej wiedzy. Zamiast niepewnego pytania utworz inne. Cztery ROZNE opcje musza zawierac tylko jedna pasujaca odpowiedz, doslownie rowna polu answer. Bez zdradzania odpowiedzi w pytaniu czy podpowiedzi. Zwroc tylko JSON, bez markdown, dokladnie wedlug schematu: {"tasks":[{"type":"choice","question":"...","answer":"...","options":["...","...","...","..."],"needsSource":true,"sourceQuote":"dokładny krótki cytat z tekstu, zawierający podstawę odpowiedzi","hint":"krótka wskazówka o sposobie rozwiązania BEZ słowa będącego odpowiedzią, jego odmian ani wyrazów pokrewnych","explanation":"..."}]}. NIE POWTARZAJ ostatnich zadan: ${excluded||'brak'}. STRONA ${p.number}, MATERIAL: ${String(p.text||'').slice(0,2400)}`;
   return prompt.slice(0,5300);
  }
 
@@ -628,7 +628,11 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
     // Dawne pytanie tylko co dziesiata misje (lub awaryjnie przy braku AI).
     if(hist.runs%10===9||!fresh.length){for(const t of old){if(picked.length>=6)break;if(add(t))break}}
     for(const t of [...diverseFresh,...extrasByType,...old]){if(picked.length>=6)break;add(t)}
-    picked.forEach(t=>{t.sourceBookId=p.bookId;t.sourceTitle=sourceLabel(p)});
+    picked.forEach(t=>{
+     t.sourceBookId=p.bookId;t.sourceTitle=sourceLabel(p);
+     // Odpowiedni fragment zapisujemy razem z zadaniem, przed rozpoczęciem gry.
+     if(sourceQuestion(t))t.sourceExcerpt=sourceFromText(p.text,t);
+    });
     all.push(...picked);
     hist.runs=(Number(hist.runs)||0)+1;
     hist.questions=[...hist.questions,...picked.map(t=>t.question)].slice(-90);
@@ -665,7 +669,16 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
  function hintText(t){
   if(t.orderHint)return 'Litery są dobrane poprawnie, ale wpisz je kolejno, tak jak występują w podanym wyrazie. Przecinki i spacje nie są obowiązkowe.';
   if(mode==='test')return 'To sprawdzian. Przeczytaj polecenie uważnie i odpowiedz samodzielnie. Omówimy odpowiedzi po zakończeniu.';
-  if(hintLevel===1)return t.hint||'Przeczytaj polecenie jeszcze raz.';
+  if(hintLevel===1){
+   if(Array.isArray(t.options)&&t.options.length===4){
+    const q=String(t.question||'').toLocaleLowerCase('pl-PL');
+    if(/ó.*wymian|wymian.*ó/i.test(q))return 'Przypomnij sobie: „ó” może wymieniać się na „o” w wyrazie pokrewnym. Sprawdź tę zasadę dla każdej propozycji.';
+    if(sourceQuestion(t))return 'Znajdź właściwy wers w tekście i porównaj wszystkie odpowiedzi z tym, co naprawdę napisano.';
+    if(/ortografi|pisown|poprawnie napis|dwuznak|cząstk/i.test(q))return 'Przypomnij sobie zasadę pisowni i sprawdź po kolei każdą odpowiedź.';
+    return 'Przeczytaj polecenie jeszcze raz i porównaj wszystkie propozycje. Nie wybieraj na chybił trafił.';
+   }
+   return t.hint||'Przeczytaj polecenie jeszcze raz.';
+  }
   if(hintLevel===2)return 'Spróbuj znaleźć potrzebne informacje w poleceniu albo w tekście, jeżeli zadanie dotyczy czytanki.';
   return 'Zastanów się spokojnie. Jeśli zadanie jest trudne, poproś nauczyciela o wskazówkę.';
  }
@@ -722,28 +735,50 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
    const box=root.querySelector('#mg-tutor-input');if(box)box.placeholder='🎤 Słucham pytania...';
   }catch(e){tutorListening=false;console.warn('Mikrofon misji:',e);tutorMessages.push({who:'system',text:'🎙️ Możesz wpisać pytanie.'});draw()}
  }
- function shortSource(t){
-  const full=pageText(t);
-  if(!full)return '';
-  const answer=spokenWords(t.answer||'').join(' ');
-  const lines=full.split(/\n+|(?<=[.!?])\s+/).map(s=>s.trim()).filter(s=>spokenWords(s).length>0);
-  if(!lines.length)return full;
-  const containsAnswer=s=>{
-   const hay=spokenWords(s).join(' ');
-   return !!answer && (' '+hay+' ').includes(' '+answer+' ');
+ // V63: Pokaż wyłącznie wersy z faktycznym potwierdzeniem odpowiedzi.
+ function sourceFromText(text,t){
+  const full=String(text||'');
+  if(!full.trim())return '';
+  const answer=spokenWords(t.answer||'');
+  if(!answer.length)return '';
+  const lines=full.split(/\n+|(?<=[.!?])\s+/).map(s=>s.trim()).filter(s=>spokenWords(s).length);
+  const contains=fragment=>{
+   const hay=spokenWords(fragment);
+   return answer.length<=hay.length&&hay.some((_,i)=>answer.every((w,j)=>hay[i+j]===w));
   };
-  let at=lines.findIndex(containsAnswer);
-  if(at<0 && answer){
-   at=lines.findIndex((s,i)=>i+1<lines.length && containsAnswer(s+' '+lines[i+1]));
+  const matches=[];
+  for(let k=0;k<lines.length;k++){
+   if(contains(lines[k])||(k+1<lines.length&&contains(lines[k]+' '+lines[k+1])))matches.push(k);
   }
-  if(at<0){
-   // W razie starszego zadania bez potwierdzonej odpowiedzi nie udawaj,
-   // że przypadkowe trzy wersy zawierają rozwiązanie.
-   return full;
+  if(!matches.length)return '';
+  // Cytat od AI służy tylko do rozstrzygnięcia, który z prawdziwych wersów wybrać.
+  const quote=spokenWords(t.sourceQuote||'').join(' ');
+  const question=spokenWords(t.question||'').filter(w=>w.length>4&&!['które','który','jakie','wiersza','tekstu','zgodnie','uczniowie','odpowiedź'].includes(w));
+  const score=k=>{
+   const context=lines.slice(Math.max(0,k-1),Math.min(lines.length,k+2)).join(' ');
+   const normalized=spokenWords(context).join(' ');
+   const quotePoints=quote.length>5&&normalized.includes(quote)?100:0;
+   const contextPoints=question.reduce((n,w)=>n+(normalized.includes(w)?1:0),0);
+   return quotePoints+contextPoints;
+  };
+  matches.sort((a,b)=>score(b)-score(a)||a-b);
+  const at=matches[0];
+  // Najwyżej trzy sąsiednie kompletne wersy, z wybraną odpowiedzią pośrodku.
+  return lines.slice(Math.max(0,at-1),Math.min(lines.length,at+2)).join('\n').slice(0,480);
+ }
+ function shortSource(t){
+  if(t.sourceExcerpt&&sourceFromText(t.sourceExcerpt,t))return t.sourceExcerpt;
+  const direct=sourceFromText(pageText(t),t);
+  if(direct)return direct;
+  // Starsze zapisane misje mogły wskazywać niewłaściwą stronę; szukaj w tej
+  // samej książce, nigdy w materiale innego dziecka lub przedmiotu.
+  const sameBook=pages.filter(p=>p.bookId===(t.sourceBookId||bookId));
+  for(const p of sameBook){
+   const excerpt=sourceFromText(p.text,t);
+   if(excerpt)return excerpt;
   }
-  // Kontekst: kompletne wersy/zdania, nie losowe 70 znaków wokół cytatu.
-  const begin=Math.max(0,at-1),finish=Math.min(lines.length,at+2);
-  return lines.slice(begin,finish).join('\n');
+  // Bez potwierdzonej odpowiedzi nie wyświetlaj losowego początku czytanki.
+  return '';
  }
  function stage(){
   const t=task();let html='<style>.mg-panel [data-mg]{transition:transform .13s ease,filter .13s ease,box-shadow .13s ease}.mg-panel [data-mg]:active{transform:scale(.94);filter:brightness(1.35)}.mg-panel [data-mg]:focus-visible{outline:3px solid #fbbf24;outline-offset:3px}.mg-panel input:focus,.mg-panel textarea:focus{outline:3px solid #fbbf24}.mg-panel .mg-feedback{animation:mg-pop .35s ease-out}@keyframes mg-pop{from{opacity:.2;transform:scale(.94)}to{opacity:1;transform:scale(1)}}</style><h3>'+escape(t.question)+'</h3>';
