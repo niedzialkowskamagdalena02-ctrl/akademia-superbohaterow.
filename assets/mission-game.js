@@ -11,7 +11,7 @@
 // V43_JSON_REPAIR
 // V42_CHAPTER_SELECTION
 // V41: interaktywne misje z podrecznikow, AI generuje tresc, aplikacja mechanike.
-export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initialBookId}){
+export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initialBookId,batchGenerate=null,launch=null,onBack=null}){
  const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const norm=s=>String(s??'').trim().toLocaleLowerCase('pl-PL').replace(/\s*,\s*/g,', ').replace(/\s+/g,' ');
  const btn=(label,act,cls='')=>`<button type="button" class="${cls}" data-mg="${act}">${label}</button>`;
@@ -34,6 +34,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
  function chapterOf(p){return String(p.chapter||'').trim()}
  function chapters(){const base=book();return [...new Set(pages.filter(p=>p.text?.trim()&&books.some(b=>b.id===p.bookId&&!b.archived&&b.child===base?.child&&comparable(b.subject,base?.subject)&&String(b.grade||'')===String(base?.grade||''))).map(chapterOf).filter(Boolean))]}
  function scopePages(){
+  if(launch){const ids=new Set(launch.pageIds||[]);return pages.filter(p=>ids.has(p.id)&&p.text?.trim()).sort((a,b)=>String(sourceBook(a)?.title||'').localeCompare(String(sourceBook(b)?.title||''),'pl')||a.number-b.number)}
   const ps=pagesFor();if(scope==='all')return ps;
   if(scope.startsWith('chapter:'))return sharedChapterPages(scope.slice(8));
   if(scope.startsWith('pages:')){
@@ -78,9 +79,9 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
  const selectionIds=()=>new Set(scopePages().map(p=>String(p.number)));
  const fingerprint=t=>norm(t.question)+'|'+norm(t.answer);
  function readBank(){try{const v=JSON.parse(localStorage.getItem(bankKey())||'[]');return Array.isArray(v)?v:[]}catch{return []}}
- function writeBank(items){try{localStorage.setItem(bankKey(),JSON.stringify(items.slice(-350)))}catch(e){console.warn('Nie mozna zapisac banku zadan',e)}}
- function storeTasks(items){
-  const bank=readBank();const ids=[...selectionIds()];
+ function writeBank(items){try{localStorage.setItem(bankKey(),JSON.stringify(items.slice(-1500)))}catch(e){console.warn('Nie mozna zapisac banku zadan',e)}}
+ function storeTasks(items,page=null){
+  const bank=readBank();const ids=page?[String(page.number)]:[...selectionIds()];
   for(const t of items){
    if(!t||!t.question||!t.answer||!Array.isArray(t.options))continue;
    const key=fingerprint(t);const prev=bank.find(x=>x.key===key);
@@ -671,22 +672,32 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
   if(busy)return;
   stageEpoch++;tutorBusy=false;
   const ps=scopePages();if(!ps.length){alert('Wybierz strony z rozpoznanym tekstem.');return setup()}
-  busy=true;root.innerHTML='<section class="mg-panel"><h2>🦸 Przygotowuję nowe wyzwania...</h2><p>AI tworzy świeże pytania, a rodzaje gier zmieniają się między misjami.</p></section>';
+  busy=true;root.innerHTML='<section class="mg-panel"><h2>🦸 Przygotowuję nowe wyzwania...</h2><p>Wczytuję zapisane pytania i gry. Nie musisz czekać na odczyt całego podręcznika.</p><p id="mg-load-progress" role="status">Otwieram materiał…</p></section>';
   try{
    const all=[],errors=[];
-   for(const p of ps.slice(0,12)){
+   // Jedna porcja materialu na misje, kolejne uruchomienia przechodza po wszystkich stronach.
+   const rotationId=String(child)+'-'+String(launch?.subject||bookId)+'-'+ps.length+'-'+String(ps[0]?.id||'');
+   const rotationKey='academy-v70-rotation-'+rotationId;
+   let at=0;try{at=Number(localStorage.getItem(rotationKey)||0)||0}catch{}
+   const chosen=ps.length?[ps[Math.abs(at)%ps.length]]:[];
+   if(ps.length>1){try{localStorage.setItem(rotationKey,String(at+1))}catch{}}
+   const startedAt=Date.now(),budgetMs=16000;
+   for(let pageIndex=0;pageIndex<chosen.length;pageIndex++){
+    const p=chosen[pageIndex];bookId=p.bookId;
+    const status=root.querySelector('#mg-load-progress');if(status)status.textContent='Przygotowuję stronę '+p.number+' z książki „'+(sourceBook(p)?.title||'')+'”…';
     const key=`academy-v58-variety-${child}-${bookId}-${p.number}-${mode}`;
     let hist={runs:0,questions:[],types:[]};
     try{const h=JSON.parse(localStorage.getItem(key)||'null');if(h&&typeof h==='object')hist={...hist,...h}}catch{}
     const bank=readBank().filter(x=>x.subject===subject()&&x.pageIds?.includes(String(p.number))&&x.task?.question);
     const excluded=[...hist.questions.slice(-65),...bank.slice(-20).map(x=>x.task.question)];
     let fresh=[];
-    try{
-     fresh=parse(await ask(pagePrompt(p,excluded))).map(t=>({...t,pageNumber:p.number,_fresh:true}));
+    // Gotowe pytania maja pierwszenstwo; AI potrzebne tylko dla pustej bazy strony.
+    if(!bank.length&&Date.now()-startedAt<budgetMs){try{
+     fresh=parse(await ask(pagePrompt(p,excluded),Math.min(12000,budgetMs-(Date.now()-startedAt)))).map(t=>({...t,pageNumber:p.number,_fresh:true}));
      const recent=new Set(hist.questions.slice(-40).map(x=>norm(x)));
      fresh=fresh.filter(x=>x.type!=='reading'&&reliableTask(x,p)&&!recent.has(norm(x.question))&&!(/sylab|głosk/i.test(x.question)&&/tropiciel/i.test(x.question)&&hist.questions.slice(-30).some(q=>/tropiciel/i.test(q))));
-     if(fresh.length)storeTasks(fresh);
-    }catch(e){errors.push('Strona '+p.number+': '+(e?.message||e))}
+     if(fresh.length)storeTasks(fresh,p);
+    }catch(e){errors.push('Strona '+p.number+': '+(e?.message||e))}}
     const unused=bank.filter(x=>!hist.questions.slice(-40).some(q=>norm(q)===norm(x.task.question)));
     const old=shuffle(unused.length?unused:bank).filter(x=>x.task?.type!=='reading'&&reliableTask(x.task,p)).map(x=>({...x.task,_bankKey:x.key,pageNumber:p.number,done:false,correct:false}));
     if(!fresh.length&&!old.length)console.warn('AI nie przygotowało poprawnych pytań; spróbuję lokalnych gier edukacyjnych.');
@@ -705,7 +716,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
     // Nie zmienia częstotliwości, wyglądu ani liczby słów w wykreślance.
     if(mode==='game'&&subject()==='polski'&&hist.runs%2===0)add(makeSafeSpelling(p));
     // Minimum dwa typy: nowa wiedza z AI plus wybrana gra.
-    const diverseFresh=shuffle(fresh).sort((a,b)=>Number(usedTypes.has(a.type))-Number(usedTypes.has(b.type)));
+    const diverseFresh=shuffle(fresh.length?fresh:old.slice(0,5)).sort((a,b)=>Number(usedTypes.has(a.type))-Number(usedTypes.has(b.type)));
     for(const t of diverseFresh){if(picked.length>=3)break;if(!usedTypes.has(t.type))add(t)}
     for(const t of diverseFresh){if(picked.length>=3)break;add(t)}
     // V62: co trzecia przygoda daje pierwszeństwo wykreślance.
@@ -1098,7 +1109,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
   if(act==='tutor-mic')return tutorMic();
   if(act==='tutor-speak'){const last=[...tutorMessages].reverse().find(m=>m.who==='ai');if(last)return speak(last.text,'pl-PL');return}
   if(act==='report')return report();
-  if(act==='guide')return voiceGuide();if(act==='start')return start();if(act==='resume')return resume();if(act==='back')return setup();
+  if(act==='guide')return voiceGuide();if(act==='start')return start();if(act==='resume')return resume();if(act==='back')return launch&&onBack?onBack():setup();
   if(act==='pause'){if(readingRec){try{readingRec.stop()}catch(e){}}if(t&&t.type==='reading')t.readActive=false;stageEpoch++;tutorBusy=false;remember();root.innerHTML='<section class="mg-panel"><h2>⏸ Misja zatrzymana</h2><p>Postęp zapisany na tym urządzeniu.</p>'+btn('▶️ Wznów','resume','mg-primary')+btn('📚 Wróć do wyboru','back')+'</section>';return}
   if(act==='hint'){hintLevel=Math.min(3,hintLevel+1);return draw()}
   if(act==='read-reset'){t.readTranscript='';t.readError='';t.readChecked=false;delete t.readScore;delete t.readHits;delete t.readTotal;delete t.readHeard;remember();draw();return;}
@@ -1128,5 +1139,28 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
   }
  });
  document.addEventListener('academy:tutor-question',ev=>{if(root.isConnected&&root.querySelector('.mg-tutor'))tutorAsk(ev.detail?.question||'')});
+ if(batchGenerate){
+  // Ta sama funkcja pytan/filtr co w treningu. Zapisywanie odbywa sie po kazdej stronie.
+  const work=(async()=>{
+   const targetPages=(batchGenerate.pages||[]).filter(p=>p.text?.trim());
+   let done=0,failed=0,added=0;
+   for(let index=0;index<targetPages.length;index++){
+    const p=targetPages[index];
+    if(batchGenerate.shouldStop?.())break;
+    bookId=p.bookId;
+    batchGenerate.onProgress?.({done,failed,added,total:targetPages.length,page:p.number,index,finished:false});
+    const excluded=readBank().filter(x=>x.pageIds?.includes(String(p.number))).slice(-35).map(x=>x.task?.question||'');
+    try{
+     const items=parse(await ask(pagePrompt(p,excluded),16000)).filter(t=>t.type!=='reading'&&reliableTask(t,p));
+     if(items.length){storeTasks(items,p);added+=items.length;done++}
+     else failed++;
+    }catch(err){failed++;console.warn('Pytania AI strona '+p.number,err)}
+    batchGenerate.onProgress?.({done,failed,added,total:targetPages.length,page:p.number,index:index+1,finished:true});
+   }
+   return {done,failed,added,total:targetPages.length,paused:!!batchGenerate.shouldStop?.()};
+  })();
+  return {work};
+ }
+ if(launch){mode=launch.mode==='test'?'test':'game';start();return {open:start}}
  setup();return {open:setup};
 }
