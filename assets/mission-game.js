@@ -129,6 +129,13 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
   const orthoRule=/(?:ortograf|pisown|poprawnie\s+(?:zapis\w*|napis\w*)|prawidłowo\s+(?:zapis\w*|napis\w*)|wymian\w*\s+(?:na|z)|wymienia\s+się)/i.test(q);
   const orthoWords=/(?:wyraz|słow|głosk|liter|cząstk|dwuznak|ortograf|pisown)/i.test(q);
   if(subject()==='polski'&&orthoRule&&orthoWords)return false;
+  // V65: nie przyjmuj nieweryfikowalnych testow AI o pisowni.
+  // Dotyczy tez formy: "Ktore slowo piszemy przez 'rz'?" oraz starego banku.
+  const riskySpelling=/(?:pisz\w*\s+przez|zapis\w*\s+przez|przez\s+[„"']?(?:rz|ż|ó|u|ch|h)\b|[„"'](?:rz|ż|ó|ch|h)[”"']|ortograf|pisown|poprawnie\s+(?:zapis\w*|napis\w*)|prawidłowo\s+(?:zapis\w*|napis\w*)|wymien\w*\s+(?:na|z)|wymienia\s+się)/i.test(q);
+  if(subject()==='polski'&&riskySpelling&&/(?:wyraz|słow|liter|głosk|cząstk|dwuznak|pisz|ortograf|pisown|które|który|wskaż|wybierz)/i.test(q))return false;
+  // Pytanie o znaczenie/synonim z wiersza musi miec potwierdzenie semantyczne.
+  // Nie uznawaj z automatu, ze np. "tajniki" to "nauka o naturze".
+  if(subject()==='polski'&&sourceQuestion(t)&&/(?:\boznacza\b|\boznaczają\b|\boznaczające\b|\bznaczy\b|\bsynonim\w*|to samo co|równoznacz\w*|innymi słowami)/i.test(q))return false;
   if(sourceQuestion(t)){
    const page=String(p.text||'');
    if(!visibleInText(page,t.answer))return false;
@@ -154,7 +161,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
  function pagePrompt(p,history=[]){
   const kinds=subject()==='matematyka'?'choice, safe, shop, clock, write, order':subject()==='angielski'?'listening, dictation, spelling, order, choice, write':'detective, loki, syllables, order, dictation, write, choice';
   const excluded=history.slice(-24).map((q,i)=>`${i+1}. ${String(q).slice(0,60)}`).join(' | ');
-  const prompt=`Jestes dobrym nauczycielem 8-latka. Utworz 5 NOWYCH, bardzo roznorodnych i jednoznacznych zadan w jezyku polskim, dopasowanych do PRZEDMIOTU ${subject()}. Dla polskiego: gramatyka, sylaby, litery, ortografia, przymiotniki, rozumienie czytanki; ZADNYCH rachunkow. Dla matematyki: rachunki i logika liczbowa, bez gramatyki. Kazde zadanie powinno uzywac innych slow i innego fragmentu strony. Unikaj ciaglego 'drugiej'. Poziom klasy drugiej. Co najmniej dwa rozne pytania o tresc czytanki, jesli strona zawiera opowiadanie lub wiersz. Dla kazdego pytania o to, co jest w tekscie lub ktore slowo pochodzi Z WIERSZA ustaw "needsSource":true i "sourceQuote": cytat DOSLOWNIE skopiowany z materialu (maksymalnie 100 znakow), ktory zawiera informacje potrzebna do odpowiedzi. Nie wymyslaj cytatow. Gdy nie ma w tekscie odpowiedzi, nie tworz tego pytania. Dla sylab, gloskowania, liczenia, rebusow i ortografii slowa podanego W SAMYM POLECENIU ustaw "needsSource":false. Gdy pytanie brzmi "ktore slowo z wiersza", potrzebny jest cytat, nawet jesli pytanie dotyczy pisowni. Nie wolno zadac pytania, ktorego odpowiedz nie wynika ze strony, chyba ze to wiedza szkolna wyraznie znana dziecku. Typy: ${kinds}. Kazde pytanie: DOKLADNIE jedna merytorycznie poprawna odpowiedz; 3 pozostale opcje musza byc NAPRAWDE bledne, nie tylko inne. UWAGA: pytanie o to, ktory wyraz zawiera poprawne "rz", gdy kilka opcji ma poprawne "rz", jest wadliwe — NIE generuj go. Jesli pytanie dotyczy tresci czytanki albo szukania wyrazu Z TEKSTU, poprawna odpowiedz ma byc DOKLADNIE obecnym w tekscie slowem lub zwrotem (ta sama forma i odmiana), a sourceQuote musi zawierac podstawe tej odpowiedzi. Nie wymyslaj odpowiedzi z ogolnej wiedzy. Zamiast niepewnego pytania utworz inne. Cztery ROZNE opcje musza zawierac tylko jedna pasujaca odpowiedz, doslownie rowna polu answer. Bez zdradzania odpowiedzi w pytaniu czy podpowiedzi. Zwroc tylko JSON, bez markdown, dokladnie wedlug schematu: {"tasks":[{"type":"choice","question":"...","answer":"...","options":["...","...","...","..."],"needsSource":true,"sourceQuote":"dokładny krótki cytat z tekstu, zawierający podstawę odpowiedzi","hint":"krótka wskazówka o sposobie rozwiązania BEZ słowa będącego odpowiedzią, jego odmian ani wyrazów pokrewnych","explanation":"..."}]}. NIE POWTARZAJ ostatnich zadan: ${excluded||'brak'}. STRONA ${p.number}, MATERIAL: ${String(p.text||'').slice(0,2400)}`;
+  const prompt=`Jestes dobrym nauczycielem 8-latka. Utworz 5 NOWYCH, bardzo roznorodnych i jednoznacznych zadan w jezyku polskim, dopasowanych do PRZEDMIOTU ${subject()}. Dla polskiego: gramatyka, sylaby, litery, ortografia, przymiotniki, rozumienie czytanki; ZADNYCH rachunkow. Dla matematyki: rachunki i logika liczbowa, bez gramatyki. Kazde zadanie powinno uzywac innych slow i innego fragmentu strony. Unikaj ciaglego 'drugiej'. Poziom klasy drugiej. Co najmniej dwa rozne pytania o tresc czytanki, jesli strona zawiera opowiadanie lub wiersz. Dla kazdego pytania o to, co jest w tekscie lub ktore slowo pochodzi Z WIERSZA ustaw "needsSource":true i "sourceQuote": cytat DOSLOWNIE skopiowany z materialu (maksymalnie 100 znakow), ktory zawiera informacje potrzebna do odpowiedzi. Nie wymyslaj cytatow. Gdy nie ma w tekscie odpowiedzi, nie tworz tego pytania. Dla sylab, gloskowania, liczenia, rebusow i ortografii slowa podanego W SAMYM POLECENIU ustaw "needsSource":false. Gdy pytanie brzmi "ktore slowo z wiersza", potrzebny jest cytat, nawet jesli pytanie dotyczy pisowni. Nie wolno zadac pytania, ktorego odpowiedz nie wynika ze strony, chyba ze to wiedza szkolna wyraznie znana dziecku. Typy: ${kinds}. Kazde pytanie: DOKLADNIE jedna merytorycznie poprawna odpowiedz; 3 pozostale opcje musza byc NAPRAWDE bledne, nie tylko inne. UWAGA: pytanie o to, ktory wyraz zawiera poprawne "rz", gdy kilka opcji ma poprawne "rz", jest wadliwe — NIE generuj go. Jesli pytanie dotyczy tresci czytanki albo szukania wyrazu Z TEKSTU, poprawna odpowiedz ma byc DOKLADNIE obecnym w tekscie slowem lub zwrotem (ta sama forma i odmiana), a sourceQuote musi zawierac podstawe tej odpowiedzi. Nie wymyslaj odpowiedzi z ogolnej wiedzy. Zamiast niepewnego pytania utworz inne. Cztery ROZNE opcje musza zawierac tylko jedna pasujaca odpowiedz, doslownie rowna polu answer. Nie tworz pytan o synonimy ani o to, co dane slowo oznacza, jesli rozstrzygniecie nie wynika JEDNOZNACZNIE z materialu. Nie nazywaj wyrazenia tajniki przyrody nauka o naturze. Bez zdradzania odpowiedzi w pytaniu czy podpowiedzi. Zwroc tylko JSON, bez markdown, dokladnie wedlug schematu: {"tasks":[{"type":"choice","question":"...","answer":"...","options":["...","...","...","..."],"needsSource":true,"sourceQuote":"dokładny krótki cytat z tekstu, zawierający podstawę odpowiedzi","hint":"krótka wskazówka o sposobie rozwiązania BEZ słowa będącego odpowiedzią, jego odmian ani wyrazów pokrewnych","explanation":"..."}]}. NIE POWTARZAJ ostatnich zadan: ${excluded||'brak'}. STRONA ${p.number}, MATERIAL: ${String(p.text||'').slice(0,2400)}`;
   return prompt.slice(0,5300);
  }
 
@@ -239,6 +246,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
  // V64: bezpieczne, różnorodne ćwiczenia ortograficzne (po jednej poprawnej wersji).
  function makeSafeSpelling(p){
   if(subject()!=='polski')return null;
+  // Sprawdzone przykłady; jedna dobra pisownia i trzy błędne warianty.
   const examples=[
    ['ogród',['ogród','ogrut','ogrod','ogródt']],
    ['róża',['róża','ruża','róza','rurza']],
@@ -255,16 +263,54 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
    ['szkoła',['szkoła','szkuła','skzoła','szkola']],
    ['jabłko',['jabłko','jabko','japłko','jabłkko']],
    ['wóz',['wóz','wuz','wózz','woz']],
-   ['jaskółka',['jaskółka','jaskułka','jaskólka','jaskółkka']]
+   ['jaskółka',['jaskółka','jaskułka','jaskólka','jaskółkka']],
+   ['burza',['burza','bórza','burża','buża']],
+   ['wróbel',['wróbel','wrubel','wróbell','wrubell']],
+   ['żółw',['żółw','rzółw','żulw','żółf']],
+   ['przyjaciel',['przyjaciel','pszyjaciel','przyjacjel','pszyjacjel']],
+   ['nożyczki',['nożyczki','nozyczki','norzyczki','nożyczkki']],
+   ['chmura',['chmura','hmura','chmóra','chmurra']],
+   ['bohater',['bohater','bochater','bohatter','bochatter']],
+   ['herbata',['herbata','cherbata','herbada','cherbada']],
+   ['kalendarz',['kalendarz','kalendaż','kalędarz','kalędaż']],
+   ['rzodkiewka',['rzodkiewka','żodkiewka','rzotkiewka','żotkiewka']],
+   ['słońce',['słońce','słonce','słończe','słonće']],
+   ['stróż',['stróż','strurz','strósz','strusż']],
+   ['półka',['półka','pułka','półkka','pułkka']],
+   ['chrząszcz',['chrząszcz','hrząszcz','chsząszcz','chżąszcz']],
+   ['drużyna',['drużyna','drurzyna','drużinna','drużena']],
+   ['żuraw',['żuraw','rzuraw','żóraw','rzóraw']],
+   ['krzesło',['krzesło','kżesło','krzesłoł','kżeśło']],
+   ['wiewiórka',['wiewiórka','wiewiurka','wiewiórrka','wiewiórkaa']],
+   ['papużka',['papużka','papórzka','papuszka','papużkka']],
+   ['ogórek',['ogórek','ogurek','ogóreck','ogórrek']],
+   ['puchar',['puchar','puhar','póchar','pucharr']],
+   ['maluch',['maluch','maluh','malóch','malluch']],
+   ['orzech',['orzech','ożech','orzeg','ożeg']],
+   ['grzyb',['grzyb','gżyb','grzyp','grzybb']],
+   ['lekarz',['lekarz','lekaż','lekarż','lekasz']],
+   ['rowerzysta',['rowerzysta','roweżysta','rowerżysta','rowerzyssta']],
+   ['mucha',['mucha','muha','mócha','muchha']],
+   ['wieża',['wieża','wierza','wieza','wierża']],
+   ['płótno',['płótno','płutno','płotno','płótnno']],
+   ['siódemka',['siódemka','siudemka','siódemkka','siodemka']],
+   ['błyskawica',['błyskawica','błyskawicaa','błyskawitsa','błyskavica']],
+   ['podróż',['podróż','podrurz','podróżż','podruż']],
+   ['wschód',['wschód','wshód','wschud','wschódd']]
   ];
   const key=`academy-v64-spelling-${child}-${bookId}`;
   let n=0;
   try{n=Number(localStorage.getItem(key)||0);localStorage.setItem(key,String(n+1))}catch(e){}
   const item=examples[n%examples.length];
-  return {type:'choice',question:'✍️ Wskaż poprawną pisownię tego samego wyrazu.',
+  const prompts=[
+   '✍️ Wskaż poprawną pisownię wyrazu.',
+   '✍️ Który zapis wyrazu jest poprawny?',
+   '✍️ Wybierz poprawnie zapisany wyraz.'
+  ];
+  return {type:'choice',question:prompts[n%prompts.length],
    answer:item[0],options:shuffle([...item[1]]),
-   hint:'Porównaj pisownię czterech propozycji. Przypomnij sobie zasady ortografii.',
-   explanation:'Poprawny zapis to: '+item[0]+'.',needsSource:false,
+   hint:'Przeczytaj uważnie każdą propozycję. Tylko jedna ma poprawną pisownię.',
+   explanation:'Poprawna pisownia: '+item[0]+'.',needsSource:false,
    pageNumber:p.number,done:false,correct:false};
  }
  function makeMiniReading(p){
@@ -652,9 +698,9 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
      if(t&&!picked.some(x=>fingerprint(x)===fingerprint(t))){picked.push(t);usedTypes.add(t.type);return true}
      return false;
     };
-    // V64: co czwarta misja może ćwiczyć ortografię z pewnym rozwiązaniem.
+    // V65: co druga misja ma ćwiczenie ortografii z pewnym rozwiązaniem.
     // Nie zmienia częstotliwości, wyglądu ani liczby słów w wykreślance.
-    if(mode==='game'&&subject()==='polski'&&hist.runs%4===1)add(makeSafeSpelling(p));
+    if(mode==='game'&&subject()==='polski'&&hist.runs%2===0)add(makeSafeSpelling(p));
     // Minimum dwa typy: nowa wiedza z AI plus wybrana gra.
     const diverseFresh=shuffle(fresh).sort((a,b)=>Number(usedTypes.has(a.type))-Number(usedTypes.has(b.type)));
     for(const t of diverseFresh){if(picked.length>=3)break;if(!usedTypes.has(t.type))add(t)}
