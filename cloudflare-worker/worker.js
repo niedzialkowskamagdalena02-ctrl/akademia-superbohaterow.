@@ -76,7 +76,7 @@ async function viaWorkersAI(env, question, style, maxTokens) {
 const OCR_VISION_PROMPT = 'Przepisz wiernie cały tekst widoczny na zdjęciu strony podręcznika, zachowując polskie znaki i podział na wiersze. Nie wymyślaj tekstu.';
 function ocrVisionPrompt(position){
   const zone=position==='top'?'GÓRNEJ':'DOLNEJ';
-  return OCR_VISION_PROMPT+' Osobno znajdź DRUKOWANY NUMER STRONY w '+zone+' części kartki, w pobliżu jej lewego lub prawego rogu. Nie pomyl z numerem ćwiczenia, nagrania, lekcji ani zadania. Jeśli wyraźnie widzisz numer drukowanej strony w wybranym obszarze, dopisz na samym końcu [[PAGE_NUMBER:30]] (zamień 30 na prawdziwy numer). Jeśli nie widzisz pewnego numeru, dopisz [[PAGE_NUMBER:UNKNOWN]]. Zachowaj tekst z całego zdjęcia, a znacznik daj tylko na końcu.';
+  return OCR_VISION_PROMPT+' Osobno znajdź DRUKOWANY NUMER STRONY w '+zone+' części kartki, w pobliżu jej lewego lub prawego rogu. Nie pomyl z numerem ćwiczenia, nagrania, lekcji ani zadania. Jeśli wyraźnie widzisz numer drukowanej strony w wybranym obszarze, dopisz na samym końcu [[PAGE_NUMBER:30]] (zamień 30 na prawdziwy numer). Odczytaj cyfry numeru dwa razy. Zwróć szczególną uwagę na podobne cyfry 4 i 7. Nie zgaduj numeru na podstawie otaczających stron. Jeśli nie jesteś pewien cyfry lub całego numeru, dopisz [[PAGE_NUMBER:UNKNOWN]]. Zachowaj tekst z całego zdjęcia, a znacznik daj tylko na końcu.';
 }
 function checkedOcrText(input) {
   const text=String(input||'').trim();
