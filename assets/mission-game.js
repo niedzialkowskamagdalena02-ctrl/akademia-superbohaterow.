@@ -98,6 +98,43 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
   const bank=readBank();const x=bank.find(v=>v.key===(t._bankKey||fingerprint(t)));
   if(x){x.seen=(x.seen||0)+1;if(!t.correct)x.wrong=(x.wrong||0)+1;else x.wrong=Math.max(0,(x.wrong||0)-1);x.last=Date.now();writeBank(bank)}
  }
+ // V62: pytanie musi mieć jedną poprawną odpowiedź i, gdy dotyczy tekstu,
+ // odpowiedź rzeczywiście musi dać się znaleźć w dostarczonej czytance.
+ function sourceQuestion(t){
+  const q=String(t.question||'').toLocaleLowerCase('pl-PL');
+  return t.needsSource===true || /(?:z|we|w) (?:wierszu|wiersza|czytance|czytanki|tekście|tekstu|refrenie|refrenu)|według (?:tekstu|wiersza)|na podstawie (?:tekstu|wiersza)|zgodnie z (?:tekstem|wierszem)|(?:co|kto|jakie|które|dlaczego).*w (?:wierszu|tekście)/i.test(q);
+ }
+ function visibleInText(text,value){
+  const needle=spokenWords(value).join(' ');
+  const hay=spokenWords(text).join(' ');
+  return !!needle && (' '+hay+' ').includes(' '+needle+' ');
+ }
+ function reliableTask(t,p){
+  if(!t||!String(t.question||'').trim()||!String(t.answer||'').trim())return false;
+  const options=t.options||[];
+  if(options.length!==4||options.some(x=>typeof x!=='string'))return false;
+  if(new Set(options.map(norm)).size!==4 || options.filter(x=>norm(x)===norm(t.answer)).length!==1)return false;
+  const q=String(t.question).toLocaleLowerCase('pl-PL');
+  // 'Które słowo zawiera poprawnie zapisane rz?' nie może mieć czterech
+  // wyrazów z poprawnym rz. Analogicznie dla innych sprawdzanych cząstek.
+  const parts=['rz','ch','sz','cz','ó','ż'];
+  const part=parts.find(x=>q.includes("'"+x+"'")||q.includes('„'+x+'”')||q.includes('"'+x+'"'));
+  if(part&&/(zawiera|zawierają|cząstk|dwuznak|występuje|poprawnie napisan)/i.test(q)){
+   const count=options.filter(x=>String(x).toLocaleLowerCase('pl-PL').includes(part)).length;
+   if(count!==1)return false;
+  }
+  if(sourceQuestion(t)){
+   const page=String(p.text||'');
+   if(!visibleInText(page,t.answer))return false;
+   const quote=String(t.sourceQuote||'').trim();
+   if(quote&&(!visibleInText(page,quote)||!visibleInText(quote,t.answer)))return false;
+   // Jednoznaczny wybór słowa Z TEKSTU: tylko jedna opcja może tam wystąpić.
+   if(/(?:które|który|jaki|wskaż|wybierz).*\b(?:słowo|wyraz)\b.*\b(?:wiersza|wierszu|tekstu|tekście|czytanki)\b/i.test(q)){
+    if(options.filter(x=>visibleInText(page,x)).length!==1)return false;
+   }
+  }
+  return true;
+ }
  function parse(raw){
   let s=typeof raw==='string'?raw:JSON.stringify(raw);s=s.replace(/```(?:json)?/gi,'').replace(/```/g,'').trim();
   let obj;try{obj=JSON.parse(s)}catch{const a=s.indexOf('{'),b=s.lastIndexOf('}');if(a<0||b<=a)throw Error('AI nie przesłało kompletnej odpowiedzi');try{obj=JSON.parse(s.slice(a,b+1))}catch{throw Error('AI zwróciło ucięte zadania')}}
@@ -111,7 +148,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
  function pagePrompt(p,history=[]){
   const kinds=subject()==='matematyka'?'choice, safe, shop, clock, write, order':subject()==='angielski'?'listening, dictation, spelling, order, choice, write':'detective, loki, syllables, order, dictation, write, choice';
   const excluded=history.slice(-24).map((q,i)=>`${i+1}. ${String(q).slice(0,60)}`).join(' | ');
-  const prompt=`Jestes dobrym nauczycielem 8-latka. Utworz 5 NOWYCH, bardzo roznorodnych i jednoznacznych zadan w jezyku polskim, dopasowanych do PRZEDMIOTU ${subject()}. Dla polskiego: gramatyka, sylaby, litery, ortografia, przymiotniki, rozumienie czytanki; ZADNYCH rachunkow. Dla matematyki: rachunki i logika liczbowa, bez gramatyki. Kazde zadanie powinno uzywac innych slow i innego fragmentu strony. Unikaj ciaglego 'drugiej'. Poziom klasy drugiej. Co najmniej dwa rozne pytania o tresc czytanki, jesli strona zawiera opowiadanie lub wiersz. Dla kazdego pytania o to, co jest w tekscie lub ktore slowo pochodzi Z WIERSZA ustaw "needsSource":true i "sourceQuote": cytat DOSLOWNIE skopiowany z materialu (maksymalnie 100 znakow), ktory zawiera informacje potrzebna do odpowiedzi. Nie wymyslaj cytatow. Gdy nie ma w tekscie odpowiedzi, nie tworz tego pytania. Dla sylab, gloskowania, liczenia, rebusow i ortografii slowa podanego W SAMYM POLECENIU ustaw "needsSource":false. Gdy pytanie brzmi "ktore slowo z wiersza", potrzebny jest cytat, nawet jesli pytanie dotyczy pisowni. Nie wolno zadac pytania, ktorego odpowiedz nie wynika ze strony, chyba ze to wiedza szkolna wyraznie znana dziecku. Typy: ${kinds}. Kazde pytanie: jedna pewna odpowiedz, 4 rozne opcje, wsrod nich doslownie odpowiedz w polu answer. Bez zdradzania odpowiedzi w pytaniu czy podpowiedzi. Zwroc tylko JSON, bez markdown, dokladnie wedlug schematu: {"tasks":[{"type":"choice","question":"...","answer":"...","options":["...","...","...","..."],"needsSource":true,"sourceQuote":"dokładny krótki cytat z tekstu, zawierający podstawę odpowiedzi","hint":"...","explanation":"..."}]}. NIE POWTARZAJ ostatnich zadan: ${excluded||'brak'}. STRONA ${p.number}, MATERIAL: ${String(p.text||'').slice(0,2400)}`;
+  const prompt=`Jestes dobrym nauczycielem 8-latka. Utworz 5 NOWYCH, bardzo roznorodnych i jednoznacznych zadan w jezyku polskim, dopasowanych do PRZEDMIOTU ${subject()}. Dla polskiego: gramatyka, sylaby, litery, ortografia, przymiotniki, rozumienie czytanki; ZADNYCH rachunkow. Dla matematyki: rachunki i logika liczbowa, bez gramatyki. Kazde zadanie powinno uzywac innych slow i innego fragmentu strony. Unikaj ciaglego 'drugiej'. Poziom klasy drugiej. Co najmniej dwa rozne pytania o tresc czytanki, jesli strona zawiera opowiadanie lub wiersz. Dla kazdego pytania o to, co jest w tekscie lub ktore slowo pochodzi Z WIERSZA ustaw "needsSource":true i "sourceQuote": cytat DOSLOWNIE skopiowany z materialu (maksymalnie 100 znakow), ktory zawiera informacje potrzebna do odpowiedzi. Nie wymyslaj cytatow. Gdy nie ma w tekscie odpowiedzi, nie tworz tego pytania. Dla sylab, gloskowania, liczenia, rebusow i ortografii slowa podanego W SAMYM POLECENIU ustaw "needsSource":false. Gdy pytanie brzmi "ktore slowo z wiersza", potrzebny jest cytat, nawet jesli pytanie dotyczy pisowni. Nie wolno zadac pytania, ktorego odpowiedz nie wynika ze strony, chyba ze to wiedza szkolna wyraznie znana dziecku. Typy: ${kinds}. Kazde pytanie: DOKLADNIE jedna merytorycznie poprawna odpowiedz; 3 pozostale opcje musza byc NAPRAWDE bledne, nie tylko inne. UWAGA: pytanie o to, ktory wyraz zawiera poprawne "rz", gdy kilka opcji ma poprawne "rz", jest wadliwe — NIE generuj go. Jesli pytanie dotyczy tresci czytanki albo szukania wyrazu Z TEKSTU, poprawna odpowiedz ma byc DOKLADNIE obecnym w tekscie slowem lub zwrotem (ta sama forma i odmiana), a sourceQuote musi zawierac podstawe tej odpowiedzi. Nie wymyslaj odpowiedzi z ogolnej wiedzy. Zamiast niepewnego pytania utworz inne. Cztery ROZNE opcje musza zawierac tylko jedna pasujaca odpowiedz, doslownie rowna polu answer. Bez zdradzania odpowiedzi w pytaniu czy podpowiedzi. Zwroc tylko JSON, bez markdown, dokladnie wedlug schematu: {"tasks":[{"type":"choice","question":"...","answer":"...","options":["...","...","...","..."],"needsSource":true,"sourceQuote":"dokładny krótki cytat z tekstu, zawierający podstawę odpowiedzi","hint":"...","explanation":"..."}]}. NIE POWTARZAJ ostatnich zadan: ${excluded||'brak'}. STRONA ${p.number}, MATERIAL: ${String(p.text||'').slice(0,2400)}`;
   return prompt.slice(0,5300);
  }
 
@@ -561,12 +598,12 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
     try{
      fresh=parse(await ask(pagePrompt(p,excluded))).map(t=>({...t,pageNumber:p.number,_fresh:true}));
      const recent=new Set(hist.questions.slice(-40).map(x=>norm(x)));
-     fresh=fresh.filter(x=>x.type!=='reading'&&!recent.has(norm(x.question))&&!(/sylab|głosk/i.test(x.question)&&/tropiciel/i.test(x.question)&&hist.questions.slice(-30).some(q=>/tropiciel/i.test(q))));
+     fresh=fresh.filter(x=>x.type!=='reading'&&reliableTask(x,p)&&!recent.has(norm(x.question))&&!(/sylab|głosk/i.test(x.question)&&/tropiciel/i.test(x.question)&&hist.questions.slice(-30).some(q=>/tropiciel/i.test(q))));
      if(fresh.length)storeTasks(fresh);
     }catch(e){errors.push('Strona '+p.number+': '+(e?.message||e))}
     const unused=bank.filter(x=>!hist.questions.slice(-40).some(q=>norm(q)===norm(x.task.question)));
-    const old=shuffle(unused.length?unused:bank).filter(x=>x.task?.type!=='reading').map(x=>({...x.task,_bankKey:x.key,pageNumber:p.number,done:false,correct:false}));
-    if(!fresh.length&&!old.length)throw Error('Nie udało się pobrać nowych zadań ani znaleźć starszych do powtórki');
+    const old=shuffle(unused.length?unused:bank).filter(x=>x.task?.type!=='reading'&&reliableTask(x.task,p)).map(x=>({...x.task,_bankKey:x.key,pageNumber:p.number,done:false,correct:false}));
+    if(!fresh.length&&!old.length)console.warn('AI nie przygotowało poprawnych pytań; spróbuję lokalnych gier edukacyjnych.');
     const extras=[makeCrossword(p),makeWordsearch(p),makePuzzle(p),makeAdjective(p),makeRebus(p),makeMemory(p),mode==='game'?makeMiniReading(p):null].filter(Boolean);
     // Rozklad gier zalezy od historii (a nie kolejności w tablicy).
     const extrasByType=[...new Map(extras.map(x=>[x.type,x])).values()];
@@ -582,6 +619,9 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
     const diverseFresh=shuffle(fresh).sort((a,b)=>Number(usedTypes.has(a.type))-Number(usedTypes.has(b.type)));
     for(const t of diverseFresh){if(picked.length>=3)break;if(!usedTypes.has(t.type))add(t)}
     for(const t of diverseFresh){if(picked.length>=3)break;add(t)}
+    // V62: co trzecia przygoda daje pierwszeństwo wykreślance.
+    const wordsearchTurn=mode==='game'&&hist.runs%3===0;
+    if(wordsearchTurn)add(extrasByType.find(t=>t.type==='wordsearch'));
     for(const t of extrasByType){if(picked.length>=5)break;if(!usedTypes.has(t.type))add(t)}
     // Czytanie co druga przygoda, NIE w sprawdzianie.
     if(mode==='game'&&hist.runs%2===0&&!picked.some(x=>x.type==='reading-mini'))add(makeMiniReading(p));
@@ -685,28 +725,25 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
  function shortSource(t){
   const full=pageText(t);
   if(!full)return '';
-  const quote=String(t.sourceQuote||'').trim();
-  // Cytat AI akceptujemy tylko jeśli RZECZYWIŚCIE występuje w źródle.
-  if(quote.length>=6){
-   const at=full.toLocaleLowerCase('pl-PL').indexOf(quote.toLocaleLowerCase('pl-PL'));
-   if(at>=0){const from=Math.max(0,at-70),to=Math.min(full.length,at+quote.length+90);return full.slice(from,to).trim()}
-  }
-  const chunks=full.split(/\n+|(?<=[.!?])\s+/).map(s=>s.trim()).filter(s=>spokenWords(s).length>=2);
-  if(!chunks.length)return full.slice(0,550);
-  const stems=spokenWords(String(t.answer||'')+' '+String(t.question||''))
-   .filter(w=>w.length>=5&&!['jakie','które','czego','który','odpowiedź','tekstu','czytanki','wiersza','refrenu','zgodnie','zasadami','ortografii','zakończeniu'].includes(w));
-  let at=-1,best=0;
-  for(let i=0;i<chunks.length;i++){
-   const words=spokenWords(chunks[i]);
-   const score=stems.reduce((v,w)=>v+(words.some(a=>a===w||a.startsWith(w.slice(0,Math.max(4,w.length-2))))?1:0),0);
-   if(score>best){best=score;at=i}
+  const answer=spokenWords(t.answer||'').join(' ');
+  const lines=full.split(/\n+|(?<=[.!?])\s+/).map(s=>s.trim()).filter(s=>spokenWords(s).length>0);
+  if(!lines.length)return full;
+  const containsAnswer=s=>{
+   const hay=spokenWords(s).join(' ');
+   return !!answer && (' '+hay+' ').includes(' '+answer+' ');
+  };
+  let at=lines.findIndex(containsAnswer);
+  if(at<0 && answer){
+   at=lines.findIndex((s,i)=>i+1<lines.length && containsAnswer(s+' '+lines[i+1]));
   }
   if(at<0){
-   // Nie pokazujemy losowego początku wiersza, gdy tam nie ma odpowiedzi.
-   // Dajemy możliwość przeczytania właściwego materiału, bez fałszywego wycinka.
-   return full.slice(0,1200);
+   // W razie starszego zadania bez potwierdzonej odpowiedzi nie udawaj,
+   // że przypadkowe trzy wersy zawierają rozwiązanie.
+   return full;
   }
-  return chunks.slice(Math.max(0,at-1),Math.min(chunks.length,at+2)).join('\n').slice(0,620);
+  // Kontekst: kompletne wersy/zdania, nie losowe 70 znaków wokół cytatu.
+  const begin=Math.max(0,at-1),finish=Math.min(lines.length,at+2);
+  return lines.slice(begin,finish).join('\n');
  }
  function stage(){
   const t=task();let html='<style>.mg-panel [data-mg]{transition:transform .13s ease,filter .13s ease,box-shadow .13s ease}.mg-panel [data-mg]:active{transform:scale(.94);filter:brightness(1.35)}.mg-panel [data-mg]:focus-visible{outline:3px solid #fbbf24;outline-offset:3px}.mg-panel input:focus,.mg-panel textarea:focus{outline:3px solid #fbbf24}.mg-panel .mg-feedback{animation:mg-pop .35s ease-out}@keyframes mg-pop{from{opacity:.2;transform:scale(.94)}to{opacity:1;transform:scale(1)}}</style><h3>'+escape(t.question)+'</h3>';
