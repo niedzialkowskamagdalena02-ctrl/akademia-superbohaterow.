@@ -612,6 +612,9 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
   const cards=shuffle(pairs.flatMap((entry,i)=>[{pair:i,label:entry.front},{pair:i,label:entry.back}]));
   return {type:'memory',question:pictures?'🃏 Memory: połącz obrazki z nazwami.':'🃏 Memory: znajdź sześć par słów.',answer:'Wszystkie pary',options:[],cards,matched:[],flipped:[],pageNumber:p.number,done:false,correct:false};
  }
+ function alphabeticOrderTask(t){
+  return t.type==='order' && /alfabetyczn/i.test(String(t.question||'')) && /liter/i.test(String(t.question||''));
+ }
  function makePuzzle(p){
   const sentence=String(p.text||'').split(/(?<=[.!?])\s+/).find(x=>x.trim().split(/\s+/).length>=4&&x.trim().split(/\s+/).length<=9);
   if(!sentence)return null;
@@ -918,8 +921,22 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
    html+='<p>Hasło pionowe: '+(t.crossWords.every((w,i)=>lettersMatch(t.crossTyped[i]||'',w.word))?'<strong>'+escape(t.answer.toUpperCase())+'</strong>':'<strong>odkryj po rozwiązaniu wszystkich słów</strong>')+'</p>';
    html+=btn('✓ Sprawdź krzyżówkę','cross-new','mg-primary')+'<p id="mg-cross-feedback" role="status"></p>';
   }else if(t.type==='order'||t.type==='spelling'){
-   if(!t.chunks)t.chunks=shuffle(t.type==='order'?t.answer.split(/\s+/):Array.from(t.answer));
-   html+='<div class="mg-built">'+escape(tiles.map(i=>t.chunks[i]).join(t.type==='order'?' ':'')||'Ułóż puzzle, dotykając kafelków')+'</div><div class="mg-choices">'+t.chunks.map((v,i)=>btn(escape(v),'tile:'+i,'mg-choice '+(tiles.includes(i)?'mg-tile-used':''))).join('')+'</div>'+btn('↩ Cofnij','undo')+btn('✓ Sprawdź','submit','mg-primary');
+   const letterOrder=alphabeticOrderTask(t);
+   if(letterOrder){
+    // Rozpoznaj wyraz z polecenia, np. „tropicieli”, aby nie ufać błędnej kolejności od AI.
+    const match=String(t.question||'').match(/(?:wyrazu|słowa)\s*[„\"'«]?\s*([a-ząćęłńóśźż]+)/i);
+    if(match){
+     const sorted=Array.from(match[1].toLocaleLowerCase('pl-PL')).sort((a,b)=>a.localeCompare(b,'pl')).join('');
+     if(t.answer!==sorted){t.answer=sorted;t.chunks=null;tiles=[]}
+    }
+   }
+   const letterTiles=letterOrder||t.type==='spelling';
+   if(!Array.isArray(t.chunks) || (letterTiles&&t.chunks.length!==Array.from(t.answer).length)){
+    t.chunks=shuffle(letterTiles?Array.from(t.answer):t.answer.trim().split(/\s+/));
+    if(letterTiles&&t.chunks.length>1&&t.chunks.join('')===t.answer)t.chunks.reverse();
+    tiles=[];
+   }
+   html+='<div class="mg-built">'+escape(tiles.map(i=>t.chunks[i]).join(letterTiles?'':' ')||'Ułóż puzzle, dotykając kafelków')+'</div><div class="mg-choices">'+t.chunks.map((v,i)=>btn(escape(v),'tile:'+i,'mg-choice '+(tiles.includes(i)?'mg-tile-used':''))).join('')+'</div>'+btn('↩ Cofnij','undo')+btn('✓ Sprawdź','submit','mg-primary');
   }else if(['write','dictation','listening','syllables','rebus'].includes(t.type)){
    if(t.type==='dictation'||t.type==='listening')html+=btn('🔊 Posłuchaj','audio');
    if(t.type==='rebus')html+='<div style="font-size:clamp(23px,5vw,36px);margin:18px 0;padding:17px;background:#172954;border:2px solid #4467ac;border-radius:12px;text-align:center;font-weight:bold">'+escape(t.rebus).replace(/− ([A-ZĄĆĘŁŃÓŚŹŻ]+)/g,'− <s style="text-decoration-color:#ff6b6b">$1</s>')+'</div><p>Odejmij i dodaj litery tak, aby powstał wyraz. Wpisz go poniżej.</p>';
@@ -1094,7 +1111,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
   if(act.startsWith('pick:'))return answer(t.options[Number(act.slice(5))]);
   if(act.startsWith('tile:')){const i=Number(act.slice(5));if(!tiles.includes(i)){tiles.push(i);draw()}return}
   if(act==='undo'){tiles.pop();return draw()}
-  if(act==='submit')return answer(tiles.map(i=>t.chunks[i]).join(t.type==='order'?' ':''));
+  if(act==='submit')return answer(tiles.map(i=>t.chunks[i]).join(alphabeticOrderTask(t)||t.type==='spelling'?'':' '));
   if(act==='written'){const val=root.querySelector('#mg-written')?.value||'';if(t.selfCheck&&!val.trim())return;return answer(val)}
   if(act==='cross'){
    const words=t.options.map(s=>s.split('=')[0]);const vals=[...root.querySelectorAll('[data-mg-cross]')].map(x=>x.value);
