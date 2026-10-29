@@ -659,3 +659,16 @@ button[data-action^="book:"][disabled],button[data-action^="page:"][disabled]{op
 .mic{touch-action:none}.mic.mic-moving{cursor:grabbing;box-shadow:0 0 24px #ffc84e}
 .tr71 .v38-books,.tr71 [data-action="sm:open"]{display:none}
 @media(prefers-reduced-motion:reduce){.tr71-choice,.tr71-start{transition:none}}
+
+/* V71: tylko biblioteka mamy / OCR i bank pytan */
+.admin-page-status{display:block;padding:8px 10px;margin:6px 0;font-weight:800;font-size:.88rem;letter-spacing:.02em;border-radius:9px}
+.admin-page-missing{border-left:6px solid #8192a9!important;opacity:.75}
+.admin-page-missing .admin-page-status{background:#283652;color:#c7d4eb}
+.admin-page-ready{border-left:6px solid #ffd65d!important}
+.admin-page-ready .admin-page-status{background:#5a420d;color:#ffe8a3}
+.admin-page-questions{border-left:6px solid #32d7a3!important}
+.admin-page-questions .admin-page-status{background:#104d45;color:#b6ffdd}
+.admin-page-item[hidden]{display:none!important}
+.admin-page-actions label{font-weight:700;min-width:100%}
+.admin-page-actions select{min-height:50px;max-width:100%}
+.admin-page-item b{display:block;font-size:1.05rem}

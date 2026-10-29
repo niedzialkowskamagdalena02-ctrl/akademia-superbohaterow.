@@ -1,7 +1,7 @@
 // V48_AI_RESPONSE_DIAGNOSTICS
 // V44_BULK_CHAPTERS
 // V42_CHAPTERS
-import {mountMissionGame} from './mission-game.js';
+import {mountMissionGame} from './mission-game.js?v=71';
 import { initHeadquarters3D } from './headquarters3d.js';
 import {initial,get,put,del,allRecords,replaceRecords,compress,uid,gradeName} from './data.js';
 import {speak,listen} from './voice.js';
@@ -68,10 +68,65 @@ let adminActionBusy=false;
 let bulkAiBusy=false;
 let bulkAiPauseRequested=false;
 let questionBuildBusy=false,questionBuildStop=false;
+function subjectsOfChild(id){
+ const p=data.profiles?.[id];return [...new Set((p?.subjects||[]).map(s=>String(s).trim()).filter(Boolean))];
+}
+function selectedSubjectValue(child,previous=''){
+ const list=subjectsOfChild(child);
+ return list.find(s=>s.toLocaleLowerCase('pl-PL')===String(previous).toLocaleLowerCase('pl-PL'))||list[0]||'';
+}
+function bookSubjectSelect(child,previous=''){
+ const items=subjectsOfChild(child);
+ return select('bsubject','Przedmiot — z profilu dziecka',items.length?items.map(s=>[s,s]):[['','Najpierw zaznacz przedmioty w profilu dziecka']],selectedSubjectValue(child,previous));
+}
+function refreshBookSubjectSelect(){
+ const target=$('bsubject'),child=$('bchild')?.value;
+ if(!target||!child)return;
+ const was=target.value;target.replaceChildren();
+ const items=subjectsOfChild(child);
+ for(const s of (items.length?items:[''])){
+  const option=document.createElement('option');option.value=s;option.textContent=s||'Najpierw zaznacz przedmioty dziecka';target.appendChild(option);
+ }
+ target.value=selectedSubjectValue(child,was);
+}
+function languageOfBook(b){return /ang|english/i.test(b?.subject||'')?'eng':'pol'}
+function bookPageNumberLocation(b){return b?.pageNumberPosition==='top'?'top':'bottom'}
+async function ensureNumberLocation(b){
+ if(!b)return false;
+ if(b.pageNumberPosition==='top'||b.pageNumberPosition==='bottom')return true;
+ const choice=prompt('Gdzie AI ma szukać drukowanego numeru strony w tej książce?\n\n1 — NA DOLE strony (np. przy łapce)\n2 — NA GÓRZE strony\n\nWybierz 1 lub 2. Pytanie pojawi się tylko raz dla tej książki.','1');
+ if(choice===null)return false;
+ if(choice.trim()!=='1'&&choice.trim()!=='2')throw Error('Wybierz 1 (dół) albo 2 (góra).');
+ b.pageNumberPosition=choice.trim()==='2'?'top':'bottom';await save();
+ note('✅ Zapisano położenie numeru strony: '+(b.pageNumberPosition==='top'?'na górze':'na dole')+'.');return true;
+}
+function bookBankItems(b){try{const v=JSON.parse(localStorage.getItem('academy-v48-bank-'+b.child+'-'+b.id)||'[]');return Array.isArray(v)?v:[]}catch{return []}}
+function questionCountOnPage(b,p,bank=bookBankItems(b)){
+ const id=String(p.id),num=String(p.number);
+ return bank.filter(x=>{
+  const ids=(x.pageIds||[]).map(String);
+  return ids.includes(id)||(!ids.some(v=>v.length>5)&&ids.includes(num));
+ }).length;
+}
+function pageState(b,p,bank){
+ if(!p.text?.trim())return {css:'missing',text:'⬜ BRAK TEKSTU'};
+ const n=questionCountOnPage(b,p,bank);
+ return n?{css:'questions',text:'🟢 '+n+' pytań AI'}:{css:'ready',text:'🟡 TEKST ODCZYTANY · bez pytań'};
+}
+function filterBookPages(value){
+ const b=data.books.find(x=>x.id===bookId);if(!b)return;
+ const bank=bookBankItems(b);let shown=0;
+ document.querySelectorAll('[data-admin-page-id]').forEach(el=>{
+  const p=data.bookPages.find(x=>x.id===el.dataset.adminPageId);
+  const state=p?pageState(b,p,bank).css:'missing';
+  const yes=value==='all'||(value==='missing'&&state==='missing')||(value==='ready'&&state==='ready')||(value==='questions'&&state==='questions');
+  el.hidden=!yes;if(yes)shown++;
+ });
+ const el=$('page-filter-count');if(el)el.textContent='Widoczne: '+shown;
+}
 function questionBankSummary(b){
- try{const items=JSON.parse(localStorage.getItem('academy-v48-bank-'+b.child+'-'+b.id)||'[]');
-  const pages=new Set(items.flatMap(x=>x.pageIds||[]));return {tasks:items.length,pages:pages.size};
- }catch{return {tasks:0,pages:0}}
+ const bank=bookBankItems(b),pages=data.bookPages.filter(p=>p.bookId===b.id&&p.text?.trim());
+ return {tasks:bank.length,pages:pages.filter(p=>questionCountOnPage(b,p,bank)>0).length,read:pages.length};
 }
 function setQuestionBuildButtons(){
  const go=document.querySelector('[data-action="book:questions"]'),pause=document.querySelector('[data-action="book:questions-pause"]');
@@ -81,16 +136,26 @@ function setQuestionBuildButtons(){
 async function buildBookQuestions(b){
  if(questionBuildBusy)throw Error('Generowanie pytań już trwa.');
  const pages=data.bookPages.filter(p=>p.bookId===b.id&&p.text?.trim()).sort((x,y)=>x.number-y.number);
- if(!pages.length){note('Najpierw odczytaj tekst zdjęć przez AI.');return}
- const cursorKey='academy-v70-questions-cursor-'+b.child+'-'+b.id;
- let cursor=0;try{cursor=Number(localStorage.getItem(cursorKey)||0)||0}catch{}
- if(cursor<0||cursor>=pages.length)cursor=0;
- const todo=pages.slice(cursor);
+ if(!pages.length){note('Najpierw odczytaj tekst co najmniej jednej strony przez AI.');return}
+ const cursorKey='academy-v71-question-queue-'+b.child+'-'+b.id;
+ let queue=null;
+ try{const stored=JSON.parse(localStorage.getItem(cursorKey)||'null');if(Array.isArray(stored))queue=stored.filter(id=>pages.some(p=>p.id===id))}catch{}
+ const bank=bookBankItems(b);
+ if(!queue?.length){
+  const missing=pages.filter(p=>questionCountOnPage(b,p,bank)===0);
+  queue=(missing.length?missing:pages).map(p=>p.id);
+ }
+ const todo=queue.map(id=>pages.find(p=>p.id===id)).filter(Boolean);
  questionBuildBusy=true;questionBuildStop=false;setQuestionBuildButtons();
+ let completed=0,added=0,failed=0;
  const status=()=>document.getElementById('book-question-progress');
  const onProgress=x=>{
-  const el=status();if(el)el.textContent='🤖 Strona '+(cursor+x.index+(x.finished?0:1))+' z '+pages.length+' (nr '+x.page+'). Nowe pytania: '+x.added+' · nieudane: '+x.failed;
-  if(x.finished)localStorage.setItem(cursorKey,String(cursor+x.index));
+  const el=status();
+  if(el)el.textContent='🤖 Odczytana strona '+(completed+1)+' z '+todo.length+' (nr '+x.page+'). Nowe pytania: '+x.added+' · nieudane: '+x.failed;
+  if(x.finished){
+   completed=x.index;added=x.added;failed=x.failed;
+   try{localStorage.setItem(cursorKey,JSON.stringify(todo.slice(completed).map(p=>p.id)))}catch{}
+  }
  };
  try{
   const controllerKey='mama-question-bank';
@@ -98,17 +163,22 @@ async function buildBookQuestions(b){
   const job=mountMissionGame(root,{books:[b],pages:data.bookPages,child:b.child,initialBookId:b.id,
    speak:()=>{},reward:async()=>{},
    ask:async(question,timeoutMs=16000)=>{
-    const controller=beginAIRequest(controllerKey);const timer=setTimeout(()=>controller.abort(),timeoutMs);
+    const controller=beginAIRequest(controllerKey),timer=setTimeout(()=>controller.abort(),timeoutMs);
     try{return await askMentorAI(question,'tech',[],controller.signal)}
     finally{clearTimeout(timer);finishAIRequest(controllerKey,controller)}
    },
    batchGenerate:{pages:todo,onProgress,shouldStop:()=>questionBuildStop||bookId!==b.id||adminTab!=='book'}
   });
+  // V70 wyswietlalo surowy blad "reading paused", gdy mieszaly sie wersje modulow.
+  if(!job?.work||typeof job.work.then!=='function')throw Error('Moduł banku pytań ma niewłaściwą wersję. Odśwież Akademię i ponów.');
   const result=await job.work;
+  if(!result||typeof result.paused!=='boolean')throw Error('Generator nie zwrócił wyniku. Nie usunięto żadnych zapisanych pytań.');
   if(!result.paused)localStorage.removeItem(cursorKey);
   const summary=questionBankSummary(b);
-  const el=status();if(el)el.textContent='✅ Gotowe. Strony z pytaniami: '+summary.pages+' / '+pages.length+' · zadania w bazie: '+summary.tasks+'.'+(result.paused?' Generowanie zatrzymane.':'');
-  note('🤖 Baza pytań: '+summary.tasks+' zadań zapisanych na tym urządzeniu.');
+  const el=status();
+  if(el)el.textContent=(result.done>0?'✅ Zakończono. ':'⚠️ AI nie utworzyło poprawnych pytań z tej partii. ')+'W bazie: '+summary.tasks+' pytań z '+summary.pages+' odczytanych stron.'+
+    (result.paused?' Wstrzymano — można wznowić.':'')+(result.failed?' Nieudane strony: '+result.failed+' — spróbuj ponownie.':'');
+  note('🤖 '+summary.tasks+' pytań w bazie, '+summary.pages+' stron z pytaniami.');
  }finally{questionBuildBusy=false;questionBuildStop=false;setQuestionBuildButtons()}
 }
 
@@ -141,6 +211,7 @@ async function saveEditedPage(){
  if(nextNumber!==p.number)p.pageNumberManual=true;
  p.number=nextNumber;
  p.text=$('ptext')?.value??p.text;
+ p.ocrLanguage=$('ocrlang')?.value||p.ocrLanguage||languageOfBook(data.books.find(b=>b.id===p.bookId));
  p.chapter=$('pchapter')?.value.trim()??p.chapter??'';
  await save();return true;
 }
@@ -156,7 +227,7 @@ async function readAllBookPagesAI(){
  }
  bulkAiBusy=true;bulkAiPauseRequested=false;setBulkAiControls();
  let ok=0,errors=0,paused=false;
- const lang=(data.books.find(b=>b.id===activeBookId)?.subject||'').toLocaleLowerCase('pl-PL').includes('ang')?'eng':'pol';
+ const lang=languageOfBook(data.books.find(b=>b.id===activeBookId));
  try{
   for(let i=0;i<pending.length;i++){
    if(bulkAiPauseRequested||bookId!==activeBookId||adminTab!=='book'){paused=true;break}
@@ -240,7 +311,7 @@ async function recognizePage(page,language='pol'){
 }
 
 // V69: rozpoznaj numer DRUKOWANY na skraju przepisanego tekstu, a nie numer cwiczenia w srodku.
-function printedPageNumberFromOCR(text){
+function printedPageNumberFromOCR(text,position="bottom"){
  const lines=String(text||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
  if(lines.length<3)return null;
  const parse=(line,explicitOnly=false)=>{
@@ -250,13 +321,9 @@ function printedPageNumberFromOCR(text){
   return Number.isInteger(value)&&value>=1&&value<=999?value:null;
  };
  // Samotna cyfra pod tekstem jest typowa dla dolnej paginy; wers naglowkowy moze byc rozdzialem.
- const last=lines.at(-1),first=lines[0];
- const footer=parse(last);
- if(footer!==null)return footer;
- const headerNamed=parse(first,true);
- if(headerNamed!==null)return headerNamed;
- // Liczba w pierwszym wierszu jest akceptowana, ale nie skanuj numerow zadan w tresci.
- return parse(first);
+ const candidate=position==='top'?lines[0]:lines.at(-1);
+ // Nie szukamy cyfry z zadania po przeciwnej stronie kartki.
+ return parse(candidate);
 }
 
 async function recognizePageAI(page,language='pol',overwriteApproved=false){
@@ -269,21 +336,25 @@ async function recognizePageAI(page,language='pol',overwriteApproved=false){
   if(blob.size>7*1024*1024)throw Error('Zdjęcie jest za duże (maksymalnie 7 MB).');
   const b64=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result).split(',')[1]);r.onerror=()=>reject(Error('Nie udało się odczytać zdjęcia.'));r.readAsDataURL(blob)});
   ocrStatus('AI czyta stronę. To może potrwać kilkanaście sekund…');
-  const response=await fetch('https://akademia-ai.niedzialkowskamagdalena02.workers.dev/ocr-ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:b64,mimeType:blob.type||'image/jpeg',language:language==='eng'?'angielski':'polski'})});
+  const response=await fetch('https://akademia-ai.niedzialkowskamagdalena02.workers.dev/ocr-ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:b64,mimeType:blob.type||'image/jpeg',language:language==='eng'?'angielski':'polski',pageNumberPosition:bookPageNumberLocation(data.books.find(b=>b.id===page.bookId))})});
   let result;try{result=await response.json()}catch{throw Error('Serwer nie zwrócił poprawnej odpowiedzi. Sprawdź wdrożenie Netlify Functions.')}
   if(!response.ok)throw Error(result.error||'Błąd usługi AI: '+response.status);
   const text=String(result.text||'').trim();if(!text)throw Error('AI nie znalazło czytelnego tekstu na zdjęciu.');
   if(page.text?.trim()&&!overwriteApproved&&!confirm('Na stronie jest już tekst. Czy zastąpić go wynikiem AI?')){ocrStatus('Zachowano dotychczasowy tekst.');return}
   // Numer zmieniamy dopiero po UDANYM odczycie; przy braku numeru zostaje kolejnosc dodawania.
-  const printed=printedPageNumberFromOCR(text);
+  const marker=text.match(/\[\[PAGE_NUMBER:(\d{1,3}|UNKNOWN)\]\]/i);
+  const cleanText=text.replace(/\[\[PAGE_NUMBER:(?:\d{1,3}|UNKNOWN)\]\]/gi,'').trim();
+  const loc=bookPageNumberLocation(data.books.find(b=>b.id===page.bookId));
+  const detected=marker&&/^\d+$/.test(marker[1])?Number(marker[1]):null;
+  const printed=(detected>=1&&detected<=999)?detected:printedPageNumberFromOCR(cleanText,loc);
   if(printed!==null&&!page.pageNumberManual)page.number=printed;
-  page.text=text;await save();
+  page.text=cleanText;page.ocrLanguage=language;await save();
   ocrStatus('AI odczytało tekst'+(printed!==null?'; rozpoznany numer strony: '+printed:'; numer pozostawiono bez zmian')+'. Sprawdź wynik.');return text;
  }catch(err){ocrStatus('Błąd AI: '+err.message+' Wcześniej zapisany tekst nie został usunięty.');throw err}
  finally{ocrBusy=false;document.querySelectorAll('[data-action="page:ai"],[data-action="reader:ai"]').forEach(b=>b.disabled=false)}
 }
 const grant=async(child,points,reason,key)=>{if(data.history.some(h=>h.key===key))return false;data.profiles[child].xp+=points;data.profiles[child].coins+=points;data.history.unshift({id:uid(),key,child,points,reason,at:new Date().toISOString()});await save();return true};
-function layout(title,content){cancelAIRequests();closeMicBubble();app.innerHTML=`<main class="wrap"><header class="head"><div><div class="brand">⚡ AKADEMIA SUPERBOHATERÓW <span style="display:inline-block;font-size:0.72em;border:1px solid currentColor;border-radius:8px;padding:2px 7px;vertical-align:middle">V70</span></div><div class="sub">${e(title)}</div></div>${role?button(testMode?'← Zakończ test':'← Profile','exit','alt'):''}</header>${testMode?'<div class="test-banner">🧪 TRYB MAMY — BEZPŁATNY TEST • POSTĘPY NIE SĄ ZAPISYWANE</div>':''}${content}</main>${role==='child'?'<button class="mic" data-action="mic" aria-label="Sterowanie głosowe">🎙️</button>':''}`;document.querySelectorAll('[data-speak]').forEach(b=>b.addEventListener('click',()=>speak(b.dataset.speak,b.dataset.lang,role==='child'?profile().mentor:'tech',data.settings.rate||1)));hydrateImages();if(role==='child'&&(tab==='learn'||tab==='subjectmissions'))installMicDrag()}
+function layout(title,content){cancelAIRequests();closeMicBubble();app.innerHTML=`<main class="wrap"><header class="head"><div><div class="brand">⚡ AKADEMIA SUPERBOHATERÓW <span style="display:inline-block;font-size:0.72em;border:1px solid currentColor;border-radius:8px;padding:2px 7px;vertical-align:middle">V71</span></div><div class="sub">${e(title)}</div></div>${role?button(testMode?'← Zakończ test':'← Profile','exit','alt'):''}</header>${testMode?'<div class="test-banner">🧪 TRYB MAMY — BEZPŁATNY TEST • POSTĘPY NIE SĄ ZAPISYWANE</div>':''}${content}</main>${role==='child'?'<button class="mic" data-action="mic" aria-label="Sterowanie głosowe">🎙️</button>':''}`;document.querySelectorAll('[data-speak]').forEach(b=>b.addEventListener('click',()=>speak(b.dataset.speak,b.dataset.lang,role==='child'?profile().mentor:'tech',data.settings.rate||1)));hydrateImages();if(role==='child'&&(tab==='learn'||tab==='subjectmissions'))installMicDrag()}
 async function hydrateImages(){for(const el of document.querySelectorAll('[data-image]')){const src=await img(el.dataset.image);if(el.isConnected&&src){el.src=src;el.onload=()=>URL.revokeObjectURL(src)}}}
 function nav(){return role==='admin'?`<div class="tabs">${[['home','Przegląd'],['books','📚 Książki'],['missions','📋 Misje'],['settings','⚙️ Ustawienia'],['test','🧪 Testuj wszystko'],['backup','💾 Kopia']].map(([k,n])=>button(n,'admin:'+k,adminTab===k?'gold':'alt')).join('')}</div>`:`<div class="tabs">${[['home','🎯 Misje'],['books','📚 Książki'],['learn','🧠 Trening'],['academy','📖 Sala odkrywców'],['mentor','🤖 Mentor'],['base','🏙️ Baza Avengersów i gry']].map(([k,n])=>button(n,'child:'+k,tab===k?'gold':'alt')).join('')}</div>`}
 function render(){if(tab!=='arcade')stopArcade();if(!role){layout('Wybierz swoją bazę',`<section class="card"><h1>Witaj w Akademii! 🛡️</h1><p>Każdy bohater ma własne misje i nagrody.</p></section><div class="grid">${people.map(([id,name])=>`<button class="tile" data-action="enter:${id}"><img class="profile-hero" src="assets/art/${data.profiles[id].hero||(id==='pawel'?'iron':'spider')}.svg" alt=""><h2>${name}</h2><small>${gradeName(data.profiles[id].grade)} · ${data.profiles[id].coins} złotych</small></button>`).join('')}</div><section class="card">${button('🔐 Centrum dowodzenia mamy','enter:admin','gold')}<p class="muted">Tryb lokalny: dane z tego telefonu nie synchronizują się jeszcze z innymi urządzeniami. ${syncAdapter.status()}</p></section>`);return}if(role==='admin')adminRender();else childRender()}
@@ -299,15 +370,15 @@ let mentorCounter=0;
 function mentorLine(p,ok){const set=MENTOR_LINES[p.mentor==='fun'?'fun':'tech'][ok?'yes':'no'];return set[(mentorCounter++)%set.length]}
 
 function adminRender(){let html=nav();if(adminTab==='home'){let pending=data.missions.filter(m=>m.status==='sent');html+=`<section class="card"><h2>Do sprawdzenia: ${pending.length}</h2>${pending.map(m=>missionCard(m,true)).join('')||'<p>Brak zgłoszeń.</p>'}</section><div class="grid">${people.map(([id,name])=>`<div class="card"><h3>${name}</h3><strong>⭐ ${data.profiles[id].coins} złotych</strong><p>${gradeName(data.profiles[id].grade)}</p></div>`).join('')}</div><p class="muted">Zdalne zgłoszenia wymagają późniejszego uruchomienia synchronizacji i logowania serwerowego.</p>`}
-if(adminTab==='books')html+=`<section class="card"><h2>Dodaj podręcznik</h2>${select('bchild','Dziecko',people,'pawel')}${select('bgrade','Klasa',grades,'2')}${input('bsubject','Przedmiot','Polski')}<label for="btype">Rodzaj materiału</label><select id="btype"><option value="Podręcznik">Podręcznik</option><option value="Ćwiczenia">Zeszyt ćwiczeń</option><option value="Inne">Inne (wiersz, piosenka, dodatkowy materiał)</option></select>${input('btitle','Tytuł')}${input('bpart','Część / tom')}${input('byear','Rok wydania')}${button('➕ Utwórz książkę','book:add','gold')}</section><section class="card"><h2>Biblioteka</h2>${data.books.map(b=>`<div class="item"><div><b>${e(b.title)}</b><small>${e(b.kind||'Podręcznik')} · ${e(b.subject)} · ${e(data.profiles[b.child].name)} · ${gradeName(b.grade)} · ${dataPageCount(b.id)} stron</small></div>${button('Otwórz','book:open:'+b.id)}</div>`).join('')||'Brak książek'}</section>`;
+if(adminTab==='books')html+=`<section class="card"><h2>Dodaj podręcznik</h2>${select('bchild','Dziecko',people,'pawel')}${select('bgrade','Klasa',grades,'2')}${bookSubjectSelect('pawel','Polski')}<label for="btype">Rodzaj materiału</label><select id="btype"><option value="Podręcznik">Podręcznik</option><option value="Ćwiczenia">Zeszyt ćwiczeń</option><option value="Inne">Inne (wiersz, piosenka, dodatkowy materiał)</option></select>${input('btitle','Tytuł')}${input('bpart','Część / tom')}${input('byear','Rok wydania')}${button('➕ Utwórz książkę','book:add','gold')}</section><section class="card"><h2>Biblioteka</h2>${data.books.map(b=>`<div class="item"><div><b>${e(b.title)}</b><small>${e(b.kind||'Podręcznik')} · ${e(b.subject)} · ${e(data.profiles[b.child].name)} · ${gradeName(b.grade)} · ${dataPageCount(b.id)} stron</small></div>${button('Otwórz','book:open:'+b.id)}</div>`).join('')||'Brak książek'}</section>`;
 if(adminTab==='books'){
  const records=[];
  for(const b of data.books){try{const key='academy-v53-stats-'+b.child+'-'+b.id;const arr=JSON.parse(localStorage.getItem(key)||'[]');if(Array.isArray(arr))arr.forEach(x=>records.push({...x,book:b.title,child:b.child}))}catch(err){console.warn(err)}}
  records.sort((x,y)=>String(y.date).localeCompare(String(x.date)));
  html+='<section class="card"><h2>📋 Trudności w nauce — raport dla mamy</h2><p>Na tym urządzeniu zapisano '+records.length+' trudnych lub pominiętych prób. Raport obejmuje książki widoczne w bibliotece.</p>'+records.slice(0,35).map(x=>'<div class="item"><div><b>'+e(x.book)+' — strona '+e(x.page)+'</b><p>'+e(x.question)+'</p><small>'+e(x.reason)+'</small></div></div>').join('')+'</section>';
 }
-if(adminTab==='book') {const b=data.books.find(b=>b.id===bookId);if(!b){adminTab='books';return render()}html+=`<section class="card">${button('← Biblioteka','admin:books')}<h2>${e(b.title)}</h2><div class="admin-cover">${b.coverId?`<img class="admin-cover-img" data-image="${b.coverId}" alt="Okładka książki">`:'<p class="muted">Brak zdjęcia okładki</p>'}<label for="bookcoverfile">📚 Okładka książki (zdjęcie z galerii)</label><input type="file" id="bookcoverfile" accept="image/*">${button('📸 Zapisz okładkę','book:cover','gold')}</div><h3>Edytuj dane książki</h3>${select('bchild','Dziecko',people,b.child)}${select('bgrade','Klasa',grades,b.grade)}${input('bsubject','Przedmiot',b.subject)}<label for="btype">Rodzaj materiału</label><select id="btype"><option value="Podręcznik" ${(!b.kind||b.kind==='Podręcznik')?'selected':''}>Podręcznik</option><option value="Ćwiczenia" ${b.kind==='Ćwiczenia'?'selected':''}>Zeszyt ćwiczeń</option><option value="Inne" ${b.kind==='Inne'?'selected':''}>Inne (wiersz, piosenka, dodatkowy materiał)</option></select>${input('btitle','Tytuł',b.title)}${input('bpart','Część / tom',b.part)}${input('byear','Rok',b.year)}${button('💾 Zapisz zmiany','book:save','gold')} ${button(b.archived?'Przywróć z archiwum':'Archiwizuj','book:archive')} ${button('🗑 Usuń cały podręcznik','book:delete','line')}<section class="admin-question-bank"><h3>🧠 Baza pytań z podręcznika</h3><p>Wygeneruj nowe zestawy na podstawie zapisanych tekstów stron. Możesz powtarzać generowanie — stare pytania pozostaną w bazie. Działa kolejno, strona po stronie.</p><p>W bazie: <b>${questionBankSummary(b).tasks}</b> pytań z <b>${questionBankSummary(b).pages}</b> stron.</p>${button('🤖 Wygeneruj nowe pytania z całej książki','book:questions','gold')} ${button('⏸ Pauza po bieżącej stronie','book:questions-pause')}<p id="book-question-progress" role="status" aria-live="polite">Pytania zapisują się na tym telefonie. Pauza zapamiętuje ostatnią stronę; następne kliknięcie wznawia, a po ukończeniu całej książki tworzy kolejny zestaw.</p></section><h3>Dodaj wiele stron naraz</h3>${input('start','Numer pierwszej strony',String((Math.max(0,...data.bookPages.filter(p=>p.bookId===bookId).map(p=>p.number))+1)),'number')}${input('newchapter','📚 Dział dodawanych stron','')}<h3>📚 Przypisz istniejące strony do działu</h3>${input('chapterfrom','Od strony','1','number')}${input('chapterto','Do strony','10','number')}${input('chaptername','Nazwa działu (np. Dział 1)','')}${button('💾 Przypisz zakres do działu','book:chapter-range','gold')}<label>Zdjęcia z galerii (można wybrać wiele)</label><input id="pagefiles" type="file" accept="image/*" multiple><button data-action="page:upload">📥 Dodaj zdjęcia</button><label>Lub zrób zdjęcie aparatem</label><input id="pagecamera" type="file" accept="image/*" capture="environment"><button data-action="page:camera" class="alt">📷 Dodaj z aparatu</button><div class="admin-bulk">${button('✨ Odczytaj wszystkie zdjęcia przez AI','page:bulk-ai','gold')}<button id="bulk-ai-pause" type="button" class="alt" data-action="page:bulk-pause" disabled>⏸ Pauza po bieżącej stronie</button><p id="bulkocrstatus" role="status" aria-live="polite" class="guide" hidden></p><small>AI pominie strony, które mają już tekst. Stronę z błędem można odczytać ponownie w edytorze.</small></div></section><section class="card"><h2>Strony</h2><div class="admin-page-actions">${button('☑ Zaznacz wszystkie','page:select-all')}${button('Odznacz wszystkie','page:select-none')}${button('🗑 Usuń zaznaczone','page:delete-selected','line')}<small id="page-selected-count">Zaznaczono: 0</small></div>${data.bookPages.filter(p=>p.bookId===bookId).sort((a,b)=>a.number-b.number).map(p=>`<div class="item admin-page-item"><label class="admin-page-check"><input type="checkbox" data-page-select="${p.id}" aria-label="Zaznacz stronę ${p.number}"><span>Zaznacz</span></label><img class="thumb" data-image="${p.imageId}" alt="Miniatura strony"><div>Strona ${p.number}<small>${e(p.chapter||'Bez działu')} · ${p.text?'Tekst zapisany':'Brak tekstu — otwórz i użyj odczytu AI'}${sortedBookPages(bookId).filter(other=>other.number===p.number).length>1?' · ⚠️ Powtórzony numer strony — sprawdź duplikat':''}${p.aiOcrError?' · ❌ Błąd AI: '+e(p.aiOcrError):''}</small></div>${button('Edytuj','page:open:'+p.id)}</div>`).join('')||'Nie dodano zdjęć.'}</section>`}
-if(adminTab==='page'){const p=data.bookPages.find(p=>p.id===pageId);if(!p){adminTab='book';return render()}html+=`<section class="card">${button('← Strony','admin:book')}<h2>Strona ${p.number}</h2><div class="admin-page-arrows">${button('← Poprzednia strona','page:prev')}${button('Następna strona →','page:next')}</div><img class="pagephoto" data-image="${p.imageId}" alt="Strona podręcznika">${input('pnum','Numer strony',p.number,'number')}${input('pchapter','📚 Dział / rozdział',p.chapter||'')}<label for="ocrlang">Język tekstu na stronie</label><select id="ocrlang"><option value="pol">Polski</option><option value="eng">Angielski</option></select><p id="ocrstatus" class="guide" role="status" hidden></p><label>Rozpoznany tekst (można poprawić)</label><textarea id="ptext">${e(p.text||'')}</textarea><div class="row">${button('💾 Zapisz','page:save','gold')}${button('✨ Odczytaj przez AI','page:ai','gold')}${speakBtn(p.text||'Nie ma jeszcze rozpoznanego tekstu')}</div><label>Zastąp zdjęcie tej strony</label><input type="file" accept="image/*" id="replacefile"><button class="alt" data-action="page:replace">Zamień zdjęcie</button>${button('Usuń stronę','page:delete','line')}<p class="muted">Użyj „Odczytaj przez AI”. Po odczycie sprawdź i w razie potrzeby popraw tekst, a następnie zapisz stronę.</p></section>`}
+if(adminTab==='book') {const b=data.books.find(b=>b.id===bookId);if(!b){adminTab='books';return render()}html+=`<section class="card">${button('← Biblioteka','admin:books')}<h2>${e(b.title)}</h2><div class="admin-cover">${b.coverId?`<img class="admin-cover-img" data-image="${b.coverId}" alt="Okładka książki">`:'<p class="muted">Brak zdjęcia okładki</p>'}<label for="bookcoverfile">📚 Okładka książki (zdjęcie z galerii)</label><input type="file" id="bookcoverfile" accept="image/*">${button('📸 Zapisz okładkę','book:cover','gold')}</div><h3>Edytuj dane książki</h3>${select('bchild','Dziecko',people,b.child)}${select('bgrade','Klasa',grades,b.grade)}${bookSubjectSelect(b.child,b.subject)}<label for="btype">Rodzaj materiału</label><select id="btype"><option value="Podręcznik" ${(!b.kind||b.kind==='Podręcznik')?'selected':''}>Podręcznik</option><option value="Ćwiczenia" ${b.kind==='Ćwiczenia'?'selected':''}>Zeszyt ćwiczeń</option><option value="Inne" ${b.kind==='Inne'?'selected':''}>Inne (wiersz, piosenka, dodatkowy materiał)</option></select>${input('btitle','Tytuł',b.title)}${input('bpart','Część / tom',b.part)}${input('byear','Rok',b.year)}<label for="booknumberlocation">📄 Gdzie jest drukowany numer strony?</label><select id="booknumberlocation"><option value="" ${!b.pageNumberPosition?'selected':''}>Zapytaj przy pierwszym odczycie</option><option value="bottom" ${b.pageNumberPosition==='bottom'?'selected':''}>Na dole strony</option><option value="top" ${b.pageNumberPosition==='top'?'selected':''}>Na górze strony</option></select><small class="muted">Przy pierwszym odczycie AI zapyta o tę lokalizację. Później można ją tutaj zmienić.</small>${button('💾 Zapisz zmiany','book:save','gold')} ${button(b.archived?'Przywróć z archiwum':'Archiwizuj','book:archive')} ${button('🗑 Usuń cały podręcznik','book:delete','line')}<section class="admin-question-bank"><h3>🧠 Baza pytań z podręcznika</h3><p>Najpierw AI uzupełnia odczytane strony bez pytań. Kolejne uruchomienie może tworzyć następny zestaw. Nie trzeba czekać na odczyt całej książki.</p><p>W bazie: <b>${questionBankSummary(b).tasks}</b> pytań z <b>${questionBankSummary(b).pages}</b> stron.</p>${button('🤖 Wygeneruj pytania z odczytanych stron','book:questions','gold')} ${button('⏸ Pauza po bieżącej stronie','book:questions-pause')}<p id="book-question-progress" role="status" aria-live="polite">Pytania zapisują się osobno dla każdej odczytanej strony. Można wstrzymać i wznowić generowanie.</p></section><h3>Dodaj wiele stron naraz</h3>${input('start','Numer pierwszej strony',String((Math.max(0,...data.bookPages.filter(p=>p.bookId===bookId).map(p=>p.number))+1)),'number')}${input('newchapter','📚 Dział dodawanych stron','')}<h3>📚 Przypisz istniejące strony do działu</h3>${input('chapterfrom','Od strony','1','number')}${input('chapterto','Do strony','10','number')}${input('chaptername','Nazwa działu (np. Dział 1)','')}${button('💾 Przypisz zakres do działu','book:chapter-range','gold')}<label>Zdjęcia z galerii (można wybrać wiele)</label><input id="pagefiles" type="file" accept="image/*" multiple><button data-action="page:upload">📥 Dodaj zdjęcia</button><label>Lub zrób zdjęcie aparatem</label><input id="pagecamera" type="file" accept="image/*" capture="environment"><button data-action="page:camera" class="alt">📷 Dodaj z aparatu</button><div class="admin-bulk">${button('✨ Odczytaj wszystkie zdjęcia przez AI','page:bulk-ai','gold')}<button id="bulk-ai-pause" type="button" class="alt" data-action="page:bulk-pause" disabled>⏸ Pauza po bieżącej stronie</button><p id="bulkocrstatus" role="status" aria-live="polite" class="guide" hidden></p><small>AI pominie strony, które mają już tekst. Stronę z błędem można odczytać ponownie w edytorze.</small></div></section><section class="card"><h2>Strony</h2><div class="admin-page-actions">${button('☑ Zaznacz wszystkie','page:select-all')}${button('Odznacz wszystkie','page:select-none')}${button('🗑 Usuń zaznaczone','page:delete-selected','line')}<small id="page-selected-count">Zaznaczono: 0</small><label for="page-filter">Pokaż strony</label><select id="page-filter"><option value="all">Wszystkie</option><option value="missing">⬜ Bez tekstu</option><option value="ready">🟡 Tekst, brak pytań</option><option value="questions">🟢 Z pytaniami AI</option></select><small id="page-filter-count"></small></div>${data.bookPages.filter(p=>p.bookId===bookId).sort((a,b)=>a.number-b.number).map(p=>`<div class="item admin-page-item admin-page-${pageState(b,p,bookBankItems(b)).css}" data-admin-page-id="${e(p.id)}"><label class="admin-page-check"><input type="checkbox" data-page-select="${p.id}" aria-label="Zaznacz stronę ${p.number}"><span>Zaznacz</span></label><img class="thumb" data-image="${p.imageId}" alt="Miniatura strony"><div><b>Strona ${p.number}</b><strong class="admin-page-status">${pageState(b,p,bookBankItems(b)).text}</strong><small>${e(p.chapter||'Bez działu')} · ${p.text?'Tekst zapisany':'Brak tekstu — otwórz i użyj odczytu AI'}${sortedBookPages(bookId).filter(other=>other.number===p.number).length>1?' · ⚠️ Powtórzony numer strony — sprawdź duplikat':''}${p.aiOcrError?' · ❌ Błąd AI: '+e(p.aiOcrError):''}</small></div>${button('Edytuj','page:open:'+p.id)}</div>`).join('')||'Nie dodano zdjęć.'}</section>`}
+if(adminTab==='page'){const p=data.bookPages.find(p=>p.id===pageId);if(!p){adminTab='book';return render()}html+=`<section class="card">${button('← Strony','admin:book')}<h2>Strona ${p.number}</h2><div class="admin-page-arrows">${button('← Poprzednia strona','page:prev')}${button('Następna strona →','page:next')}</div><img class="pagephoto" data-image="${p.imageId}" alt="Strona podręcznika">${input('pnum','Numer strony',p.number,'number')}${input('pchapter','📚 Dział / rozdział',p.chapter||'')}<select id="ocrlang"><option value="pol" ${(p.ocrLanguage||languageOfBook(data.books.find(b=>b.id===p.bookId)))==='pol'?'selected':''}>Polski</option><option value="eng" ${(p.ocrLanguage||languageOfBook(data.books.find(b=>b.id===p.bookId)))==='eng'?'selected':''}>Angielski</option></select><p id="ocrstatus" class="guide" role="status" hidden></p><label>Rozpoznany tekst (można poprawić)</label><textarea id="ptext">${e(p.text||'')}</textarea><div class="row">${button('💾 Zapisz','page:save','gold')}${button('✨ Odczytaj przez AI','page:ai','gold')}${speakBtn(p.text||'Nie ma jeszcze rozpoznanego tekstu')}</div><label>Zastąp zdjęcie tej strony</label><input type="file" accept="image/*" id="replacefile"><button class="alt" data-action="page:replace">Zamień zdjęcie</button>${button('Usuń stronę','page:delete','line')}<p class="muted">Użyj „Odczytaj przez AI”. Po odczycie sprawdź i w razie potrzeby popraw tekst, a następnie zapisz stronę.</p></section>`}
 if(adminTab==='missions')html+=`<section class="card"><h2>Nowa misja</h2>${select('mchild','Dla kogo',people,'pawel')}${select('mtype','Rodzaj',[['homework','🎒 Misja szkolna'],['chore','🏠 Misja domowa'],['test','🚨 Sprawdzian / ważny termin']],'homework')}${input('mtitle','Opis / zadania')}${input('msubject','Przedmiot / kategoria','Polski')}${select('mbook','Podręcznik (opcjonalnie)',[['','Bez książki'],...data.books.map(b=>[b.id,b.title])],'')}${input('mpage','Numer strony','', 'number')}${input('mdue','Termin','', 'date')}${select('mrepeat','Powtarzanie',[['none','Jednorazowo'],['daily','Codziennie'],['weekly','Co tydzień']],'none')}${input('mpoints','Pieniążki po zatwierdzeniu','20','number')}<label><input id="mphoto" type="checkbox" checked> Wymagaj zdjęcia wykonanej pracy</label><p class='muted'>Przy typie „Test / sprawdzian” wybierz przedmiot, podręcznik i stronę lub pozostaw książkę pustą, aby utworzyć test losowy z wybranego przedmiotu.</p>${button('➕ Dodaj misję','mission:add','gold')}</section><section class="card"><h2>Wszystkie misje</h2>${data.missions.slice().reverse().map(m=>missionCard(m,true)).join('')||'Brak misji.'}</section>`;
 if(adminTab==='settings')html+=`<section class="card"><h2>Profile i poziomy</h2><h3>🧪 Podgląd całej Bazy Avengersów</h3><p>Tryb testowy pokazuje wszystkie piętra i wyposażenie, bez kupowania i bez zmiany postępów dzieci.</p>${button('🏙️ Zobacz całą bazę — podgląd','admin:preview','gold')}${people.map(([id,name])=>`<div class="item"><h3>${name}</h3></div>${select('grade_'+id,'Etap edukacji',grades,data.profiles[id].grade)}${subjectChecks(id)}${input('newsubject_'+id,'Dodaj nowy przedmiot (opcjonalnie)')}${input('pin_'+id,'PIN profilu (opcjonalny)',data.profiles[id].pin,'password')}<h4>Wybierz bohatera</h4>${heroPicker(id)}${button('Zapisz '+name,'profile:save:'+id)}</section><section class="card">`).join('')}<h2>PIN mamy</h2>${input('parentpin','Nowy PIN (min. 4 cyfry)','','password')}${button('Zmień PIN','pin:change')}<h3>Nagrody za trening</h3>${input('xpPractice','XP za poprawne ćwiczenie',data.settings.xpPractice,'number')}${input('dailyLimit','Dzienny limit nagród',data.settings.dailyPracticeLimit,'number')}${input('rate','Tempo czytania',data.settings.rate||1,'number')}${button('Zapisz ustawienia','settings:save')}<h3>Muzyczne nagrody</h3>${input('songtitle','Nazwa piosenki')}${input('songurl','Link YouTube')}<label for="songlyrics">Tekst piosenki (wklej lub wpisz)</label><textarea id="songlyrics" rows="8" placeholder="Każdy wers w osobnej linii"></textarea>${select('songchild','Misja dla',people,'pawel')}${button('🎵 Zapisz piosenkę i utwórz misję','song:add','gold')}<p>${data.settings.songs.map((s,i)=>`${e(s.title)} ${button('Usuń','song:delete:'+i,'line')}`).join('<br>')}</p><p class="muted">PIN-y chronią tylko przed przypadkowym wejściem. Pełne uprawnienia wymagają kont serwerowych.</p></section>`;
 if(adminTab==='test')html+=`<section class="card"><h2>🧪 Centrum testów mamy</h2><p>Uruchom dowolny profil w trybie testowym. Wszystkie gry, pomieszczenia, bohaterowie i przedmioty są odblokowane. Nic nie kosztuje złotych i żadne zmiany nie zostaną zapisane.</p><div class="grid">${people.map(([id,name])=>button('🎮 Testuj jako '+name,'test:enter:'+id,'gold')).join('')}</div><p class="muted">Po zakończeniu wybierz „Zakończ test”. Dane dzieci pozostaną takie jak przed testem.</p></section>`;
@@ -944,14 +1015,16 @@ if(action==='av36:next'&&avengersRun&&avengersRun.done){
  avengersRun.i++;avengersRun.done=false;return render();
 }
 const [a,b,c]=action.split(':');try{if(action==='exit'){if(testMode){data=testSnapshot;testSnapshot=null;testMode=false;role='admin';who='';tab='home';adminTab='test';return render()}role='';who='';tab='home';return render()}if(a==='enter'){if(b==='admin'){if(!data.parentPin){const pin=prompt('Ustaw PIN mamy (minimum 4 cyfry)');if(!/^\d{4,8}$/.test(pin||''))return note('Wymagany PIN od 4 do 8 cyfr');data.parentPin=pin;await save()}else if(prompt('PIN mamy')!==data.parentPin)return note('Nieprawidłowy PIN');role='admin';adminTab='home'}else{const p=data.profiles[b];if(p.pin&&prompt('PIN profilu '+p.name)!==p.pin)return note('Nieprawidłowy PIN');role='child';who=b;tab='home'}return render()}if(a==='test'&&b==='enter'){if(!['pawel','patryk'].includes(c))return;testSnapshot=data;data=structuredClone(data);testMode=true;for(const id of ['pawel','patryk']){const p=data.profiles[id];p.coins=99999;p.arcadeUnlocked=ARCADE_GAMES.map(g=>g.id);const base=migrateBase(p);base.owned=BASE_ITEMS.map(i=>i.id)}role='child';who=c;tab='base';return render()}if(a==='admin'){adminTab=b;return render()}if(a==='child'){tab=b;if(b==='learn'){v37Classic=false;avengersRun=null;trainingStep='subject';trainingSelectedPages=new Set()}return render()}if(action==='book:add')return runAdminAction(target,'Dodaje ksiazke…',async()=>{
+ if(!$('bsubject')?.value)throw Error('Najpierw zaznacz przedmioty w profilu dziecka.');
  const title=$('btitle')?.value.trim();if(!title)return note('Wpisz tytuł');
  const child=$('bchild').value,subject=$('bsubject').value,part=$('bpart').value;
  if(data.books.some(b=>b.child===child&&b.title.trim().toLocaleLowerCase('pl-PL')===title.toLocaleLowerCase('pl-PL')&&b.subject===subject&&String(b.part||'')===part))return note('Taka książka jest już w bibliotece. Otwórz ją zamiast dodawać ponownie.');
  data.books.push({id:uid(),title,child,grade:$('bgrade').value,subject,part,year:$('byear').value,kind:$('btype').value,archived:false});
  await save();render();note('✅ Dodano książkę: '+title);
 });if(action==='book:save')return runAdminAction(target,'Zapisuje książkę…',async()=>{
+ if(!$('bsubject')?.value)throw Error('Wybierz przedmiot z profilu dziecka.');
  const book=data.books.find(b=>b.id===bookId);if(!book)throw Error('Nie znaleziono książki.');
- Object.assign(book,{title:$('btitle').value,child:$('bchild').value,grade:$('bgrade').value,subject:$('bsubject').value,part:$('bpart').value,year:$('byear').value,kind:$('btype').value});
+ Object.assign(book,{title:$('btitle').value,child:$('bchild').value,grade:$('bgrade').value,subject:$('bsubject').value,part:$('bpart').value,year:$('byear').value,kind:$('btype').value,pageNumberPosition:$('booknumberlocation')?.value||book.pageNumberPosition});
  await save();render();note('✅ Zapisano dane książki.');
 });
 if(action==='book:cover')return runAdminAction(target,'Zapisuje okładkę…',async()=>{
@@ -969,7 +1042,7 @@ if(action==='book:questions'){
  const b=data.books.find(x=>x.id===bookId);if(!b)return note('Nie znaleziono książki.');
  return buildBookQuestions(b).catch(err=>{console.error(err);note('❌ '+err.message)});
 }
-if(action==='page:bulk-ai')return runAdminAction(target,'Odczytuje strony AI…',()=>readAllBookPagesAI());
+if(action==='page:bulk-ai')return runAdminAction(target,'Odczytuje strony AI…',async()=>{const b=data.books.find(x=>x.id===bookId);if(!await ensureNumberLocation(b))return;return readAllBookPagesAI()});
 if(action==='page:select-all'||action==='page:select-none'){
  document.querySelectorAll('[data-page-select]').forEach(box=>box.checked=action==='page:select-all');
  updateBookPageSelection();return;
@@ -1025,7 +1098,7 @@ if(action==='page:prev'||action==='page:next')return runAdminAction(target,'Zapi
  const pages=sortedBookPages(bookId),index=pages.findIndex(p=>p.id===current),next=pages[index+delta];
  if(!next){note(delta>0?'To ostatnia strona.':'To pierwsza strona.');return}
  pageId=next.id;render();note('✅ Zapisano zmiany. Strona '+next.number+'.');
-});if(action==='page:delete'){if(!confirm('Usunąć tę stronę?'))return;const p=data.bookPages.find(p=>p.id===pageId);await del('image:'+p.imageId);data.bookPages=data.bookPages.filter(x=>x.id!==pageId);await save();adminTab='book';return render()}if(action==='page:replace'){const f=$('replacefile').files[0];if(!f)return note('Wybierz zdjęcie');const p=data.bookPages.find(p=>p.id===pageId);await put('image:'+p.imageId,await compress(f));return render()}if(action==='page:ai'){const p=data.bookPages.find(p=>p.id===pageId);if(!p)return note('Nie znaleziono strony');try{await saveEditedPage();await recognizePageAI(p,$('ocrlang')?.value||'pol',true);render();note('✅ Odczyt AI gotowy. Sprawdź tekst i numer strony.')}catch(err){note('❌ Nie udało się odczytać zdjęcia. Wcześniejszy tekst zachowano. '+err.message)}return}if(action==='page:ocr'){const p=data.bookPages.find(p=>p.id===pageId);if(!p)return note('Nie znaleziono strony');const lang=$('ocrlang')?.value||'pol';try{await recognizePage(p,lang);render();note('Tekst odczytany. Sprawdź go i zapisz poprawki.')}catch(err){note(err.message)}return}
+});if(action==='page:delete'){if(!confirm('Usunąć tę stronę?'))return;const p=data.bookPages.find(p=>p.id===pageId);await del('image:'+p.imageId);data.bookPages=data.bookPages.filter(x=>x.id!==pageId);await save();adminTab='book';return render()}if(action==='page:replace'){const f=$('replacefile').files[0];if(!f)return note('Wybierz zdjęcie');const p=data.bookPages.find(p=>p.id===pageId);await put('image:'+p.imageId,await compress(f));return render()}if(action==='page:ai'){const p=data.bookPages.find(p=>p.id===pageId);if(!p)return note('Nie znaleziono strony');try{const b=data.books.find(x=>x.id===p.bookId);if(!await ensureNumberLocation(b))return;await saveEditedPage();await recognizePageAI(p,$('ocrlang')?.value||languageOfBook(b),true);render();note('✅ Odczyt AI gotowy. Sprawdź tekst i numer strony.')}catch(err){note('❌ Nie udało się odczytać zdjęcia. Wcześniejszy tekst zachowano. '+err.message)}return}if(action==='page:ocr'){const p=data.bookPages.find(p=>p.id===pageId);if(!p)return note('Nie znaleziono strony');const lang=$('ocrlang')?.value||'pol';try{await recognizePage(p,lang);render();note('Tekst odczytany. Sprawdź go i zapisz poprawki.')}catch(err){note(err.message)}return}
 if(action.startsWith('profile:save:')){const p=data.profiles[c],pin=$('pin_'+c).value;if(pin&&!/^\d{4,8}$/.test(pin))return note('PIN musi mieć 4–8 cyfr');p.grade=$('grade_'+c).value;p.subjects=[...document.querySelectorAll('[data-subject-for="'+c+'"]:checked')].map(x=>x.value);const extra=$('newsubject_'+c).value.trim();if(extra&&!p.subjects.some(x=>x.toLowerCase()===extra.toLowerCase()))p.subjects.push(extra);p.pin=pin;await save();return note('Zapisano profil')}if(a==='hero'&&b==='set'){const id=c,selected=action.split(':')[3];if(!HEROES.some(h=>h[0]===selected))return;data.profiles[id].hero=selected;await save();return render()}if(action==='pin:change'){const pin=$('parentpin').value;if(!/^\d{4,8}$/.test(pin))return note('PIN musi mieć 4–8 cyfr');data.parentPin=pin;await save();return note('Zmieniono PIN')}if(action==='settings:save'){data.settings.xpPractice=Math.max(0,Math.min(30,Number($('xpPractice').value)));data.settings.dailyPracticeLimit=Math.max(0,Math.min(20,Number($('dailyLimit').value)));data.settings.rate=Math.max(.5,Math.min(1.5,Number($('rate').value)));await save();return note('Zapisano ustawienia')}if(action.startsWith('song:open:')){missionId=action.slice(10);tab='song';return render()}if(action.startsWith('song:line:')){const lines=[...document.querySelectorAll('.song-line')];lines.forEach((x,i)=>x.classList.toggle('active',i===Number(c)));return}if(action==='song:add'){const title=$('songtitle').value,url=$('songurl').value;if(!/^https:\/\/(www\.)?(youtube\.com|youtu\.be)\//.test(url))return note('Podaj prawidłowy link YouTube');const lyrics=$('songlyrics')?.value||'';const id=youtubeId(url);if(!id)return note('Podaj prawidłowy adres filmu YouTube');data.settings.songs.push({id:uid(),title,url,lyrics});const song=data.settings.songs.at(-1);data.missions.push({id:uid(),child:$('songchild').value,type:'song',songId:song.id,title:'🎵 Naucz się piosenki: '+title,subject:'Muzyka',status:'todo',points:20,requirePhoto:false,repeat:'none',created:date()});await save();return render()}if(action.startsWith('song:delete:')){data.settings.songs.splice(Number(c),1);await save();return render()}if(action==='backup:export')return exportBackup();if(action==='backup:import')return importBackup();if(action.startsWith('reader:')&&action!=='reader:ocr'){bookId=b;pageId='';tab='reader';return render()}if(action==='reader:ai'){const pg=data.bookPages.find(p=>p.id===($('readerpage')?.value||pageId));if(!pg)return note('Wybierz stronę');try{await recognizePageAI(pg,$('ocrlang')?.value||'pol');pageId=pg.id;render();note('Odczyt AI gotowy. Sprawdź tekst.')}catch(err){note(err.message)}return}if(action==='reader:ocr'){const pg=data.bookPages.find(p=>p.id===($('readerpage')?.value||pageId));if(!pg)return note('Wybierz stronę');try{await recognizePage(pg,$('ocrlang')?.value||'pol');pageId=pg.id;render();note('Tekst rozpoznany — możesz go teraz odsłuchać.')}catch(err){note(err.message)}return}
 if(action==='homework:create'){const p=data.bookPages.find(p=>p.id===$('readerpage').value),b=data.books.find(b=>b.id===bookId),tasks=$('tasks').value.trim();if(!p||!tasks)return note('Wybierz stronę i wpisz zadania');data.missions.push({id:uid(),child:who,type:'homework',title:'Zadania '+tasks,subject:b.subject,bookId:b.id,page:p.number,status:'todo',points:20,requirePhoto:true,repeat:'none',created:date()});await save();tab='home';return render()}if(action==='academy:subjects'){academySubject='';tab='academy';return render()}if(action.startsWith('academy:subject:')){academySubject=c;tab='academy';return render()}if(action.startsWith('lesson:open:')){lessonIndex=Number(c);tab='lesson';return render()}
 if(action.startsWith('discovery:start:'))return discoveryStart(c);if(action==='discovery:restart')return discoveryStart(discoveryGame?.mode||'match');if(action.startsWith('discovery:match:'))return discoveryAnswer(discoveryGame?.items[discoveryGame.index]?.[1]===discoveryGame?.items[Number(c)]?.[1]?discoveryGame.items[discoveryGame.index][1]:'');if(action==='discovery:quick')return discoveryAnswer(target.dataset.answer);if(action.startsWith('lesson:answer:')){const l=LESSONS[lessonIndex],ok=Number(c)===l.correct,el=$('lesson-feedback');if(!el)return;el.textContent=ok?'🎉 Świetnie! '+l.why:'💡 Spróbuj ponownie. '+l.rule;el.className=ok?'answer-ok':'answer-retry';speak(el.textContent,'pl-PL',profile().mentor);return}
@@ -1175,7 +1248,7 @@ function microphone(){
 }
 
 document.addEventListener('click',ev=>{const btn=ev.target.closest('[data-action]');if(btn){if(ev.target.closest('[data-speak]'))return;if(btn.dataset.action==='mic'&&micDragIgnoreClick){ev.preventDefault();ev.stopPropagation();return}handle(btn.dataset.action,btn)}});
-document.addEventListener('change',ev=>{if(ev.target.matches('[data-tr71-page],[data-tr71-book],[data-tr71-chapter]'))return trainingSelectionChange(ev.target);if(ev.target.matches('[data-page-select]'))updateBookPageSelection();if(ev.target.id==='trainingSubject')trainingChooseSubject(ev.target.value);if(ev.target.id==='kind')newExercise();if(ev.target.id==='booktrainingpage')bookExercise();if(ev.target.id==='tracechar')drawTrace();if(ev.target.id==='readerpage'){pageId=ev.target.value;render()}if(ev.target.id==='mentorstyle'){profile().mentor=ev.target.value;save()}});
+document.addEventListener('change',ev=>{if(ev.target.matches('[data-tr71-page],[data-tr71-book],[data-tr71-chapter]'))return trainingSelectionChange(ev.target);if(ev.target.matches('[data-page-select]'))updateBookPageSelection();if(ev.target.id==='bchild')refreshBookSubjectSelect();if(ev.target.id==='page-filter')filterBookPages(ev.target.value);if(ev.target.id==='trainingSubject')trainingChooseSubject(ev.target.value);if(ev.target.id==='kind')newExercise();if(ev.target.id==='booktrainingpage')bookExercise();if(ev.target.id==='tracechar')drawTrace();if(ev.target.id==='readerpage'){pageId=ev.target.value;render()}if(ev.target.id==='mentorstyle'){profile().mentor=ev.target.value;save()}});
 async function start(){try{data=await get('state')||initial();data.bookPages??=[];data.settings.rate??=1;data.settings.songs??=[];await save();render();if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(console.warn)}catch(err){app.innerHTML=`<main class="wrap"><section class="card"><h2>Nie udało się uruchomić Akademii</h2><p>${e(err.message)}</p><p>Włącz przechowywanie danych w przeglądarce i otwórz stronę ponownie.</p></section></main>`}}
 start();
 

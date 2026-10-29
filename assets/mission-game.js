@@ -79,9 +79,9 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
  const selectionIds=()=>new Set(scopePages().map(p=>String(p.number)));
  const fingerprint=t=>norm(t.question)+'|'+norm(t.answer);
  function readBank(){try{const v=JSON.parse(localStorage.getItem(bankKey())||'[]');return Array.isArray(v)?v:[]}catch{return []}}
- function writeBank(items){try{localStorage.setItem(bankKey(),JSON.stringify(items.slice(-1500)))}catch(e){console.warn('Nie mozna zapisac banku zadan',e)}}
+ function writeBank(items){try{localStorage.setItem(bankKey(),JSON.stringify(items.slice(-1800)))}catch(e){console.warn('Nie mozna zapisac banku zadan',e)}}
  function storeTasks(items,page=null){
-  const bank=readBank();const ids=page?[String(page.number)]:[...selectionIds()];
+  const bank=readBank();const ids=page?[String(page.number),String(page.id)]:[...selectionIds()];
   for(const t of items){
    if(!t||!t.question||!t.answer||!Array.isArray(t.options))continue;
    const key=fingerprint(t);const prev=bank.find(x=>x.key===key);

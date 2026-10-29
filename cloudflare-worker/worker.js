@@ -73,38 +73,42 @@ async function viaWorkersAI(env, question, style, maxTokens) {
   return text;
 }
 // V69: OCR multimodalny z trzema kolejnymi, NIEZALEZNYMI probami.
-const OCR_VISION_PROMPT = 'Przepisz wiernie cały tekst widoczny na zdjęciu strony podręcznika, zachowując polskie znaki i podział na wiersze. Jeśli widzisz drukowany numer strony w górnym lub dolnym rogu, przepisz go jako osobną linię na początku lub końcu. Nie dodawaj komentarzy ani wymyślonego tekstu.';
+const OCR_VISION_PROMPT = 'Przepisz wiernie cały tekst widoczny na zdjęciu strony podręcznika, zachowując polskie znaki i podział na wiersze. Nie wymyślaj tekstu.';
+function ocrVisionPrompt(position){
+  const zone=position==='top'?'GÓRNEJ':'DOLNEJ';
+  return OCR_VISION_PROMPT+' Osobno znajdź DRUKOWANY NUMER STRONY w '+zone+' części kartki, w pobliżu jej lewego lub prawego rogu. Nie pomyl z numerem ćwiczenia, nagrania, lekcji ani zadania. Jeśli wyraźnie widzisz numer drukowanej strony w wybranym obszarze, dopisz na samym końcu [[PAGE_NUMBER:30]] (zamień 30 na prawdziwy numer). Jeśli nie widzisz pewnego numeru, dopisz [[PAGE_NUMBER:UNKNOWN]]. Zachowaj tekst z całego zdjęcia, a znacznik daj tylko na końcu.';
+}
 function checkedOcrText(input) {
   const text=String(input||'').trim();
   if (text.length<8 || /^(nie mogę|nie jestem w stanie|sorry|i cannot|i can't|unable to|brak tekstu)/i.test(text)) throw Error('no readable OCR text');
   return text;
 }
-async function ocrViaGemini(env, image, mimeType){
+async function ocrViaGemini(env, image, mimeType,prompt){
   if(!env.GEMINI_API_KEY) throw Error('key not configured');
   const response=await fetchWithLimit('https://generativelanguage.googleapis.com/v1beta/models/'+GEMINI_MODEL+':generateContent',
     {method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':env.GEMINI_API_KEY},
-    body:JSON.stringify({contents:[{role:'user',parts:[{text:OCR_VISION_PROMPT},{inline_data:{mime_type:mimeType,data:image}}]}],
+    body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt},{inline_data:{mime_type:mimeType,data:image}}]}],
       generationConfig:{maxOutputTokens:2800}})},17000);
   if(!response.ok)throw Error('HTTP '+response.status);
   return checkedOcrText(extractedGemini(await response.json()));
 }
-async function ocrViaGroqVision(env, image, mimeType){
+async function ocrViaGroqVision(env, image, mimeType,prompt){
   if(!env.GROQ_API_KEY) throw Error('key not configured');
   // GPT-OSS-120B nie obsluguje zdjec; do OCR osobny model multimodalny Groq.
   const response=await fetchWithLimit('https://api.groq.com/openai/v1/chat/completions',
     {method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+env.GROQ_API_KEY},
     body:JSON.stringify({model:'qwen/qwen3.8-27b',messages:[{role:'user',content:[
-      {type:'text',text:OCR_VISION_PROMPT},{type:'image_url',image_url:{url:'data:'+mimeType+';base64,'+image}}
+      {type:'text',text:prompt},{type:'image_url',image_url:{url:'data:'+mimeType+';base64,'+image}}
     ]}],temperature:0.1,max_completion_tokens:2800})},17000);
   if(!response.ok)throw Error('HTTP '+response.status);
   const data=await response.json();
   return checkedOcrText(data?.choices?.[0]?.message?.content);
 }
-async function ocrViaWorkersVision(env,image,mimeType){
+async function ocrViaWorkersVision(env,image,mimeType,prompt){
   if(!env.AI?.run)throw Error('AI binding not configured');
   // Gemma 4 posiada wejscie obrazu: Workers AI ImageTextToText (image + messages).
   const result=await Promise.race([
-    env.AI.run(WORKERS_MODEL,{messages:[{role:'user',content:OCR_VISION_PROMPT}],
+    env.AI.run(WORKERS_MODEL,{messages:[{role:'user',content:prompt}],
       image:'data:'+mimeType+';base64,'+image,max_tokens:2800,
       chat_template_kwargs:{enable_thinking:false}}),
     new Promise((_,reject)=>setTimeout(()=>reject(Error('timeout')),17000))
@@ -116,9 +120,10 @@ async function ocrWithFallback(env, body){
   const mimeType=String(body.mimeType||'image/jpeg');
   if(!['image/jpeg','image/png','image/webp'].includes(mimeType))return send({error:'Nieobsługiwany format zdjęcia'},400);
   if(!image||image.length>4500000)return send({error:'Nieprawidłowy rozmiar zdjęcia'},400);
+  const prompt=ocrVisionPrompt(body.pageNumberPosition==='top'?'top':'bottom');
   const providers=[['gemini',ocrViaGemini],['groq-vision',ocrViaGroqVision],['workers-vision',ocrViaWorkersVision]];
   for(const [name,run] of providers){
-    try {return send({text:await run(env,image,mimeType)},200,name)}
+    try {return send({text:await run(env,image,mimeType,prompt)},200,name)}
     catch(err){console.warn('OCR '+name+' failed:',String(err?.message||err).slice(0,80))}
   }
   return send({error:'Żaden z trzech modeli AI nie odczytał zdjęcia. Spróbuj ponownie później.'},503);
