@@ -743,3 +743,41 @@ button[data-action^="book:"][disabled],button[data-action^="page:"][disabled]{op
 .head .tr72-sound-toggle{font-size:1.15rem;min-width:46px;min-height:46px;padding:7px 10px;flex-shrink:0}
 .mic{z-index:9999!important;touch-action:none;user-select:none;-webkit-user-select:none}
 @media(prefers-reduced-motion:reduce){.v73-training *, .v73-portal img{animation:none!important;transition:none!important}}
+
+
+/* V74: tylko panel mamy, książki, zatwierdzanie i raport */
+.v74-book .admin-cover,.v74-cover{display:flex;flex-direction:column;align-items:center;gap:10px}
+.v74-cover .v74-cover-button{width:min(100%,310px);box-sizing:border-box;flex:none;min-height:58px}
+.v74-book h3{margin-top:20px}
+.v74-book-details,.v74-chapter-details{border:2px solid #4777a8;border-radius:16px;padding:12px;margin:16px 0;background:#11244f}
+.v74-book-details>summary,.v74-chapter-details>summary{font-size:1.06rem;font-weight:800;cursor:pointer;padding:8px 6px;color:#ffdc86}
+.v74-book-details-body{padding:10px 5px 5px}
+.v74-admin-row{display:flex;align-items:stretch;gap:10px;flex-wrap:nowrap;margin:12px 0}
+.v74-admin-row>*{flex:1 1 0;min-width:0;box-sizing:border-box;text-align:center;white-space:normal}
+.v74-admin-row .v74-ocr-read{display:flex}.v74-admin-row .v74-ocr-read>*{flex:1}
+.v74-admin-row button{margin:0;min-height:54px;padding:9px 7px;font-size:clamp(.84rem,3vw,1rem)}
+.v74-book-ocr,.v74-book-add,.v74-bank{padding:12px 0;border-top:1px solid #405b80;margin-top:12px}
+.v74-book-ocr select{max-width:100%;min-height:48px;margin:9px 0}
+.v74-book-ocr small{display:block;margin-top:9px}
+.v74-pages .v74-page-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;padding:12px 8px;margin:10px 0;border:1px solid #405c84;border-radius:14px}
+.v74-pages .v74-page-info{min-width:0}.v74-pages .v74-page-info small{overflow-wrap:anywhere}
+.v74-pages .v74-page-row button{padding:11px 10px;min-height:48px}
+.v74-pages .admin-page-check{max-width:72px}.v74-pages .admin-page-status{font-size:.79rem;padding:5px}
+.v74-pages .admin-page-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.v74-pages .admin-page-actions select{width:100%;max-width:100%}
+.v74-page-text{display:block;width:100%!important;max-width:none!important;min-height:380px;box-sizing:border-box;padding:15px;line-height:1.65}
+.v74-number-field{display:grid;grid-template-columns:1fr minmax(95px,40%);align-items:center;gap:10px;margin:15px 0}
+.v74-number-field label{font-weight:700}.v74-number-field input{box-sizing:border-box;width:100%}
+.v74-page-meta{grid-template-columns:repeat(2,minmax(0,1fr))}
+.v74-page-edit .pagephoto{max-width:100%}.v74-delete-row{margin-top:18px}
+.v74-bank-review .v74-review-page{margin:14px 0;padding:10px;border:1px solid #577aaf;border-radius:14px;background:#10265c}
+.v74-bank-review details>summary{padding:10px 6px;font-weight:800;cursor:pointer;overflow-wrap:anywhere}
+.v74-bank-review .v74-question{margin:9px 0;padding:10px;background:#0b1c43;border-radius:12px}
+.v74-qedit label{display:block;margin:10px 0;font-weight:700}
+.v74-qedit input,.v74-qedit textarea{display:block;width:100%;box-sizing:border-box;margin-top:5px;min-height:47px;font-size:1rem;line-height:1.45}
+.v74-qedit textarea{resize:vertical;min-height:86px}
+.v74-qedit .v74-source{border-left:4px solid #f3bf58;padding:7px 11px;margin:12px 0;background:#192855}
+.v74-source small{color:#d8e2f4}.v74-source blockquote{padding:8px;margin:6px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.v74-qbuttons{gap:5px}.v74-qbuttons button{font-size:.86rem}.v74-qbuttons button:disabled{opacity:.45;filter:grayscale(1)}
+.v74-report .v74-report-count{align-self:center}.v74-report .item{margin:9px 0}
+@media(max-width:370px){.v74-admin-row{gap:5px}.v74-admin-row button{font-size:.78rem}.v74-pages .v74-page-row{gap:5px;padding:9px 5px}}
