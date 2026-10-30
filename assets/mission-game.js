@@ -1,3 +1,5 @@
+import {speakSequence,stopVoice,setVoiceState} from './voice.js?v=76-k2';
+import {cleanEnglish76,vocabulary76,checkedVocabulary76,englishInstruction76,makeVocabularyTasks76,spokenMatch76,englishTaskSafe76} from './english76.js?v=76-k2';
 // V53_TEST_FIXES_01
 // V53_CONSOLIDATED_CROSSING_CHAPTERS
 // V55_FULL_REVIEW
@@ -11,7 +13,8 @@
 // V43_JSON_REPAIR
 // V42_CHAPTER_SELECTION
 // V41: interaktywne misje z podrecznikow, AI generuje tresc, aplikacja mechanike.
-export function mountMissionGame(root,{books,pages,ask,speak,reward,child,childGrade='2',initialBookId,batchGenerate=null,launch=null,onBack=null}){
+export function mountMissionGame(root,{books,pages,ask,speak,reward,child,childGrade='2',initialBookId,batchGenerate=null,launch=null,onBack=null,transient=false}){
+ const localStorage=transient?((persistent)=>{const memory=new Map();return {getItem:key=>memory.has(key)?memory.get(key):persistent.getItem(key),setItem:(key,value)=>memory.set(key,String(value)),removeItem:key=>memory.set(key,null)}})(globalThis.localStorage):globalThis.localStorage;
  const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const norm=s=>String(s??'').trim().toLocaleLowerCase('pl-PL').replace(/\s*,\s*/g,', ').replace(/\s+/g,' ');
  const btn=(label,act,cls='')=>`<button type="button" class="${cls}" data-mg="${act}">${label}</button>`;
@@ -25,14 +28,14 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,childG
  const sourceBook=p=>books.find(b=>b.id===p.bookId);
  const sourceLabel=p=>{const b=sourceBook(p);return (b?.title||'Materiał bez tytułu')+' · strona '+p.number};
  const comparable=(a,b)=>String(a||'').trim().toLocaleLowerCase('pl-PL')===String(b||'').trim().toLocaleLowerCase('pl-PL');
- const sharedChapterPages=chapter=>{const base=book();return pages.filter(p=>p.text?.trim()&&comparable(p.chapter,chapter)&&books.some(b=>b.id===p.bookId&&!b.archived&&b.child===base?.child&&comparable(b.subject,base?.subject)&&String(b.grade||'')===String(base?.grade||''))).sort((a,b)=>String(sourceBook(a)?.title||'').localeCompare(String(sourceBook(b)?.title||''))||a.number-b.number)};
+ const sharedChapterPages=chapter=>{const base=book();return pages.filter(p=>p.text?.trim()&&comparable(p.chapter,chapter)&&books.some(b=>b.id===p.bookId&&!b.archived&&comparable(b.subject,base?.subject)&&String(b.grade||'')===String(base?.grade||''))).sort((a,b)=>String(sourceBook(a)?.title||'').localeCompare(String(sourceBook(b)?.title||''))||a.number-b.number)};
  const material=()=>scopePages().map(p=>`STRONA ${p.number}${p.chapter?' | DZIAŁ '+p.chapter:''}: ${p.text}`).join('\n').slice(0,15000);
  const themes={polski:['🕵️ Detektyw Spider-Mana','🦹 Pułapka Lokiego','🎙️ Laboratorium czytania','🧩 Szyfr Avengersów','✍️ Dyktando Kapitana','🔠 Sylaby i głoski','📝 Krzyżówka'],matematyka:['🔐 Sejf Iron Mana','🛒 Sklep Avengersów','⏰ Zegar misji','📐 Geometria','🧮 Działania','🧠 Logiczne zagadki'],angielski:['🎧 Słuchanie','🎙️ Wymowa','🃏 Memory','🧩 Rozsypanki','✍️ Pisownia','🦹 Pułapka Lokiego','🗣️ Dialogi']};
  const plan={polski:['detective','loki','reading','order','dictation','syllables','crossword','choice'],matematyka:['safe','shop','clock','choice','safe','order','choice','shop'],angielski:['listening','memory','order','spelling','loki','reading','choice','listening']};
  const storeKey=()=>`academy-v41-${child}-${bookId}-${scope}`;
 
  function chapterOf(p){return String(p.chapter||'').trim()}
- function chapters(){const base=book();return [...new Set(pages.filter(p=>p.text?.trim()&&books.some(b=>b.id===p.bookId&&!b.archived&&b.child===base?.child&&comparable(b.subject,base?.subject)&&String(b.grade||'')===String(base?.grade||''))).map(chapterOf).filter(Boolean))]}
+ function chapters(){const base=book();return [...new Set(pages.filter(p=>p.text?.trim()&&books.some(b=>b.id===p.bookId&&!b.archived&&comparable(b.subject,base?.subject)&&String(b.grade||'')===String(base?.grade||''))).map(chapterOf).filter(Boolean))]}
  function scopePages(){
   if(launch){const ids=new Set(launch.pageIds||[]);return pages.filter(p=>ids.has(p.id)&&p.text?.trim()).sort((a,b)=>String(sourceBook(a)?.title||'').localeCompare(String(sourceBook(b)?.title||''),'pl')||a.number-b.number)}
   const ps=pagesFor();if(scope==='all')return ps;
@@ -72,18 +75,118 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,childG
   root.querySelectorAll('[data-mg-chapter]').forEach(el=>el.onclick=()=>{scope='chapter:'+el.dataset.mgChapter;setup()});
  }
  // V48_BANK_AI: zapis lokalny w przegladarce, osobny dla kazdego dziecka i podrecznika
- const bankKey=()=>`academy-v48-bank-${child}-${bookId}`;
+ // V76_WORDS_AND_SPEECH: wspolny lektor EN -> PL, slowka i mowienie.
+ let v76VocabOnly=launch?.mode==='vocab';
+ function v76AttachInstruction(t){if(subject(t)==='angielski'){const x=englishInstruction76(t);t.instructionEn=x.en;t.instructionPl=x.pl;t.question=x.en;t.questionPl=x.pl;}return t}
+ function v76SayInstruction(t){
+  const x=englishInstruction76(t),current=t;
+  return speakSequence([{text:x.en,lang:'en-US',rate:.84},...(mode!=='test'?[{text:x.pl,lang:'pl-PL',rate:.92}]:[])],{isCurrent:()=>root.isConnected&&task()===current});
+ }
+ function v76VocabularyPool(ps){const out=[];for(const p of ps){const b=books.find(b=>b.id===p.bookId);if(!/ang|english/i.test(b?.subject||''))continue;for(const entry of vocabulary76(p.text))if(!out.some(x=>x.en===entry.en))out.push({...entry,sourcePageId:p.id,sourceBookId:p.bookId,pageNumber:p.number,sourceTitle:sourceLabel(p)})}return out}
+ async function v76StartVocabulary(){
+  if(busy)return;const ps=scopePages().filter(p=>/ang|english/i.test(books.find(b=>b.id===p.bookId)?.subject||''));
+  if(!ps.length){root.innerHTML='<section class="mg-panel"><h2>Wybierz strony z angielskiego</h2><p>Słówka korzystają z odczytanego tekstu wybranych stron.</p>'+btn('← Wróć','back')+'</section>';return}
+  busy=true;const prepareEpoch=++stageEpoch;root.innerHTML='<section class="mg-panel"><h2>🃏 Przygotowuję słówka…</h2></section>';
+  try{
+   const key='academy-v76-words-rotation-'+child+'-'+ps.map(p=>p.id).join('|').slice(0,150);let rotation=0;try{rotation=Number(localStorage.getItem(key)||0)||0}catch{}
+   const chosen=Array.from({length:Math.min(2,ps.length)},(_,i)=>ps[(Math.abs(rotation)+i)%ps.length]);let pool=v76VocabularyPool(chosen);
+   if(pool.length<3){for(const p of chosen){
+    try{
+     const text=String(p.text||'').slice(0,2400),cacheKey='academy-v76-vocabulary-'+child+'-'+p.id;
+     let cached=null;try{cached=JSON.parse(localStorage.getItem(cacheKey)||'null')}catch{}
+     let list=cached?.text===text?checkedVocabulary76(cached.items,text):[];
+     if(!list.length){const raw=String(await ask('Wybierz do 20 podstawowych angielskich slow lub krotkich zwrotow DOSLOWNIE obecnych w materiale. Dodaj ich jednoznaczne polskie znaczenia zgodne z kontekstem. Nie dodawaj slow spoza strony, imion ani tresci polecen. TYLKO JSON {"vocabulary":[{"en":"cat","pl":"kot"}]}. MATERIAL: '+text,16000)).replace(/```(?:json)?/gi,'').replace(/```/g,'');const obj=JSON.parse(raw.slice(raw.indexOf('{'),raw.lastIndexOf('}')+1));list=checkedVocabulary76(obj.vocabulary,text);if(list.length)try{localStorage.setItem(cacheKey,JSON.stringify({text,items:list}))}catch{}}
+     for(const item of list)if(!pool.some(x=>x.en===item.en))pool.push({...item,sourcePageId:p.id,sourceBookId:p.bookId,pageNumber:p.number,sourceTitle:sourceLabel(p)});
+    }catch(err){console.warn('Słówka: nie udało się uzupełnić strony',p.number)}
+   }}
+   if(!root.isConnected||stageEpoch!==prepareEpoch)return;
+   if(!pool.length)throw Error('Na wybranych stronach nie znalazłem jeszcze słówek do bezpiecznego ćwiczenia. Wybierz inną stronę albo spróbuj ponownie przy dostępnym AI.');
+   tasks=makeVocabularyTasks76(pool,rotation,10).map(t=>({...t,vocab76:true}));idx=0;points=0;award=false;mode='game';reset();remember();try{localStorage.setItem(key,String(rotation+1))}catch{}draw();
+  }catch(err){root.innerHTML='<section class="mg-panel"><h2>Nie udało się przygotować słówek</h2><p>'+escape(err.message)+'</p>'+btn('Spróbuj ponownie','start')+btn('← Wróć','back')+'</section>'}
+  finally{busy=false}
+ }
+ function v76MixWords(all,ps){
+  const original=shuffle(all).slice(0,10);if(mode==='test'||childGrade==='P')return original.map(v76AttachInstruction);
+  const pool=v76VocabularyPool(ps);if(!pool.length)return original.map(v76AttachInstruction);
+  const key='academy-v76-mixed-words-'+child+'-'+ps.map(p=>p.bookId).join('|');let rotation=0;try{rotation=Number(localStorage.getItem(key)||0)||0}catch{}
+  const words=makeVocabularyTasks76(pool,rotation,10);const oral=words.findIndex(t=>['vocab-speak','vocab-repeat','vocab-reading'].includes(t.type));if(oral>0)words.unshift(...words.splice(oral,1));let j=0;
+  for(let i=2;i<original.length;i+=3){if(words[j])original[i]={...words[j++],vocab76:true};}
+  try{localStorage.setItem(key,String(rotation+1))}catch{}
+  return original.map(v76AttachInstruction);
+ }
+ function v76WordRecord(t){
+  const key='academy-v76-word-stats-'+child+'-'+(t.sourceBookId||bookId);let data={};try{const x=JSON.parse(localStorage.getItem(key)||'{}');if(x&&typeof x==='object'&&!Array.isArray(x))data=x}catch{}
+  const id=t.wordEn||t.answer,old=data[id]||{seen:0,correct:0};data[id]={seen:old.seen+1,correct:old.correct+(t.correct?1:0),last:Date.now(),kind:t.type};try{localStorage.setItem(key,JSON.stringify(data))}catch{}
+ }
+ function v76WordStage(t){
+  const instruction=englishInstruction76(t);
+  let html='<div class="v76-word-card"><div class="v76-word-icon" aria-hidden="true">'+escape(t.picture||({'vocab-write':'✍️','vocab-speak':'🎙️','vocab-repeat':'🗣️','vocab-listen':'🎧','vocab-reading':'📖','vocab-choice':'🃏','vocab-meaning':'💡'}[t.type])||'🃏')+'</div><h3>'+escape(instruction.en)+'</h3>'+(mode!=='test'?'<p class="mg-translation">'+escape(instruction.pl)+'</p>':'');
+  if(['vocab-write','vocab-speak','vocab-choice'].includes(t.type))html+='<div class="v76-word-prompt">'+escape(t.promptPl)+'</div>';
+  if(['vocab-meaning','vocab-repeat'].includes(t.type))html+='<div class="v76-word-prompt" lang="en">'+escape(t.wordEn)+'</div>';
+  if(t.type==='vocab-reading')html+='<div class="v76-reading-words" lang="en">'+(t.readWords||[]).map(w=>'<span>'+escape(w)+'</span>').join('')+'</div>';
+  if(['vocab-choice','vocab-meaning'].includes(t.type))html+='<div class="mg-choices">'+t.options.map((v,i)=>btn(escape(v),'pick:'+i,'mg-choice')).join('')+'</div>';
+  if(['vocab-write','vocab-listen'].includes(t.type)){if(t.type==='vocab-listen')html+=btn('🔊 Posłuchaj słowa','v76-word-model','mg-primary');html+='<input id="mg-written" lang="en" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Wpisz po angielsku">'+btn('✓ Sprawdź','written','mg-primary');}
+  if(['vocab-speak','vocab-repeat','vocab-reading'].includes(t.type)){
+   if(t.type!=='vocab-speak'||t.v76SpeechTried)html+=btn('🔊 Posłuchaj wzoru powoli','v76-word-model');
+   html+=btn(t.v76Recording?'⏹ Zakończ wypowiedź':'🎙️ Odpowiedz po angielsku','v76-word-record','mg-primary '+(t.v76Recording?'v76-recording':''));
+   if(t.v76Transcript)html+='<p class="v76-heard">Usłyszałem: '+escape(t.v76Transcript)+'</p>';
+   if(t.v76Error)html+='<p class="mg-feedback" role="status">'+escape(t.v76Error)+'</p>';
+  }
+  html+='</div>';
+  if(!answered)html+=btn('Pomiń bez zaliczenia — następne zadanie','skip');
+  if(answered)html+='<div class="mg-feedback v76-success">🌟 Świetnie! '+escape(t.wordEn+' — '+t.promptPl)+'</div>'+btn(idx===tasks.length-1?'🏆 Zakończ misję':'➡️ Następne zadanie','next','mg-primary');
+  return html+tutorPanel();
+ }
+ function v76WordModel(t){const words=t.type==='vocab-reading'?(t.readWords||[]):[t.wordEn];return speakSequence(words.flatMap((text,i)=>[{text,lang:'en-US',rate:.68},...(t.v76SpeechTried?[{text:t.type==='vocab-reading'?(t.readMeanings?.[i]||''):(t.promptPl||''),lang:'pl-PL',rate:.87}]:[])]),{isCurrent:()=>task()===t&&root.isConnected})}
+ function v76WordVoice(t){
+  if(readingRec){try{readingRec.stop()}catch{}return}
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){t.v76Error='Rozpoznawanie mowy nie jest dostępne w tej przeglądarce. Możesz pominąć zadanie bez zaliczenia.';draw();return}
+  stopVoice();const current=t,epoch=stageEpoch;let transcript='',got=false,failed=false;
+  const r=new SR();r.lang='en-US';r.maxAlternatives=5;r.interimResults=false;readingRec=r;t.v76Error='';
+  const isCurrent=()=>root.isConnected&&task()===current&&epoch===stageEpoch;
+  r.onstart=()=>{if(isCurrent()&&readingRec===r&&!r.__v76Cancelled){t.v76Recording=true;setVoiceState('listening');draw()}};
+  r.onresult=e=>{if(!isCurrent())return;const candidates=Array.from(e.results?.[0]||[]).map(x=>x.transcript||'');transcript=candidates.find(s=>spokenMatch76(t.answer,s))||candidates[0]||'';got=!!transcript.trim()};
+  r.onerror=e=>{failed=true;if(isCurrent()){t.v76Error=/not-allowed|service-not-allowed/.test(e.error)?'Zezwól na dostęp do mikrofonu.':'Nie udało się rozpoznać słów. Spróbuj ponownie.';t.v76Recording=false;setVoiceState('idle');draw()}};
+  r.onend=()=>{
+   if(readingRec===r)readingRec=null;if(!isCurrent())return;t.v76Recording=false;setVoiceState('idle');
+   if(r.__v76Cancelled)return draw();
+   if(!got){if(!failed)t.v76Error='Nie usłyszałem wypowiedzi. Spróbuj ponownie.';draw();return}
+   t.v76Transcript=transcript;t.v76SpeechTried=true;
+   if(spokenMatch76(t.answer,transcript)){answer(t.answer);return}
+   wrongAttempts++;t.correct=false;logDifficulty(t,'próba wymowy: '+transcript);audioCue(false);t.v76Error='Spróbuj jeszcze raz. Posłuchaj spokojnego wzoru i powtórz słowa.';draw();if(mode!=='test')v76WordModel(t);
+  };
+  try{setVoiceState('starting');r.start()}catch(err){readingRec=null;t.v76Recording=false;t.v76Error='Nie udało się uruchomić mikrofonu. Spróbuj ponownie.';setVoiceState('idle');draw()}
+ }
+ function v76EnglishCrossword(p){
+  const pool=vocabulary76(p.text).filter(x=>/^[a-z]{3,10}$/.test(x.en));
+  if(pool.length<4)return null;
+  const key='academy-v76-cross-'+child+'-'+bookId+'-'+p.id;let runs=0;try{runs=Number(localStorage.getItem(key)||0)||0}catch{}
+  const candidates=[...pool.slice(runs%pool.length),...pool.slice(0,runs%pool.length)].filter(x=>x.en.length<=8);
+  for(const target of candidates){const used=new Set(),entries=[];let valid=true;
+   for(const letter of target.en){const match=pool.find(x=>!used.has(x.en)&&x.en.includes(letter));if(!match){valid=false;break}used.add(match.en);entries.push({word:match.en,index:match.en.indexOf(letter),clue:'Jak jest po angielsku „'+match.pl+'”?'})}
+   if(!valid)continue;
+   const left=Math.max(...entries.map(x=>x.index)),width=Math.max(...entries.map(x=>left-x.index+x.word.length));
+   const grid=entries.map((entry,row)=>Array.from({length:width},(_,col)=>{const at=col-(left-entry.index);return at>=0&&at<entry.word.length?{letter:entry.word[at],cross:col===left,row,col}:null}));
+   try{localStorage.setItem(key,String(runs+1))}catch{}
+   const t={type:'crossword',question:'Solve the crossword. The highlighted letters will form the secret word.',questionPl:'Rozwiąż krzyżówkę. Wyróżnione litery utworzą hasło.',answer:target.en,crossInfo:target.en+' — '+target.pl,crossWords:entries,crossGrid:grid,crossColumn:left,crossTyped:entries.map(()=>''),options:[],pageNumber:p.number,done:false,correct:false};return t;
+  }
+  return null;
+ }
+ document.addEventListener('academy:voice-stop',()=>{if(!root.isConnected)return;if(tutorBusy){stageEpoch++;tutorBusy=false}if(!readingRec)return;const r=readingRec;r.__v76Cancelled=true;readingRec=null;const t=task();if(t){t.v76Recording=false;t.readActive=false}try{r.abort()}catch{}draw()});
+
+ const bankKey=()=>`academy-v48-bank-${books.find(b=>b.id===bookId)?.child||child}-${bookId}`;
  const sessionKey=()=>`academy-v49-session-${child}-${launch&&initialBookId?initialBookId:bookId}`;
  const remember=()=>{try{localStorage.setItem(sessionKey(),JSON.stringify({scope,mode,tasks,idx,points,award}))}catch{}};
- function resume(){try{const x=JSON.parse(localStorage.getItem(sessionKey())||'null');if(!x||!x.tasks?.length)return setup();scope=x.scope;mode=x.mode;tasks=x.tasks;tasks.forEach(t=>{t.readActive=false});if(tasks.some(t=>t.type==='reading')){const before=tasks.slice(0,x.idx).filter(t=>t.type!=='reading').length;tasks=tasks.filter(t=>t.type!=='reading');x.idx=Math.min(before,Math.max(0,tasks.length-1))}idx=x.idx;points=x.points;award=x.award;paused=false;reset();draw()}catch{setup()}}
+ function resume(){try{const x=JSON.parse(localStorage.getItem(sessionKey())||'null');if(!x||!x.tasks?.length)return setup();scope=x.scope;mode=x.mode;tasks=x.tasks.map(v76AttachInstruction);tasks.forEach(t=>{t.readActive=false});if(tasks.some(t=>t.type==='reading')){const before=tasks.slice(0,x.idx).filter(t=>t.type!=='reading').length;tasks=tasks.filter(t=>t.type!=='reading');x.idx=Math.min(before,Math.max(0,tasks.length-1))}idx=x.idx;points=x.points;award=x.award;paused=false;reset();draw()}catch{setup()}}
  const selectionIds=()=>new Set(scopePages().map(p=>String(p.number)));
  const fingerprint=t=>norm(t.question)+'|'+norm(t.answer);
  function v75MatchesPage(x,p){
   const ids=(x.pageIds||[]).map(String),linked=pages.filter(q=>q.bookId===p.bookId&&ids.includes(String(q.id)));
   return linked.length?linked.some(q=>String(q.id)===String(p.id)):ids.includes(String(p.number));
  }
- function readBank(){try{const v=JSON.parse(localStorage.getItem(bankKey())||'[]');return Array.isArray(v)?v:[]}catch{return []}}
- function writeBank(items){try{localStorage.setItem(bankKey(),JSON.stringify(items.slice(-1800)))}catch(e){console.warn('Nie mozna zapisac banku zadan',e)}}
+ function readBank(){try{const v=JSON.parse(localStorage.getItem(bankKey())||'[]');if(!Array.isArray(v))return [];let stats={};try{stats=JSON.parse(localStorage.getItem('academy-v76-question-stats-'+child+'-'+bookId)||'{}')||{}}catch{};let legacy=[];try{legacy=JSON.parse(localStorage.getItem('academy-v48-bank-'+child+'-'+bookId)||'[]')}catch{};if(!Array.isArray(legacy))legacy=[];return v.map(x=>{const old=legacy.find(t=>t.key===x.key);return {...x,...(child===books.find(b=>b.id===bookId)?.child?{}:{seen:old?.seen||0,wrong:old?.wrong||0,last:old?.last||0}),...(stats[x.key]||{})}})}catch{return []}}
+ function writeBank(items){try{let previous=[];try{const v=JSON.parse(localStorage.getItem(bankKey())||'[]');if(Array.isArray(v))previous=v}catch{};localStorage.setItem(bankKey(),JSON.stringify(items.slice(-1800).map(x=>{const old=previous.find(p=>p.key===x.key);return {...x,seen:old?.seen||0,wrong:old?.wrong||0,last:old?.last||0}})))}catch(e){console.warn('Nie mozna zapisac banku zadan',e)}}
  function storeTasks(items,page=null){
   const bank=readBank();const ids=page?[String(page.number),String(page.id)]:[...selectionIds()];
   for(const t of items){
@@ -100,12 +203,11 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,childG
   return eligible.slice(0,count).map(x=>({...x.task,_bankKey:x.key,done:false,correct:false}));
  }
  function recordResult(t){
+  if(t.vocab76){v76WordRecord(t);return}
+
   const sourceId=t?.sourceBookId||bookId,owner=books.find(b=>b.id===sourceId)?.child||child;
-  const key='academy-v48-bank-'+child+'-'+sourceId;
-  let bank=[];try{bank=JSON.parse(localStorage.getItem(key)||'[]')}catch{return}
-  if(!Array.isArray(bank))return;
-  const x=bank.find(v=>v.key===(t._bankKey||fingerprint(t)));
-  if(x){x.seen=(x.seen||0)+1;if(!t.correct)x.wrong=(x.wrong||0)+1;else x.wrong=Math.max(0,(x.wrong||0)-1);x.last=Date.now();try{localStorage.setItem(key,JSON.stringify(bank.slice(-1800)))}catch(err){console.warn('Nie udalo sie zapisac postepu',err)}}
+  const contentKey='academy-v48-bank-'+owner+'-'+sourceId,statsKey='academy-v76-question-stats-'+child+'-'+sourceId;
+  try{const bank=JSON.parse(localStorage.getItem(contentKey)||'[]'),key=t._bankKey||fingerprint(t);let all=JSON.parse(localStorage.getItem(statsKey)||'{}');if(!all||Array.isArray(all)||typeof all!=='object')all={};let legacy=[];try{legacy=JSON.parse(localStorage.getItem('academy-v48-bank-'+child+'-'+sourceId)||'[]')}catch{};const old=all[key]||((owner===child?bank:Array.isArray(legacy)?legacy:[]).find(x=>x.key===key)||{});all[key]={seen:(old.seen||0)+1,wrong:t.correct?Math.max(0,(old.wrong||0)-1):(old.wrong||0)+1,last:Date.now()};localStorage.setItem(statsKey,JSON.stringify(all))}catch(err){console.warn('Nie udało się zapisać postępu',err)}
  }
  // V62: pytanie musi mieć jedną poprawną odpowiedź i, gdy dotyczy tekstu,
  // odpowiedź rzeczywiście musi dać się znaleźć w dostarczonej czytance.
@@ -119,6 +221,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,childG
   return !!needle && (' '+hay+' ').includes(' '+needle+' ');
  }
  function reliableTask(t,p){
+  if(subject()==='angielski'&&!englishTaskSafe76(t))return false;
   if(t?.type==='crossword'){
    if(typeof t.crossInfo!=='string'||!Array.isArray(t.crossWords)||!t.crossWords.length||!Array.isArray(t.crossGrid)||t.crossGrid.length!==t.crossWords.length||!Number.isInteger(t.crossColumn)||t.crossColumn<0)return false;
    if(t.crossWords.some((v,i)=>!v||typeof v.word!=='string'||!v.word.trim()||typeof v.clue!=='string'||!Number.isInteger(v.index)||v.index<0||v.index>=v.word.length||!Array.isArray(t.crossGrid[i])||t.crossColumn<v.index||t.crossColumn-v.index+v.word.length>t.crossGrid[i].length||t.crossGrid[i].some(c=>c&&(typeof c.letter!=='string'||c.letter.length!==1))))return false;
@@ -216,7 +319,7 @@ Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj
   }catch(e){console.warn('Konfetti niedostępne',e)}
  }
  function celebrateReading(){
-  party();
+  party();if(localStorage.getItem('academy-v72-training-silent')==='1')return;
   try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;const c=new AC();
    [523,659,784,1047].forEach((f,i)=>{const osc=c.createOscillator(),gain=c.createGain();const st=c.currentTime+i*.13;
     osc.type='sine';osc.frequency.value=f;gain.gain.setValueAtTime(.0001,st);gain.gain.exponentialRampToValueAtTime(.06,st+.025);
@@ -352,7 +455,7 @@ Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj
   const passage=sentences[n%sentences.length];
   return {type:'reading-mini',question:'🎙️ Przeczytaj kolejno podświetlane słowa.',passage,answer:'Przeczytane',options:[],pageNumber:p.number,done:false,correct:false,readProgress:0};
  }
- function sayFeedback(message){try{speak(String(message).replace(/[\*#_`]/g,''),'pl-PL')}catch(e){console.warn('Mowa niedostępna',e)}}
+ function sayFeedback(message){if(task()?.vocab76&&task().correct){const t=task();return speakSequence([{text:'Brawo! Dobra odpowiedź.',lang:'pl-PL',rate:.92},{text:t.audio||t.wordEn,lang:'en-US',rate:.72},{text:t.type==='vocab-reading'?'':t.promptPl,lang:'pl-PL',rate:.92}])}try{speak(String(message).replace(/[\*#_`]/g,''),'pl-PL')}catch(e){console.warn('Mowa niedostępna',e)}}
  function audioCue(ok){try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;const c=new C(),o=c.createOscillator(),g=c.createGain();o.type=ok?'sine':'triangle';o.frequency.setValueAtTime(ok?660:240,c.currentTime);if(ok)o.frequency.exponentialRampToValueAtTime(990,c.currentTime+.13);g.gain.setValueAtTime(.035,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.19);o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.2);o.onended=()=>c.close()}catch(e){}}
  function wordPieces(text){const stop=new Set(['drugiej','drugiego','drugi','druga','drugie','który','która','które','przez','oraz','jest','także','potem']);return [...new Set((String(text||'').match(/[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]{4,10}/g)||[]).map(x=>x.toLocaleLowerCase('pl-PL')))].filter(w=>w.length<=10&&!stop.has(w))}
  function rotatePool(pool,p){
@@ -370,9 +473,9 @@ Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj
   return selected.slice(0,5).sort((a,b)=>((a.type.charCodeAt(0)+n*17)%37)-((b.type.charCodeAt(0)+n*17)%37));
  }
  function makeWordsearch(p){
-  const words=wordPieces(p.text).filter(w=>w.length>=4&&w.length<=8);
+  const words=(subject()==='angielski'?vocabulary76(p.text).map(x=>x.en):wordPieces(p.text)).filter(w=>w.length>=3&&w.length<=8);
   const extra=subject()==='matematyka'?['dodaj','liczba','wynik','zegar','linia','figura','trójkąt','kwadrat']:subject()==='angielski'?['apple','flower','water','school','pencil','yellow','green','friend']:['kropka','wyrazy','zdanie','sylaba','książka','literki','wiersze','pytanie','wyraz','czytanie'];
-  const pool=[...new Set([...words,...extra])].filter(w=>[...w].length<=7);
+  const pool=[...new Set([...words,...(subject()==='angielski'?[]:extra)])].filter(w=>[...w].length<=7);
   if(pool.length<6)return null;
   const key=`academy-v59-wordsearch-${child}-${bookId}-${p.number}`;
   let n=0;try{n=Number(localStorage.getItem(key)||0)}catch{}
@@ -382,7 +485,7 @@ Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj
   return {type:'wordsearch',question:'🔎 Znajdź 6 słów. Szukaj poziomo i pionowo.',answer:chosen.join(', '),words:chosen,pageNumber:p.number,options:[],hint:'Zacznij od pierwszej litery i zaznaczaj kolejne.',done:false,correct:false};
  }
  function initWordGrid(t){
-  const size=10,abc='AĄBCĆDEĘFGHIJKLŁMNŃOÓPRSŚTUWYZŹŻ';
+  const size=10,abc=subject(t)==='angielski'?'ABCDEFGHIJKLMNOPQRSTUVWXYZ':'AĄBCĆDEĘFGHIJKLŁMNŃOÓPRSŚTUWYZŹŻ';
   // Sześć słów w zwartej siatce 10x10; słowa mogą się przecinać wspólną literą.
   const words=(t.words||[]).slice(0,6);
   let grid,placed;
@@ -419,6 +522,7 @@ Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj
  }
  function wordCell(p,i){return [p.row+(p.dir==='v'?i:0),p.col+(p.dir==='v'?0:i)]}
  function makeCrossword(p){
+  if(subject()==='angielski')return v76EnglishCrossword(p);
   // Większa pula haseł końcowych; 19 edukacyjnych, co 20. — Avengers.
   const polish=[
    ['rzeczownik','Jak nazywa się część mowy odpowiadająca na pytania kto? co?'],
@@ -618,8 +722,8 @@ Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj
   // 12 kart (6 par). Na zmianę: słowo-słowo oraz obrazek-słowo.
   const gallery=[['🐝','pszczoła'],['🌹','róża'],['🐟','ryba'],['🐈','kot'],['🐄','krowa'],['🌳','drzewo'],['🐻','niedźwiedź'],['🏠','dom'],['☀️','słońce'],['🚂','pociąg'],['🐸','żaba'],['🐘','słoń'],['🦊','lis'],['🌼','kwiat']];
   const subjects=subject()==='matematyka'?['dodawanie','liczba','kwadrat','trójkąt','zegar','wynik','godzina','minuta','figura','linijka']:subject()==='angielski'?['apple','school','yellow','green','water','cat','book','red','blue','tree']:['sylaba','litera','zdanie','kropka','wyraz','alfabet','wiersz','głoska','książka','czytanie'];
-  const source=wordPieces(p.text).filter(w=>[...w].length>=4&&[...w].length<=10);
-  const pool=[...new Set([...source,...subjects])];
+  const source=(subject()==='angielski'?vocabulary76(p.text).map(x=>x.en):wordPieces(p.text)).filter(w=>[...w].length>=3&&[...w].length<=10);
+  const pool=[...new Set([...source,...(subject()==='angielski'?[]:subjects)])];
   const key=`academy-v60-memory-${child}-${bookId}`;let n=0;
   try{n=Number(localStorage.getItem(key)||0);localStorage.setItem(key,String(n+1))}catch{}
   const pictures=subject()==='polski'&&n%3===1;
@@ -630,7 +734,7 @@ Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj
   }else{
    const choices=[...pool.slice(n%Math.max(1,pool.length)),...pool.slice(0,n%Math.max(1,pool.length))].slice(0,6);
    if(choices.length<6)return null;
-   pairs=choices.map(word=>({front:word,back:word}));
+   pairs=choices.map(word=>({front:word,back:subject()==='angielski'?(vocabulary76(p.text).find(x=>x.en===word)?.pl||word):word}));
   }
   const cards=shuffle(pairs.flatMap((entry,i)=>[{pair:i,label:entry.front},{pair:i,label:entry.back}]));
   return {type:'memory',question:pictures?'🃏 Memory: połącz obrazki z nazwami.':'🃏 Memory: znajdź sześć par słów.',answer:'Wszystkie pary',options:[],cards,matched:[],flipped:[],pageNumber:p.number,done:false,correct:false};
@@ -639,9 +743,9 @@ Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj
   return t.type==='order' && /alfabetyczn/i.test(String(t.question||'')) && /liter/i.test(String(t.question||''));
  }
  function makePuzzle(p){
-  const sentence=String(p.text||'').split(/(?<=[.!?])\s+/).find(x=>x.trim().split(/\s+/).length>=4&&x.trim().split(/\s+/).length<=9);
+  const sentence=String(p.text||'').split(/(?<=[.!?])\s+/).find(x=>x.trim().split(/\s+/).length>=4&&x.trim().split(/\s+/).length<=9&&(subject()!=='angielski'||!/[ąćęłńóśźż]|\b(?:wybierz|ułóż|zapisz|strona|podręcznik)\b/i.test(x)));
   if(!sentence)return null;
-  return {type:'order',question:'🧩 Puzzle Avengersów: ułóż wyrazy w zdanie z podręcznika.',answer:sentence.trim(),options:[],pageNumber:p.number,hint:'Zacznij od wyrazu pisanego wielką literą.',done:false,correct:false};
+  return {type:'order',question:'Ułóż wyrazy w zdanie.',answer:sentence.trim(),options:[],pageNumber:p.number,hint:'Zacznij od wyrazu pisanego wielką literą.',done:false,correct:false};
  }
  function makeAdjective(p){
   if(subject()!=='polski')return null;
@@ -653,6 +757,7 @@ Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj
   return {type:'write',question:'🎨 Znajdź przymiotnik w zdaniu: „'+x.sentence.trim()+'”',answer:x.found[0],pageNumber:p.number,options:[],hint:'Przymiotnik odpowiada na pytanie: jaki? jaka? jakie?',done:false,correct:false};
  }
  function answerIsCorrect(t,value){
+  if(t.vocab76&&t.type!=='vocab-meaning')return cleanEnglish76(value)===cleanEnglish76(t.answer);
   if(t.type==='reading')return true;
   if(t.selfCheck)return false; // Never automatically approve arbitrary noun/adjective.
   if(t.type==='wordsearch')return false;
@@ -692,6 +797,7 @@ Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj
   return result;
  }
  async function start(){
+  if(v76VocabOnly)return v76StartVocabulary();
   if(busy)return;
   stageEpoch++;tutorBusy=false;
   const ps=scopePages();if(!ps.length){alert('Wybierz strony z rozpoznanym tekstem.');return setup()}
@@ -768,12 +874,12 @@ Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj
     for(const [question,options,ok] of basic){all.push({type:'choice',question,options,answer:options[ok],explanation:'',sourceBookId:bookId,sourceTitle:'Zabawy przedszkolaka',pageNumber:0,done:false,correct:false})}
    }
    if(!all.length)throw Error(errors.join('; ')||'Nie udało się utworzyć misji');
-   tasks=shuffle(all).slice(0,10).map(t=>({...t,sourceBookId:t.sourceBookId||bookId,sourceTitle:t.sourceTitle||'Strona '+t.pageNumber}));
+   tasks=v76MixWords(all,chosen).map(t=>({...t,sourceBookId:t.sourceBookId||bookId,sourceTitle:t.sourceTitle||'Strona '+t.pageNumber}));
    idx=0;points=0;award=false;reset();remember();draw();
   }catch(err){console.warn('Tworzenie misji:',err);if(root.isConnected)root.innerHTML='<section class="mg-panel"><h2>Nie udało się przygotować misji</h2><p>Spróbuj ponownie, kiedy AI będzie dostępne.</p>'+btn('Spróbuj ponownie','start')+btn('Wróć','back')+'</section>'}
   finally{busy=false}
  }
- function reset(){if(readingRec){try{readingRec.stop()}catch(e){}readingRec=null;}stageEpoch++;tutorBusy=false;choice=null;answered=false;tiles=[];hintLevel=0;wrongAttempts=0;tutorMessages=[]}
+ function reset(){if(readingRec){readingRec.__v76Cancelled=true;try{readingRec.abort()}catch(e){}readingRec=null;}stageEpoch++;tutorBusy=false;choice=null;answered=false;tiles=[];hintLevel=0;wrongAttempts=0;tutorMessages=[]}
  const task=()=>tasks[idx];
  function answer(value){
   if(answered)return;
@@ -792,7 +898,7 @@ Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj
    finally{busy=false;draw()}})();return;
   }
   if(!t.correct){if(/spółgłoski|samogłoski/i.test(t.question)){const a=Array.from(lettersOnly(t.answer)).sort().join(''),b=Array.from(lettersOnly(choice)).sort().join('');t.orderHint=!!a&&a===b;}wrongAttempts++;audioCue(false);if(wrongAttempts>=2)logDifficulty(t,'błędne próby');hintLevel=Math.min(3,hintLevel+1);draw();return}
-  answered=true;t.done=true;points++;audioCue(true);sayFeedback('Brawo! Dobra odpowiedź.'+(mode==='game'&&subject(t)==='angielski'&&t.explanation?' '+t.explanation:''));recordResult(t);remember();draw();
+  answered=true;t.done=true;points++;audioCue(true);if(subject(t)==='angielski')celebrateReading();sayFeedback('Brawo! Dobra odpowiedź.'+(mode==='game'&&subject(t)==='angielski'&&t.explanation?' '+t.explanation:''));recordResult(t);remember();draw();
  }
  function hintText(t){
   if(t.orderHint)return 'Litery są dobrane poprawnie, ale wpisz je kolejno, tak jak występują w podanym wyrazie. Przecinki i spacje nie są obowiązkowe.';
@@ -909,22 +1015,9 @@ Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj
   return '';
  }
  // V75_AUDYT_ZGODNOSCI_2
- function v75InstructionSpeech(t,mode){
-  const text=String(t?.question||'');if(!text)return;
-  if(!('speechSynthesis' in window))return speak(text,'en-US');
-  const synth=window.speechSynthesis;synth.cancel();
-  const en=new SpeechSynthesisUtterance(text);en.lang='en-US';en.rate=.93;
-  const vs=synth.getVoices(),v=vs.find(x=>x.lang.toLowerCase().startsWith('en'));if(v)en.voice=v;
-  if(mode!=='test'&&t?.questionPl){en.onend=()=>{
-    if(task()!==t)return;
-    const pl=new SpeechSynthesisUtterance(String(t.questionPl));pl.lang='pl-PL';pl.rate=.95;
-    const vv=vs.find(x=>x.lang.toLowerCase().startsWith('pl'));if(vv)pl.voice=vv;
-    synth.speak(pl);
-  }}
-  synth.speak(en);
- }
+ function v75InstructionSpeech(t,mode){return v76SayInstruction(t)}
 function stage(){
-  const t=task();let html='<style>.mg-panel [data-mg]{transition:transform .13s ease,filter .13s ease,box-shadow .13s ease}.mg-panel [data-mg]:active{transform:scale(.94);filter:brightness(1.35)}.mg-panel [data-mg]:focus-visible{outline:3px solid #fbbf24;outline-offset:3px}.mg-panel input:focus,.mg-panel textarea:focus{outline:3px solid #fbbf24}.mg-panel .mg-feedback{animation:mg-pop .35s ease-out}@keyframes mg-pop{from{opacity:.2;transform:scale(.94)}to{opacity:1;transform:scale(1)}}</style><h3>'+escape(t.question)+'</h3>'+ (subject(t)==='angielski'&&mode!=='test'&&t.questionPl?'<p class="mg-translation">🇵🇱 '+escape(t.questionPl)+'</p>':'');
+  const t=task();if(t.vocab76)return v76WordStage(t);let html='<style>.mg-panel [data-mg]{transition:transform .13s ease,filter .13s ease,box-shadow .13s ease}.mg-panel [data-mg]:active{transform:scale(.94);filter:brightness(1.35)}.mg-panel [data-mg]:focus-visible{outline:3px solid #fbbf24;outline-offset:3px}.mg-panel input:focus,.mg-panel textarea:focus{outline:3px solid #fbbf24}.mg-panel .mg-feedback{animation:mg-pop .35s ease-out}@keyframes mg-pop{from{opacity:.2;transform:scale(.94)}to{opacity:1;transform:scale(1)}}</style><h3>'+escape(t.question)+'</h3>'+ (subject(t)==='angielski'&&mode!=='test'&&t.questionPl?'<p class="mg-translation">🇵🇱 '+escape(t.questionPl)+'</p>':'');
   const q=String(t.question||'').toLocaleLowerCase('pl-PL');
   const storyHint=/(czytank|tekst|wiersz|opowiadani|bohater|autor|narrator|histori|według|na podstawie|co (?:się|robi|zrobił|zrobiła|zauważył|powiedział|woła|nawołuje)|kto (?:powiedział|woła|spotkał|zobaczył|zrobił)|dlaczego|w jaki sposób|co wydarzyło|o czym)/i.test(q);
   const noSource=['reading','wordsearch','crossword','rebus','syllables','dictation','listening','spelling','order'].includes(t.type)||/(sylab|głosk|samogłosk|spółgłosk|liter|alfabet|ortografi|wyraz[ieyu]? [„"'])/i.test(q);
@@ -1015,7 +1108,7 @@ function stage(){
  function draw(){
   if(idx>=tasks.length)return finish();
   const t=task();
-  const names={safe:'🔐 Sejf Iron Mana',shop:'🛒 Sklep Avengersów',clock:'⏰ Zegar misji',detective:'🕵️ Detektyw Spider-Mana',loki:'🦹 Bitwa z Lokim',reading:'🎙️ Laboratorium czytania',order:'🧩 Szyfr Avengersów',dictation:'✍️ Dyktando Kapitana',syllables:'🔠 Sylaby i głoski',crossword:'📝 Krzyżówka',choice:'⚡ Zagadka bohatera',listening:'🎧 Misja słuchowa',memory:'🃏 Memory',spelling:'✍️ Pisownia',rebus:'🧩 Rebus Avengersów',memory:'🃏 Memory',"reading-mini":'🎙️ Czytaj słowo po słowie'};
+  const names={safe:'🔐 Sejf Iron Mana',shop:'🛒 Sklep Avengersów',clock:'⏰ Zegar misji',detective:'🕵️ Detektyw Spider-Mana',loki:'🦹 Bitwa z Lokim',reading:'🎙️ Laboratorium czytania',order:'🧩 Szyfr Avengersów',dictation:'✍️ Dyktando Kapitana',syllables:'🔠 Sylaby i głoski','vocab-choice':'🃏 Słówka · wybierz','vocab-write':'✍️ Słówka · napisz','vocab-speak':'🎙️ Słówka · powiedz','vocab-repeat':'🗣️ Słówka · powtórz','vocab-meaning':'💡 Słówka · znaczenie','vocab-listen':'🎧 Słówka · posłuchaj','vocab-reading':'📖 Słówka · przeczytaj',crossword:'📝 Krzyżówka',choice:'⚡ Zagadka bohatera',listening:'🎧 Misja słuchowa',memory:'🃏 Memory',spelling:'✍️ Pisownia',rebus:'🧩 Rebus Avengersów',memory:'🃏 Memory',"reading-mini":'🎙️ Czytaj słowo po słowie'};
   root.innerHTML=`<section class="mg-panel"><header class="mg-header"><small>${mode==='test'?'🏆 PRÓBNY SPRAWDZIAN':'⚡ MISJA SPECJALNA'} · ${escape(t.sourceTitle||('STRONA '+(t.pageNumber||'?')))}</small>${btn('🔊 Odczytaj polecenie','read-instruction')}<h2>${t.type==='reading'?'📜 Tajny przekaz Avengersów':t.type==='loki'?'🦹 Pułapka Lokiego':t.type==='detective'?'🕵️ Detektyw Spider-Mana':t.type==='wordsearch'?'🔎 Wykreślanka':t.type==='draw'?'🎨 Misja rysunkowa':names[t.type]||'🎮 Misja bohatera'}</h2><p>Wyzwanie ${idx+1} z ${tasks.length}</p><div class="mg-bar"><div style="width:${Math.round(idx/tasks.length*100)}%"></div></div>${btn('⏸ Stop / zapisz','pause')}</header>${stage()}</section>`;
   const canvas=root.querySelector('#mg-draw');if(canvas){const ctx=canvas.getContext('2d');ctx.lineWidth=4;ctx.lineCap='round';let painting=false;const point=e=>{const r=canvas.getBoundingClientRect();return [(e.clientX-r.left)*canvas.width/r.width,(e.clientY-r.top)*canvas.height/r.height]};canvas.onpointerdown=e=>{painting=true;canvas.setPointerCapture(e.pointerId);ctx.beginPath();ctx.moveTo(...point(e))};canvas.onpointermove=e=>{if(painting){ctx.lineTo(...point(e));ctx.stroke()}};canvas.onpointerup=()=>painting=false;}
  }
@@ -1072,6 +1165,8 @@ function stage(){
  root.addEventListener('click',ev=>{
   const b=ev.target.closest('[data-mg]');if(!b||busy)return;
   const act=b.dataset.mg,t=task();
+  if(act==='v76-word-model')return t?.vocab76?v76WordModel(t):undefined;
+  if(act==='v76-word-record')return t?.vocab76&&!answered?v76WordVoice(t):undefined;
   if(act==='tutor-instruction')return speak('Zapytaj nauczyciela AI. Naciśnij czerwony mikrofon z boku ekranu i powiedz, czego nie rozumiesz.','pl-PL');
   if(act==='read-instruction'){if(subject(t)==='angielski'){v75InstructionSpeech(t,mode);return;}return speak((mode==='test'?'Sprawdzian':'Misja')+'. '+(t?.type==='reading'?'Przeczytaj na głos cały tekst poniżej. Naciśnij rozpocznij czytanie. Kiedy będziesz potrzebował przerwy, naciśnij zakończ fragment. Możesz później kontynuować.':t?.question||'')+(t?.type==='wordsearch'?' Wybieraj litery kolejno.':''),'pl-PL');}
   if(act==='skip'){logDifficulty(t,'uczeń poprosił o następne zadanie');sayFeedback('Nie szkodzi. '+(subject(t)==='angielski'&&t.explanation?'Wyjaśnienie: '+t.explanation+'. ':'')+'Zapisuję to do powtórki.');idx++;reset();remember();return draw()}
@@ -1080,7 +1175,7 @@ function stage(){
    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
    if(!SR){t.readError='Ta przeglądarka nie obsługuje rozpoznawania głosu.';draw();return}
    if(readingRec)return;
-   const r=new SR();r.lang='pl-PL';r.continuous=true;r.interimResults=true;
+   stopVoice();const r=new SR();r.onstart=()=>{if(readingRec===r&&!r.__v76Cancelled)setVoiceState('listening')};setVoiceState('starting');r.lang=subject(t)==='angielski'?'en-US':'pl-PL';r.continuous=true;r.interimResults=true;
    const current=t,epoch=stageEpoch;
    readingRec=r;t.readActive=true;t.readError='';t.readChecked=false;
    let finalPart='';
@@ -1113,7 +1208,8 @@ function stage(){
     else if(kind!=='no-speech'&&kind!=='aborted')t.readError='Rozpoznawanie zakończone: '+kind+'. Zapisany tekst nie znika.';
    };
    r.onend=()=>{
-    if(readingRec===r)readingRec=null;
+    if(readingRec===r){readingRec=null;setVoiceState('idle')}
+    if(r.__v76Cancelled)return;
     t.readTranscript=t.type==='reading-mini'&&t.correct?String(t.readTranscript||''):(base+' '+finalPart).trim();t.readActive=false;
     const c=(t.type==='reading-mini'?miniCoverage:readingCoverage)(t.passage||pageText(t),t.readTranscript);
     t.readScore=c.score;t.readHits=c.hits;t.readTotal=c.total;t.readHeard=c.heard;
@@ -1153,7 +1249,7 @@ function stage(){
   if(act==='tutor-speak'){const last=[...tutorMessages].reverse().find(m=>m.who==='ai');if(last)return speak(last.text,'pl-PL');return}
   if(act==='report')return report();
   if(act==='guide')return voiceGuide();if(act==='start')return start();if(act==='resume')return resume();if(act==='back')return launch&&onBack?onBack():setup();
-  if(act==='pause'){if(readingRec){try{readingRec.stop()}catch(e){}}if(t&&t.type==='reading')t.readActive=false;stageEpoch++;tutorBusy=false;remember();root.innerHTML='<section class="mg-panel"><h2>⏸ Misja zatrzymana</h2><p>Postęp zapisany na tym urządzeniu.</p>'+btn('▶️ Wznów','resume','mg-primary')+btn('📚 Wróć do wyboru','back')+'</section>';return}
+  if(act==='pause'){stopVoice();if(readingRec){try{readingRec.stop()}catch(e){}}if(t&&t.type==='reading')t.readActive=false;stageEpoch++;tutorBusy=false;remember();root.innerHTML='<section class="mg-panel"><h2>⏸ Misja zatrzymana</h2><p>Postęp zapisany na tym urządzeniu.</p>'+btn('▶️ Wznów','resume','mg-primary')+btn('📚 Wróć do wyboru','back')+'</section>';return}
   if(act==='hint'){hintLevel=Math.min(3,hintLevel+1);return draw()}
   if(act==='read-reset'){t.readTranscript='';t.readError='';t.readChecked=false;delete t.readScore;delete t.readHits;delete t.readTotal;delete t.readHeard;remember();draw();return;}
   if(act==='read-done')return; // nadal bez zaliczenia przez kliknięcie

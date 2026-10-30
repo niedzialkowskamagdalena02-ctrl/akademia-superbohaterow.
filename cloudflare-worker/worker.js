@@ -139,7 +139,7 @@ async function reviewThree(env,body){
  const results=await Promise.all(providers.map(async ([provider,fn])=>{
   try{let raw=await fn(env,prompt,'tech',1500);raw=String(raw).replace(/```(?:json)?/gi,'').replace(/```/g,'').trim();let obj;try{obj=JSON.parse(raw)}catch{obj=JSON.parse(raw.slice(raw.indexOf('{'),raw.lastIndexOf('}')+1))}
    if(!Array.isArray(obj?.issues)||obj.issues.some(x=>!x||!['number','string'].includes(typeof x.index)||String(x.index).trim()===''||!Number.isInteger(Number(x.index))||Number(x.index)<0||Number(x.index)>=questions.length||typeof x.reason!=='string'||!x.reason.trim()))throw Error('Model przeslal nieprawidlowa liste ocen');return {provider,issues:obj.issues.map(x=>({index:Number(x.index),reason:x.reason.trim()})).slice(0,8)};
-  }catch(err){return {provider,error:'Ten model nie był dostępny podczas sprawdzania.'}}
+  }catch(err){const msg=String(err?.message||''),status=msg.match(/^HTTP (\d{3})$/);const code=/missing key/.test(msg)?'missing-key':/missing production AI binding/.test(msg)?'missing-binding':err?.name==='AbortError'||/timeout/.test(msg)?'timeout':status?'HTTP-'+status[1]:/empty response/.test(msg)?'empty-response':'invalid-review';return {provider,code,error:'Ten model nie udostępnił prawidłowego raportu.'}}
  }));
  if(!results.some(x=>Array.isArray(x.issues)))return send({error:'Żaden z trzech modeli AI nie odpowiedział.'},503);
  return send({reviews:results});
