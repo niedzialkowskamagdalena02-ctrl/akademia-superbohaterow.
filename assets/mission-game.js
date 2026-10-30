@@ -11,7 +11,7 @@
 // V43_JSON_REPAIR
 // V42_CHAPTER_SELECTION
 // V41: interaktywne misje z podrecznikow, AI generuje tresc, aplikacja mechanike.
-export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initialBookId,batchGenerate=null,launch=null,onBack=null}){
+export function mountMissionGame(root,{books,pages,ask,speak,reward,child,childGrade='2',initialBookId,batchGenerate=null,launch=null,onBack=null}){
  const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const norm=s=>String(s??'').trim().toLocaleLowerCase('pl-PL').replace(/\s*,\s*/g,', ').replace(/\s+/g,' ');
  const btn=(label,act,cls='')=>`<button type="button" class="${cls}" data-mg="${act}">${label}</button>`;
@@ -19,7 +19,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
  let tutorMessages=[],tutorBusy=false,tutorListening=false,stageEpoch=0,readingRec=null;
  let bookId=initialBookId||'',scope='all',mode='game',tasks=[],idx=0,points=0,choice=null,answered=false,tiles=[],busy=false,award=false,progress={},hintLevel=0,paused=false,wrongAttempts=0;
  const book=()=>books.find(b=>b.id===bookId);
- const subject=()=>/ang|english/i.test(book()?.subject||'')?'angielski':/mat/i.test(book()?.subject||'')?'matematyka':'polski';
+ const subject=(t=null)=>{const b=t?.sourceBookId?books.find(b=>b.id===t.sourceBookId):book();return /ang|english/i.test(b?.subject||'')?'angielski':/mat/i.test(b?.subject||'')?'matematyka':/przyrod|natur/i.test(b?.subject||'')?'przyroda':'polski'};
  const available=()=>books.filter(b=>pages.some(p=>p.bookId===b.id&&p.text?.trim()));
  const pagesFor=()=>pages.filter(p=>p.bookId===bookId&&p.text?.trim()).sort((a,b)=>a.number-b.number);
  const sourceBook=p=>books.find(b=>b.id===p.bookId);
@@ -73,11 +73,15 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
  }
  // V48_BANK_AI: zapis lokalny w przegladarce, osobny dla kazdego dziecka i podrecznika
  const bankKey=()=>`academy-v48-bank-${child}-${bookId}`;
- const sessionKey=()=>`academy-v49-session-${child}-${bookId}`;
+ const sessionKey=()=>`academy-v49-session-${child}-${launch&&initialBookId?initialBookId:bookId}`;
  const remember=()=>{try{localStorage.setItem(sessionKey(),JSON.stringify({scope,mode,tasks,idx,points,award}))}catch{}};
  function resume(){try{const x=JSON.parse(localStorage.getItem(sessionKey())||'null');if(!x||!x.tasks?.length)return setup();scope=x.scope;mode=x.mode;tasks=x.tasks;tasks.forEach(t=>{t.readActive=false});if(tasks.some(t=>t.type==='reading')){const before=tasks.slice(0,x.idx).filter(t=>t.type!=='reading').length;tasks=tasks.filter(t=>t.type!=='reading');x.idx=Math.min(before,Math.max(0,tasks.length-1))}idx=x.idx;points=x.points;award=x.award;paused=false;reset();draw()}catch{setup()}}
  const selectionIds=()=>new Set(scopePages().map(p=>String(p.number)));
  const fingerprint=t=>norm(t.question)+'|'+norm(t.answer);
+ function v75MatchesPage(x,p){
+  const ids=(x.pageIds||[]).map(String),linked=pages.filter(q=>q.bookId===p.bookId&&ids.includes(String(q.id)));
+  return linked.length?linked.some(q=>String(q.id)===String(p.id)):ids.includes(String(p.number));
+ }
  function readBank(){try{const v=JSON.parse(localStorage.getItem(bankKey())||'[]');return Array.isArray(v)?v:[]}catch{return []}}
  function writeBank(items){try{localStorage.setItem(bankKey(),JSON.stringify(items.slice(-1800)))}catch(e){console.warn('Nie mozna zapisac banku zadan',e)}}
  function storeTasks(items,page=null){
@@ -86,7 +90,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
    if(!t||!t.question||!t.answer||!Array.isArray(t.options))continue;
    const key=fingerprint(t);const prev=bank.find(x=>x.key===key);
    if(prev){prev.pageIds=[...new Set([...(prev.pageIds||[]),...ids])];continue}
-   bank.push({key,subject:subject(),pageIds:ids,task:{question:t.question,answer:t.answer,options:t.options,explanation:t.explanation||'',hint:t.hint||'',audio:t.audio||'',type:t.type,needsSource:t.needsSource===true,sourceQuote:t.sourceQuote||''},seen:0,wrong:0,last:0});
+   bank.push({key,subject:subject(),pageIds:ids,task:{question:t.question,answer:t.answer,options:t.options,explanation:t.explanation||'',hint:t.hint||'',audio:t.audio||'',type:t.type,needsSource:t.needsSource===true,sourceQuote:t.sourceQuote||'',questionPl:t.questionPl||'',...(t.type==='crossword'?{crossInfo:t.crossInfo,crossWords:t.crossWords,crossGrid:t.crossGrid,crossColumn:t.crossColumn}:{}),...(t.type==='wordsearch'?{words:t.words}:{}),...(t.type==='rebus'?{rebus:t.rebus,rebusPicture:t.rebusPicture,rebusHint:t.rebusHint}:{})},seen:0,wrong:0,last:0});
   }writeBank(bank);
  }
  function pickSaved(count=5){
@@ -96,8 +100,12 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
   return eligible.slice(0,count).map(x=>({...x.task,_bankKey:x.key,done:false,correct:false}));
  }
  function recordResult(t){
-  const bank=readBank();const x=bank.find(v=>v.key===(t._bankKey||fingerprint(t)));
-  if(x){x.seen=(x.seen||0)+1;if(!t.correct)x.wrong=(x.wrong||0)+1;else x.wrong=Math.max(0,(x.wrong||0)-1);x.last=Date.now();writeBank(bank)}
+  const sourceId=t?.sourceBookId||bookId,owner=books.find(b=>b.id===sourceId)?.child||child;
+  const key='academy-v48-bank-'+child+'-'+sourceId;
+  let bank=[];try{bank=JSON.parse(localStorage.getItem(key)||'[]')}catch{return}
+  if(!Array.isArray(bank))return;
+  const x=bank.find(v=>v.key===(t._bankKey||fingerprint(t)));
+  if(x){x.seen=(x.seen||0)+1;if(!t.correct)x.wrong=(x.wrong||0)+1;else x.wrong=Math.max(0,(x.wrong||0)-1);x.last=Date.now();try{localStorage.setItem(key,JSON.stringify(bank.slice(-1800)))}catch(err){console.warn('Nie udalo sie zapisac postepu',err)}}
  }
  // V62: pytanie musi mieć jedną poprawną odpowiedź i, gdy dotyczy tekstu,
  // odpowiedź rzeczywiście musi dać się znaleźć w dostarczonej czytance.
@@ -111,6 +119,13 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
   return !!needle && (' '+hay+' ').includes(' '+needle+' ');
  }
  function reliableTask(t,p){
+  if(t?.type==='crossword'){
+   if(typeof t.crossInfo!=='string'||!Array.isArray(t.crossWords)||!t.crossWords.length||!Array.isArray(t.crossGrid)||t.crossGrid.length!==t.crossWords.length||!Number.isInteger(t.crossColumn)||t.crossColumn<0)return false;
+   if(t.crossWords.some((v,i)=>!v||typeof v.word!=='string'||!v.word.trim()||typeof v.clue!=='string'||!Number.isInteger(v.index)||v.index<0||v.index>=v.word.length||!Array.isArray(t.crossGrid[i])||t.crossColumn<v.index||t.crossColumn-v.index+v.word.length>t.crossGrid[i].length||t.crossGrid[i].some(c=>c&&(typeof c.letter!=='string'||c.letter.length!==1))))return false;
+  }
+  if(t?.type==='wordsearch'&&(!Array.isArray(t.words)||!t.words.length||t.words.length>6||t.words.some(x=>typeof x!=='string'||!x.trim()||[...x].length>10)))return false;
+  if(t?.type==='rebus'&&(typeof t.rebusPicture!=='string'||!t.rebusPicture.trim()||typeof t.rebus!=='string'||!t.rebus.trim()))return false;
+  if(subject()==='angielski'&& (t.needsSource===true||/(?:z tekstu|zgodnie z tekstem|z listy|w historii|w opowiesci|w opowieści|w trzeciej części)/i.test(t.question||'')))return false;
   if(!t||!String(t.question||'').trim()||!String(t.answer||'').trim())return false;
   const options=t.options||[];
   if(options.length!==4||options.some(x=>typeof x!=='string'))return false;
@@ -157,24 +172,31 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
   const allowed=['choice','detective','loki','reading','order','dictation','syllables','crossword','listening','spelling','write','draw','wordsearch','safe','shop','clock','rebus'];
   const good=arr.filter(t=>t&&typeof t.question==='string'&&typeof t.answer==='string'&&Array.isArray(t.options)&&t.options.length===4&&t.options.every(x=>typeof x==='string'));
   if(!good.length)throw Error('AI nie przygotowało poprawnego zadania');
-  return good.slice(0,5).map((t,i)=>({...t,explanation:t.explanation||'Sprawdź fragment w podręczniku.',hint:t.hint||'Przeczytaj uważnie jeszcze raz odpowiedni fragment.',type:allowed.includes(t.type)?t.type:'choice',done:false,correct:false}));
+  return good.slice(0,10).map((t,i)=>({...t,explanation:t.explanation||'Sprawdź fragment w podręczniku.',hint:t.hint||'Przeczytaj uważnie jeszcze raz odpowiedni fragment.',type:allowed.includes(t.type)?t.type:'choice',done:false,correct:false}));
  }
  function pagePrompt(p,history=[]){
-  const kinds=subject()==='matematyka'?'choice, safe, shop, clock, write, order':subject()==='angielski'?'listening, dictation, spelling, order, choice, write':'detective, loki, syllables, order, dictation, write, choice';
-  const excluded=history.slice(-24).map((q,i)=>`${i+1}. ${String(q).slice(0,60)}`).join(' | ');
-  const prompt=`Jestes dobrym nauczycielem 8-latka. Utworz 5 NOWYCH, bardzo roznorodnych i jednoznacznych zadan w jezyku polskim, dopasowanych do PRZEDMIOTU ${subject()}. Dla polskiego: gramatyka, sylaby, litery, ortografia, przymiotniki, rozumienie czytanki; ZADNYCH rachunkow. Dla matematyki: rachunki i logika liczbowa, bez gramatyki. Kazde zadanie powinno uzywac innych slow i innego fragmentu strony. Unikaj ciaglego 'drugiej'. Poziom klasy drugiej. Co najmniej dwa rozne pytania o tresc czytanki, jesli strona zawiera opowiadanie lub wiersz. Dla kazdego pytania o to, co jest w tekscie lub ktore slowo pochodzi Z WIERSZA ustaw "needsSource":true i "sourceQuote": cytat DOSLOWNIE skopiowany z materialu (maksymalnie 100 znakow), ktory zawiera informacje potrzebna do odpowiedzi. Nie wymyslaj cytatow. Gdy nie ma w tekscie odpowiedzi, nie tworz tego pytania. Dla sylab, gloskowania, liczenia, rebusow i ortografii slowa podanego W SAMYM POLECENIU ustaw "needsSource":false. Gdy pytanie brzmi "ktore slowo z wiersza", potrzebny jest cytat, nawet jesli pytanie dotyczy pisowni. Nie wolno zadac pytania, ktorego odpowiedz nie wynika ze strony, chyba ze to wiedza szkolna wyraznie znana dziecku. Typy: ${kinds}. Kazde pytanie: DOKLADNIE jedna merytorycznie poprawna odpowiedz; 3 pozostale opcje musza byc NAPRAWDE bledne, nie tylko inne. UWAGA: pytanie o to, ktory wyraz zawiera poprawne "rz", gdy kilka opcji ma poprawne "rz", jest wadliwe — NIE generuj go. Jesli pytanie dotyczy tresci czytanki albo szukania wyrazu Z TEKSTU, poprawna odpowiedz ma byc DOKLADNIE obecnym w tekscie slowem lub zwrotem (ta sama forma i odmiana), a sourceQuote musi zawierac podstawe tej odpowiedzi. Nie wymyslaj odpowiedzi z ogolnej wiedzy. Zamiast niepewnego pytania utworz inne. Cztery ROZNE opcje musza zawierac tylko jedna pasujaca odpowiedz, doslownie rowna polu answer. Nie tworz pytan o synonimy ani o to, co dane slowo oznacza, jesli rozstrzygniecie nie wynika JEDNOZNACZNIE z materialu. Nie nazywaj wyrazenia tajniki przyrody nauka o naturze. Bez zdradzania odpowiedzi w pytaniu czy podpowiedzi. Zwroc tylko JSON, bez markdown, dokladnie wedlug schematu: {"tasks":[{"type":"choice","question":"...","answer":"...","options":["...","...","...","..."],"needsSource":true,"sourceQuote":"dokładny krótki cytat z tekstu, zawierający podstawę odpowiedzi","hint":"krótka wskazówka o sposobie rozwiązania BEZ słowa będącego odpowiedzią, jego odmian ani wyrazów pokrewnych","explanation":"..."}]}. NIE POWTARZAJ ostatnich zadan: ${excluded||'brak'}. STRONA ${p.number}, MATERIAL: ${String(p.text||'').slice(0,2400)}`;
-  return prompt.slice(0,5300);
+  const sub=subject(),level=childGrade==='P'?'przedszkole, bez czytania i pisania':'klasa '+String(childGrade).slice(0,8);
+  const kinds=childGrade==='P'?'choice, listening':sub==='matematyka'?'choice, safe, shop, clock, write, order':sub==='angielski'?'listening, spelling, dictation, order, choice, write':sub==='przyroda'?'choice, detective, order':'detective, loki, syllables, order, dictation, write, choice';
+  const language=sub==='angielski'?'Polecenie question po angielsku; questionPl to polskie tlumaczenie SAMEGO polecenia, bez rozwiazania. Bez czytania ze zrozumieniem ani pokazywania listy slowek z gotowa odpowiedzia. explanation wyjasnia znaczenie dopiero po odpowiedzi.':'Polecenia po polsku; questionPl puste.';
+  const base=`Jestes nauczycielem. Poziom: ${level}. Przedmiot: ${sub}. Utworz do 10 NOWYCH, roznorodnych zadan z materialu strony, kilka roznych typow: ${kinds}. Nie powtarzaj wciaz sylabowania ani slowa drugiej. ${language}
+Kazde zadanie ma jedna MERYTORYCZNIE poprawna odpowiedz answer i 4 ROZNE opcje options; tylko jedna opcja jest rowna answer, pozostale musza byc naprawde bledne. Nie zgaduj faktow ani odpowiedzi dla wyrownania liczby zadan. Dopasuj zadania do przedmiotu: polski bez rachunkow, matematyka i przyroda bez gramatyki. Dla przedszkola tylko proste pojecia, wybor lub sluchanie.
+Pytanie o tresc wiersza/opowiadania wymaga needsSource:true oraz sourceQuote: doslowny cytat do 100 znakow, ze strony i z podstawa odpowiedzi. Odpowiedz musi wystepowac w materiale w tej samej formie. Nie wymyslaj cytatow. Dla zadan o slowie podanym w poleceniu needsSource:false; jesli pytanie dotyczy slowa Z TEKSTU, cytat jest wymagany. Nie tworz niejednoznacznych pytan o synonimy; tajniki przyrody nie oznaczaja nauki o naturze. Nie zadawaj pytan o rz/ó itp. z kilkoma prawidlowymi opcjami. Nie zdradzaj odpowiedzi w pytaniu ani hint, takze przez odmiany lub wyrazy pokrewne.
+Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj ich nazw jako typu zadania bez planszy. Dla listening podaj audio do odsluchu. Zwroc TYLKO kompletny JSON: {"tasks":[{"type":"choice","question":"...","questionPl":"...","answer":"...","options":["...","...","...","..."],"needsSource":false,"sourceQuote":"","hint":"wskazowka o sposobie rozwiazania bez odpowiedzi","explanation":"...","audio":""}]}.`;
+  const tail='\nSTRONA '+String(p.number).slice(0,12)+', MATERIAL: '+String(p.text||'').slice(0,2400),prefix='\nNIE POWTARZAJ: ';
+  const room=Math.max(0,5300-base.length-tail.length-prefix.length-4);
+  const excluded=history.slice(-24).map(q=>String(q).slice(0,60)).join(' | ').slice(0,room);
+  return base+prefix+(excluded||'brak')+tail;
  }
 
  const vowelsPL='aąeęiouóy';
  const lettersOnly=x=>String(x||'').toLocaleLowerCase('pl-PL').replace(/[^a-ząćęłńóśźż]/g,'');
  const lettersMatch=(a,b)=>lettersOnly(a)===lettersOnly(b);
- const curriculumKey=()=>`academy-v53-stats-${child}-${bookId}`;
- function stats(){try{return JSON.parse(localStorage.getItem(curriculumKey())||'[]')}catch{return []}}
+ const curriculumKey=(t=null)=>`academy-v53-stats-${child}-${t?.sourceBookId||bookId}`;
+ function stats(t=null){try{return JSON.parse(localStorage.getItem(curriculumKey(t))||'[]')}catch{return []}}
  function logDifficulty(t,reason){
-  try{const v=stats();v.push({date:new Date().toISOString(),page:t.pageNumber||'',type:t.type,question:t.question,reason,attempts:wrongAttempts,subject:subject()});localStorage.setItem(curriculumKey(),JSON.stringify(v.slice(-400)))}catch(e){console.warn(e)}
+  try{const v=stats(t);v.push({date:new Date().toISOString(),page:t.pageNumber||'',type:t.type,question:t.question,reason,attempts:wrongAttempts,subject:subject(t)});localStorage.setItem(curriculumKey(t),JSON.stringify(v.slice(-400)))}catch(e){console.warn(e)}
  }
- function pageText(t){const p=pages.find(p=>p.bookId===(t.sourceBookId||bookId)&&Number(p.number)===Number(t.pageNumber));return String(p?.text||t.passage||'').slice(0,4000)}
+ function pageText(t){const p=pages.find(p=>t.sourcePageId&&String(p.id)===String(t.sourcePageId))||pages.find(p=>p.bookId===(t.sourceBookId||bookId)&&Number(p.number)===Number(t.pageNumber));return String(p?.text||t.passage||'').slice(0,4000)}
   function party(){
   try{
    if(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)return;
@@ -622,6 +644,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
   return {type:'order',question:'🧩 Puzzle Avengersów: ułóż wyrazy w zdanie z podręcznika.',answer:sentence.trim(),options:[],pageNumber:p.number,hint:'Zacznij od wyrazu pisanego wielką literą.',done:false,correct:false};
  }
  function makeAdjective(p){
+  if(subject()!=='polski')return null;
   const forms=new Set(['mały','mała','małe','małego','małej','duży','duża','duże','dużego','dużej','dobry','dobra','dobre','dobrego','dobrej','piękny','piękna','piękne','pięknego','pięknej','zielony','zielona','zielone','zielonego','zielonej','nowy','nowa','nowe','nowego','nowej','stary','stara','stare','starego','starej','drugi','druga','drugie','drugiego','drugiej','pierwszy','pierwsza','pierwsze','pierwszej']);
   const sentences=String(p.text||'').split(/(?<=[.!?])\s+/);
   const candidates=sentences.map(sentence=>({sentence,found:(sentence.match(/[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]+/g)||[]).map(w=>w.toLocaleLowerCase('pl-PL')).filter(w=>forms.has(w))})).filter(x=>x.found.length===1);
@@ -679,29 +702,30 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
    const rotationId=String(child)+'-'+String(launch?.subject||bookId)+'-'+ps.length+'-'+String(ps[0]?.id||'');
    const rotationKey='academy-v70-rotation-'+rotationId;
    let at=0;try{at=Number(localStorage.getItem(rotationKey)||0)||0}catch{}
-   const chosen=ps.length?[ps[Math.abs(at)%ps.length]]:[];
+   const chosen=ps.length?[ps[Math.abs(at)%ps.length],...(ps.length>1?[ps[(Math.abs(at)+1)%ps.length]]:[])]:[];
    if(ps.length>1){try{localStorage.setItem(rotationKey,String(at+1))}catch{}}
-   const startedAt=Date.now(),budgetMs=16000;
+   const startedAt=Date.now(),budgetMs=24000;
    for(let pageIndex=0;pageIndex<chosen.length;pageIndex++){
     const p=chosen[pageIndex];bookId=p.bookId;
     const status=root.querySelector('#mg-load-progress');if(status)status.textContent='Przygotowuję stronę '+p.number+' z książki „'+(sourceBook(p)?.title||'')+'”…';
     const key=`academy-v58-variety-${child}-${bookId}-${p.number}-${mode}`;
     let hist={runs:0,questions:[],types:[]};
     try{const h=JSON.parse(localStorage.getItem(key)||'null');if(h&&typeof h==='object')hist={...hist,...h}}catch{}
-    const bank=readBank().filter(x=>x.subject===subject()&&x.pageIds?.includes(String(p.number))&&x.task?.question);
+    const pageBank=readBank().filter(x=>x.subject===subject()&&v75MatchesPage(x,p)&&x.task?.question);
+    const bank=pageBank.filter(x=>x.task.type!=='reading'&&(childGrade!=='P'||['choice','listening'].includes(x.task.type))&&reliableTask(x.task,p));
     const excluded=[...hist.questions.slice(-65),...bank.slice(-20).map(x=>x.task.question)];
     let fresh=[];
     // Gotowe pytania maja pierwszenstwo; AI potrzebne tylko dla pustej bazy strony.
     if(!bank.length&&Date.now()-startedAt<budgetMs){try{
      fresh=parse(await ask(pagePrompt(p,excluded),Math.min(12000,budgetMs-(Date.now()-startedAt)))).map(t=>({...t,pageNumber:p.number,_fresh:true}));
      const recent=new Set(hist.questions.slice(-40).map(x=>norm(x)));
-     fresh=fresh.filter(x=>x.type!=='reading'&&reliableTask(x,p)&&!recent.has(norm(x.question))&&!(/sylab|głosk/i.test(x.question)&&/tropiciel/i.test(x.question)&&hist.questions.slice(-30).some(q=>/tropiciel/i.test(q))));
+     fresh=fresh.filter(x=>x.type!=='reading'&&(childGrade!=='P'||['choice','listening'].includes(x.type))&&reliableTask(x,p)&&!recent.has(norm(x.question))&&!(/sylab|głosk/i.test(x.question)&&/tropiciel/i.test(x.question)&&hist.questions.slice(-30).some(q=>/tropiciel/i.test(q))));
      if(fresh.length)storeTasks(fresh,p);
     }catch(e){errors.push('Strona '+p.number+': '+(e?.message||e))}}
     const unused=bank.filter(x=>!hist.questions.slice(-40).some(q=>norm(q)===norm(x.task.question)));
-    const old=shuffle(unused.length?unused:bank).filter(x=>x.task?.type!=='reading'&&reliableTask(x.task,p)).map(x=>({...x.task,_bankKey:x.key,pageNumber:p.number,done:false,correct:false}));
+    const old=shuffle(unused.length?unused:bank).filter(x=>x.task?.type!=='reading'&&(childGrade!=='P'||['choice','listening'].includes(x.task?.type))&&reliableTask(x.task,p)).map(x=>({...x.task,_bankKey:x.key,pageNumber:p.number,done:false,correct:false}));
     if(!fresh.length&&!old.length)console.warn('AI nie przygotowało poprawnych pytań; spróbuję lokalnych gier edukacyjnych.');
-    const extras=[makeCrossword(p),makeWordsearch(p),makePuzzle(p),makeAdjective(p),makeRebus(p),makeMemory(p),mode==='game'?makeMiniReading(p):null].filter(Boolean);
+    const extras=(childGrade==='P'?[]:[makeCrossword(p),makeWordsearch(p),makePuzzle(p),makeAdjective(p),makeRebus(p),makeMemory(p),mode==='game'?makeMiniReading(p):null]).filter(Boolean);
     // Rozklad gier zalezy od historii (a nie kolejności w tablicy).
     const extrasByType=[...new Map(extras.map(x=>[x.type,x])).values()];
     extrasByType.sort((a,b)=>{
@@ -714,22 +738,22 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
     };
     // V65: co druga misja ma ćwiczenie ortografii z pewnym rozwiązaniem.
     // Nie zmienia częstotliwości, wyglądu ani liczby słów w wykreślance.
-    if(mode==='game'&&subject()==='polski'&&hist.runs%2===0)add(makeSafeSpelling(p));
+    if(childGrade!=='P'&&mode==='game'&&subject()==='polski'&&hist.runs%2===0)add(makeSafeSpelling(p));
     // Minimum dwa typy: nowa wiedza z AI plus wybrana gra.
     const diverseFresh=shuffle(fresh.length?fresh:old.slice(0,5)).sort((a,b)=>Number(usedTypes.has(a.type))-Number(usedTypes.has(b.type)));
-    for(const t of diverseFresh){if(picked.length>=3)break;if(!usedTypes.has(t.type))add(t)}
-    for(const t of diverseFresh){if(picked.length>=3)break;add(t)}
+    for(const t of diverseFresh){if(picked.length>=5)break;if(!usedTypes.has(t.type))add(t)}
+    for(const t of diverseFresh){if(picked.length>=5)break;add(t)}
     // V62: co trzecia przygoda daje pierwszeństwo wykreślance.
     const wordsearchTurn=mode==='game'&&hist.runs%3===0;
     if(wordsearchTurn)add(extrasByType.find(t=>t.type==='wordsearch'));
-    for(const t of extrasByType){if(picked.length>=5)break;if(!usedTypes.has(t.type))add(t)}
+    for(const t of extrasByType){if(picked.length>=8)break;if(!usedTypes.has(t.type))add(t)}
     // Czytanie co druga przygoda, NIE w sprawdzianie.
-    if(mode==='game'&&hist.runs%2===0&&!picked.some(x=>x.type==='reading-mini'))add(makeMiniReading(p));
+    if(childGrade!=='P'&&mode==='game'&&hist.runs%2===0&&!picked.some(x=>x.type==='reading-mini'))add(makeMiniReading(p));
     // Dawne pytanie tylko co dziesiata misje (lub awaryjnie przy braku AI).
-    if(hist.runs%10===9||!fresh.length){for(const t of old){if(picked.length>=6)break;if(add(t))break}}
-    for(const t of [...diverseFresh,...extrasByType,...old]){if(picked.length>=6)break;add(t)}
+    if(hist.runs%10===9||!fresh.length){for(const t of old){if(picked.length>=10)break;if(add(t))break}}
+    for(const t of [...diverseFresh,...extrasByType,...old]){if(picked.length>=10)break;add(t)}
     picked.forEach(t=>{
-     t.sourceBookId=p.bookId;t.sourceTitle=sourceLabel(p);
+     t.sourceBookId=p.bookId;t.sourcePageId=p.id;t.sourceTitle=sourceLabel(p);
      // Odpowiedni fragment zapisujemy razem z zadaniem, przed rozpoczęciem gry.
      if(sourceQuestion(t))t.sourceExcerpt=sourceFromText(p.text,t);
     });
@@ -739,8 +763,12 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
     hist.types=[...hist.types,...picked.map(t=>t.type)].slice(-40);
     try{localStorage.setItem(key,JSON.stringify(hist))}catch{}
    }
+   if(!all.length&&childGrade==='P'){
+    const basic=[['Jakie zwierzę miauczy?',['Kot','Pies','Koń','Ryba'],0],['Co jest okrągłe?',['Koło','Kwadrat','Trójkąt','Prostokąt'],0],['Ile nóg ma kot?',['Dwie','Cztery','Sześć','Osiem'],1],['Co zakładamy na stopy?',['Buty','Czapkę','Rękawiczki','Szalik'],0],['Co pijemy, gdy chce nam się pić?',['Wodę','Piasek','Kredki','Kartkę'],0],['Co świeci w dzień?',['Słońce','Łyżka','Poduszka','But'],0],['Które zwierzę ma skrzydła?',['Wróbel','Kot','Pies','Krowa'],0],['Jakiego koloru jest trawa?',['Zielona','Złota','Różowa','Czarna'],0],['Czym myjemy ręce?',['Wodą i mydłem','Piaskiem','Farba','Kredą'],0],['Jaki owoc jest żółty?',['Banan','Wiśnia','Borówka','Śliwka'],0]];
+    for(const [question,options,ok] of basic){all.push({type:'choice',question,options,answer:options[ok],explanation:'',sourceBookId:bookId,sourceTitle:'Zabawy przedszkolaka',pageNumber:0,done:false,correct:false})}
+   }
    if(!all.length)throw Error(errors.join('; ')||'Nie udało się utworzyć misji');
-   tasks=all.map(t=>({...t,sourceBookId:t.sourceBookId||bookId,sourceTitle:t.sourceTitle||'Strona '+t.pageNumber}));
+   tasks=shuffle(all).slice(0,10).map(t=>({...t,sourceBookId:t.sourceBookId||bookId,sourceTitle:t.sourceTitle||'Strona '+t.pageNumber}));
    idx=0;points=0;award=false;reset();remember();draw();
   }catch(err){console.warn('Tworzenie misji:',err);if(root.isConnected)root.innerHTML='<section class="mg-panel"><h2>Nie udało się przygotować misji</h2><p>Spróbuj ponownie, kiedy AI będzie dostępne.</p>'+btn('Spróbuj ponownie','start')+btn('Wróć','back')+'</section>'}
   finally{busy=false}
@@ -764,7 +792,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
    finally{busy=false;draw()}})();return;
   }
   if(!t.correct){if(/spółgłoski|samogłoski/i.test(t.question)){const a=Array.from(lettersOnly(t.answer)).sort().join(''),b=Array.from(lettersOnly(choice)).sort().join('');t.orderHint=!!a&&a===b;}wrongAttempts++;audioCue(false);if(wrongAttempts>=2)logDifficulty(t,'błędne próby');hintLevel=Math.min(3,hintLevel+1);draw();return}
-  answered=true;t.done=true;points++;audioCue(true);sayFeedback('Brawo! Dobra odpowiedź.');recordResult(t);remember();draw();
+  answered=true;t.done=true;points++;audioCue(true);sayFeedback('Brawo! Dobra odpowiedź.'+(mode==='game'&&subject(t)==='angielski'&&t.explanation?' '+t.explanation:''));recordResult(t);remember();draw();
  }
  function hintText(t){
   if(t.orderHint)return 'Litery są dobrane poprawnie, ale wpisz je kolejno, tak jak występują w podanym wyrazie. Przecinki i spacje nie są obowiązkowe.';
@@ -880,13 +908,28 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
   // Bez potwierdzonej odpowiedzi nie wyświetlaj losowego początku czytanki.
   return '';
  }
- function stage(){
-  const t=task();let html='<style>.mg-panel [data-mg]{transition:transform .13s ease,filter .13s ease,box-shadow .13s ease}.mg-panel [data-mg]:active{transform:scale(.94);filter:brightness(1.35)}.mg-panel [data-mg]:focus-visible{outline:3px solid #fbbf24;outline-offset:3px}.mg-panel input:focus,.mg-panel textarea:focus{outline:3px solid #fbbf24}.mg-panel .mg-feedback{animation:mg-pop .35s ease-out}@keyframes mg-pop{from{opacity:.2;transform:scale(.94)}to{opacity:1;transform:scale(1)}}</style><h3>'+escape(t.question)+'</h3>';
+ // V75_AUDYT_ZGODNOSCI_2
+ function v75InstructionSpeech(t,mode){
+  const text=String(t?.question||'');if(!text)return;
+  if(!('speechSynthesis' in window))return speak(text,'en-US');
+  const synth=window.speechSynthesis;synth.cancel();
+  const en=new SpeechSynthesisUtterance(text);en.lang='en-US';en.rate=.93;
+  const vs=synth.getVoices(),v=vs.find(x=>x.lang.toLowerCase().startsWith('en'));if(v)en.voice=v;
+  if(mode!=='test'&&t?.questionPl){en.onend=()=>{
+    if(task()!==t)return;
+    const pl=new SpeechSynthesisUtterance(String(t.questionPl));pl.lang='pl-PL';pl.rate=.95;
+    const vv=vs.find(x=>x.lang.toLowerCase().startsWith('pl'));if(vv)pl.voice=vv;
+    synth.speak(pl);
+  }}
+  synth.speak(en);
+ }
+function stage(){
+  const t=task();let html='<style>.mg-panel [data-mg]{transition:transform .13s ease,filter .13s ease,box-shadow .13s ease}.mg-panel [data-mg]:active{transform:scale(.94);filter:brightness(1.35)}.mg-panel [data-mg]:focus-visible{outline:3px solid #fbbf24;outline-offset:3px}.mg-panel input:focus,.mg-panel textarea:focus{outline:3px solid #fbbf24}.mg-panel .mg-feedback{animation:mg-pop .35s ease-out}@keyframes mg-pop{from{opacity:.2;transform:scale(.94)}to{opacity:1;transform:scale(1)}}</style><h3>'+escape(t.question)+'</h3>'+ (subject(t)==='angielski'&&mode!=='test'&&t.questionPl?'<p class="mg-translation">🇵🇱 '+escape(t.questionPl)+'</p>':'');
   const q=String(t.question||'').toLocaleLowerCase('pl-PL');
   const storyHint=/(czytank|tekst|wiersz|opowiadani|bohater|autor|narrator|histori|według|na podstawie|co (?:się|robi|zrobił|zrobiła|zauważył|powiedział|woła|nawołuje)|kto (?:powiedział|woła|spotkał|zobaczył|zrobił)|dlaczego|w jaki sposób|co wydarzyło|o czym)/i.test(q);
   const noSource=['reading','wordsearch','crossword','rebus','syllables','dictation','listening','spelling','order'].includes(t.type)||/(sylab|głosk|samogłosk|spółgłosk|liter|alfabet|ortografi|wyraz[ieyu]? [„"'])/i.test(q);
   const explicitText=/(z wiersza|z czytanki|z tekstu|według wiersza|na podstawie tekstu|na końcu refrenu|zakończeniu refrenu)/i.test(q);
-  if(explicitText||(!noSource&&(t.needsSource===true||storyHint||t.type==='detective'||t.type==='loki'))){
+  if(subject(t)!=='angielski'&&(explicitText||(!noSource&&(t.needsSource===true||storyHint||t.type==='detective'||t.type==='loki')))){
    const excerpt=shortSource(t);
    if(excerpt)html+='<details class="mg-source" open><summary>📖 Tekst źródłowy — znajdź odpowiedź</summary><p style="max-height:330px;overflow:auto;white-space:pre-wrap">'+escape(excerpt)+'</p></details>';
   }
@@ -1030,8 +1073,8 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
   const b=ev.target.closest('[data-mg]');if(!b||busy)return;
   const act=b.dataset.mg,t=task();
   if(act==='tutor-instruction')return speak('Zapytaj nauczyciela AI. Naciśnij czerwony mikrofon z boku ekranu i powiedz, czego nie rozumiesz.','pl-PL');
-  if(act==='read-instruction')return speak((mode==='test'?'Sprawdzian':'Misja')+'. '+(t?.type==='reading'?'Przeczytaj na głos cały tekst poniżej. Naciśnij rozpocznij czytanie. Kiedy będziesz potrzebował przerwy, naciśnij zakończ fragment. Możesz później kontynuować.':t?.question||'')+(t?.type==='wordsearch'?' Wybieraj litery kolejno.':''),'pl-PL');
-  if(act==='skip'){logDifficulty(t,'uczeń poprosił o następne zadanie');sayFeedback('Nie szkodzi. Zapisuję to zadanie do powtórki. Przejdźmy dalej.');idx++;reset();remember();return draw()}
+  if(act==='read-instruction'){if(subject(t)==='angielski'){v75InstructionSpeech(t,mode);return;}return speak((mode==='test'?'Sprawdzian':'Misja')+'. '+(t?.type==='reading'?'Przeczytaj na głos cały tekst poniżej. Naciśnij rozpocznij czytanie. Kiedy będziesz potrzebował przerwy, naciśnij zakończ fragment. Możesz później kontynuować.':t?.question||'')+(t?.type==='wordsearch'?' Wybieraj litery kolejno.':''),'pl-PL');}
+  if(act==='skip'){logDifficulty(t,'uczeń poprosił o następne zadanie');sayFeedback('Nie szkodzi. '+(subject(t)==='angielski'&&t.explanation?'Wyjaśnienie: '+t.explanation+'. ':'')+'Zapisuję to do powtórki.');idx++;reset();remember();return draw()}
   if(act==='cross-new'){if(crossStatus(t))return crossDone(t);wrongAttempts++;audioCue(false);const box=root.querySelector('#mg-cross-feedback');if(box)box.textContent='Nie wszystkie wyrazy są jeszcze poprawne. Wpisane litery pozostają w kratkach.';return}
   if(act==='read-aloud'){
    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -1117,7 +1160,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
   if(act==='draw-done'){answered=true;t.done=true;t.correct=true;points++;remember();return draw()}
   if(act==='clear-draw'){const c=root.querySelector('#mg-draw');c?.getContext('2d')?.clearRect(0,0,c.width,c.height);return}
   if(act==='next'){idx++;reset();remember();return draw()}
-  if(act==='audio')return speak(t.audio||t.question,subject()==='angielski'?'en-US':'pl-PL');
+  if(act==='audio')return speak(t.audio||t.question,subject(t)==='angielski'?'en-US':'pl-PL');
   if(answered)return;
   if(act.startsWith('pick:'))return answer(t.options[Number(act.slice(5))]);
   if(act.startsWith('tile:')){const i=Number(act.slice(5));if(!tiles.includes(i)){tiles.push(i);draw()}return}
@@ -1149,7 +1192,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
     if(batchGenerate.shouldStop?.())break;
     bookId=p.bookId;
     batchGenerate.onProgress?.({done,failed,added,total:targetPages.length,page:p.number,index,finished:false});
-    const excluded=readBank().filter(x=>x.pageIds?.includes(String(p.number))).slice(-35).map(x=>x.task?.question||'');
+    const excluded=readBank().filter(x=>v75MatchesPage(x,p)).slice(-35).map(x=>x.task?.question||'');
     try{
      const items=parse(await ask(pagePrompt(p,excluded),16000)).filter(t=>t.type!=='reading'&&reliableTask(t,p));
      if(items.length){storeTasks(items,p);added+=items.length;done++}
@@ -1164,3 +1207,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,initia
  if(launch){mode=launch.mode==='test'?'test':'game';start();return {open:start}}
  setup();return {open:setup};
 }
+
+// V75_AUDYT_ZGODNOSCI_3
+
+// V75_AUDYT_ZGODNOSCI_4

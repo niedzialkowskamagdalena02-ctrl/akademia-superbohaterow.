@@ -129,6 +129,22 @@ async function ocrWithFallback(env, body){
   return send({error:'Żaden z trzech modeli AI nie odczytał zdjęcia. Spróbuj ponownie później.'},503);
 }
 
+// V75: trzy niezależne opinie, bez modyfikowania pytań w bazie.
+async function reviewThree(env,body){
+ const questions=Array.isArray(body.questions)?body.questions.slice(0,4):[];
+ if(!questions.length)return send({error:'Brak pytań do sprawdzenia'},400);
+ const input=questions.map((q,i)=>({index:i,question:String(q.question||'').slice(0,400),answer:String(q.answer||'').slice(0,120),options:(q.options||[]).slice(0,4).map(x=>String(x).slice(0,120)),sourceQuote:String(q.sourceQuote||'').slice(0,320),source:String(q.source||'').slice(0,1700)}));
+ const prompt='Jestes niezaleznym pedagogiem sprawdzajacym pytania edukacyjne dla dziecka. Nie zmieniaj pytan, tylko zglos powazne bledy logiczne, niepoprawne odpowiedzi, jawne zdradzenie odpowiedzi przez tekst zrodlowy, sprzecznosc z materialem, niezrozumialy jezyk. Przedmiot: '+String(body.subject||'')+'. Ocen kazda pozycje osobno. Zwroc TYLKO JSON: {"issues":[{"index":0,"reason":"opis bledu"}]}. Jesli wszystkie poprawne: {"issues":[]}. Nie oznaczaj bez podstaw i nie sugeruj zmian bez bledow. DANE: '+JSON.stringify(input);
+ const providers=[['gemini',viaGemini],['groq',viaGroq],['workers-ai',viaWorkersAI]];
+ const results=await Promise.all(providers.map(async ([provider,fn])=>{
+  try{let raw=await fn(env,prompt,'tech',1500);raw=String(raw).replace(/```(?:json)?/gi,'').replace(/```/g,'').trim();let obj;try{obj=JSON.parse(raw)}catch{obj=JSON.parse(raw.slice(raw.indexOf('{'),raw.lastIndexOf('}')+1))}
+   if(!Array.isArray(obj?.issues)||obj.issues.some(x=>!x||!['number','string'].includes(typeof x.index)||String(x.index).trim()===''||!Number.isInteger(Number(x.index))||Number(x.index)<0||Number(x.index)>=questions.length||typeof x.reason!=='string'||!x.reason.trim()))throw Error('Model przeslal nieprawidlowa liste ocen');return {provider,issues:obj.issues.map(x=>({index:Number(x.index),reason:x.reason.trim()})).slice(0,8)};
+  }catch(err){return {provider,error:'Ten model nie był dostępny podczas sprawdzania.'}}
+ }));
+ if(!results.some(x=>Array.isArray(x.issues)))return send({error:'Żaden z trzech modeli AI nie odpowiedział.'},503);
+ return send({reviews:results});
+}
+
 export default {
   async fetch(request, env) {
     const origin=request.headers.get('Origin');
@@ -136,17 +152,18 @@ export default {
     if (request.method!=='POST') return send({error:'Method not allowed'},405);
     if (origin!==ALLOWED_ORIGIN) return send({error:'Forbidden'},403);
     const path=new URL(request.url).pathname;
-    if (!['/mentor-ai','/ocr-ai'].includes(path)) return send({error:'Not found'},404);
+    if (!['/mentor-ai','/ocr-ai','/review-three'].includes(path)) return send({error:'Not found'},404);
     const length=Number(request.headers.get('content-length')||0);
     if (length>5000000) return send({error:'Za duże żądanie'},413);
     let body;
     try {body=await request.json();} catch {return send({error:'Nieprawidłowy JSON'},400);}
     if (path==='/ocr-ai') return ocrWithFallback(env,body);
+    if (path==='/review-three') return reviewThree(env,body);
 
     const question=String(body.question||'').slice(0,5500);
     if (!question.trim()) return send({error:'Brak pytania'},400);
     const style=String(body.mentor||'tech');
-    const maxTokens=/JSON|\\"tasks\\"|Zwróć TYLKO/i.test(question)?2200:1200;
+    const maxTokens=/JSON|\\"tasks\\"|Zwróć TYLKO/i.test(question)?3600:1200;
     // Bez fikcyjnych odpowiedzi. Każda próba musi wywołać prawdziwy model.
     const providers=[['gemini',viaGemini],['groq',viaGroq],['workers-ai',viaWorkersAI]];
     for(const [name,invoke] of providers) {
@@ -161,3 +178,5 @@ export default {
     return send({error:'Brak łączności z AI. Spróbuj ponownie później.'},503);
   }
 };
+
+// V75_AUDYT_ZGODNOSCI_3
