@@ -1,3 +1,5 @@
+import {handleFamilySync78,AcademyFamilySync78} from './sync-worker.js';
+export {AcademyFamilySync78};
 // AKADEMIA V69 — Mentor: Gemini/Groq/Workers AI; OCR: Gemini/Groq Vision/Workers Vision.
 // Klucze wyłącznie w sekretach Cloudflare. Nie wpisuj ich do tego pliku.
 const GEMINI_MODEL = 'gemini-3.1-flash-lite';
@@ -163,6 +165,7 @@ async function reviewThree(env,body){
 
 export default {
   async fetch(request, env) {
+    if(new URL(request.url).pathname.startsWith('/family-sync/'))return handleFamilySync78(request,env);
     const origin=request.headers.get('Origin');
     if (request.method==='OPTIONS') return new Response(null,{status:origin===ALLOWED_ORIGIN?204:403,headers:cors});
     if (request.method!=='POST') return send({error:'Method not allowed'},405);

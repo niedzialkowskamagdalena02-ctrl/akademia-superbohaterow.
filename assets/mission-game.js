@@ -1,6 +1,6 @@
 const v773PreviewDecks=new Map();
-import {speakSequence,stopVoice,setVoiceState,spellEnglish77} from './voice.js?v=77.4';
-import {cleanEnglish76,vocabulary76,checkedVocabulary76,englishInstruction76,makeVocabularyTasks76,spokenMatch76,englishTaskSafe76,englishCue774,englishRecall774,simplifyEnglish774,englishExplanation774,englishAudioAllowed774,polishText774} from './english76.js?v=77.4';
+import {speakSequence,stopVoice,setVoiceState,spellEnglish77} from './voice.js?v=78';
+import {cleanEnglish76,vocabulary76,checkedVocabulary76,englishInstruction76,makeVocabularyTasks76,spokenMatch76,englishTaskSafe76,englishCue774,englishRecall774,simplifyEnglish774,englishExplanation774,englishAudioAllowed774,polishText774} from './english76.js?v=78';
 // V53_TEST_FIXES_01
 // V53_CONSOLIDATED_CROSSING_CHAPTERS
 // V55_FULL_REVIEW

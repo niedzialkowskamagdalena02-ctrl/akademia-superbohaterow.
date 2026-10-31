@@ -6,3 +6,12 @@ compatibility_date = "2026-10-27"
 # V56 — produkcyjny binding Workers AI (nie tylko previews)
 [ai]
 binding = "AI"
+
+# V78: prywatne dane rodziny, SQLite jest obslugiwane takze w planie Free.
+[[durable_objects.bindings]]
+name = "FAMILY_SYNC"
+class_name = "AcademyFamilySync78"
+
+[[migrations]]
+tag = "v78-family-sync"
+new_sqlite_classes = ["AcademyFamilySync78"]
