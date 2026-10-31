@@ -1,5 +1,6 @@
 // V76: tresc z podrecznika, jawne jezyki polecen i oddzielne cwiczenia slowek.
 export const VOCAB76=[
+ ['spring','wiosna','🌷'],['summer','lato','☀️'],['autumn','jesień','🍂'],['winter','zima','❄️'],['season','pora roku','🌦️'],
  ['jacket','kurtka',''],['coat','płaszcz',''],['jumper','sweter',''],['sweater','sweter',''],['jeans','dżinsy',''],
  ['t shirt','koszulka',''],['shirt','koszula',''],['skirt','spódnica',''],['shorts','krótkie spodenki',''],['trousers','spodnie',''],['dress','sukienka',''],['shoes','buty',''],['hat','czapka',''],['socks','skarpetki',''],['listen','słuchać',''],['think','myśleć',''],['say','powiedzieć',''],['ask','zapytać',''],['write','pisać',''],['read','czytać',''],
  ['cat','kot','🐈'],['dog','pies','🐕'],['sun','słońce','☀️'],['house','dom','🏠'],['book','książka','📘'],['tree','drzewo','🌳'],['bird','ptak','🐦'],['fish','ryba','🐟'],['apple','jabłko','🍎'],['water','woda','💧'],['milk','mleko','🥛'],['car','samochód','🚗'],['ball','piłka','⚽'],['flower','kwiat','🌼'],['school','szkoła','🏫'],['pencil','ołówek','✏️'],['pen','długopis','🖊️'],['chair','krzesło','🪑'],['table','stół',''],['door','drzwi','🚪'],['window','okno','🪟'],['bed','łóżko','🛏️'],['red','czerwony','🔴'],['blue','niebieski','🔵'],['green','zielony','🟢'],['yellow','żółty','🟡'],['white','biały','⚪'],['black','czarny','⚫'],['orange','pomarańczowy','🟠'],['pink','różowy',''],['purple','fioletowy','🟣'],['brown','brązowy','🟤'],['one','jeden','1'],['two','dwa','2'],['three','trzy','3'],['four','cztery','4'],['five','pięć','5'],['six','sześć','6'],['seven','siedem','7'],['eight','osiem','8'],['nine','dziewięć','9'],['ten','dziesięć','10'],['monday','poniedziałek',''],['tuesday','wtorek',''],['wednesday','środa',''],['thursday','czwartek',''],['friday','piątek',''],['saturday','sobota',''],['sunday','niedziela',''],['mother','mama',''],['father','tata',''],['sister','siostra',''],['brother','brat',''],['friend','przyjaciel',''],['happy','szczęśliwy','🙂'],['sad','smutny','🙁'],['big','duży',''],['small','mały',''],['rabbit','królik','🐇'],['horse','koń','🐎'],['duck','kaczka','🦆'],['cow','krowa','🐄'],['pig','świnia','🐖'],['sheep','owca','🐑'],['lion','lew','🦁'],['elephant','słoń','🐘'],['monkey','małpa','🐒'],['banana','banan','🍌'],['bread','chleb','🍞'],['egg','jajko','🥚'],['cheese','ser','🧀'],['head','głowa',''],['hand','dłoń','✋'],['eye','oko','👁️'],['ear','ucho','👂'],['nose','nos','👃'],['mouth','usta',''],['leg','noga',''],['foot','stopa','🦶'],['arm','ręka',''],['body','ciało',''],['hello','cześć','👋'],['goodbye','do widzenia','👋']
@@ -121,3 +122,48 @@ export function simplifyEnglish774(t,cue=''){
 export function englishAudioAllowed774(t){
  return !t?.v774Recall&&!englishRecall774(t)&&(['listening','dictation','vocab-listen','vocab-repeat','vocab-reading'].includes(t?.type));
 }
+
+// V79: słuchanie korzysta wyłącznie z prostych, potwierdzonych słówek danej strony.
+export function listeningVocabulary79(text){
+ const commands=new Set(['listen','think','say','ask','write','read']);
+ return vocabulary76(text).filter(x=>/^[a-z]{2,12}$/.test(x.en)&&!commands.has(x.en));
+}
+export function normalizeListening79(t,text){
+ if(!t||!['listening','dictation','vocab-listen'].includes(t.type)||englishRecall774(t))return t;
+ const pool=listeningVocabulary79(text),existing=cleanEnglish76(t.wordEn||t.answer);
+ let word=pool.find(x=>x.en===existing);
+ if(!word&&pool.length){let seed=0;for(const ch of String(t.question||''))seed=(seed*31+ch.charCodeAt(0))>>>0;word=pool[seed%pool.length];}
+ t.v79UnsafeListening=!word;
+ if(!word)return t;
+ t.answer=word.en;t.wordEn=word.en;t.audio=word.en;t.promptPl=word.pl;t.answerPl=word.pl;t.answerPlFor=word.en;
+ t.question=t.instructionEn='Listen and write the word.';
+ t.questionPl=t.instructionPl='Posłuchaj i zapisz słowo.';
+ t.explanation='Po angielsku „'+word.pl+'” to „'+word.en+'”.';
+ t.hint='Naciśnij głośnik i posłuchaj słowa jeszcze raz. Zapisz to, co słyszysz.';
+ return t;
+}
+export function readingProgress79(t){
+ const words=Array.isArray(t.readWords)?t.readWords:[];
+ const saved=Array.isArray(t.readPassed79)?t.readPassed79:[];
+ let hits=0;while(hits<words.length&&saved[hits]===true)hits++;
+ return {words,hits,total:words.length,complete:words.length>0&&hits===words.length};
+}
+export function acceptReading79(t,candidates){
+ const p=readingProgress79(t);let best=p.hits;
+ for(const candidate of candidates){
+  const tokens=cleanEnglish76(candidate).split(' ').filter(Boolean);
+  // Starsze zaliczone słowa mogą być powtórzone, ale nie są wymagane ponownie.
+  for(const start of [p.hits,0]){
+   let at=0,step=start;
+   while(step<p.total){
+    const expected=cleanEnglish76(p.words[step]).split(' ');
+    if(!expected.every((word,j)=>tokens[at+j]===word))break;
+    at+=expected.length;step++;
+   }
+   if(step>best)best=step;
+  }
+ }
+ t.readPassed79=p.words.map((_,i)=>i<best);
+ return {...readingProgress79(t),advanced:best>p.hits};
+}
+

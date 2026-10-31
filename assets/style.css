@@ -888,3 +888,16 @@ button:not(:disabled):not(.tr72-subject-card):not(.mic):active,label.v73-file-co
 .v77-play button.mg-memory-card{background:linear-gradient(#378ec5,#5363b2)!important;border-color:#aaddff!important}
 .v77-play button.mg-matched{background:linear-gradient(#26a779,#167650)!important;border-color:#b8f7d9!important}
 .v77-play .mg-built{background:#eff8ff;color:#244a70;border-color:#7fb4dc}
+
+/* V79: spokojne kolory w istniejącym układzie ćwiczeń. */
+.v77-play .v77-task-surface{background:linear-gradient(135deg,#d8effb 0%,#d7f3ed 55%,#e0f2dc 100%);border-color:#8ccbc7;box-shadow:0 6px 0 #659fae}
+.v77-play .mg-tutor{background:linear-gradient(135deg,#d8edf9,#d6f0e8)!important}
+.v77-play .v76-word-prompt{background:#e7f7ee;border-color:#79bcb9}
+.v79-reading-words{display:grid;gap:12px;list-style:none;padding:0;margin:22px 0;counter-reset:none}
+.v79-reading-words li{display:grid;grid-template-columns:32px 1fr 30px;align-items:center;gap:10px;padding:14px 16px;border:2px solid #8db9ca;border-radius:16px;background:#e4f1f6;color:#1c425d;box-shadow:0 4px 0 #93bac5;font-size:clamp(25px,7vw,36px);font-weight:750}
+.v79-reading-words small{font-size:17px;color:inherit;border-radius:50%;background:#ffffff70;text-align:center;padding:4px}
+.v79-reading-words .v79-read-current{background:#c9e9fa;border-color:#357cae;outline:2px solid #357cae;outline-offset:2px}
+.v79-reading-words .v79-read-done{background:#b8e6cb;border-color:#27805c;color:#105439;box-shadow:0 4px 0 #6bb894}
+.v79-reading-progress{color:#1d4f69;font-size:18px;line-height:1.45}
+.v77-play .v76-heard{color:#23526b!important;font-size:17px;line-height:1.4}
+
