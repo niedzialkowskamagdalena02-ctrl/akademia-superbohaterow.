@@ -1,10 +1,10 @@
 // V48_AI_RESPONSE_DIAGNOSTICS
 // V44_BULK_CHAPTERS
 // V42_CHAPTERS
-import {mountMissionGame} from './mission-game.js?v=77';
+import {mountMissionGame} from './mission-game.js?v=77.1';
 import { initHeadquarters3D } from './headquarters3d.js';
 import {initial,get,put,del,allRecords,replaceRecords,compress,uid,gradeName} from './data.js';
-import {speak,listen,stopVoice,getVoiceState,setVoiceState,spellEnglish77} from './voice.js?v=77';
+import {speak,listen,stopVoice,getVoiceState,setVoiceState,spellEnglish77} from './voice.js?v=77.1';
 import {vocabulary,readings,explanation} from './learning.js';
 import {syncAdapter} from './sync.js';
 import {BASE_ITEMS,baseMarkup,migrateBase} from './base.js';
@@ -126,10 +126,14 @@ function filterBookPages(value){
  document.querySelectorAll('[data-admin-page-id]').forEach(el=>{
   const p=data.bookPages.find(x=>x.id===el.dataset.adminPageId);
   const state=p?pageState(b,p,bank).css:'missing';
-  const yes=value==='all'||(value==='missing'&&state==='missing')||(value==='ready'&&state==='ready')||(value==='approved'&&state==='approved')||(value==='questions'&&state==='questions');
+  const chapter=$('page-chapter-filter')?.value||'';
+  const chapterMatches=!chapter||(chapter==='none'?!String(p?.chapter||'').trim():String(p?.chapter||'')===chapter.slice(2));
+  const yes=!!p&&p.bookId===bookId&&chapterMatches&&(value==='all'||(value==='missing'&&state==='missing')||(value==='ready'&&state==='ready')||(value==='approved'&&state==='approved')||(value==='questions'&&state==='questions'));
+  if(!yes){const box=el.querySelector('[data-page-select]');if(box)box.checked=false;}
   el.hidden=!yes;if(yes)shown++;
  });
  const el=$('page-filter-count');if(el)el.textContent='Widoczne: '+shown;const toolbar=$('v75-page-toolbar');if(toolbar)toolbar.hidden=!shown;
+ updateBookPageSelection();
 }
 // V75: panel rodzica, różnorodne zadania, materiały wspólne i trening przedszkolaka.
 // V75_AUDYT_ZGODNOSCI_2
@@ -453,13 +457,16 @@ function questionBankSummary(b){
 function setQuestionBuildButtons(){
  const go=document.querySelector('[data-action="book:questions"]'),pause=document.querySelector('[data-action="book:questions-pause"]');
  if(go)go.disabled=questionBuildBusy;
+ for(const id of ['book-question-scope','book-question-pages'])if($(id))$(id).disabled=questionBuildBusy;
  if(pause){pause.disabled=!questionBuildBusy||questionBuildStop;pause.textContent=questionBuildStop?'⏳ Zatrzymuję po stronie…':'⏸ Pauza generowania';}
 }
 async function buildBookQuestions(b){
  if(questionBuildBusy)throw Error('Generowanie pytań już trwa.');
- const pages=data.bookPages.filter(p=>p.bookId===b.id&&p.text?.trim()&&p.reviewed===true).sort((x,y)=>x.number-y.number);
+ const scope=v77ResolveQuestionScope(b);
+ const pages=scope.ready;
+ if(!pages.length){note(scope.mode==='selected'?'W wybranym zakresie nie ma stron z zatwierdzonym tekstem. Sprawdź numery i zatwierdzenie stron.':'Najpierw sprawdź i zatwierdź stronę.');return;}
  if(!pages.length){note('Najpierw sprawdź i zatwierdź przynajmniej jedną stronę. AI nie wygeneruje pytań ze stron niezatwierdzonych.');return}
- const cursorKey='academy-v71-question-queue-'+b.child+'-'+b.id;
+ const cursorKey='academy-v71-question-queue-'+b.child+'-'+b.id+(scope.mode==='selected'?'-pages-'+encodeURIComponent(pages.map(p=>p.id).sort().join('|')):'');
  let queue=null;
  try{const stored=JSON.parse(localStorage.getItem(cursorKey)||'null');if(Array.isArray(stored))queue=stored.filter(id=>pages.some(p=>p.id===id))}catch{}
  const bank=bookBankItems(b);
@@ -482,7 +489,7 @@ async function buildBookQuestions(b){
  try{
   const controllerKey='mama-question-bank';
   const root=document.createElement('div');
-  const job=mountMissionGame(root,{books:[b],pages:data.bookPages,child:b.child,childGrade:b.grade||data.profiles?.[b.child]?.grade||'2',initialBookId:b.id,
+  const job=mountMissionGame(root,{books:[b],pages,child:b.child,childGrade:b.grade||data.profiles?.[b.child]?.grade||'2',initialBookId:b.id,
    speak:()=>{},reward:async()=>{},
    ask:async(question,timeoutMs=16000)=>{
     const controller=beginAIRequest(controllerKey),timer=setTimeout(()=>controller.abort(),timeoutMs);
@@ -498,7 +505,7 @@ async function buildBookQuestions(b){
   if(!result.paused)localStorage.removeItem(cursorKey);
   const summary=questionBankSummary(b);
   const el=status();
-  if(el)el.textContent=(result.done>0?'✅ Zakończono. ':'⚠️ AI nie utworzyło poprawnych pytań z tej partii. ')+'W bazie: '+summary.tasks+' pytań z '+summary.pages+' odczytanych stron.'+
+  if(el)el.textContent=(result.done>0?'✅ Zakończono. ':'⚠️ AI nie utworzyło poprawnych pytań z tej partii. ')+scope.label+' · ukończono '+result.done+' z '+todo.length+' stron.'+(scope.skipped?' Pominięto '+scope.skipped+' stron bez zatwierdzonego tekstu.':'')+' W bazie: '+summary.tasks+' pytań z '+summary.pages+' odczytanych stron.'+
     (result.paused?' Wstrzymano — można wznowić.':'')+(result.failed?' Nieudane strony: '+result.failed+' — spróbuj ponownie.':'');
   if(el)el.classList.toggle('v76-complete',result.done>0);note('🤖 '+summary.tasks+' pytań w bazie, '+summary.pages+' stron z pytaniami.');
  }finally{questionBuildBusy=false;questionBuildStop=false;setQuestionBuildButtons()}
@@ -513,7 +520,10 @@ function selectedBookPageIds(){
  return [...document.querySelectorAll('[data-page-select]:checked')].map(el=>el.dataset.pageSelect);
 }
 function updateBookPageSelection(){
- const el=$('page-selected-count');if(el)el.textContent='Zaznaczono: '+selectedBookPageIds().length;
+ const valid=new Set(sortedBookPages(bookId).map(p=>p.id)),ids=selectedBookPageIds().filter(id=>valid.has(id));
+ for(const key of ['page-selected-count','chapter-selected-count']){const el=$(key);if(el)el.textContent='Zaznaczono: '+ids.length+' stron';}
+ document.querySelectorAll('[data-chapter-needs-selection]').forEach(el=>el.disabled=!ids.length);
+ if($('page-filter')){const old=v77BookViews.get(bookId)||{scroll:0};v77BookViews.set(bookId,{...old,filter:$('page-filter').value,chapter:$('page-chapter-filter')?.value||'',selected:ids});}
 }
 async function runAdminAction(target,label,operation){
  if(adminActionBusy){note('⏳ Poczekaj, poprzednia operacja jeszcze trwa.');return}
@@ -679,7 +689,7 @@ async function recognizePageAI(page,language='pol',overwriteApproved=false){
  finally{ocrBusy=false;document.querySelectorAll('[data-action="page:ai"],[data-action="reader:ai"]').forEach(b=>b.disabled=false)}
 }
 const grant=async(child,points,reason,key)=>{if(data.history.some(h=>h.key===key))return false;data.profiles[child].xp+=points;data.profiles[child].coins+=points;data.history.unshift({id:uid(),key,child,points,reason,at:new Date().toISOString()});await save();return true};
-function layout(title,content){cancelAIRequests();stopVoice();closeMicBubble();app.innerHTML=`<main class="wrap"><header class="head"><div><div class="brand">⚡ AKADEMIA SUPERBOHATERÓW <span style="display:inline-block;font-size:0.72em;border:1px solid currentColor;border-radius:8px;padding:2px 7px;vertical-align:middle">V77</span></div><div class="sub">${e(title)}</div></div>${role==='child'?trainingSoundControl():''}${role?button(testMode?'← Zakończ test':'← Profile','exit','alt'):''}</header>${testMode?'<div class="test-banner">🧪 TRYB MAMY — BEZPŁATNY TEST • POSTĘPY NIE SĄ ZAPISYWANE</div>':''}${content}</main>${role==='child'?'<button class="mic" data-action="mic" aria-label="Sterowanie głosowe">🎙️</button>':''}`;document.querySelectorAll('[data-speak]').forEach(b=>b.addEventListener('click',()=>speak(b.dataset.speak,b.dataset.lang,role==='child'?profile().mentor:'tech',data.settings.rate||1)));hydrateImages();v76AfterRender();if(role==='child'&&(tab==='learn'||tab==='subjectmissions'))installMicDrag()}
+function layout(title,content){cancelAIRequests();stopVoice();closeMicBubble();app.innerHTML=`<main class="wrap"><header class="head"><div><div class="brand">⚡ AKADEMIA SUPERBOHATERÓW <span style="display:inline-block;font-size:0.72em;border:1px solid currentColor;border-radius:8px;padding:2px 7px;vertical-align:middle">V77 · korekta 1</span></div><div class="sub">${e(title)}</div></div>${role==='child'?trainingSoundControl():''}${role?button(testMode?'← Zakończ test':'← Profile','exit','alt'):''}</header>${testMode?'<div class="test-banner">🧪 TRYB MAMY — BEZPŁATNY TEST • POSTĘPY NIE SĄ ZAPISYWANE</div>':''}${content}</main>${role==='child'?'<button class="mic" data-action="mic" aria-label="Sterowanie głosowe">🎙️</button>':''}`;document.querySelectorAll('[data-speak]').forEach(b=>b.addEventListener('click',()=>speak(b.dataset.speak,b.dataset.lang,role==='child'?profile().mentor:'tech',data.settings.rate||1)));hydrateImages();v76AfterRender();if(role==='child'&&(tab==='learn'||tab==='subjectmissions'))installMicDrag()}
 async function hydrateImages(){for(const el of document.querySelectorAll('[data-image]')){const src=await img(el.dataset.image);if(el.isConnected&&src){el.src=src;el.onload=()=>URL.revokeObjectURL(src)}}}
 function nav(){return role==='admin'?`<div class="tabs">${[['home','Przegląd'],['books','📚 Książki'],['missions','📋 Misje'],['settings','⚙️ Ustawienia'],['test','🧪 Testuj wszystko'],['backup','💾 Kopia']].map(([k,n])=>button(n,'admin:'+k,adminTab===k?'gold':'alt')).join('')}</div>`:`<div class="tabs">${[['home','🎯 Misje'],['books','📚 Książki'],['learn','🧠 Trening'],['academy','📖 Sala odkrywców'],['mentor','🤖 Mentor'],['base','🏙️ Baza Avengersów i gry']].map(([k,n])=>button(n,'child:'+k,tab===k?'gold':'alt')).join('')}</div>`}
 function render(){if(tab!=='arcade')stopArcade();if(!role){layout('Wybierz swoją bazę',`<section class="card"><h1>Witaj w Akademii! 🛡️</h1><p>Każdy bohater ma własne misje i nagrody.</p></section><div class="grid">${people.map(([id,name])=>`<button class="tile" data-action="enter:${id}"><img class="profile-hero" src="assets/art/${data.profiles[id].hero||(id==='pawel'?'iron':'spider')}.svg" alt=""><h2>${name}</h2><small>${gradeName(data.profiles[id].grade)} · ${data.profiles[id].coins} złotych</small></button>`).join('')}</div><section class="card">${button('🔐 Centrum dowodzenia mamy','enter:admin','gold')}<p class="muted">Tryb lokalny: dane z tego telefonu nie synchronizują się jeszcze z innymi urządzeniami. ${syncAdapter.status()}</p></section>`);return}if(role==='admin')adminRender();else childRender()}
@@ -1295,6 +1305,7 @@ async function traceSubmit(){
 async function exportBackup(){const records=await allRecords();const encoded=[];for(const [k,v] of records){if(v instanceof Blob){const base64=await new Promise(ok=>{const r=new FileReader();r.onload=()=>ok(r.result);r.readAsDataURL(v)});encoded.push([k,{__blob:base64}])}else encoded.push([k,v])}const url=URL.createObjectURL(new Blob([JSON.stringify({format:'academy-backup-1',records:encoded})],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='akademia-pelna-kopia-'+date()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),10000)}
 async function importBackup(){const f=$('backupfile').files[0];if(!f)return note('Wybierz plik kopii.');try{const raw=JSON.parse(await f.text());if(raw.format!=='academy-backup-1'||!Array.isArray(raw.records)||!raw.records.some(([k,v])=>k==='state'&&v.profiles?.pawel&&v.profiles?.patryk))throw Error('To nie jest poprawna kopia');if(!confirm('Zastąpić wszystkie lokalne dane tą kopią?'))return;const records=[];for(const [k,v] of raw.records){if(v?.__blob){const res=await fetch(v.__blob);records.push([k,await res.blob()])}else records.push([k,v])}await replaceRecords(records);data=await get('state');role='';render();note('Przywrócono pełną kopię.')}catch(err){note('Nie udało się przywrócić kopii: '+err.message)}}
 async function handle(action,target){
+if(action.startsWith('book:chapters:'))return v77ChapterAction(action,target);
 if(action==='v77:q-fix-all')return v77BatchFix();
 if(action.startsWith('v77:'))return v77Action(action,target);
 if(action.startsWith('page:open:'))v77CaptureBookView();
@@ -1450,7 +1461,8 @@ if(action==='book:questions'){
 }
 if(action==='page:bulk-ai')return runAdminAction(target,'Odczytuje strony AI…',async()=>{const b=data.books.find(x=>x.id===bookId);if(!await ensureNumberLocation(b))return;return readAllBookPagesAI()});
 if(action==='page:select-all'||action==='page:select-none'){
- document.querySelectorAll('[data-page-select]').forEach(box=>box.checked=action==='page:select-all');
+ const visible=new Set([...document.querySelectorAll('[data-admin-page-id]')].filter(row=>!row.hidden).map(row=>row.dataset.adminPageId));
+ document.querySelectorAll('[data-page-select]').forEach(box=>box.checked=action==='page:select-all'&&visible.has(box.dataset.pageSelect));
  updateBookPageSelection();return;
 }
 if(action==='page:delete-selected')return runAdminAction(target,'Usuwam wybrane strony…',async()=>{
@@ -1678,7 +1690,7 @@ document.addEventListener('toggle',ev=>{
 },true);
 document.addEventListener('click',ev=>{const btn=ev.target.closest('[data-action]');if(btn){if(ev.target.closest('[data-speak]'))return;if(btn.dataset.action==='mic'&&micDragIgnoreClick){ev.preventDefault();ev.stopPropagation();return}if(btn.classList.contains('tr72-subject-card')){if(btn.dataset.opening)return;btn.dataset.opening='1';btn.classList.add('tr72-selected');trainingTapSound();setTimeout(()=>{if(btn.isConnected)handle(btn.dataset.action,btn)},['matematyka','przyroda','wiedza'].includes(btn.dataset.theme)?1150:480);return}if(btn.closest('.tr71')&&/^training:(source|mode):/.test(btn.dataset.action||'')){if(btn.dataset.opening)return;btn.dataset.opening='1';btn.classList.add('v76-tile-pressed');btn.setAttribute('aria-busy','true');trainingTapSound();setTimeout(()=>{if(btn.isConnected)handle(btn.dataset.action,btn)},280);return}if(btn.closest('.tr71')&&btn.dataset.action?.startsWith('training:')&&btn.dataset.action!=='training:toggle-sound')trainingTapSound();handle(btn.dataset.action,btn)}});
 document.addEventListener('input',ev=>{const box=ev.target.closest('[data-v74-edit]');if(!box||!ev.target.matches('[data-v74-field],[data-v75-field]'))return;const key=decodeURIComponent(box.dataset.v74Edit||'');const btn=box.querySelector('[data-action^="book:save-question:"]');if(btn)btn.disabled=!v74QuestionModified(box,key);});
-document.addEventListener('change',ev=>{if(ev.target.matches('[data-tr71-page],[data-tr71-book],[data-tr71-chapter]'))return trainingSelectionChange(ev.target);if(ev.target.matches('[data-page-select]'))updateBookPageSelection();if(ev.target.id==='bchild')refreshBookSubjectSelect();if(ev.target.id==='btype'){const other=ev.target.value==='Inne';const a=$('v73-book-title'),b=$('v73-book-part');if(a)a.hidden=!other;if(b)b.hidden=other;}if(ev.target.id==='page-filter'){filterBookPages(ev.target.value);const old=v77BookViews.get(bookId)||{scroll:0,selected:[]};v77BookViews.set(bookId,{...old,filter:ev.target.value})}if(ev.target.id==='v74-report-child')v74UpdateReportFilter();if(ev.target.id==='booknumberlocation'){const b=data.books.find(x=>x.id===bookId);if(b){b.pageNumberPosition=ev.target.value;save().then(()=>note('✅ Zapisano położenie numeru strony.')).catch(err=>note('❌ '+err.message))}}if(ev.target.id==='replacefile'&&ev.target.files?.length)handle('page:replace');if(ev.target.id==='replacecamera'&&ev.target.files?.length)handle('page:replace-camera');if(ev.target.id==='bookcoverfile'&&ev.target.files?.length)handle('book:cover');if(ev.target.id==='pagefiles'&&ev.target.files?.length)handle('page:upload');if(ev.target.id==='pagecamera'&&ev.target.files?.length)handle('page:camera');if(ev.target.id==='trainingSubject')trainingChooseSubject(ev.target.value);if(ev.target.id==='kind')newExercise();if(ev.target.id==='booktrainingpage')bookExercise();if(ev.target.id==='tracechar')drawTrace();if(ev.target.id==='readerpage'){pageId=ev.target.value;render()}if(ev.target.id==='mentorstyle'){profile().mentor=ev.target.value;save()}});
+document.addEventListener('change',ev=>{if(ev.target.id==='page-chapter-filter'){if($('page-filter')?.value==='none')$('page-filter').value='all';filterBookPages($('page-filter')?.value||'all');return;}if(ev.target.matches('[data-tr71-page],[data-tr71-book],[data-tr71-chapter]'))return trainingSelectionChange(ev.target);if(ev.target.matches('[data-page-select]'))updateBookPageSelection();if(ev.target.id==='bchild')refreshBookSubjectSelect();if(ev.target.id==='btype'){const other=ev.target.value==='Inne';const a=$('v73-book-title'),b=$('v73-book-part');if(a)a.hidden=!other;if(b)b.hidden=other;}if(ev.target.id==='page-filter'){filterBookPages(ev.target.value);const old=v77BookViews.get(bookId)||{scroll:0,selected:[]};v77BookViews.set(bookId,{...old,filter:ev.target.value})}if(ev.target.id==='v74-report-child')v74UpdateReportFilter();if(ev.target.id==='booknumberlocation'){const b=data.books.find(x=>x.id===bookId);if(b){b.pageNumberPosition=ev.target.value;save().then(()=>note('✅ Zapisano położenie numeru strony.')).catch(err=>note('❌ '+err.message))}}if(ev.target.id==='replacefile'&&ev.target.files?.length)handle('page:replace');if(ev.target.id==='replacecamera'&&ev.target.files?.length)handle('page:replace-camera');if(ev.target.id==='bookcoverfile'&&ev.target.files?.length)handle('book:cover');if(ev.target.id==='pagefiles'&&ev.target.files?.length)handle('page:upload');if(ev.target.id==='pagecamera'&&ev.target.files?.length)handle('page:camera');if(ev.target.id==='trainingSubject')trainingChooseSubject(ev.target.value);if(ev.target.id==='kind')newExercise();if(ev.target.id==='booktrainingpage')bookExercise();if(ev.target.id==='tracechar')drawTrace();if(ev.target.id==='readerpage'){pageId=ev.target.value;render()}if(ev.target.id==='mentorstyle'){profile().mentor=ev.target.value;save()}});
 // V76_PANEL: zachowujemy kolejnosc Dodaj -> Biblioteka -> Trudnosci -> Baza poza.
 const v76OpenSections=new Set();
 const v76Q={level:'pages',page:null,key:null,subject:'',selected:new Set(),numbers:new Map(),scroll:0,last:null};
@@ -1713,14 +1725,14 @@ function v76BookMarkup(b){
  let header=original.slice(0,original.indexOf(add));
  header=header.replace(select('bchild','Dziecko',people,b.child),`<input type="hidden" id="bchild" value="${e(b.child||'pawel')}">`).replace(bookSubjectSelect(b.child,b.subject),v76BookSubjectSelect(b.subject)).replace(v75ShareControls(b),v76AudienceControls(b));
  const upload=cut(add,'<details class="v74-chapter-details">');
- const assign=cut('<details class="v74-chapter-details"><summary>📚 Przypisz istniejące strony do działu</summary>','</details>');
+ const assign=v77ChapterMarkup(b);
  let ocr=cut('<section class="v74-book-ocr"><h3>✨ Odczytaj zdjęcia przez AI</h3>','</section>');
  ocr=ocr.replace('<small>AI pomija strony z zapisanym tekstem. Nieudany odczyt można ponowić w edytorze strony.</small>',v76Info('AI pomija strony z zapisanym tekstem. Nieudany odczyt można ponowić w edytorze strony.')).replace('<small>To ustawienie zapisuje się po zmianie. AI będzie szukało numeru we wskazanej części zdjęcia.</small>',v76Info('To ustawienie zapisuje się po zmianie. AI będzie szukało numeru we wskazanej części zdjęcia.'));
  ocr=ocr.replace(/<label for="booknumberlocation">[\s\S]*?<\/label>(<select id="booknumberlocation">[\s\S]*?<\/select>)/,'<details class="v76-location"><summary>📄 Gdzie szukać drukowanego numeru strony?</summary><label for="booknumberlocation">Położenie numeru</label>$1</details>');
- let bank=cut('<section class="admin-question-bank v74-bank"><h3>🧠 Baza pytań z podręcznika</h3>','</section>');
+ let bank=v77QuestionScopeMarkup(b)+cut('<section class="admin-question-bank v74-bank"><h3>🧠 Baza pytań z podręcznika</h3>','</section>').replace('🤖 Generuj pytania z zatwierdzonych stron','🤖 Generuj pytania');
  bank=bank.replace('🔎 Sprawdź pytania AI','🔎 Przejrzyj i popraw pytania').replace('<p id="book-question-progress" role="status" aria-live="polite">Generowanie obejmuje zatwierdzone strony. Pytania zapisują się osobno dla każdej strony.</p>','<p id="book-question-progress" role="status" aria-live="polite"></p>'+v76Info('Generowanie obejmuje zatwierdzone strony. Pytania zapisują się osobno dla każdej strony.'));
- const pages=cut('<section class="card v74-pages"><h2>📄 Strony podręcznika</h2>','</section>');
- return header+v76BookFold('book-upload','📷 Dodaj strony',upload)+v76BookFold('book-assign','📚 Przypisz istniejące strony do działu',assign)+v76BookFold('book-ocr','✨ Odczytaj tekst ze stron',ocr)+v76BookFold('book-bank','🧠 Stwórz bazę pytań',bank)+'</section>'+v76BookFold('book-pages','📄 Strony podręcznika',pages,'card v74-pages');
+ const pages=cut('<section class="card v74-pages"><h2>📄 Strony podręcznika</h2>','</section>').replace('<label for="page-filter">',v77ChapterFilter(b)+'<label for="page-filter">').replace('🗑 Usuń zaznaczone</button>','🗑 Usuń zaznaczone strony</button>');
+ return header+v76BookFold('book-upload','📷 Dodaj strony',upload)+v76BookFold('book-ocr','✨ Odczytaj tekst ze stron',ocr)+v76BookFold('book-bank','🧠 Stwórz bazę pytań',bank)+'</section>'+v76BookFold('book-pages','📄 Strony podręcznika',v76BookFold('book-assign','📚 Przypisz strony do działu',assign)+pages,'card v74-pages');
 }
 
 function v76QGroups(b){const bank=bookBankItems(b),ps=sortedBookPages(b.id),groups=ps.map(p=>({p,items:bank.filter(x=>v75BankMatchesPage(x,p))})).filter(g=>g.items.length),used=new Set(groups.flatMap(g=>g.items.map(x=>String(x.key))));if(bank.some(x=>!used.has(String(x.key))))groups.push({p:{id:'unassigned',number:'bez przypisania'},items:bank.filter(x=>!used.has(String(x.key)))});return groups}
@@ -1762,7 +1774,7 @@ async function v76Action(action,target){
 }
 function v76MicPaint(){const state=getVoiceState(),label={idle:'Zadaj pytanie',starting:'Uruchamiam…',listening:'Słucham…',thinking:'Myślę…',speaking:'Mówię…'}[state]||'Zadaj pytanie';for(const mic of document.querySelectorAll('.mic')){mic.dataset.state=state;mic.setAttribute('aria-label',state==='idle'?'Nagraj pytanie':state==='listening'?'Zatrzymaj nagrywanie':'Przerwij odpowiedź lub oczekiwanie');if(!mic.querySelector('.v76-mic-glyph'))mic.innerHTML='<span class="v76-mic-glyph" aria-hidden="true">🎙️</span><small class="v76-mic-label" aria-live="polite"></small>';const el=mic.querySelector('.v76-mic-label');if(el)el.textContent=label}}
 function v76AfterRender(){
- v77RestoreBookView();v76MicPaint();
+ v77RestoreBookView();v76MicPaint();v77QuestionScopeRefresh();setQuestionBuildButtons();
  if($('v75-outside-child')){$('v75-outside-child').value=v76Outside.child;$('v75-outside-subject').value=v76Outside.subject;if(v76Outside.shown)v76OutsideShow()}
  // Dlugie informacje przenosimy pod i. Statusy operacji pozostaja widoczne.
  const informational=/^(Tryb lokalny:|Zdalne zgłoszenia|PIN-y chronią|Każda strona to|Generowanie obejmuje|AI pomija|To ustawienie|Wyczyść raport usuwa)/;
@@ -1895,8 +1907,8 @@ async function v77Action(action,target){
  if(action.startsWith('v77:outside-step:')){const {items}=v76OutsideScope(),at=items.findIndex(x=>v76OutsideKey(x)===v76Outside.detail),next=at+Number(action.slice(17));if(at<0||!items[next])return;const item=items[at],dirty=$('v76-outside-q')?.value!==item.q||[0,1,2].some(i=>$('v76-outside-a'+i)?.value!==item.a[i])||Number($('v76-outside-ok')?.value)!==Number(item.ok);if(dirty&&!confirm('Przejść dalej bez zapisania zmian?'))return;v76Outside.detail=v76OutsideKey(items[next]);v76Outside.last=v76Outside.detail;v76OutsideShow();requestAnimationFrame(()=>$('v75-outside-results')?.scrollIntoView?.({block:'start'}));return}
 }
 function v77OutsideNav(items,item){const at=items.indexOf(item);return '<nav class="v77-question-nav" aria-label="Nawigacja pytań">'+(at>0?button('← Poprzednie pytanie','v77:outside-step:-1'):'<span></span>')+(at<items.length-1?button('Następne pytanie →','v77:outside-step:1'):'<span></span>')+'</nav>'}
-function v77CaptureBookView(){v77BookViews.set(bookId,{filter:$('page-filter')?.value||'none',scroll:window.scrollY||0,selected:[...document.querySelectorAll('[data-page-select]:checked')].map(x=>x.dataset.pageSelect)});v76OpenSections.add('book-pages')}
-function v77RestoreBookView(){if(role!=='admin'||adminTab!=='book')return;const state=v77BookViews.get(bookId),select=$('page-filter');if(!state||!select)return;select.value=state.filter;filterBookPages(state.filter);for(const x of document.querySelectorAll('[data-page-select]'))x.checked=state.selected.includes(x.dataset.pageSelect);updateBookPageSelection();if(v77ReturnBook){v77ReturnBook=false;requestAnimationFrame(()=>window.scrollTo(0,state.scroll))}}
+function v77CaptureBookView(){v77BookViews.set(bookId,{filter:$('page-filter')?.value||'none',chapter:$('page-chapter-filter')?.value||'',scroll:window.scrollY||0,selected:[...document.querySelectorAll('[data-page-select]:checked')].map(x=>x.dataset.pageSelect)});v76OpenSections.add('book-pages')}
+function v77RestoreBookView(){if(role!=='admin'||adminTab!=='book')return;const state=v77BookViews.get(bookId),select=$('page-filter');if(!state||!select)return;select.value=state.filter;const chapter=$('page-chapter-filter');if(chapter){const valid=!state.chapter||state.chapter==='none'||sortedBookPages(bookId).some(p=>'c:'+p.chapter===state.chapter);chapter.value=valid?(state.chapter||''):'';}for(const x of document.querySelectorAll('[data-page-select]'))x.checked=state.selected.includes(x.dataset.pageSelect);filterBookPages(state.filter);updateBookPageSelection();if(v77ReturnBook){v77ReturnBook=false;requestAnimationFrame(()=>window.scrollTo(0,state.scroll))}}
 function v77OutsideOpen(){v76Outside.detail=null;v76OutsideShow();requestAnimationFrame(()=>{$('v75-outside-results')?.scrollIntoView?.({block:'start',behavior:'smooth'});$('v75-outside-results')?.querySelector('h3')?.focus?.()})}
 function v75CheckQuestionLogic(){if(v77Batch.running)return note('Trwa zbiorcza poprawka AI.');const b=data.books.find(x=>x.id===bookId);if(!b)return;v77Q.book=b.id;const bank=bookBankItems(b);for(const x of bank){if(!Array.isArray(x.v77AiReasons))x.v77AiReasons=x.v75Flagged?[x.v75Reason||'Wcześniejsza uwaga do sprawdzenia']:[];x.v77Technical={reasons:v77TechnicalReasons(x.task),at:new Date().toISOString()};v77SyncFlags(x)}localStorage.setItem('academy-v48-bank-'+b.child+'-'+b.id,JSON.stringify(bank));const n=bank.filter(x=>v77Status(x)==='attention').length;v77Q.message='Kontrola techniczna zakończona. Wymagają uwagi: '+n+'.';v77Q.filter=n?'attention':'all';v76Q.level='pages';v76Q.selected.clear();render();note(v77Q.message)}
 async function v77RunReview(b,keys=null,btn=null){
@@ -1973,3 +1985,93 @@ async function v77SpellingChat(q,style,history=[],signal){
  if(typeof obj.answer!=='string'||!obj.answer.trim()||typeof obj.spellWord!=='string'||obj.spellWord&&!/^[a-z][a-z '-]{0,34}$/i.test(obj.spellWord))throw Error('Niepełna odpowiedź o pisowni.');
  return {text:obj.answer.trim(),word:obj.spellWord.trim()};
 }
+
+// V77 korekta 1: zbiorcza zmiana dzialu wewnatrz listy stron.
+function v77ChapterFilter(b){
+ const chapters=[...new Set(sortedBookPages(b.id).map(p=>String(p.chapter||'')).filter(x=>x.trim()))];
+ return `<label for="page-chapter-filter">Dział</label><select id="page-chapter-filter"><option value="">Wszystkie działy</option><option value="none">Bez działu</option>${chapters.map(name=>`<option value="${e('c:'+name)}">${e(name)}</option>`).join('')}</select>`;
+}
+function v77ChapterMarkup(b){
+ return `<div class="v74-admin-row">${button('Zaznacz wszystkie strony','book:chapters:all')}${button('Odznacz wszystkie','page:select-none')}</div>
+ <p id="chapter-selected-count" role="status" aria-live="polite">Zaznaczono: 0 stron</p>
+ ${input('chaptername','Dział — numer lub nazwa','')}
+ <div class="v74-admin-row"><button type="button" class="gold" data-action="book:chapters:assign" data-chapter-needs-selection disabled>Przypisz zaznaczone do działu</button><button type="button" class="alt" data-action="book:chapters:clear" data-chapter-needs-selection disabled>Usuń przypisanie do działu</button></div>
+ <details class="v74-chapter-details"><summary>Wybierz zakres stron</summary><div class="v73-inline-fields v73-two-fields">${input('chapterfrom','Od strony','1','number')}${input('chapterto','Do strony',String(Math.max(1,...sortedBookPages(b.id).map(p=>Number(p.number)||0))),'number')}</div>${button('Zaznacz zakres','book:chapters:range')}</details>
+ ${v76Info('Przypisanie zastępuje poprzedni dział zaznaczonych stron. Usunięcie przypisania przenosi je do „Bez działu”. Zdjęcia, tekst i pytania zostają. Na liście poniżej możesz też wybrać dział i zaznaczyć tylko jego strony.')}`;
+}
+function v77ChapterSelect(ids){
+ const valid=new Set(sortedBookPages(bookId).map(p=>p.id)),chosen=new Set(ids.filter(id=>valid.has(id)));
+ if($('page-filter'))$('page-filter').value='all';
+ if($('page-chapter-filter'))$('page-chapter-filter').value='';
+ filterBookPages('all');
+ document.querySelectorAll('[data-page-select]').forEach(box=>box.checked=chosen.has(box.dataset.pageSelect));
+ updateBookPageSelection();v76OpenSections.add('book-pages');v76OpenSections.add('book-assign');
+}
+async function v77ChapterAction(action,target){
+ if(role!=='admin'||adminTab!=='book')return;
+ const b=data.books.find(x=>x.id===bookId);if(!b)return note('Nie znaleziono książki.');
+ const pages=sortedBookPages(b.id);
+ if(action==='book:chapters:all'){v77ChapterSelect(pages.map(p=>p.id));return;}
+ if(action==='book:chapters:range'){
+  const rawFrom=String($('chapterfrom')?.value||'').trim(),rawTo=String($('chapterto')?.value||'').trim(),from=Number(rawFrom),to=Number(rawTo);
+  if(!rawFrom||!rawTo||!Number.isInteger(from)||!Number.isInteger(to)||from<1||to<from)return note('Podaj prawidłowy zakres od–do.');
+  const matching=pages.filter(p=>Number(p.number)>=from&&Number(p.number)<=to);
+  if(!matching.length)return note('Nie znaleziono stron w tym zakresie.');
+  v77ChapterSelect(matching.map(p=>p.id));return;
+ }
+ if(!['book:chapters:assign','book:chapters:clear'].includes(action))return;
+ const ids=new Set(selectedBookPageIds()),selected=pages.filter(p=>ids.has(p.id));
+ if(!selected.length)return note('Najpierw zaznacz strony.');
+ const clear=action==='book:chapters:clear',raw=String($('chaptername')?.value||'').trim();
+ if(!clear&&!raw)return note('Wpisz numer lub nazwę działu.');
+ const chapter=clear?'':/^\d+$/.test(raw)?'Dział '+raw:raw;
+ const changed=selected.filter(p=>String(p.chapter||'')!==chapter);
+ if(!changed.length)return note(clear?'Zaznaczone strony już są bez działu.':'Zaznaczone strony już należą do tego działu.');
+ return runAdminAction(target,clear?'Usuwam przypisanie…':'Przypisuję dział…',async()=>{
+  v77CaptureBookView();v76OpenSections.add('book-assign');
+  for(const p of changed)p.chapter=chapter;
+  await save();
+  if(bookId===b.id&&role==='admin'&&adminTab==='book'){v77ReturnBook=true;render();}
+  note(clear?'✅ Usunięto przypisanie do działu z '+changed.length+' stron.':'✅ Przypisano '+changed.length+' stron do: '+chapter);
+ });
+}
+
+// Zakres generatora jest oddzielny dla kazdej ksiazki. Brak dopasowania nie rozszerza zakresu.
+const v77QuestionScopes=new Map();
+function v77QuestionScopeMarkup(b){
+ const state=v77QuestionScopes.get(b.id)||{mode:'all',numbers:''};
+ return `<label for="book-question-scope">Z których stron utworzyć pytania?</label><select id="book-question-scope"><option value="all" ${state.mode==='all'?'selected':''}>Wszystkie zatwierdzone strony</option><option value="selected" ${state.mode==='selected'?'selected':''}>Wybrane strony</option></select><div id="book-question-pages-box" ${state.mode==='selected'?'':'hidden'}><label for="book-question-pages">Numery stron, np. 1–16 lub 1–8, 12, 15–20</label><input id="book-question-pages" type="text" inputmode="text" autocomplete="off" placeholder="np. 1–16" value="${e(state.numbers)}"></div><p id="book-question-scope-count" role="status" aria-live="polite"></p>`;
+}
+function v77QuestionRanges(text){
+ const chunks=String(text).replace(/[–—−]/g,'-').split(/[,;\n]+/).map(x=>x.trim());
+ if(!chunks.length||chunks.some(x=>!x))throw Error('Wpisz numery stron, np. 1–16 lub 1–8, 12, 15–20.');
+ return chunks.map(chunk=>{
+  const m=chunk.match(/^(\d+(?:\.\d+)?)\s*(?:-\s*(\d+(?:\.\d+)?))?$/);
+  if(!m)throw Error('Nieprawidłowe numery stron. Wpisz np. 1–16 lub 1–8, 12, 15–20.');
+  const from=Number(m[1]),to=Number(m[2]||m[1]);
+  if(!Number.isFinite(from)||!Number.isFinite(to)||from<1||to<from)throw Error('Zakres stron musi być dodatni i zapisany od mniejszej do większej, np. 1–16.');
+  return {from,to};
+ });
+}
+function v77QuestionScopeRemember(){
+ if(!$('book-question-scope'))return;
+ v77QuestionScopes.set(bookId,{mode:$('book-question-scope').value==='selected'?'selected':'all',numbers:$('book-question-pages')?.value||''});
+}
+function v77ResolveQuestionScope(b){
+ v77QuestionScopeRemember();
+ const state=v77QuestionScopes.get(b.id)||{mode:'all',numbers:''};
+ const ranges=state.mode==='selected'?v77QuestionRanges(state.numbers):null;
+ const matched=sortedBookPages(b.id).filter(p=>!ranges||ranges.some(r=>Number(p.number)>=r.from&&Number(p.number)<=r.to));
+ if(state.mode==='selected'&&!matched.length)throw Error('W tej książce nie ma stron o podanych numerach. Nie uruchomiono generatora.');
+ const ready=matched.filter(p=>p.text?.trim()&&p.reviewed===true);
+ return {mode:state.mode,ready,matched,skipped:matched.length-ready.length,label:state.mode==='selected'?'Wybrane strony: '+state.numbers:'Wszystkie zatwierdzone strony'};
+}
+function v77QuestionScopeRefresh(){
+ const b=data.books.find(x=>x.id===bookId);if(!b||!$('book-question-scope'))return;
+ v77QuestionScopeRemember();const box=$('book-question-pages-box');if(box)box.hidden=$('book-question-scope').value!=='selected';
+ const count=$('book-question-scope-count');if(!count)return;
+ try{const scope=v77ResolveQuestionScope(b);count.textContent='Do generowania: '+scope.ready.length+' stron'+(scope.skipped?' · pominięte bez zatwierdzonego tekstu: '+scope.skipped:'');}
+ catch(err){count.textContent=err.message;}
+}
+document.addEventListener('change',ev=>{if(ev.target.id==='book-question-scope'||ev.target.id==='book-question-pages')v77QuestionScopeRefresh();});
+document.addEventListener('input',ev=>{if(ev.target.id==='book-question-pages')v77QuestionScopeRefresh();});
