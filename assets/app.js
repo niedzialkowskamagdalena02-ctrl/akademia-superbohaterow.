@@ -1,10 +1,10 @@
 // V48_AI_RESPONSE_DIAGNOSTICS
 // V44_BULK_CHAPTERS
 // V42_CHAPTERS
-import {mountMissionGame} from './mission-game.js?v=77.2';
+import {mountMissionGame} from './mission-game.js?v=77.3';
 import { initHeadquarters3D } from './headquarters3d.js';
 import {initial,get,put,del,allRecords,replaceRecords,compress,uid,gradeName} from './data.js';
-import {speak,listen,stopVoice,getVoiceState,setVoiceState,spellEnglish77} from './voice.js?v=77.2';
+import {speak,listen,stopVoice,getVoiceState,setVoiceState,spellEnglish77} from './voice.js?v=77.3';
 import {vocabulary,readings,explanation} from './learning.js';
 import {syncAdapter} from './sync.js';
 import {BASE_ITEMS,baseMarkup,migrateBase} from './base.js';
@@ -127,7 +127,7 @@ function filterBookPages(value){
   const p=data.bookPages.find(x=>x.id===el.dataset.adminPageId);
   const state=p?pageState(b,p,bank).css:'missing';
   const chapter=$('page-chapter-filter')?.value||'';
-  const chapterMatches=!chapter||(chapter==='none'?!String(p?.chapter||'').trim():String(p?.chapter||'')===chapter.slice(2));
+  const chapterMatches=!chapter||(chapter==='none'?!String(p?.chapter||'').trim():v773ChapterKey(p?.chapter)===v773ChapterKey(chapter.slice(2)));
   const yes=!!p&&p.bookId===bookId&&chapterMatches&&(value==='all'||(value==='missing'&&state==='missing')||(value==='ready'&&state==='ready')||(value==='approved'&&state==='approved')||(value==='questions'&&state==='questions'));
   if(!yes){const box=el.querySelector('[data-page-select]');if(box)box.checked=false;}
   el.hidden=!yes;if(yes)shown++;
@@ -284,7 +284,7 @@ function v74BookMarkup(b){
  </div></details>
  <div class="v74-admin-row v74-danger-row">${button(b.archived?'Przywróć z archiwum':'📦 Archiwizuj','book:archive')}${button('🗑️ Usuń cały podręcznik','book:delete','line')}</div>
  <section class="v74-book-add"><h3>📷 Dodaj wiele stron naraz</h3>
-  <div class="v73-inline-fields v73-two-fields">${input('start','Pierwsza strona',String(last+1),'number')}${input('newchapter','Dział dodawanych stron','')}</div>
+  <div class="v73-inline-fields v73-two-fields">${input('start','Pierwsza strona',String(last+1),'number')}${v773ChapterField(b,'newchapter','Dział dodawanych stron','',true)}</div>
   <div class="v73-photo-options"><label class="v73-file-control">📁 Wybierz zdjęcia<input id="pagefiles" type="file" accept="image/*" multiple></label><label class="v73-file-control">📷 Zrób zdjęcie<input id="pagecamera" type="file" accept="image/*" capture="environment"></label></div>
   <details class="v74-chapter-details"><summary>📚 Przypisz istniejące strony do działu</summary>
    <div class="v73-inline-fields v73-two-fields">${input('chapterfrom','Od strony','1','number')}${input('chapterto','Do strony','10','number')}</div>
@@ -321,7 +321,7 @@ function v74PageMarkup(p){
  <label for="ptext" class="v73-text-label">📝 Rozpoznany tekst — sprawdź lub popraw</label>
  <textarea id="ptext" class="v73-textarea v74-page-text">${e(p.text||'')}</textarea>
  <div class="v74-number-field"><label for="pnum">Numer strony</label><input id="pnum" type="number" min="1" value="${e(p.number)}"></div>
- <div class="v73-inline-fields v73-two-fields v74-page-meta">${input('pchapter','Dział',p.chapter||'')}
+ <div class="v73-inline-fields v73-two-fields v74-page-meta">${v773ChapterField(data.books.find(b=>b.id===p.bookId),'pchapter','Dział',p.chapter||'',true)}
  <div class="v73-language"><label for="ocrlang">Język strony</label><select id="ocrlang"><option value="pol" ${lang==='pol'?'selected':''}>Polski</option><option value="eng" ${lang==='eng'?'selected':''}>Angielski</option></select></div></div>
  <p id="ocrstatus" class="guide" role="status" hidden></p>
  <div class="v74-admin-row v74-page-actions">${p.reviewed?button('↩️ Cofnij zatwierdzenie','page:unapprove'):button('🟠 Zatwierdź stronę','page:approve','gold')}${button('✨ Odczytaj przez AI','page:ai','gold')}</div>
@@ -457,7 +457,7 @@ function questionBankSummary(b){
 function setQuestionBuildButtons(){
  const go=document.querySelector('[data-action="book:questions"]'),pause=document.querySelector('[data-action="book:questions-pause"]');
  if(go)go.disabled=questionBuildBusy;
- for(const id of ['book-question-scope','book-question-pages'])if($(id))$(id).disabled=questionBuildBusy;
+ for(const id of ['book-question-scope','book-question-pages','book-question-chapter'])if($(id))$(id).disabled=questionBuildBusy;
  if(pause){pause.disabled=!questionBuildBusy||questionBuildStop;pause.textContent=questionBuildStop?'⏳ Zatrzymuję po stronie…':'⏸ Pauza generowania';}
 }
 async function buildBookQuestions(b){
@@ -466,7 +466,7 @@ async function buildBookQuestions(b){
  const pages=scope.ready;
  if(!pages.length){note(scope.mode==='selected'?'W wybranym zakresie nie ma stron z zatwierdzonym tekstem. Sprawdź numery i zatwierdzenie stron.':'Najpierw sprawdź i zatwierdź stronę.');return;}
  if(!pages.length){note('Najpierw sprawdź i zatwierdź przynajmniej jedną stronę. AI nie wygeneruje pytań ze stron niezatwierdzonych.');return}
- const cursorKey='academy-v71-question-queue-'+b.child+'-'+b.id+(scope.mode==='selected'?'-pages-'+encodeURIComponent(pages.map(p=>p.id).sort().join('|')):'');
+ const cursorKey='academy-v71-question-queue-'+b.child+'-'+b.id+(scope.mode!=='all'?'-pages-'+encodeURIComponent(pages.map(p=>p.id).sort().join('|')):'');
  let queue=null;
  try{const stored=JSON.parse(localStorage.getItem(cursorKey)||'null');if(Array.isArray(stored))queue=stored.filter(id=>pages.some(p=>p.id===id))}catch{}
  const bank=bookBankItems(b);
@@ -547,7 +547,7 @@ async function saveEditedPage(){
  if(numberChanged||nextText!==p.text)p.reviewed=false;
  p.text=nextText;
  p.ocrLanguage=$('ocrlang')?.value||p.ocrLanguage||languageOfBook(data.books.find(b=>b.id===p.bookId));
- p.chapter=$('pchapter')?.value.trim()??p.chapter??'';
+ p.chapter=v773ResolveChapter(p.bookId,$('pchapter')?.value??p.chapter??'');
  await save();return true;
 }
 async function readAllBookPagesAI(){
@@ -689,7 +689,7 @@ async function recognizePageAI(page,language='pol',overwriteApproved=false){
  finally{ocrBusy=false;document.querySelectorAll('[data-action="page:ai"],[data-action="reader:ai"]').forEach(b=>b.disabled=false)}
 }
 const grant=async(child,points,reason,key)=>{if(data.history.some(h=>h.key===key))return false;data.profiles[child].xp+=points;data.profiles[child].coins+=points;data.history.unshift({id:uid(),key,child,points,reason,at:new Date().toISOString()});await save();return true};
-function layout(title,content){cancelAIRequests();stopVoice();closeMicBubble();app.innerHTML=`<main class="wrap"><header class="head"><div><div class="brand">⚡ AKADEMIA SUPERBOHATERÓW <span style="display:inline-block;font-size:0.72em;border:1px solid currentColor;border-radius:8px;padding:2px 7px;vertical-align:middle">V77 · korekta 2</span></div><div class="sub">${e(title)}</div></div>${role==='child'?trainingSoundControl():''}${role?button(testMode?'← Zakończ test':'← Profile','exit','alt'):''}</header>${testMode?'<div class="test-banner">🧪 TRYB MAMY — BEZPŁATNY TEST • POSTĘPY NIE SĄ ZAPISYWANE</div>':''}${content}</main>${role==='child'?'<button class="mic" data-action="mic" aria-label="Sterowanie głosowe">🎙️</button>':''}`;document.querySelectorAll('[data-speak]').forEach(b=>b.addEventListener('click',()=>speak(b.dataset.speak,b.dataset.lang,role==='child'?profile().mentor:'tech',data.settings.rate||1)));hydrateImages();v76AfterRender();if(role==='child'&&(tab==='learn'||tab==='subjectmissions'))installMicDrag()}
+function layout(title,content){cancelAIRequests();stopVoice();closeMicBubble();app.innerHTML=`<main class="wrap"><header class="head"><div><div class="brand">⚡ AKADEMIA SUPERBOHATERÓW <span style="display:inline-block;font-size:0.72em;border:1px solid currentColor;border-radius:8px;padding:2px 7px;vertical-align:middle">V77 · korekta 3</span></div><div class="sub">${e(title)}</div></div>${role==='child'?trainingSoundControl():''}${role?button(testMode?'← Zakończ test':'← Profile','exit','alt'):''}</header>${testMode?'<div class="test-banner">🧪 TRYB MAMY — BEZPŁATNY TEST • POSTĘPY NIE SĄ ZAPISYWANE</div>':''}${content}</main>${role==='child'?'<button class="mic" data-action="mic" aria-label="Sterowanie głosowe">🎙️</button>':''}`;document.querySelectorAll('[data-speak]').forEach(b=>b.addEventListener('click',()=>speak(b.dataset.speak,b.dataset.lang,role==='child'?profile().mentor:'tech',data.settings.rate||1)));hydrateImages();v76AfterRender();if(role==='child'&&(tab==='learn'||tab==='subjectmissions'))installMicDrag()}
 async function hydrateImages(){for(const el of document.querySelectorAll('[data-image]')){const src=await img(el.dataset.image);if(el.isConnected&&src){el.src=src;el.onload=()=>URL.revokeObjectURL(src)}}}
 function nav(){return role==='admin'?`<div class="tabs">${[['home','Przegląd'],['books','📚 Książki'],['missions','📋 Misje'],['settings','⚙️ Ustawienia'],['test','🧪 Testuj wszystko'],['backup','💾 Kopia']].map(([k,n])=>button(n,'admin:'+k,adminTab===k?'gold':'alt')).join('')}</div>`:`<div class="tabs">${[['home','🎯 Misje'],['books','📚 Książki'],['learn','🧠 Trening'],['academy','📖 Sala odkrywców'],['mentor','🤖 Mentor'],['base','🏙️ Baza Avengersów i gry']].map(([k,n])=>button(n,'child:'+k,tab===k?'gold':'alt')).join('')}</div>`}
 function render(){if(tab!=='arcade')stopArcade();if(!role){layout('Wybierz swoją bazę',`<section class="card"><h1>Witaj w Akademii! 🛡️</h1><p>Każdy bohater ma własne misje i nagrody.</p></section><div class="grid">${people.map(([id,name])=>`<button class="tile" data-action="enter:${id}"><img class="profile-hero" src="assets/art/${data.profiles[id].hero||(id==='pawel'?'iron':'spider')}.svg" alt=""><h2>${name}</h2><small>${gradeName(data.profiles[id].grade)} · ${data.profiles[id].coins} złotych</small></button>`).join('')}</div><section class="card">${button('🔐 Centrum dowodzenia mamy','enter:admin','gold')}<p class="muted">Tryb lokalny: dane z tego telefonu nie synchronizują się jeszcze z innymi urządzeniami. ${syncAdapter.status()}</p></section>`);return}if(role==='admin')adminRender();else childRender()}
@@ -1486,7 +1486,7 @@ if(action==='page:delete-selected')return runAdminAction(target,'Usuwam wybrane 
 });
 if(action==='book:archive'){const book=data.books.find(b=>b.id===bookId);book.archived=!book.archived;await save();return render()}if(action.startsWith('book:open:')){bookId=action.slice(10);adminTab='book';return render()}if(action==='book:chapter-range'){
  const from=Number($('chapterfrom')?.value),to=Number($('chapterto')?.value);
- const rawChapter=String($('chaptername')?.value||'').trim();const name=/^\d+$/.test(rawChapter)?'Dział '+rawChapter:rawChapter;
+ const rawChapter=String($('chaptername')?.value||'').trim();const name=v773ResolveChapter(bookId,rawChapter);
  if(!Number.isInteger(from)||!Number.isInteger(to)||from<1||to<from||to-from>500)return note('Podaj prawidłowy zakres stron (maks. 501 stron).');
  if(!name)return note('Wpisz nazwę działu.');
  let count=0;for(const p of data.bookPages){if(p.bookId===bookId&&p.number>=from&&p.number<=to){p.chapter=name;count++}}
@@ -1879,7 +1879,7 @@ function v77Status(x){return v77Issues(x).length?'attention':v772Pending(x).leng
 function v77Badge(x){const s=v77Status(x);return `<span class="v77-status v77-status-${s}">${s==='attention'?'⚠ Wymaga uwagi':s==='checked'?'✓ AI bez uwag · '+x.v76Review.count+'/3':v772Pending(x).length?'○ Kontrola niepełna · '+v772Pending(x).length+'/3 AI':'○ Nie sprawdzono przez AI'}</span>`+(x.v77Technical&&!x.v77Technical.reasons.length?'<span class="v77-tech-ok">✓ Technicznie OK</span>':'')}
 function v77Match(x){return v77Q.filter==='all'||v77Status(x)===v77Q.filter}
 function v77FilterBar(b){const bank=bookBankItems(b),counts={all:bank.length,attention:0,checked:0,unchecked:0};for(const x of bank)counts[v77Status(x)]++;
- return `<div class="v77-review-summary" role="status">${e(v77Q.message||'Wybierz status, aby szybko znaleźć pytania.')}</div><div class="v77-qfilters" aria-label="Filtr pytań">${[['all','Wszystkie'],['attention','⚠ Wymagają uwagi'],['unchecked','Do kontroli AI'],['checked','✓ AI bez uwag']].map(([k,label])=>`<button type="button" data-action="v77:q-filter:${k}" aria-pressed="${v77Q.filter===k}">${label} <b>${counts[k]}</b></button>`).join('')}</div>`;
+ return `<div class="v77-review-summary" role="status">${e(v77Q.message||'Wybierz status, aby szybko znaleźć pytania.')}</div><div class="v77-qfilters" aria-label="Filtr pytań">${[['all','Wszystkie'],['attention','⚠ Wymagają uwagi'],['unchecked','Do kontroli AI'],['checked','✓ AI bez uwag']].map(([k,label])=>`<button type="button" data-action="v77:q-filter:${k}" data-v773-filter="${k}" aria-pressed="${v77Q.filter===k}">${label} <b>${counts[k]}</b></button>`).join('')}</div>`;
 }
 function v77Flat(b){const seen=new Set(),out=[];for(const g of v76QGroups(b))for(const x of g.items){const key=String(x.key);if(seen.has(key))continue;seen.add(key);out.push({item:x,page:g.p})}return out}
 function v77QuestionLink(x,p,n){const key=String(x.key);return `<div class="v76-qrow ${v76Q.last===key?'v76-visited':''}"><label><input type="checkbox" data-v76-qcheck="${e(encodeURIComponent(key))}" aria-label="Zaznacz pytanie ${n}" ${v76Q.selected.has(key)?'checked':''}></label><button type="button" data-action="v77:q-jump:${encodeURIComponent(key)}"><b>${n}.</b><span>${e(x.task?.question||'Bez pytania')}<small>Strona ${e(p.number)} · ${e(x.task?.type||'pytanie')}</small>${v77Badge(x)}${v77Issues(x).length?'<small class="v77-reason">'+e(v77Issues(x).join(' · '))+'</small>':''}</span><i aria-hidden="true">›</i></button></div>`}
@@ -1963,11 +1963,11 @@ const v77Ranges=new Map();
 const v772RangeModes=new Map();
 function v77RangeMarkup(b,ps){
  const chosen=ps.filter(p=>trainingSelectedPages.has(p.id)),state=v77Ranges.get(b.id)||{from:chosen[0]?.id||ps[0]?.id,to:chosen.at(-1)?.id||ps.at(-1)?.id};
- const chapters=[...new Set(ps.map(p=>String(p.chapter||'').trim()||'Bez działu'))],mode=v772RangeModes.get(b.id);
+ const chapters=v773ChapterNames(ps,true),mode=v772RangeModes.get(b.id);
  const options=value=>ps.map((p,i)=>`<option value="${e(p.id)}" ${p.id===value?'selected':''}>${e(p.number)}${ps.filter(x=>String(x.number)===String(p.number)).length>1?' · '+e(p.chapter||'bez działu')+' · zdjęcie '+(i+1):''}</option>`).join('');
  return `<div class="tr71-book v77-range-book"><div class="v77-book-identity">${trainingVoice(b.title)}${b.coverId?`<img data-image="${e(b.coverId)}" alt="Okładka ${e(b.title)}">`:'<span class="tr71-cover">📘</span>'}<strong>${e(b.title)}</strong><small>${ps.length} stron</small></div><div class="v77-book-range"><label class="tr71-check"><input type="checkbox" data-tr71-book="${e(b.id)}" ${ps.length&&chosen.length===ps.length?'checked':''}> Cała książka</label><details class="v77-range-fold" data-v772-book-choice="chapter" data-v772-book-id="${e(b.id)}" ${mode==='chapter'?'open':''}><summary>Wybierz dział</summary><label>Dział<select data-v772-chapter-book="${e(b.id)}"><option value="">Wybierz dział</option>${chapters.map(c=>`<option value="${e(c)}" ${v772ChapterChosen(ps,c)?'selected':''}>${e(c)}</option>`).join('')}</select></label></details><details class="v77-range-fold" data-v772-book-choice="range" data-v772-book-id="${e(b.id)}" ${mode==='range'?'open':''}><summary>Wybierz zakres stron</summary>${ps.length?`<div class="v77-from-to"><label>Od<select data-v77-range-book="${e(b.id)}" data-v77-range-edge="from">${options(state.from)}</select></label><label>Do<select data-v77-range-book="${e(b.id)}" data-v77-range-edge="to">${options(state.to)}</select></label></div>`:'<p>Brak odczytanych stron.</p>'}<small role="status" data-v772-range-error="${e(b.id)}"></small></details><small data-v77-range-summary="${e(b.id)}">Wybrano ${chosen.length} stron</small></div></div>`;
 }
-function v772ChapterChosen(ps,chapter){const matching=ps.filter(p=>(String(p.chapter||'').trim()||'Bez działu')===chapter);return matching.length&&matching.length===ps.filter(p=>trainingSelectedPages.has(p.id)).length&&matching.every(p=>trainingSelectedPages.has(p.id));}
+function v772ChapterChosen(ps,chapter){const matching=ps.filter(p=>v773ChapterKey(p.chapter||'Bez działu')===v773ChapterKey(chapter));return matching.length&&matching.length===ps.filter(p=>trainingSelectedPages.has(p.id)).length&&matching.every(p=>trainingSelectedPages.has(p.id));}
 function v772RememberRangeMode(el){
  if(el.hasAttribute?.('data-tr71-book')){v772RangeModes.set(el.dataset.tr71Book,'all');for(const x of document.querySelectorAll('[data-v772-chapter-book]'))if(x.dataset.v772ChapterBook===el.dataset.tr71Book)x.value='';for(const x of document.querySelectorAll('[data-v772-book-choice]'))if(x.dataset.v772BookId===el.dataset.tr71Book)x.open=false;}
  if(el.hasAttribute?.('data-tr71-page')||el.hasAttribute?.('data-tr71-chapter')){const p=el.dataset?.tr71Page?trainingPageItems().find(p=>p.id===el.dataset.tr71Page):null;const id=p?.bookId||el.dataset?.tr71Chapter;if(id)v772RangeModes.set(id,'manual');}
@@ -1990,7 +1990,7 @@ function v77ApplyRange(id,announce=true){
 }
 function v772ApplyChapter(id){
  const el=[...document.querySelectorAll('[data-v772-chapter-book]')].find(x=>x.dataset.v772ChapterBook===id),chapter=el?.value||'',ps=trainingPageItems().filter(p=>p.bookId===id);
- v772SetMaterial(id,chapter?ps.filter(p=>(String(p.chapter||'').trim()||'Bez działu')===chapter):[],'chapter');
+ v772SetMaterial(id,chapter?ps.filter(p=>v773ChapterKey(p.chapter||'Bez działu')===v773ChapterKey(chapter)):[],'chapter');
 }
 function v772SyncTrainingRanges(){
  const visible=new Set(trainingPageItems().map(p=>p.bookId));for(const [id,mode] of v772RangeModes){if(!visible.has(id))continue;if(mode==='invalid')return note('Popraw zakres stron przed rozpoczęciem misji.'),false;if(mode==='range'&&document.querySelectorAll('[data-v77-range-book]').length&&!v77ApplyRange(id,false))return false;}
@@ -2034,13 +2034,13 @@ async function v77SpellingChat(q,style,history=[],signal){
 
 // V77 korekta 1: zbiorcza zmiana dzialu wewnatrz listy stron.
 function v77ChapterFilter(b){
- const chapters=[...new Set(sortedBookPages(b.id).map(p=>String(p.chapter||'')).filter(x=>x.trim()))];
+ const chapters=v773ChapterNames(sortedBookPages(b.id));
  return `<label for="page-chapter-filter">Dział</label><select id="page-chapter-filter"><option value="">Wszystkie działy</option><option value="none">Bez działu</option>${chapters.map(name=>`<option value="${e('c:'+name)}">${e(name)}</option>`).join('')}</select>`;
 }
 function v77ChapterMarkup(b){
  return `<div class="v74-admin-row">${button('Zaznacz wszystkie strony','book:chapters:all')}${button('Odznacz wszystkie','page:select-none')}</div>
  <p id="chapter-selected-count" role="status" aria-live="polite">Zaznaczono: 0 stron</p>
- ${input('chaptername','Dział — numer lub nazwa','')}
+ ${v773ChapterField(b,'chaptername','Dział — wybierz istniejący lub dodaj nowy')}
  <div class="v74-admin-row"><button type="button" class="gold" data-action="book:chapters:assign" data-chapter-needs-selection disabled>Przypisz zaznaczone do działu</button><button type="button" class="alt" data-action="book:chapters:clear" data-chapter-needs-selection disabled>Usuń przypisanie do działu</button></div>
  <details class="v74-chapter-details"><summary>Wybierz zakres stron</summary><div class="v73-inline-fields v73-two-fields">${input('chapterfrom','Od strony','1','number')}${input('chapterto','Do strony',String(Math.max(1,...sortedBookPages(b.id).map(p=>Number(p.number)||0))),'number')}</div>${button('Zaznacz zakres','book:chapters:range')}</details>
  ${v76Info('Przypisanie zastępuje poprzedni dział zaznaczonych stron. Usunięcie przypisania przenosi je do „Bez działu”. Zdjęcia, tekst i pytania zostają. Na liście poniżej możesz też wybrać dział i zaznaczyć tylko jego strony.')}`;
@@ -2070,7 +2070,7 @@ async function v77ChapterAction(action,target){
  if(!selected.length)return note('Najpierw zaznacz strony.');
  const clear=action==='book:chapters:clear',raw=String($('chaptername')?.value||'').trim();
  if(!clear&&!raw)return note('Wpisz numer lub nazwę działu.');
- const chapter=clear?'':/^\d+$/.test(raw)?'Dział '+raw:raw;
+ const chapter=clear?'':v773ResolveChapter(b.id,raw);
  const changed=selected.filter(p=>String(p.chapter||'')!==chapter);
  if(!changed.length)return note(clear?'Zaznaczone strony już są bez działu.':'Zaznaczone strony już należą do tego działu.');
  return runAdminAction(target,clear?'Usuwam przypisanie…':'Przypisuję dział…',async()=>{
@@ -2085,9 +2085,10 @@ async function v77ChapterAction(action,target){
 // Zakres generatora jest oddzielny dla kazdej ksiazki. Brak dopasowania nie rozszerza zakresu.
 const v77QuestionScopes=new Map();
 function v77QuestionScopeMarkup(b){
- const state=v77QuestionScopes.get(b.id)||{mode:'all',numbers:''};
- return `<label for="book-question-scope">Z których stron utworzyć pytania?</label><select id="book-question-scope"><option value="all" ${state.mode==='all'?'selected':''}>Wszystkie zatwierdzone strony</option><option value="selected" ${state.mode==='selected'?'selected':''}>Wybrane strony</option></select><div id="book-question-pages-box" ${state.mode==='selected'?'':'hidden'}><label for="book-question-pages">Numery stron, np. 1–16 lub 1–8, 12, 15–20</label><input id="book-question-pages" type="text" inputmode="text" autocomplete="off" placeholder="np. 1–16" value="${e(state.numbers)}"></div><p id="book-question-scope-count" role="status" aria-live="polite"></p>`;
+ const state=v77QuestionScopes.get(b.id)||{mode:'all',numbers:'',chapter:''},names=v773ChapterNames(sortedBookPages(b.id));
+ return `<label for="book-question-scope">Z których stron utworzyć pytania?</label><select id="book-question-scope"><option value="all" ${state.mode==='all'?'selected':''}>Wszystkie zatwierdzone strony</option><option value="chapter" ${state.mode==='chapter'?'selected':''}>Wybrany dział</option><option value="selected" ${state.mode==='selected'?'selected':''}>Wybrane strony</option></select><div id="book-question-chapter-box" ${state.mode==='chapter'?'':'hidden'}><label for="book-question-chapter">Dział</label><select id="book-question-chapter"><option value="">${names.length?'Wybierz dział':'Najpierw przypisz strony do działu'}</option>${names.map(name=>`<option value="${e(name)}" ${v773ChapterKey(state.chapter)===v773ChapterKey(name)?'selected':''}>${e(name)}</option>`).join('')}</select></div><div id="book-question-pages-box" ${state.mode==='selected'?'':'hidden'}><label for="book-question-pages">Numery stron, np. 1–16 lub 1–8, 12, 15–20</label><input id="book-question-pages" type="text" inputmode="text" autocomplete="off" placeholder="np. 1–16" value="${e(state.numbers)}"></div><p id="book-question-scope-count" role="status" aria-live="polite"></p>`;
 }
+
 function v77QuestionRanges(text){
  const chunks=String(text).replace(/[–—−]/g,'-').split(/[,;\n]+/).map(x=>x.trim());
  if(!chunks.length||chunks.some(x=>!x))throw Error('Wpisz numery stron, np. 1–16 lub 1–8, 12, 15–20.');
@@ -2101,25 +2102,26 @@ function v77QuestionRanges(text){
 }
 function v77QuestionScopeRemember(){
  if(!$('book-question-scope'))return;
- v77QuestionScopes.set(bookId,{mode:$('book-question-scope').value==='selected'?'selected':'all',numbers:$('book-question-pages')?.value||''});
+ v77QuestionScopes.set(bookId,{mode:['selected','chapter'].includes($('book-question-scope').value)?$('book-question-scope').value:'all',numbers:$('book-question-pages')?.value||'',chapter:$('book-question-chapter')?.value||''});
 }
 function v77ResolveQuestionScope(b){
  v77QuestionScopeRemember();
  const state=v77QuestionScopes.get(b.id)||{mode:'all',numbers:''};
  const ranges=state.mode==='selected'?v77QuestionRanges(state.numbers):null;
- const matched=sortedBookPages(b.id).filter(p=>!ranges||ranges.some(r=>Number(p.number)>=r.from&&Number(p.number)<=r.to));
- if(state.mode==='selected'&&!matched.length)throw Error('W tej książce nie ma stron o podanych numerach. Nie uruchomiono generatora.');
+ if(state.mode==='chapter'&&!state.chapter)throw Error('Wybierz dział, z którego chcesz utworzyć pytania.');
+ const matched=sortedBookPages(b.id).filter(p=>state.mode==='chapter'?v773ChapterKey(p.chapter)===v773ChapterKey(state.chapter):!ranges||ranges.some(r=>Number(p.number)>=r.from&&Number(p.number)<=r.to));
+ if(state.mode!=='all'&&!matched.length)throw Error('W tej książce nie ma stron o podanych numerach. Nie uruchomiono generatora.');
  const ready=matched.filter(p=>p.text?.trim()&&p.reviewed===true);
- return {mode:state.mode,ready,matched,skipped:matched.length-ready.length,label:state.mode==='selected'?'Wybrane strony: '+state.numbers:'Wszystkie zatwierdzone strony'};
+ return {mode:state.mode,ready,matched,skipped:matched.length-ready.length,label:state.mode==='selected'?'Wybrane strony: '+state.numbers:state.mode==='chapter'?'Wybrany dział: '+state.chapter:'Wszystkie zatwierdzone strony'};
 }
 function v77QuestionScopeRefresh(){
  const b=data.books.find(x=>x.id===bookId);if(!b||!$('book-question-scope'))return;
- v77QuestionScopeRemember();const box=$('book-question-pages-box');if(box)box.hidden=$('book-question-scope').value!=='selected';
+ v77QuestionScopeRemember();const box=$('book-question-pages-box');if(box)box.hidden=$('book-question-scope').value!=='selected';const chapterBox=$('book-question-chapter-box');if(chapterBox)chapterBox.hidden=$('book-question-scope').value!=='chapter';
  const count=$('book-question-scope-count');if(!count)return;
  try{const scope=v77ResolveQuestionScope(b);count.textContent='Do generowania: '+scope.ready.length+' stron'+(scope.skipped?' · pominięte bez zatwierdzonego tekstu: '+scope.skipped:'');}
  catch(err){count.textContent=err.message;}
 }
-document.addEventListener('change',ev=>{if(ev.target.id==='book-question-scope'||ev.target.id==='book-question-pages')v77QuestionScopeRefresh();});
+document.addEventListener('change',ev=>{if(ev.target.id==='book-question-scope'||ev.target.id==='book-question-pages'||ev.target.id==='book-question-chapter')v77QuestionScopeRefresh();});
 document.addEventListener('input',ev=>{if(ev.target.id==='book-question-pages')v77QuestionScopeRefresh();});
 
 // Wybór zdjęcia uruchamia zapis również bez elementu-przycisku.
@@ -2130,7 +2132,7 @@ async function v772UploadPages(action,target){
  if(!data.books.some(b=>b.id===owner))return note('Nie znaleziono książki.');
  const n0=Number($('start')?.value);
  if(!Number.isInteger(n0)||n0<1){if(input)input.value='';return note('Wpisz prawidłowy numer pierwszej strony, np. 4.');}
- const chapter=$('newchapter')?.value.trim()||'';
+ const chapter=v773ResolveChapter(owner,$('newchapter')?.value||'');
  return runAdminAction(target,'Dodaję zdjęcia…',async()=>{
   let n=n0,added=0,skipped=0,failed=0;const known=new Set();
   try{for(const f of files){
@@ -2156,3 +2158,13 @@ async function v772UploadPages(action,target){
   note((added?'✅ ':'⚠️ ')+'Dodano '+added+' stron'+(skipped?' · pominięto '+skipped+' istniejących numerów/duplikatów':'')+(failed?' · nie udało się dodać '+failed+' zdjęć — wybierz je ponownie':'')+'.');
  });
 }
+
+// Istniejace nazwy maja pierwszenstwo. Odczyt nie przepisuje zapisanych dzialow.
+function v773ChapterKey(value){const s=String(value||'').normalize('NFKC').trim().replace(/\s+/g,' ').toLocaleLowerCase('pl-PL'),m=s.match(/^(?:dzia[łl]\s*)?0*(\d+)$/u);return m?'number:'+Number(m[1]):s;}
+function v773ChapterNames(pages,includeEmpty=false){const seen=new Set(),out=[];for(const p of pages){const name=String(p.chapter||'').trim().replace(/\s+/g,' ')||(includeEmpty?'Bez działu':''),key=v773ChapterKey(name);if(name&&!seen.has(key)){seen.add(key);out.push(name);}}return out;}
+function v773ResolveChapter(bookId,value){const raw=String(value||'').trim().replace(/\s+/g,' ');if(!raw)return '';const names=v773ChapterNames(sortedBookPages(bookId)),existing=names.find(name=>v773ChapterKey(name)===v773ChapterKey(raw));return existing||(/^\d+$/.test(raw)?'Dział '+Number(raw):raw);}
+function v773ChapterField(b,id,label,value='',allowEmpty=false){
+ const names=v773ChapterNames(sortedBookPages(b?.id)),current=String(value||'').trim(),known=names.find(name=>v773ChapterKey(name)===v773ChapterKey(current)),choice=known||(!current?'':'__new__');
+ return `<div class="v773-chapter-field"><label for="${id}-choice">${e(label)}</label><select id="${id}-choice" data-v773-chapter-choice="${id}"><option value="" ${!choice?'selected':''}>${allowEmpty?'Bez działu':'Wybierz dział'}</option>${names.map(name=>`<option value="${e(name)}" ${choice===name?'selected':''}>${e(name)}</option>`).join('')}<option value="__new__" ${choice==='__new__'?'selected':''}>＋ Nowy dział</option></select><div id="${id}-new" ${choice==='__new__'?'':'hidden'}><label for="${id}">Numer lub nazwa nowego działu</label><input id="${id}" type="text" value="${e(known||current)}" placeholder="np. 2 lub Powtórka"></div></div>`;
+}
+document.addEventListener('change',ev=>{const id=ev.target?.dataset?.v773ChapterChoice;if(!id)return;const input=$(id),wrap=$(id+'-new');if(!input)return;const fresh=ev.target.value==='__new__';input.value=fresh?'':ev.target.value;if(wrap)wrap.hidden=!fresh;if(fresh)input.focus?.();});

@@ -1,3 +1,4 @@
+const v773PreviewDecks=new Map();
 import {speakSequence,stopVoice,setVoiceState,spellEnglish77} from './voice.js?v=77';
 import {cleanEnglish76,vocabulary76,checkedVocabulary76,englishInstruction76,makeVocabularyTasks76,spokenMatch76,englishTaskSafe76} from './english76.js?v=77';
 // V53_TEST_FIXES_01
@@ -18,7 +19,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,childG
  const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const norm=s=>String(s??'').trim().toLocaleLowerCase('pl-PL').replace(/\s*,\s*/g,', ').replace(/\s+/g,' ');
  const btn=(label,act,cls='')=>`<button type="button" class="${cls}" data-mg="${act}">${label}</button>`;
- const shuffle=a=>[...a].sort(()=>Math.random()-.5);
+ const shuffle=a=>{const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;};
  let tutorMessages=[],tutorBusy=false,tutorListening=false,stageEpoch=0,readingRec=null;
  let bookId=initialBookId||'',scope='all',mode='game',tasks=[],idx=0,points=0,choice=null,answered=false,tiles=[],busy=false,award=false,progress={},hintLevel=0,paused=false,wrongAttempts=0;
  const book=()=>books.find(b=>b.id===bookId);
@@ -74,6 +75,62 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,childG
   root.querySelectorAll('[data-mg-mode]').forEach(el=>el.onclick=()=>{mode=el.dataset.mgMode;setup()});
   root.querySelectorAll('[data-mg-chapter]').forEach(el=>el.onclick=()=>{scope='chapter:'+el.dataset.mgChapter;setup()});
  }
+ // V77.3: wybieramy z calego wybranego materialu, bez nadpisywania pytan po losowaniu.
+ function v773DeckKey(part,ps){return 'academy-v773-'+part+'-'+child+'-'+mode+'-'+JSON.stringify(ps.map(p=>[p.bookId,p.id]).sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b))));}
+ function v773ReadState(key,fallback){try{const raw=transient?v773PreviewDecks.get(key):localStorage.getItem(key);return raw?JSON.parse(raw):fallback;}catch{return fallback;}}
+ function v773WriteState(key,value){try{const raw=JSON.stringify(value);if(transient)v773PreviewDecks.set(key,raw);else localStorage.setItem(key,raw);}catch{}}
+ function v773DrawItems(list,count,key,initialTypes=[]){
+  const candidates=shuffle([...new Map(list.map(x=>[x.token,x])).values()]),saved=v773ReadState(key,{}),counts=saved&&typeof saved==='object'&&!Array.isArray(saved)?saved:{},selected=[],types=new Set(initialTypes),pageUse=new Map();
+  const seen=x=>Number.isFinite(counts[x.token])&&counts[x.token]>=0?counts[x.token]:0;
+  while(candidates.length&&selected.length<count){
+   const min=Math.min(...candidates.map(seen)),fresh=candidates.filter(x=>seen(x)===min);
+   fresh.sort((a,b)=>Number(types.has(a.kind))-Number(types.has(b.kind))+(Number(pageUse.get(a.page)||0)-Number(pageUse.get(b.page)||0))*.1);
+   const next=fresh[0];selected.push(next);types.add(next.kind);pageUse.set(next.page,(pageUse.get(next.page)||0)+1);counts[next.token]=seen(next)+1;candidates.splice(candidates.indexOf(next),1);
+  }
+  v773WriteState(key,counts);return selected;
+ }
+ function v773CollectBank(ps){
+  const previous=bookId,out=[],seen=new Set();
+  try{for(const id of new Set(ps.map(p=>p.bookId))){bookId=id;const matching=ps.filter(p=>p.bookId===id);
+   for(const entry of readBank()){
+    if(entry.subject!==subject()||!entry.task?.question)continue;
+    const p=matching.find(p=>v75MatchesPage(entry,p)&&entry.task.type!=='reading'&&reliableTask(entry.task,p));if(!p)continue;
+    const token=JSON.stringify([id,entry.key||fingerprint(entry.task)]);if(seen.has(token))continue;seen.add(token);
+    out.push({token,kind:entry.task.type||'choice',page:p.id,entry,p});
+   }
+  }}finally{bookId=previous;}
+  return out;
+ }
+ function v773TaskEntry(t,p){
+  const token=JSON.stringify([p.bookId,p.id,t.type,t.answer,t.wordEn||'',(t.items||[]).map(x=>x.key||x.label).sort(),(t.pairs||[]).map(x=>x.en).sort(),(t.words||[]).slice().sort()]);
+  return {token,kind:t.type,page:p.id,task:{...t,sourceBookId:p.bookId,sourcePageId:p.id,pageNumber:p.number,sourceTitle:sourceLabel(p),done:false,correct:false}};
+ }
+ function v773SourceWordsearch(p,round){const words=(subject()==='angielski'?vocabulary76(p.text).map(x=>x.en):wordPieces(p.text)).filter(w=>[...w].length>=3&&[...w].length<=8),pool=[...new Set(words)];if(pool.length<6)return null;const at=Math.abs(round)%pool.length,chosen=[...pool.slice(at),...pool.slice(0,at)].slice(0,6);return {type:'wordsearch',question:'🔎 Znajdź 6 słów. Szukaj poziomo i pionowo.',answer:chosen.join(', '),words:chosen,options:[],hint:'Zacznij od pierwszej litery i zaznaczaj kolejne.',pageNumber:p.number,done:false,correct:false};}
+ function v773SourceMemory(p,round){const en=subject()==='angielski',pool=en?vocabulary76(p.text).map(x=>({front:x.en,back:x.pl})):[...new Set(wordPieces(p.text))].map(word=>({front:word,back:word}));if(pool.length<6)return null;const at=Math.abs(round)%pool.length,pairs=[...pool.slice(at),...pool.slice(0,at)].slice(0,6);return {type:'memory',question:en?'🃏 Memory: połącz słowa z ich znaczeniem.':'🃏 Memory: znajdź sześć par słów ze strony.',answer:'Wszystkie pary',options:[],cards:shuffle(pairs.flatMap((x,i)=>[{pair:i,label:x.front},{pair:i,label:x.back}])),matched:[],flipped:[],pageNumber:p.number,done:false,correct:false};}
+ function v773SourceReading(p,round){if(subject()!=='polski')return null;const sentences=(String(p.text).match(/[^.!?]+[.!?]+|[^.!?]+$/g)||[]).map(x=>x.trim()).filter(x=>x.split(/\s+/).length>=3&&x.split(/\s+/).length<=25);if(!sentences.length)return null;return {type:'reading-mini',question:'🎙️ Przeczytaj kolejno podświetlane słowa ze strony.',passage:sentences[Math.abs(round)%sentences.length],answer:'Przeczytane',options:[],pageNumber:p.number,done:false,correct:false,readProgress:0};}
+ function v773MaterialGame(t,p){if(!t)return false;if(t.type==='rebus')return visibleInText(p.text,t.answer);if(t.type==='crossword')return t.crossWords?.length&&t.crossWords.every(x=>visibleInText(p.text,x.word));if(t.type==='order'||t.type==='write')return visibleInText(p.text,t.answer);return true;}
+ function v773BuildMission(ps){
+  const pool=v773CollectBank(ps);if(!pool.length)return [];
+  const saved=v773DrawItems(pool,mode==='test'?10:6,v773DeckKey('questions',ps));
+  const core=saved.map(({entry,p})=>{const t={...entry.task,_bankKey:entry.key||fingerprint(entry.task),sourceBookId:p.bookId,sourcePageId:p.id,pageNumber:p.number,sourceTitle:sourceLabel(p),done:false,correct:false};if(sourceQuestion(t))t.sourceExcerpt=sourceFromText(p.text,t);if(['choice','safe','shop','clock','detective','loki'].includes(t.type))t.options=shuffle(t.options||[]);return t;});
+  if(mode==='test')return core.map(v76AttachInstruction);
+  const previous=bookId,roundKey=v773DeckKey('round',ps),round=Number(v773ReadState(roundKey,0))||0;v773WriteState(roundKey,round+1);
+  const gamePages=v773DrawItems(ps.map(p=>({token:p.id,kind:p.bookId,page:p.id,p})),Math.min(2,ps.length),v773DeckKey('game-pages',ps)).map(x=>x.p),extras=[];
+  try{for(const p of gamePages){bookId=p.bookId;
+   const visual=v77ActivityPool([p],Math.abs(round));
+   const local=[makeCrossword(p),v773SourceWordsearch(p,round),makePuzzle(p),makeAdjective(p),makeRebus(p),v773SourceMemory(p,round),v773SourceReading(p,round)].filter(t=>v773MaterialGame(t,p));
+   extras.push(...[...visual,...local].map(t=>v773TaskEntry(t,p)));
+  }}finally{bookId=previous;}
+  const vocabulary=v76VocabularyPool(gamePages);
+  if(vocabulary.length){for(const t of [...makeVocabularyTasks76(vocabulary,round,10),...v77ExtraWords(gamePages,Math.abs(round),vocabulary)]){const p=gamePages.find(p=>p.id===t.sourcePageId);if(p)extras.push(v773TaskEntry({...t,vocab76:!['vocab-build','vocab-match'].includes(t.type)},p));}}
+  const extraKey=v773DeckKey('activities',ps),picked=[],oralTypes=['vocab-speak','vocab-repeat','vocab-reading'],types=core.map(t=>t.type),limit=10-core.length;
+  const addFrom=(list,n)=>{const used=new Set(picked.map(x=>x.token)),chosen=v773DrawItems(list.filter(x=>!used.has(x.token)),Math.min(n,limit-picked.length),extraKey,[...types,...picked.map(x=>x.kind)]);picked.push(...chosen);};
+  if(limit){addFrom(extras.filter(x=>oralTypes.includes(x.kind)),1);addFrom(extras.filter(x=>x.task.visual77),1);addFrom(extras.filter(x=>!oralTypes.includes(x.kind)),limit-picked.length);}
+  const games=picked.map(x=>x.task),result=[];
+  for(let i=0;i<core.length;i++){result.push(core[i]);if(i%2===0&&games.length)result.push(games.shift());}result.push(...games);
+  return result.map(v76AttachInstruction);
+ }
+
  // V48_BANK_AI: zapis lokalny w przegladarce, osobny dla kazdego dziecka i podrecznika
  // V76_WORDS_AND_SPEECH: wspolny lektor EN -> PL, slowka i mowienie.
  let v76VocabOnly=launch?.mode==='vocab';
@@ -88,8 +145,8 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,childG
   if(!ps.length){root.innerHTML='<section class="mg-panel"><h2>Wybierz strony z angielskiego</h2><p>Słówka korzystają z odczytanego tekstu wybranych stron.</p>'+btn('← Wróć','back')+'</section>';return}
   busy=true;const prepareEpoch=++stageEpoch;root.innerHTML='<section class="mg-panel"><h2>🃏 Przygotowuję słówka…</h2></section>';
   try{
-   const key='academy-v76-words-rotation-'+child+'-'+ps.map(p=>p.id).join('|').slice(0,150);let rotation=0;try{rotation=Number(localStorage.getItem(key)||0)||0}catch{}
-   const chosen=Array.from({length:Math.min(2,ps.length)},(_,i)=>ps[(Math.abs(rotation)+i)%ps.length]);let pool=v76VocabularyPool(chosen);
+   const key=v773DeckKey('vocabulary-round',ps);let rotation=Number(v773ReadState(key,0))||0;
+   const chosen=v773DrawItems(ps.map(p=>({token:p.id,kind:p.bookId,page:p.id,p})),Math.min(2,ps.length),v773DeckKey('vocabulary-pages',ps)).map(x=>x.p);let pool=v76VocabularyPool(chosen);
    if(pool.length<3){for(const p of chosen){
     try{
      const text=String(p.text||'').slice(0,2400),cacheKey='academy-v76-vocabulary-'+child+'-'+p.id;
@@ -101,7 +158,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,childG
    }}
    if(!root.isConnected||stageEpoch!==prepareEpoch)return;
    if(!pool.length)throw Error('Na wybranych stronach nie znalazłem jeszcze słówek do bezpiecznego ćwiczenia. Wybierz inną stronę albo spróbuj ponownie przy dostępnym AI.');
-   tasks=makeVocabularyTasks76(pool,rotation,10).map(t=>({...t,vocab76:true}));const extra=v77ExtraWords(chosen,Math.abs(rotation),pool);if(extra.length&&tasks.length>=7)tasks.splice(tasks.length-2,2,...extra);tasks=v77MixActivities(tasks,chosen,pool);idx=0;points=0;award=false;mode='game';reset();remember();try{localStorage.setItem(key,String(rotation+1))}catch{}draw();
+   tasks=makeVocabularyTasks76(pool,rotation,10).map(t=>({...t,vocab76:true}));const extra=v77ExtraWords(chosen,Math.abs(rotation),pool);if(extra.length&&tasks.length>=7)tasks.splice(tasks.length-2,2,...extra);tasks=v77MixActivities(tasks,chosen,pool);idx=0;points=0;award=false;mode='game';reset();remember();v773WriteState(key,rotation+1);draw();
   }catch(err){root.innerHTML='<section class="mg-panel"><h2>Nie udało się przygotować słówek</h2><p>'+escape(err.message)+'</p>'+btn('Spróbuj ponownie','start')+btn('← Wróć','back')+'</section>'}
   finally{busy=false}
  }
@@ -231,15 +288,16 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,childG
   if(t?.type==='rebus'&&(typeof t.rebusPicture!=='string'||!t.rebusPicture.trim()||typeof t.rebus!=='string'||!t.rebus.trim()))return false;
   if(subject()==='angielski'&& (t.needsSource===true||/(?:z tekstu|zgodnie z tekstem|z listy|w historii|w opowiesci|w opowieści|w trzeciej części)/i.test(t.question||'')))return false;
   if(!t||!String(t.question||'').trim()||!String(t.answer||'').trim())return false;
-  const options=t.options||[];
-  if(options.length!==4||options.some(x=>typeof x!=='string'))return false;
-  if(new Set(options.map(norm)).size!==4 || options.filter(x=>norm(x)===norm(t.answer)).length!==1)return false;
+  const options=t.options||[],requiresChoices=['choice','safe','shop','clock','detective','loki'].includes(t.type||'choice');
+  if(!Array.isArray(options)||options.some(x=>typeof x!=='string'))return false;
+  if(requiresChoices){if(options.length!==4||new Set(options.map(norm)).size!==4||options.filter(x=>norm(x)===norm(t.answer)).length!==1)return false;}
+  else if(!['write','dictation','listening','order','spelling','syllables','rebus','crossword','wordsearch'].includes(t.type))return false;
   const q=String(t.question).toLocaleLowerCase('pl-PL');
   // 'Które słowo zawiera poprawnie zapisane rz?' nie może mieć czterech
   // wyrazów z poprawnym rz. Analogicznie dla innych sprawdzanych cząstek.
   const parts=['rz','ch','sz','cz','ó','ż'];
   const part=parts.find(x=>q.includes("'"+x+"'")||q.includes('„'+x+'”')||q.includes('"'+x+'"'));
-  if(part&&/(zawiera|zawierają|cząstk|dwuznak|występuje|poprawnie napisan)/i.test(q)){
+  if(part&&requiresChoices&&/(zawiera|zawierają|cząstk|dwuznak|występuje|poprawnie napisan)/i.test(q)){
    const count=options.filter(x=>String(x).toLocaleLowerCase('pl-PL').includes(part)).length;
    if(count!==1)return false;
   }
@@ -262,7 +320,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,childG
    const quote=String(t.sourceQuote||'').trim();
    if(quote&&(!visibleInText(page,quote)||!visibleInText(quote,t.answer)))return false;
    // Jednoznaczny wybór słowa Z TEKSTU: tylko jedna opcja może tam wystąpić.
-   if(/(?:które|który|jaki|wskaż|wybierz).*\b(?:słowo|wyraz)\b.*\b(?:wiersza|wierszu|tekstu|tekście|czytanki)\b/i.test(q)){
+   if(requiresChoices&&/(?:które|który|jaki|wskaż|wybierz).*\b(?:słowo|wyraz)\b.*\b(?:wiersza|wierszu|tekstu|tekście|czytanki)\b/i.test(q)){
     if(options.filter(x=>visibleInText(page,x)).length!==1)return false;
    }
   }
@@ -804,6 +862,7 @@ Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj
   const ps=scopePages();if(!ps.length){alert('Wybierz strony z rozpoznanym tekstem.');return setup()}
   busy=true;root.innerHTML='<section class="mg-panel"><h2>🦸 Przygotowuję nowe wyzwania...</h2><p>Wczytuję zapisane pytania i gry. Nie musisz czekać na odczyt całego podręcznika.</p><p id="mg-load-progress" role="status">Otwieram materiał…</p></section>';
   try{
+   if(childGrade!=='P'){const prepared=v773BuildMission(ps);if(prepared.length){tasks=prepared;idx=0;points=0;award=false;reset();remember();draw();return;}}
    const all=[],errors=[];
    // Jedna porcja materialu na misje, kolejne uruchomienia przechodza po wszystkich stronach.
    const rotationId=String(child)+'-'+String(launch?.subject||bookId)+'-'+ps.length+'-'+String(ps[0]?.id||'');

@@ -874,3 +874,17 @@ button:not(:disabled):not(.tr72-subject-card):not(.mic):active,label.v73-file-co
 @media(prefers-reduced-motion:reduce){.a77-board *{animation:none!important;transition:none!important}}
 
 .a77-command77 button.a77-circled::after{content:"";position:absolute;inset:8px;border:5px solid #bb4c7e;border-radius:50%;transform:rotate(-9deg);pointer-events:none;animation:a77-place .35s ease-out}
+
+/* V77 korekta 3: znaczenie kolorow filtrow i jasniejsze tlo samej gry. */
+.v773-chapter-field{min-width:0}.v773-chapter-field>label{display:block}.v773-chapter-field select{width:100%;box-sizing:border-box}
+.v76-book-fold[data-v76-section="book-upload"] .v773-chapter-field{grid-column:1/-1}
+.v77-qfilters button[data-v773-filter="all"]{background:linear-gradient(#f4f8fc,#cbd8e6)!important;color:#243d58!important;border:2px solid #a9bfd4!important}
+.v77-qfilters button[data-v773-filter="unchecked"],.v77-qfilters button[data-v773-filter="attention"]{background:linear-gradient(#ca3f55,#a92540)!important;color:#fff!important;border:2px solid #fa9ead!important}
+.v77-qfilters button[data-v773-filter="checked"]{background:linear-gradient(#188458,#106744)!important;color:#fff!important;border:2px solid #89e0b4!important}
+.v77-qfilters button[data-v773-filter][aria-pressed="true"]{outline:4px solid #ffdc68;outline-offset:2px}
+.mg-panel.v77-play{background:radial-gradient(ellipse at 0 0,#73d7ef77,transparent 65%),linear-gradient(145deg,#276d99,#7157a0)!important;border-color:#9deaff!important}
+.v77-play .mg-header{background:radial-gradient(ellipse at top,#b6eaff42,transparent 80%)}
+.v77-play .v77-task-surface{background:linear-gradient(135deg,#fff7df,#e8f9ff 65%,#f2e7ff);border-color:#d0ccff}
+.v77-play button.mg-memory-card{background:linear-gradient(#378ec5,#5363b2)!important;border-color:#aaddff!important}
+.v77-play button.mg-matched{background:linear-gradient(#26a779,#167650)!important;border-color:#b8f7d9!important}
+.v77-play .mg-built{background:#eff8ff;color:#244a70;border-color:#7fb4dc}
