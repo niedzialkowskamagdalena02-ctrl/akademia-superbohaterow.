@@ -1,5 +1,7 @@
 // V76: tresc z podrecznika, jawne jezyki polecen i oddzielne cwiczenia slowek.
 export const VOCAB76=[
+ ['sunflower','słonecznik','🌻'],['rainbow','tęcza','🌈'],['rain','deszcz','🌧️'],['bow','kokarda','🎀'],['carpet','dywan',''],['pet','zwierzątko domowe','🐈'],['snowman','bałwan','⛄'],['snow','śnieg','❄️'],['man','mężczyzna','👨'],['football','piłka nożna','⚽'],
+ ['broccoli','brokuł','🥦'],['tomato','pomidor','🍅'],['potato','ziemniak','🥔'],['carrot','marchewka','🥕'],['pear','gruszka','🍐'],['grape','winogrono','🍇'],['strawberry','truskawka','🍓'],['lemon','cytryna','🍋'],['pizza','pizza','🍕'],['cake','ciasto','🍰'],['rice','ryż','🍚'],['juice','sok','🧃'],['chicken','kurczak','🐔'],['butter','masło','🧈'],['sandwich','kanapka','🥪'],['ice cream','lody','🍦'],['plate','talerz','🍽️'],['spoon','łyżka','🥄'],['fork','widelec','🍴'],['cup','kubek','☕'],
  ['spring','wiosna','🌷'],['summer','lato','☀️'],['autumn','jesień','🍂'],['winter','zima','❄️'],['season','pora roku','🌦️'],
  ['jacket','kurtka',''],['coat','płaszcz',''],['jumper','sweter',''],['sweater','sweter',''],['jeans','dżinsy',''],
  ['t shirt','koszulka',''],['shirt','koszula',''],['skirt','spódnica',''],['shorts','krótkie spodenki',''],['trousers','spodnie',''],['dress','sukienka',''],['shoes','buty',''],['hat','czapka',''],['socks','skarpetki',''],['listen','słuchać',''],['think','myśleć',''],['say','powiedzieć',''],['ask','zapytać',''],['write','pisać',''],['read','czytać',''],

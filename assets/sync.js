@@ -82,4 +82,5 @@ export function createSync78(options={}){
  async function resolve(which){if(!conflict)return;const c=conflict;conflict=null;outbox=null;baseline=sync78Clone(c.remote);if(which==='remote')await applyRemote(c.remote,c.base||{},false);await persist();schedule();}
  return {init,connectParent,join,pair,resolve,cycle,revoke:child=>request('revoke',{child}),onLocalChange:async()=>{schedule();return {queued:!!device};},changed:schedule,device:()=>device,status:()=>message,onStatus:fn=>{listeners.add(fn);return ()=>listeners.delete(fn);},stop:()=>{stopped=true;clearTimeout(timer);clearInterval(interval);},debug:()=>({baseline,revision,seq,outbox,conflict})};
 }
-export const syncAdapter=createSync78();
+const testSync80=()=>{throw Error('Synchronizacja rodziny jest wyłączona w testowej V80.')}
+export const syncAdapter=globalThis.AKADEMIA_TEST80?{init:async()=>{},onLocalChange:async()=>({queued:false}),device:()=>null,status:()=> 'V80 TEST — dane tylko tej przeglądarki',onStatus:()=>()=>{},stop(){},cycle:async()=>false,connectParent:testSync80,join:testSync80,pair:testSync80,revoke:testSync80,resolve:testSync80}:createSync78();

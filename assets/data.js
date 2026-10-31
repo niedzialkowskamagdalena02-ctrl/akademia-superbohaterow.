@@ -1,6 +1,6 @@
 export const uid=()=>crypto.randomUUID();
 export const initial=()=>({version:1,parentPin:'',profiles:{pawel:{name:'Paweł',grade:'2',pin:'',subjects:['Polski','Matematyka','Angielski'],mentor:'tech',xp:0,coins:0,unlocks:[]},patryk:{name:'Patryk',grade:'P',pin:'',subjects:['Przedszkole'],mentor:'fun',xp:0,coins:0,unlocks:[]}},books:[],missions:[],history:[],settings:{xpPractice:5,dailyPracticeLimit:3,songs:[{title:'Planeta Ziemia — wyszukaj piosenkę',url:'https://www.youtube.com/results?search_query=planeta+ziemia+piosenka+dla+dzieci'}]}});
-const DB='academy_original_2026';const STORE='records';let handle;
+const DB=globalThis.AKADEMIA_TEST80?'academy_v80_preview_2026':'academy_original_2026';const STORE='records';let handle;
 export async function database(){if(handle)return handle;handle=await new Promise((ok,no)=>{const r=indexedDB.open(DB,1);r.onupgradeneeded=()=>{r.result.createObjectStore(STORE)};r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)});return handle}
 export async function get(key){const db=await database();return new Promise((ok,no)=>{const r=db.transaction(STORE).objectStore(STORE).get(key);r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)})}
 export async function put(key,value){const db=await database();await new Promise((ok,no)=>{const t=db.transaction(STORE,'readwrite');t.objectStore(STORE).put(value,key);t.oncomplete=ok;t.onerror=()=>no(t.error);t.onabort=()=>no(t.error||Error('Zapis przerwany'));});if(typeof document!=='undefined')document.dispatchEvent(new CustomEvent('academy:record-change',{detail:{key}}));}
