@@ -1,6 +1,7 @@
 // V76: tresc z podrecznika, jawne jezyki polecen i oddzielne cwiczenia slowek.
 export const VOCAB76=[
- ['t shirt','koszulka',''],['shirt','koszula',''],['skirt','spódnica',''],['shorts','szorty',''],['trousers','spodnie',''],['dress','sukienka',''],['shoes','buty',''],['hat','czapka',''],['socks','skarpetki',''],['listen','słuchać',''],['think','myśleć',''],['say','powiedzieć',''],['ask','zapytać',''],['write','pisać',''],['read','czytać',''],
+ ['jacket','kurtka',''],['coat','płaszcz',''],['jumper','sweter',''],['sweater','sweter',''],['jeans','dżinsy',''],
+ ['t shirt','koszulka',''],['shirt','koszula',''],['skirt','spódnica',''],['shorts','krótkie spodenki',''],['trousers','spodnie',''],['dress','sukienka',''],['shoes','buty',''],['hat','czapka',''],['socks','skarpetki',''],['listen','słuchać',''],['think','myśleć',''],['say','powiedzieć',''],['ask','zapytać',''],['write','pisać',''],['read','czytać',''],
  ['cat','kot','🐈'],['dog','pies','🐕'],['sun','słońce','☀️'],['house','dom','🏠'],['book','książka','📘'],['tree','drzewo','🌳'],['bird','ptak','🐦'],['fish','ryba','🐟'],['apple','jabłko','🍎'],['water','woda','💧'],['milk','mleko','🥛'],['car','samochód','🚗'],['ball','piłka','⚽'],['flower','kwiat','🌼'],['school','szkoła','🏫'],['pencil','ołówek','✏️'],['pen','długopis','🖊️'],['chair','krzesło','🪑'],['table','stół',''],['door','drzwi','🚪'],['window','okno','🪟'],['bed','łóżko','🛏️'],['red','czerwony','🔴'],['blue','niebieski','🔵'],['green','zielony','🟢'],['yellow','żółty','🟡'],['white','biały','⚪'],['black','czarny','⚫'],['orange','pomarańczowy','🟠'],['pink','różowy',''],['purple','fioletowy','🟣'],['brown','brązowy','🟤'],['one','jeden','1'],['two','dwa','2'],['three','trzy','3'],['four','cztery','4'],['five','pięć','5'],['six','sześć','6'],['seven','siedem','7'],['eight','osiem','8'],['nine','dziewięć','9'],['ten','dziesięć','10'],['monday','poniedziałek',''],['tuesday','wtorek',''],['wednesday','środa',''],['thursday','czwartek',''],['friday','piątek',''],['saturday','sobota',''],['sunday','niedziela',''],['mother','mama',''],['father','tata',''],['sister','siostra',''],['brother','brat',''],['friend','przyjaciel',''],['happy','szczęśliwy','🙂'],['sad','smutny','🙁'],['big','duży',''],['small','mały',''],['rabbit','królik','🐇'],['horse','koń','🐎'],['duck','kaczka','🦆'],['cow','krowa','🐄'],['pig','świnia','🐖'],['sheep','owca','🐑'],['lion','lew','🦁'],['elephant','słoń','🐘'],['monkey','małpa','🐒'],['banana','banan','🍌'],['bread','chleb','🍞'],['egg','jajko','🥚'],['cheese','ser','🧀'],['head','głowa',''],['hand','dłoń','✋'],['eye','oko','👁️'],['ear','ucho','👂'],['nose','nos','👃'],['mouth','usta',''],['leg','noga',''],['foot','stopa','🦶'],['arm','ręka',''],['body','ciało',''],['hello','cześć','👋'],['goodbye','do widzenia','👋']
 ].map(([en,pl,picture])=>({en,pl,picture}));
 export const cleanEnglish76=s=>String(s||'').toLowerCase().replace(/[’']/g,"'").replace(/[^a-z0-9' ]/g,' ').replace(/\s+/g,' ').trim();
@@ -70,4 +71,53 @@ export function englishTaskSafe76(t){
  if(!['spelling','order','reading'].includes(t.type)&&(' '+cleanEnglish76(t.question)+' ').includes(' '+cleanEnglish76(t.answer)+' '))return false;
  if(['listening','dictation'].includes(t.type)&&!String(t.audio||'').trim())t.audio=t.answer;
  return true;
+}
+
+// V77.4: proste wskazanie polskiego znaczenia, bez zagadek i odsluchu klucza.
+export function polishText774(value){
+ const text=String(value||'').trim();
+ return !!text&&!/^(?:the |this |it is |you |your |because |correct |in english|a |an )/i.test(text)&&(/[ąćęłńóśźż]/i.test(text)||/\b(?:oznacza|angielsku|polsku|wyraz|litery|slowo|odpowiedz|kolejno|poprawnie|znaczenie|napisz|posluchaj|zapisz)\b/i.test(text));
+}
+export function englishCue774(t){
+ const answer=cleanEnglish76(t.wordEn||t.answer),known=VOCAB76.find(x=>x.en===answer);
+ if(known)return known.pl;
+ const explicit=String((!t.answerPlFor||t.answerPlFor===answer?t.answerPl:'')||t.promptPl||'').trim();
+ return explicit&&explicit.length<=100&&cleanEnglish76(explicit)!==answer?explicit:'';
+}
+export function englishRecall774(t){
+ if(t.visual77||/^vocab-/.test(t.type||''))return false;
+ if(!['choice','loki','detective','write','spelling','listening','dictation','order'].includes(t.type))return false;
+ if(t.type==='order'&&String(t.answer||'').trim().split(/\s+/).length>1)return false;
+ // Typ listening ze starych bankow sam nie jest dowodem, ze to cwiczenie sluchowe.
+ if(['listening','dictation'].includes(t.type)&&/\b(?:listen|hear|audio)\b|posłuchaj|usłysz/i.test(String(t.question||'')+' '+String(t.questionPl||'')))return false;
+ return true;
+}
+export function englishExplanation774(t){
+ const cue=englishCue774(t);
+ if(cue&&!t.readWords?.length)return 'Po angielsku „'+cue+'” to „'+(t.wordEn||t.answer)+'”.';
+ if(polishText774(t.explanationPl))return String(t.explanationPl).trim();
+ if(polishText774(t.explanation))return String(t.explanation).trim();
+ if(t.type==='order')return 'Wyrazy układamy w kolejności podanej w poprawnej odpowiedzi. Przeczytaj całe zdanie jeszcze raz.';
+ if(['listening','dictation','vocab-listen'].includes(t.type))return 'Zapisz słowo usłyszane w nagraniu. Porównaj swój zapis z poprawną odpowiedzią, litera po literze.';
+ return 'Porównaj swoją odpowiedź z poprawnym zapisem. Zwróć uwagę na kolejność liter i znaczenie słów.';
+}
+export function simplifyEnglish774(t,cue=''){
+ if(!t)return t;
+ if(cue&&(!t.answerPl||t.answerPlFor&&t.answerPlFor!==cleanEnglish76(t.answer))){t.answerPl=cue;t.answerPlFor=cleanEnglish76(t.answer);}
+ t.explanation=englishExplanation774(t);
+ if(!polishText774(t.hint))t.hint='Przypomnij sobie słowo z lekcji. Sprawdź spokojnie kolejność liter.';
+ if(!englishRecall774(t))return t;
+ const target=englishCue774(t);t.v774NeedsCue=!target;if(!target)return t;
+ const choice=['choice','loki','detective'].includes(t.type),letters=['spelling','order'].includes(t.type);
+ t.type=choice?'choice':letters?'spelling':'write';
+ t.answerPl=target;t.answerPlFor=cleanEnglish76(t.answer);t.audio='';t.v774Recall=true;t.v774NeedsCue=false;
+ const primary=choice?'Choose the English word.':letters?'Put the letters in the correct order.':'Write the word in English.';
+ t.question=[primary,'Translate into English.','Your turn.'].find(q=>!(' '+cleanEnglish76(q)+' ').includes(' '+cleanEnglish76(t.answer)+' '))||primary;
+ t.questionPl=(choice?'Wybierz po angielsku: ':letters?'Ułóż z liter angielskie słowo: ':'Napisz po angielsku: ')+'„'+target+'”.';
+ // Polecenie musi wskazywac slowo rowniez w trybie sprawdzianu, gdzie nie ma tlumaczenia.
+ t.targetPl774=target;t.instructionEn=t.question;t.instructionPl=t.questionPl;
+ return t;
+}
+export function englishAudioAllowed774(t){
+ return !t?.v774Recall&&!englishRecall774(t)&&(['listening','dictation','vocab-listen','vocab-repeat','vocab-reading'].includes(t?.type));
 }
