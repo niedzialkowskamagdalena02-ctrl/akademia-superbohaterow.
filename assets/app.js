@@ -1,10 +1,10 @@
 // V48_AI_RESPONSE_DIAGNOSTICS
 // V44_BULK_CHAPTERS
 // V42_CHAPTERS
-import {mountMissionGame} from './mission-game.js?v=77.1';
+import {mountMissionGame} from './mission-game.js?v=77.2';
 import { initHeadquarters3D } from './headquarters3d.js';
 import {initial,get,put,del,allRecords,replaceRecords,compress,uid,gradeName} from './data.js';
-import {speak,listen,stopVoice,getVoiceState,setVoiceState,spellEnglish77} from './voice.js?v=77.1';
+import {speak,listen,stopVoice,getVoiceState,setVoiceState,spellEnglish77} from './voice.js?v=77.2';
 import {vocabulary,readings,explanation} from './learning.js';
 import {syncAdapter} from './sync.js';
 import {BASE_ITEMS,baseMarkup,migrateBase} from './base.js';
@@ -689,7 +689,7 @@ async function recognizePageAI(page,language='pol',overwriteApproved=false){
  finally{ocrBusy=false;document.querySelectorAll('[data-action="page:ai"],[data-action="reader:ai"]').forEach(b=>b.disabled=false)}
 }
 const grant=async(child,points,reason,key)=>{if(data.history.some(h=>h.key===key))return false;data.profiles[child].xp+=points;data.profiles[child].coins+=points;data.history.unshift({id:uid(),key,child,points,reason,at:new Date().toISOString()});await save();return true};
-function layout(title,content){cancelAIRequests();stopVoice();closeMicBubble();app.innerHTML=`<main class="wrap"><header class="head"><div><div class="brand">⚡ AKADEMIA SUPERBOHATERÓW <span style="display:inline-block;font-size:0.72em;border:1px solid currentColor;border-radius:8px;padding:2px 7px;vertical-align:middle">V77 · korekta 1</span></div><div class="sub">${e(title)}</div></div>${role==='child'?trainingSoundControl():''}${role?button(testMode?'← Zakończ test':'← Profile','exit','alt'):''}</header>${testMode?'<div class="test-banner">🧪 TRYB MAMY — BEZPŁATNY TEST • POSTĘPY NIE SĄ ZAPISYWANE</div>':''}${content}</main>${role==='child'?'<button class="mic" data-action="mic" aria-label="Sterowanie głosowe">🎙️</button>':''}`;document.querySelectorAll('[data-speak]').forEach(b=>b.addEventListener('click',()=>speak(b.dataset.speak,b.dataset.lang,role==='child'?profile().mentor:'tech',data.settings.rate||1)));hydrateImages();v76AfterRender();if(role==='child'&&(tab==='learn'||tab==='subjectmissions'))installMicDrag()}
+function layout(title,content){cancelAIRequests();stopVoice();closeMicBubble();app.innerHTML=`<main class="wrap"><header class="head"><div><div class="brand">⚡ AKADEMIA SUPERBOHATERÓW <span style="display:inline-block;font-size:0.72em;border:1px solid currentColor;border-radius:8px;padding:2px 7px;vertical-align:middle">V77 · korekta 2</span></div><div class="sub">${e(title)}</div></div>${role==='child'?trainingSoundControl():''}${role?button(testMode?'← Zakończ test':'← Profile','exit','alt'):''}</header>${testMode?'<div class="test-banner">🧪 TRYB MAMY — BEZPŁATNY TEST • POSTĘPY NIE SĄ ZAPISYWANE</div>':''}${content}</main>${role==='child'?'<button class="mic" data-action="mic" aria-label="Sterowanie głosowe">🎙️</button>':''}`;document.querySelectorAll('[data-speak]').forEach(b=>b.addEventListener('click',()=>speak(b.dataset.speak,b.dataset.lang,role==='child'?profile().mentor:'tech',data.settings.rate||1)));hydrateImages();v76AfterRender();if(role==='child'&&(tab==='learn'||tab==='subjectmissions'))installMicDrag()}
 async function hydrateImages(){for(const el of document.querySelectorAll('[data-image]')){const src=await img(el.dataset.image);if(el.isConnected&&src){el.src=src;el.onload=()=>URL.revokeObjectURL(src)}}}
 function nav(){return role==='admin'?`<div class="tabs">${[['home','Przegląd'],['books','📚 Książki'],['missions','📋 Misje'],['settings','⚙️ Ustawienia'],['test','🧪 Testuj wszystko'],['backup','💾 Kopia']].map(([k,n])=>button(n,'admin:'+k,adminTab===k?'gold':'alt')).join('')}</div>`:`<div class="tabs">${[['home','🎯 Misje'],['books','📚 Książki'],['learn','🧠 Trening'],['academy','📖 Sala odkrywców'],['mentor','🤖 Mentor'],['base','🏙️ Baza Avengersów i gry']].map(([k,n])=>button(n,'child:'+k,tab===k?'gold':'alt')).join('')}</div>`}
 function render(){if(tab!=='arcade')stopArcade();if(!role){layout('Wybierz swoją bazę',`<section class="card"><h1>Witaj w Akademii! 🛡️</h1><p>Każdy bohater ma własne misje i nagrody.</p></section><div class="grid">${people.map(([id,name])=>`<button class="tile" data-action="enter:${id}"><img class="profile-hero" src="assets/art/${data.profiles[id].hero||(id==='pawel'?'iron':'spider')}.svg" alt=""><h2>${name}</h2><small>${gradeName(data.profiles[id].grade)} · ${data.profiles[id].coins} złotych</small></button>`).join('')}</div><section class="card">${button('🔐 Centrum dowodzenia mamy','enter:admin','gold')}<p class="muted">Tryb lokalny: dane z tego telefonu nie synchronizują się jeszcze z innymi urządzeniami. ${syncAdapter.status()}</p></section>`);return}if(role==='admin')adminRender();else childRender()}
@@ -1081,6 +1081,7 @@ function trainingFlowMarkup(){
 }
 function trainingSelectionUpdate(){for(const el of document.querySelectorAll('[data-v77-range-summary]')){const n=trainingPageItems().filter(p=>p.bookId===el.dataset.v77RangeSummary&&trainingSelectedPages.has(p.id)).length;el.textContent='Wybrano '+n+' stron'}const el=document.getElementById('tr71-count');if(el)el.textContent='Zaznaczono '+trainingSelectedPages.size+' stron.'}
 function trainingSelectionChange(el){
+ v772RememberRangeMode(el);
  const list=trainingPageItems(),checked=el.checked;
  let matching=[];
  if(el.hasAttribute('data-tr71-page'))matching=list.filter(p=>p.id===el.dataset.tr71Page);
@@ -1317,18 +1318,20 @@ if(action==='training:toggle-sound'){const old=localStorage.getItem('academy-v72
 if(action.startsWith('training:')){
  const parts=action.split(':'),what=parts[1],value=decodeURIComponent(parts.slice(2).join(':'));
  if(what==='mini'){const lessonBySubject={Polski:0,Matematyka:5,Angielski:9};lessonIndex=lessonBySubject[trainingSelectedSubject]??0;avengersRun=null;trainingStep='outside-mini';render();discoveryStart(value==='quick'?'quick':'match');return}
- if(what==='subject'){trainingSelectedSubject=value;trainingSelectedPages=new Set();trainingStep='source';return render()}
+ if(what==='subject'){v772RangeModes.clear();trainingSelectedSubject=value;trainingSelectedPages=new Set();trainingStep='source';return render()}
  if(what==='source'){trainingStep=value==='outside'?'outside':'mode';if(value==='outside'){const map={Polski:'polski',Matematyka:'matematyka',Angielski:'angielski',Przyroda:'przyroda'};v37Subject=map[trainingSelectedSubject]||'all'}return render()}
  if(what==='mode'){trainingMode=value==='test'?'test':value==='vocab'&&/angiel|english/i.test(trainingSelectedSubject)?'vocab':'game';trainingStep='range';return render()}
  if(what==='back'){trainingStep=value;return render()}
  if(what==='range'){
+  v772RangeModes.clear();
   if(value==='all'){trainingSelectedPages=new Set(trainingPageItems().map(p=>p.id));trainingStep='ready'}
   else{trainingSelectedPages=new Set();trainingStep='pick'}return render();
  }
- if(what==='all'){trainingSelectedPages=new Set(trainingPageItems().map(p=>p.id));return render()}
- if(what==='none'){trainingSelectedPages=new Set();return render()}
+ if(what==='all'){v772RangeModes.clear();trainingSelectedPages=new Set(trainingPageItems().map(p=>p.id));return render()}
+ if(what==='none'){v772RangeModes.clear();trainingSelectedPages=new Set();return render()}
  if(what==='readpage'){const p=data.bookPages.find(p=>p.id===value);if(p)return speak(p.text||'Brak rozpoznanego tekstu', 'pl-PL',profile().mentor,data.settings.rate||1);return}
  if(what==='start'){
+  if(!v772SyncTrainingRanges())return;
   const eligible=new Set(trainingPageItems().map(p=>p.id));
   const selected=[...trainingSelectedPages].filter(id=>eligible.has(id));
   if(!selected.length)return note('Wybierz co najmniej jedną stronę, której tekst został odczytany.');
@@ -1490,24 +1493,8 @@ if(action==='book:archive'){const book=data.books.find(b=>b.id===bookId);book.ar
  if(!count)return note('Nie znaleziono stron w podanym zakresie.');
  await save();render();return note('Przypisano '+count+' stron do działu: '+name);
  }
- if(action==='page:upload'||action==='page:camera')return runAdminAction(target,'Dodaje zdjęcia…',async()=>{
- const input=action==='page:camera'?$('pagecamera'):$('pagefiles');
- const files=[...(input?.files||[])];if(!files.length)return note('Wybierz zdjęcia.');
- let n=Number($('start')?.value)||1,added=0,skipped=0;
- const known=new Set();const chapter=$('newchapter')?.value.trim()||'';
- for(const f of files){
-  const signature=[f.name,f.size,f.lastModified].join('|');
-  if(known.has(signature)){skipped++;continue}known.add(signature);
-  if(data.bookPages.some(p=>p.bookId===bookId&&p.number===n)){
-   // Zdjęcie dla tego numeru już istnieje: nie dodawaj drugiej kopii.
-   skipped++;n++;continue;
-  }
-  const blob=await compress(f),imageId=uid();await put('image:'+imageId,blob);
-  data.bookPages.push({id:uid(),bookId,number:n++,imageId,text:'',chapter});
-  added++;target.textContent='⏳ Dodano '+added+' z '+files.length;
- }
- if(added)await save();render();note('✅ Dodano '+added+' stron'+(skipped?' · pominięto '+skipped+' duplikatów/numerów':'')+'.');
-});if(action.startsWith('page:open:')){pageId=action.slice(10);adminTab='page';return render()}if(action==='page:approve')return runAdminAction(target,'Zatwierdzam stronę…',async()=>{
+ if(action==='page:upload'||action==='page:camera')return v772UploadPages(action,target);
+if(action.startsWith('page:open:')){pageId=action.slice(10);adminTab='page';return render()}if(action==='page:approve')return runAdminAction(target,'Zatwierdzam stronę…',async()=>{
  if(!await saveEditedPage())throw Error('Nie znaleziono strony.');
  const p=data.bookPages.find(x=>x.id===pageId);
  if(!p?.text?.trim())return note('Najpierw odczytaj i sprawdź tekst strony.');
@@ -1690,7 +1677,7 @@ document.addEventListener('toggle',ev=>{
 },true);
 document.addEventListener('click',ev=>{const btn=ev.target.closest('[data-action]');if(btn){if(ev.target.closest('[data-speak]'))return;if(btn.dataset.action==='mic'&&micDragIgnoreClick){ev.preventDefault();ev.stopPropagation();return}if(btn.classList.contains('tr72-subject-card')){if(btn.dataset.opening)return;btn.dataset.opening='1';btn.classList.add('tr72-selected');trainingTapSound();setTimeout(()=>{if(btn.isConnected)handle(btn.dataset.action,btn)},['matematyka','przyroda','wiedza'].includes(btn.dataset.theme)?1150:480);return}if(btn.closest('.tr71')&&/^training:(source|mode):/.test(btn.dataset.action||'')){if(btn.dataset.opening)return;btn.dataset.opening='1';btn.classList.add('v76-tile-pressed');btn.setAttribute('aria-busy','true');trainingTapSound();setTimeout(()=>{if(btn.isConnected)handle(btn.dataset.action,btn)},280);return}if(btn.closest('.tr71')&&btn.dataset.action?.startsWith('training:')&&btn.dataset.action!=='training:toggle-sound')trainingTapSound();handle(btn.dataset.action,btn)}});
 document.addEventListener('input',ev=>{const box=ev.target.closest('[data-v74-edit]');if(!box||!ev.target.matches('[data-v74-field],[data-v75-field]'))return;const key=decodeURIComponent(box.dataset.v74Edit||'');const btn=box.querySelector('[data-action^="book:save-question:"]');if(btn)btn.disabled=!v74QuestionModified(box,key);});
-document.addEventListener('change',ev=>{if(ev.target.id==='page-chapter-filter'){if($('page-filter')?.value==='none')$('page-filter').value='all';filterBookPages($('page-filter')?.value||'all');return;}if(ev.target.matches('[data-tr71-page],[data-tr71-book],[data-tr71-chapter]'))return trainingSelectionChange(ev.target);if(ev.target.matches('[data-page-select]'))updateBookPageSelection();if(ev.target.id==='bchild')refreshBookSubjectSelect();if(ev.target.id==='btype'){const other=ev.target.value==='Inne';const a=$('v73-book-title'),b=$('v73-book-part');if(a)a.hidden=!other;if(b)b.hidden=other;}if(ev.target.id==='page-filter'){filterBookPages(ev.target.value);const old=v77BookViews.get(bookId)||{scroll:0,selected:[]};v77BookViews.set(bookId,{...old,filter:ev.target.value})}if(ev.target.id==='v74-report-child')v74UpdateReportFilter();if(ev.target.id==='booknumberlocation'){const b=data.books.find(x=>x.id===bookId);if(b){b.pageNumberPosition=ev.target.value;save().then(()=>note('✅ Zapisano położenie numeru strony.')).catch(err=>note('❌ '+err.message))}}if(ev.target.id==='replacefile'&&ev.target.files?.length)handle('page:replace');if(ev.target.id==='replacecamera'&&ev.target.files?.length)handle('page:replace-camera');if(ev.target.id==='bookcoverfile'&&ev.target.files?.length)handle('book:cover');if(ev.target.id==='pagefiles'&&ev.target.files?.length)handle('page:upload');if(ev.target.id==='pagecamera'&&ev.target.files?.length)handle('page:camera');if(ev.target.id==='trainingSubject')trainingChooseSubject(ev.target.value);if(ev.target.id==='kind')newExercise();if(ev.target.id==='booktrainingpage')bookExercise();if(ev.target.id==='tracechar')drawTrace();if(ev.target.id==='readerpage'){pageId=ev.target.value;render()}if(ev.target.id==='mentorstyle'){profile().mentor=ev.target.value;save()}});
+document.addEventListener('change',ev=>{if(ev.target.hasAttribute?.('data-v77-range-book')){v77ApplyRange(ev.target.dataset.v77RangeBook,false);return;}if(ev.target.hasAttribute?.('data-v772-chapter-book')){v772ApplyChapter(ev.target.dataset.v772ChapterBook);return;}if(ev.target.id==='page-chapter-filter'){if($('page-filter')?.value==='none')$('page-filter').value='all';filterBookPages($('page-filter')?.value||'all');return;}if(ev.target.matches('[data-tr71-page],[data-tr71-book],[data-tr71-chapter]'))return trainingSelectionChange(ev.target);if(ev.target.matches('[data-page-select]'))updateBookPageSelection();if(ev.target.id==='bchild')refreshBookSubjectSelect();if(ev.target.id==='btype'){const other=ev.target.value==='Inne';const a=$('v73-book-title'),b=$('v73-book-part');if(a)a.hidden=!other;if(b)b.hidden=other;}if(ev.target.id==='page-filter'){filterBookPages(ev.target.value);const old=v77BookViews.get(bookId)||{scroll:0,selected:[]};v77BookViews.set(bookId,{...old,filter:ev.target.value})}if(ev.target.id==='v74-report-child')v74UpdateReportFilter();if(ev.target.id==='booknumberlocation'){const b=data.books.find(x=>x.id===bookId);if(b){b.pageNumberPosition=ev.target.value;save().then(()=>note('✅ Zapisano położenie numeru strony.')).catch(err=>note('❌ '+err.message))}}if(ev.target.id==='replacefile'&&ev.target.files?.length)handle('page:replace');if(ev.target.id==='replacecamera'&&ev.target.files?.length)handle('page:replace-camera');if(ev.target.id==='bookcoverfile'&&ev.target.files?.length)handle('book:cover');if(ev.target.id==='pagefiles'&&ev.target.files?.length)handle('page:upload');if(ev.target.id==='pagecamera'&&ev.target.files?.length)handle('page:camera');if(ev.target.id==='trainingSubject')trainingChooseSubject(ev.target.value);if(ev.target.id==='kind')newExercise();if(ev.target.id==='booktrainingpage')bookExercise();if(ev.target.id==='tracechar')drawTrace();if(ev.target.id==='readerpage'){pageId=ev.target.value;render()}if(ev.target.id==='mentorstyle'){profile().mentor=ev.target.value;save()}});
 // V76_PANEL: zachowujemy kolejnosc Dodaj -> Biblioteka -> Trudnosci -> Baza poza.
 const v76OpenSections=new Set();
 const v76Q={level:'pages',page:null,key:null,subject:'',selected:new Set(),numbers:new Map(),scroll:0,last:null};
@@ -1888,8 +1875,8 @@ function v77Issues(x){
  return [...new Set([...ai,...tech,...legacy])];
 }
 function v77SyncFlags(x){const reasons=v77Issues(x);x.v75Flagged=!!reasons.length;x.v75Reason=reasons.join(' | ').slice(0,1000)}
-function v77Status(x){return v77Issues(x).length?'attention':x.v76Review?.count>=2?'checked':'unchecked'}
-function v77Badge(x){const s=v77Status(x);return `<span class="v77-status v77-status-${s}">${s==='attention'?'⚠ Wymaga uwagi':s==='checked'?'✓ AI bez uwag · '+x.v76Review.count+'/3':'○ Nie sprawdzono przez AI'}</span>`+(x.v77Technical&&!x.v77Technical.reasons.length?'<span class="v77-tech-ok">✓ Technicznie OK</span>':'')}
+function v77Status(x){return v77Issues(x).length?'attention':v772Pending(x).length?'unchecked':x.v76Review?.count>=2?'checked':'unchecked'}
+function v77Badge(x){const s=v77Status(x);return `<span class="v77-status v77-status-${s}">${s==='attention'?'⚠ Wymaga uwagi':s==='checked'?'✓ AI bez uwag · '+x.v76Review.count+'/3':v772Pending(x).length?'○ Kontrola niepełna · '+v772Pending(x).length+'/3 AI':'○ Nie sprawdzono przez AI'}</span>`+(x.v77Technical&&!x.v77Technical.reasons.length?'<span class="v77-tech-ok">✓ Technicznie OK</span>':'')}
 function v77Match(x){return v77Q.filter==='all'||v77Status(x)===v77Q.filter}
 function v77FilterBar(b){const bank=bookBankItems(b),counts={all:bank.length,attention:0,checked:0,unchecked:0};for(const x of bank)counts[v77Status(x)]++;
  return `<div class="v77-review-summary" role="status">${e(v77Q.message||'Wybierz status, aby szybko znaleźć pytania.')}</div><div class="v77-qfilters" aria-label="Filtr pytań">${[['all','Wszystkie'],['attention','⚠ Wymagają uwagi'],['unchecked','Do kontroli AI'],['checked','✓ AI bez uwag']].map(([k,label])=>`<button type="button" data-action="v77:q-filter:${k}" aria-pressed="${v77Q.filter===k}">${label} <b>${counts[k]}</b></button>`).join('')}</div>`;
@@ -1911,23 +1898,48 @@ function v77CaptureBookView(){v77BookViews.set(bookId,{filter:$('page-filter')?.
 function v77RestoreBookView(){if(role!=='admin'||adminTab!=='book')return;const state=v77BookViews.get(bookId),select=$('page-filter');if(!state||!select)return;select.value=state.filter;const chapter=$('page-chapter-filter');if(chapter){const valid=!state.chapter||state.chapter==='none'||sortedBookPages(bookId).some(p=>'c:'+p.chapter===state.chapter);chapter.value=valid?(state.chapter||''):'';}for(const x of document.querySelectorAll('[data-page-select]'))x.checked=state.selected.includes(x.dataset.pageSelect);filterBookPages(state.filter);updateBookPageSelection();if(v77ReturnBook){v77ReturnBook=false;requestAnimationFrame(()=>window.scrollTo(0,state.scroll))}}
 function v77OutsideOpen(){v76Outside.detail=null;v76OutsideShow();requestAnimationFrame(()=>{$('v75-outside-results')?.scrollIntoView?.({block:'start',behavior:'smooth'});$('v75-outside-results')?.querySelector('h3')?.focus?.()})}
 function v75CheckQuestionLogic(){if(v77Batch.running)return note('Trwa zbiorcza poprawka AI.');const b=data.books.find(x=>x.id===bookId);if(!b)return;v77Q.book=b.id;const bank=bookBankItems(b);for(const x of bank){if(!Array.isArray(x.v77AiReasons))x.v77AiReasons=x.v75Flagged?[x.v75Reason||'Wcześniejsza uwaga do sprawdzenia']:[];x.v77Technical={reasons:v77TechnicalReasons(x.task),at:new Date().toISOString()};v77SyncFlags(x)}localStorage.setItem('academy-v48-bank-'+b.child+'-'+b.id,JSON.stringify(bank));const n=bank.filter(x=>v77Status(x)==='attention').length;v77Q.message='Kontrola techniczna zakończona. Wymagają uwagi: '+n+'.';v77Q.filter=n?'attention':'all';v76Q.level='pages';v76Q.selected.clear();render();note(v77Q.message)}
+function v772SourceHash(source){let a=2166136261,b=5381;for(const c of String(source)){const n=c.charCodeAt(0);a=Math.imul(a^n,16777619);b=Math.imul(b,33)^n;}return (a>>>0).toString(16)+':'+(b>>>0).toString(16)+':'+String(source).length;}
+function v772Pending(item,source){const p=item?.v772PendingReview;if(!p||p.task!==JSON.stringify(item.task)||source!==undefined&&p.sourceHash!==v772SourceHash(source)||!Number.isFinite(p.at)||p.at>Date.now()+60000||Date.now()-p.at>12*60*60*1000)return [];const names=new Set();return (Array.isArray(p.reports)?p.reports:[]).filter(r=>['gemini','groq','workers-ai'].includes(r.provider)&&!names.has(r.provider)&&Array.isArray(r.reasons)&&r.reasons.every(s=>typeof s==='string')&&names.add(r.provider));}
+function v772ReviewFailures(reviews){
+ const labels={gemini:'Gemini',groq:'Groq','workers-ai':'Cloudflare AI'},codes={'missing-key':'brak klucza w konfiguracji','missing-binding':'brak powiązania Workers AI','timeout':'przekroczony czas odpowiedzi','HTTP-429':'limit zapytań lub tokenów','HTTP-401':'nieprawidłowy klucz','HTTP-403':'brak uprawnień','HTTP-404':'model niedostępny','empty-response':'pusta odpowiedź','invalid-review':'nieprawidłowy format raportu'};
+ return (Array.isArray(reviews)?reviews:[]).filter(r=>labels[r?.provider]&&!Array.isArray(r.issues)).map(r=>labels[r.provider]+': '+(codes[r.code]||'usługa nie zwróciła poprawnego raportu')).join('; ');
+}
 async function v77RunReview(b,keys=null,btn=null){
  if(!b||v76ReviewRunning)return;
- const selected=keys?new Set(keys.map(String)):null,bank=bookBankItems(b).filter(x=>!selected||selected.has(String(x.key)));if(!bank.length)return note('Brak pytań do sprawdzenia.');
+ const selected=keys?new Set(keys.map(String)):null,all=bookBankItems(b),waiting=all.filter(x=>!(x.v76Review?.count>=2)||v772Pending(x).length);
+ const bank=selected?all.filter(x=>selected.has(String(x.key))):waiting.length?waiting:all;
+ if(!bank.length)return note('Brak pytań do sprawdzenia.');
  if(bookId===b.id)v77Q.book=b.id;v76ReviewRunning=true;const batchButton=document.querySelector('[data-action="v77:q-fix-all"]');if(batchButton)batchButton.disabled=true;v75ReviewStop=false;let checked=0,stale=0,failed='';
- if(btn){btn.disabled=true;btn.textContent='⏳ Sprawdzam…'}
- try{for(let i=0;i<bank.length;i+=4){if(v75ReviewStop)break;const group=bank.slice(i,i+4),snapshots=group.map(x=>JSON.stringify(x.task)),ps=sortedBookPages(b.id),ac=new AbortController();v76ReviewController=ac;const timer=setTimeout(()=>ac.abort(),30000);let response,res;
-  try{response=await fetch('https://akademia-ai.niedzialkowskamagdalena02.workers.dev/review-three',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subject:b.subject,questions:group.map(x=>({...x.task,source:(ps.find(p=>v75BankMatchesPage(x,p))?.text||'').slice(0,1800)}))}),signal:ac.signal});res=await response.json()}finally{clearTimeout(timer);v76ReviewController=null}
-  if(v75ReviewStop)break;if(!response.ok)throw Error(res?.error||'Błąd kontroli AI');const reports=v76ValidReports(res.reviews,group.length);if(reports.length<2)throw Error('Odpowiedziało '+reports.length+' z 3 AI. Potrzebne są dwa raporty.');
-  const fresh=bookBankItems(b);for(let j=0;j<group.length;j++){const item=fresh.find(x=>String(x.key)===String(group[j].key));if(!item||JSON.stringify(item.task)!==snapshots[j]){stale++;continue}item.v77AiReasons=reports.flatMap(r=>r.issues.filter(z=>Number(z.index)===j).map(z=>r.provider+': '+z.reason.trim()));item.v77Technical={reasons:v77TechnicalReasons(item.task),at:new Date().toISOString()};item.v76Review={count:reports.length,providers:reports.map(r=>r.provider),at:new Date().toISOString(),status:item.v77AiReasons.length?'do poprawy':'bez zgłoszonych uwag'};v77SyncFlags(item);checked++}
+ if(btn){btn.disabled=true;btn.textContent='⏳ Sprawdzam…';}
+ const sourceOf=x=>(sortedBookPages(b.id).find(p=>v75BankMatchesPage(x,p))?.text||'').slice(0,1800);
+ try{for(let i=0;i<bank.length;i+=4){
+  if(v75ReviewStop)break;
+  const group=bank.slice(i,i+4),snapshots=group.map(x=>JSON.stringify(x.task)),sources=group.map(sourceOf),pending=group.map((x,j)=>v772Pending(x,sources[j]));
+  const providers=['gemini','groq','workers-ai'].filter(name=>pending.some(reports=>!reports.some(r=>r.provider===name)));
+  const ac=new AbortController();v76ReviewController=ac;const timer=setTimeout(()=>ac.abort(),32000);let response,res;
+  try{response=await fetch('https://akademia-ai.niedzialkowskamagdalena02.workers.dev/review-three',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subject:b.subject,providers,questions:group.map((x,j)=>({...x.task,source:sources[j]}))}),signal:ac.signal});res=await response.json();}finally{clearTimeout(timer);v76ReviewController=null;}
+  if(v75ReviewStop)break;
+  const reports=v76ValidReports(res.reviews,group.length),fresh=bookBankItems(b);let incomplete=0;
+  for(let j=0;j<group.length;j++){
+   const item=fresh.find(x=>String(x.key)===String(group[j].key));if(!item||JSON.stringify(item.task)!==snapshots[j]||sourceOf(item)!==sources[j]){stale++;continue;}
+   const merged=new Map(pending[j].map(r=>[r.provider,r]));
+   for(const r of reports)merged.set(r.provider,{provider:r.provider,reasons:r.issues.filter(z=>Number(z.index)===j).map(z=>z.reason.trim())});
+   if(!merged.size){incomplete++;continue;}
+   const opinions=[...merged.values()];item.v77AiReasons=opinions.flatMap(r=>r.reasons.map(reason=>r.provider+': '+reason));item.v77Technical={reasons:v77TechnicalReasons(item.task),at:new Date().toISOString()};
+   if(opinions.length>=2){item.v76Review={count:opinions.length,providers:opinions.map(r=>r.provider),at:new Date().toISOString(),status:item.v77AiReasons.length?'do poprawy':'bez zgłoszonych uwag'};delete item.v772PendingReview;checked++;}
+   else{item.v772PendingReview={task:snapshots[j],sourceHash:v772SourceHash(sources[j]),at:Date.now(),reports:opinions};incomplete++;}
+   v77SyncFlags(item);
+  }
   if(data.books.some(x=>x.id===b.id))localStorage.setItem('academy-v48-bank-'+b.child+'-'+b.id,JSON.stringify(fresh));
-  const progress=bookId===b.id?document.querySelector('.v75-review-progress'):null;if(progress)progress.textContent='Sprawdzono '+checked+'/'+bank.length+' · '+reports.length+'/3 AI';
- }}catch(err){failed=err.name==='AbortError'?'Przekroczono czas kontroli':v75PolishError(err)}finally{
-  v76ReviewRunning=false;v76ReviewController=null;const n=bookBankItems(b).filter(x=>v77Status(x)==='attention').length;
-  if(bookId===b.id){v77Q.message=(failed?'⚠ '+failed+'. ':v75ReviewStop?'⏸ Zatrzymano. ':'✓ Kontrola zakończona. ')+'Sprawdzono: '+checked+'/'+bank.length+'. Wymagają uwagi: '+n+'.'+(stale?' Pominięto zmienione pytania: '+stale+'.':'');if(!keys){v77Q.filter=n?'attention':'all';v76Q.level='pages';v76Q.selected.clear()}if(adminTab==='question-review')render();note(v77Q.message)}
-  if(btn?.isConnected){btn.disabled=false;btn.textContent='Sprawdź ponownie AI'}
+  const progress=bookId===b.id?document.querySelector('.v75-review-progress'):null;if(progress)progress.textContent='Sprawdzono '+checked+'/'+bank.length+' · co najmniej 2 AI';
+  if(incomplete){const details=v772ReviewFailures(res.reviews);throw Error((reports.length?'Kontrola niepełna. Zachowano poprawne pojedyncze raporty; ponowienie zapyta brakujących dostawców.':'Nie uzyskano poprawnych raportów.')+(details?' '+details:!response.ok?' '+String(res.error||'Błąd usługi AI'):' Potrzebne są dwa niezależne raporty.'));}
+ }}catch(err){failed=err.name==='AbortError'?'Przekroczono czas kontroli':v75PolishError(err);}finally{
+  v76ReviewRunning=false;v76ReviewController=null;const fresh=bookBankItems(b),n=fresh.filter(x=>v77Status(x)==='attention').length,totalChecked=fresh.filter(x=>x.v76Review?.count>=2&&!v772Pending(x).length).length;
+  if(bookId===b.id){v77Q.message=(failed?'⚠ '+failed+' ':v75ReviewStop?'⏸ Zatrzymano. ':'✓ Kontrola zakończona. ')+'Sprawdzono: '+checked+'/'+bank.length+'. Łącznie w książce: '+totalChecked+'/'+fresh.length+' po kontroli AI. Wymagają uwagi: '+n+'.'+(stale?' Pominięto zmienione pytania: '+stale+'.':'');if(!keys){v77Q.filter=n?'attention':'all';v76Q.level='pages';v76Q.selected.clear();}if(adminTab==='question-review')render();note(failed?'⚠ Kontrola niepełna — szczegóły są w podsumowaniu.':v77Q.message);}
+  if(btn?.isConnected){btn.disabled=false;btn.textContent='Sprawdź ponownie AI';}
  }
 }
+
 async function v75ReviewWithThreeAI(btn){if(v77Batch.running)return note('Trwa zbiorcza poprawka AI.');const b=data.books.find(x=>x.id===bookId);if(!b)return;if(!confirm('Sprawdzić pytania przez AI? Wynik wymaga co najmniej dwóch niezależnych raportów.'))return;return v77RunReview(b,null,btn)}
 async function v77AutoFix(key,btn,options={}){
  if(v77Batch.running&&!options.batch)return note("Trwa zbiorcza poprawka AI.");
@@ -1948,11 +1960,45 @@ async function v77AutoFix(key,btn,options={}){
 }
 
 const v77Ranges=new Map();
-function v77RangeMarkup(b,ps){const chosen=ps.filter(p=>trainingSelectedPages.has(p.id)),state=v77Ranges.get(b.id)||{from:chosen[0]?.id||ps[0]?.id,to:chosen.at(-1)?.id||ps.at(-1)?.id};
+const v772RangeModes=new Map();
+function v77RangeMarkup(b,ps){
+ const chosen=ps.filter(p=>trainingSelectedPages.has(p.id)),state=v77Ranges.get(b.id)||{from:chosen[0]?.id||ps[0]?.id,to:chosen.at(-1)?.id||ps.at(-1)?.id};
+ const chapters=[...new Set(ps.map(p=>String(p.chapter||'').trim()||'Bez działu'))],mode=v772RangeModes.get(b.id);
  const options=value=>ps.map((p,i)=>`<option value="${e(p.id)}" ${p.id===value?'selected':''}>${e(p.number)}${ps.filter(x=>String(x.number)===String(p.number)).length>1?' · '+e(p.chapter||'bez działu')+' · zdjęcie '+(i+1):''}</option>`).join('');
- return `<div class="tr71-book v77-range-book"><div class="v77-book-identity">${trainingVoice(b.title)}${b.coverId?`<img data-image="${e(b.coverId)}" alt="Okładka ${e(b.title)}">`:'<span class="tr71-cover">📘</span>'}<strong>${e(b.title)}</strong><small>${ps.length} stron</small></div><div class="v77-book-range"><label class="tr71-check"><input type="checkbox" data-tr71-book="${e(b.id)}" ${ps.length&&chosen.length===ps.length?'checked':''}> Cała książka</label><details class="v77-range-fold"><summary>Wybierz zakres stron</summary>${ps.length?`<div class="v77-from-to"><label>Od<select data-v77-range-book="${e(b.id)}" data-v77-range-edge="from">${options(state.from)}</select></label><label>Do<select data-v77-range-book="${e(b.id)}" data-v77-range-edge="to">${options(state.to)}</select></label></div>${button('✓ Wybierz zakres','v77:range:'+encodeURIComponent(b.id),'gold')}`:'<p>Brak odczytanych stron.</p>'}</details><small data-v77-range-summary="${e(b.id)}">Wybrano ${chosen.length} stron</small></div></div>`;
+ return `<div class="tr71-book v77-range-book"><div class="v77-book-identity">${trainingVoice(b.title)}${b.coverId?`<img data-image="${e(b.coverId)}" alt="Okładka ${e(b.title)}">`:'<span class="tr71-cover">📘</span>'}<strong>${e(b.title)}</strong><small>${ps.length} stron</small></div><div class="v77-book-range"><label class="tr71-check"><input type="checkbox" data-tr71-book="${e(b.id)}" ${ps.length&&chosen.length===ps.length?'checked':''}> Cała książka</label><details class="v77-range-fold" data-v772-book-choice="chapter" data-v772-book-id="${e(b.id)}" ${mode==='chapter'?'open':''}><summary>Wybierz dział</summary><label>Dział<select data-v772-chapter-book="${e(b.id)}"><option value="">Wybierz dział</option>${chapters.map(c=>`<option value="${e(c)}" ${v772ChapterChosen(ps,c)?'selected':''}>${e(c)}</option>`).join('')}</select></label></details><details class="v77-range-fold" data-v772-book-choice="range" data-v772-book-id="${e(b.id)}" ${mode==='range'?'open':''}><summary>Wybierz zakres stron</summary>${ps.length?`<div class="v77-from-to"><label>Od<select data-v77-range-book="${e(b.id)}" data-v77-range-edge="from">${options(state.from)}</select></label><label>Do<select data-v77-range-book="${e(b.id)}" data-v77-range-edge="to">${options(state.to)}</select></label></div>`:'<p>Brak odczytanych stron.</p>'}<small role="status" data-v772-range-error="${e(b.id)}"></small></details><small data-v77-range-summary="${e(b.id)}">Wybrano ${chosen.length} stron</small></div></div>`;
 }
-function v77ApplyRange(id){const ps=trainingPageItems().filter(p=>p.bookId===id),controls=[...document.querySelectorAll('[data-v77-range-book]')].filter(x=>x.dataset.v77RangeBook===id);const from=controls.find(x=>x.dataset.v77RangeEdge==='from')?.value,to=controls.find(x=>x.dataset.v77RangeEdge==='to')?.value,a=ps.findIndex(p=>p.id===from),z=ps.findIndex(p=>p.id===to);if(a<0||z<0)return note('Wybierz początek i koniec zakresu.');if(a>z)return note('Początek zakresu musi być przed jego końcem.');for(const p of ps)trainingSelectedPages.delete(p.id);for(const p of ps.slice(a,z+1))trainingSelectedPages.add(p.id);v77Ranges.set(id,{from,to});trainingSelectionChange({checked:true,hasAttribute:()=>false});note('✓ Wybrano '+(z-a+1)+' stron z „'+data.books.find(b=>b.id===id)?.title+'”.')}
+function v772ChapterChosen(ps,chapter){const matching=ps.filter(p=>(String(p.chapter||'').trim()||'Bez działu')===chapter);return matching.length&&matching.length===ps.filter(p=>trainingSelectedPages.has(p.id)).length&&matching.every(p=>trainingSelectedPages.has(p.id));}
+function v772RememberRangeMode(el){
+ if(el.hasAttribute?.('data-tr71-book')){v772RangeModes.set(el.dataset.tr71Book,'all');for(const x of document.querySelectorAll('[data-v772-chapter-book]'))if(x.dataset.v772ChapterBook===el.dataset.tr71Book)x.value='';for(const x of document.querySelectorAll('[data-v772-book-choice]'))if(x.dataset.v772BookId===el.dataset.tr71Book)x.open=false;}
+ if(el.hasAttribute?.('data-tr71-page')||el.hasAttribute?.('data-tr71-chapter')){const p=el.dataset?.tr71Page?trainingPageItems().find(p=>p.id===el.dataset.tr71Page):null;const id=p?.bookId||el.dataset?.tr71Chapter;if(id)v772RangeModes.set(id,'manual');}
+}
+function v772SetMaterial(id,pages,mode){
+ for(const p of trainingPageItems().filter(p=>p.bookId===id))trainingSelectedPages.delete(p.id);
+ for(const p of pages)trainingSelectedPages.add(p.id);
+ for(const el of document.querySelectorAll('[data-v772-range-error]'))if(el.dataset.v772RangeError===id)el.textContent='';
+ v772RangeModes.set(id,mode);trainingSelectionChange({checked:true,hasAttribute:()=>false});
+ const chosen=pages.length?{from:pages[0].id,to:pages.at(-1).id}:null;if(chosen)v77Ranges.set(id,chosen);
+ for(const x of document.querySelectorAll('[data-v77-range-book]'))if(x.dataset.v77RangeBook===id&&chosen)x.value=x.dataset.v77RangeEdge==='from'?chosen.from:chosen.to;
+ for(const x of document.querySelectorAll('[data-v772-chapter-book]'))if(x.dataset.v772ChapterBook===id&&mode!=='chapter')x.value='';
+}
+function v77ApplyRange(id,announce=true){
+ const ps=trainingPageItems().filter(p=>p.bookId===id),controls=[...document.querySelectorAll('[data-v77-range-book]')].filter(x=>x.dataset.v77RangeBook===id),from=controls.find(x=>x.dataset.v77RangeEdge==='from')?.value,to=controls.find(x=>x.dataset.v77RangeEdge==='to')?.value,a=ps.findIndex(p=>p.id===from),z=ps.findIndex(p=>p.id===to);
+ const error=[...document.querySelectorAll('[data-v772-range-error]')].find(x=>x.dataset.v772RangeError===id);
+ if(a<0||z<0||a>z){for(const p of ps)trainingSelectedPages.delete(p.id);v772RangeModes.set(id,'invalid');trainingSelectionChange({checked:true,hasAttribute:()=>false});const message=a>z?'Początek zakresu musi być przed jego końcem.':'Wybierz początek i koniec zakresu.';if(error)error.textContent=message;if(announce)note(message);return false;}
+ if(error)error.textContent='';v772SetMaterial(id,ps.slice(a,z+1),'range');
+ if(announce)note('✓ Wybrano '+(z-a+1)+' stron z „'+data.books.find(b=>b.id===id)?.title+'”.');return true;
+}
+function v772ApplyChapter(id){
+ const el=[...document.querySelectorAll('[data-v772-chapter-book]')].find(x=>x.dataset.v772ChapterBook===id),chapter=el?.value||'',ps=trainingPageItems().filter(p=>p.bookId===id);
+ v772SetMaterial(id,chapter?ps.filter(p=>(String(p.chapter||'').trim()||'Bez działu')===chapter):[],'chapter');
+}
+function v772SyncTrainingRanges(){
+ const visible=new Set(trainingPageItems().map(p=>p.bookId));for(const [id,mode] of v772RangeModes){if(!visible.has(id))continue;if(mode==='invalid')return note('Popraw zakres stron przed rozpoczęciem misji.'),false;if(mode==='range'&&document.querySelectorAll('[data-v77-range-book]').length&&!v77ApplyRange(id,false))return false;}
+ return true;
+}
+document.addEventListener('input',ev=>{if(ev.target.hasAttribute?.('data-v77-range-book'))v77ApplyRange(ev.target.dataset.v77RangeBook,false);});
+document.addEventListener('toggle',ev=>{const el=ev.target,id=el?.dataset?.v772BookId,choice=el?.dataset?.v772BookChoice;if(!id||!choice||!el.open)return;for(const other of document.querySelectorAll('[data-v772-book-choice]'))if(other!==el&&other.dataset.v772BookId===id)other.open=false;if(choice==='range')v77ApplyRange(id,false);},true);
+
 function v77TrainingArt(kind='space'){return `<div class="v77-adventure-art v77-art-${kind}" aria-hidden="true"><span class="v77-rocket">🚀</span><span class="v77-star s1">✦</span><span class="v77-star s2">✧</span><span class="v77-planet">🪐</span><svg class="v77-web" viewBox="0 0 100 100"><path d="M0 0L100 100M0 0L35 100M0 0L100 35M15 15Q40 8 65 23M30 30Q60 15 90 35M45 45Q72 28 100 55M15 15Q8 40 23 65M30 30Q15 60 35 90M45 45Q28 72 55 100" fill="none" stroke="currentColor" stroke-width="2"/></svg></div>`}
 function v77HulkScene(){return '<div class="v77-hulk-scene" aria-hidden="true"><div class="v77-hulk"><img src="assets/art/hulk.svg" alt=""><span>👋</span></div><span class="v77-hulk-spark">✦</span></div>'}
 
@@ -2075,3 +2121,38 @@ function v77QuestionScopeRefresh(){
 }
 document.addEventListener('change',ev=>{if(ev.target.id==='book-question-scope'||ev.target.id==='book-question-pages')v77QuestionScopeRefresh();});
 document.addEventListener('input',ev=>{if(ev.target.id==='book-question-pages')v77QuestionScopeRefresh();});
+
+// Wybór zdjęcia uruchamia zapis również bez elementu-przycisku.
+async function v772UploadPages(action,target){
+ const input=action==='page:camera'?$('pagecamera'):$('pagefiles');
+ const files=[...(input?.files||[])],owner=bookId;
+ if(!files.length)return note('Wybierz zdjęcia.');
+ if(!data.books.some(b=>b.id===owner))return note('Nie znaleziono książki.');
+ const n0=Number($('start')?.value);
+ if(!Number.isInteger(n0)||n0<1){if(input)input.value='';return note('Wpisz prawidłowy numer pierwszej strony, np. 4.');}
+ const chapter=$('newchapter')?.value.trim()||'';
+ return runAdminAction(target,'Dodaję zdjęcia…',async()=>{
+  let n=n0,added=0,skipped=0,failed=0;const known=new Set();
+  try{for(const f of files){
+   if(!data.books.some(b=>b.id===owner))break;
+   const signature=[f.name,f.size,f.lastModified].join('|');
+   if(known.has(signature)){skipped++;continue;}known.add(signature);
+   const number=n++;
+   if(data.bookPages.some(p=>p.bookId===owner&&Number(p.number)===number)){skipped++;continue;}
+   let imageId=null,page=null;
+   try{
+    const blob=await compress(f);if(!data.books.some(b=>b.id===owner))break;
+    imageId=uid();await put('image:'+imageId,blob);
+    if(!data.books.some(b=>b.id===owner)){await del('image:'+imageId);break;}
+    page={id:uid(),bookId:owner,number,imageId,text:'',chapter};data.bookPages.push(page);
+    try{await save();}catch(err){data.bookPages=data.bookPages.filter(p=>p.id!==page.id);await del('image:'+imageId).catch(()=>{});throw err;}
+    added++;if(target?.isConnected)target.textContent='⏳ Dodano '+added+' z '+files.length;
+   }catch(err){failed++;console.warn('Nie dodano strony '+number+': '+v75PolishError(err));}
+  }}finally{if(input)input.value='';}
+  if(bookId===owner&&role==='admin'&&adminTab==='book'){
+   if(added){const view=v77BookViews.get(owner)||{scroll:window.scrollY||0,selected:[]};v77BookViews.set(owner,{...view,filter:'all',chapter:''});v76OpenSections.add('book-pages');}
+   render();
+  }
+  note((added?'✅ ':'⚠️ ')+'Dodano '+added+' stron'+(skipped?' · pominięto '+skipped+' istniejących numerów/duplikatów':'')+(failed?' · nie udało się dodać '+failed+' zdjęć — wybierz je ponownie':'')+'.');
+ });
+}

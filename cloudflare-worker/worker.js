@@ -36,38 +36,33 @@ function instruction(style) {
     'Odpowiedz na rzeczywiste pytanie dziecka, bez powitania i bez menu.';
 }
 
-async function viaGemini(env, question, style, maxTokens) {
+async function viaGemini(env, question, style, maxTokens, opts={}) {
   if (!env.GEMINI_API_KEY) throw new Error('missing key');
   const response = await fetchWithLimit(
     'https://generativelanguage.googleapis.com/v1beta/models/' + GEMINI_MODEL + ':generateContent',
     {method:'POST', headers:{'Content-Type':'application/json','x-goog-api-key':env.GEMINI_API_KEY},
       body:JSON.stringify({contents:[{role:'user',parts:[{text:instruction(style)+'\n\n'+question}]}],
-        generationConfig:{maxOutputTokens:maxTokens}})}, 7500);
+        generationConfig:{maxOutputTokens:maxTokens,...(opts.review?{responseMimeType:'application/json'}:{})}})}, opts.review?12000:7500);
   if (!response.ok) throw new Error('HTTP ' + response.status);
   const text = extractedGemini(await response.json());
   if (!text) throw new Error('empty response');
   return text;
 }
-async function viaGroq(env, question, style, maxTokens) {
+async function viaGroq(env, question, style, maxTokens, opts={}) {
   if (!env.GROQ_API_KEY) throw new Error('missing key');
   const response = await fetchWithLimit('https://api.groq.com/openai/v1/chat/completions',
     {method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+env.GROQ_API_KEY},
       body:JSON.stringify({model:GROQ_MODEL, messages:[{role:'system',content:instruction(style)},{role:'user',content:question}],
-        max_completion_tokens:maxTokens, temperature:0.4})}, 8500);
+        max_completion_tokens:maxTokens, temperature:0.4,...(opts.review?{reasoning_effort:'low',include_reasoning:false,response_format:{type:'json_schema',json_schema:{name:'question_review',strict:true,schema:v772ReviewSchema}}}:{})})}, opts.review?12000:8500);
   if (!response.ok) throw new Error('HTTP ' + response.status);
   const data = await response.json();
   const text = String(data?.choices?.[0]?.message?.content || '').trim();
   if (!text) throw new Error('empty response');
   return text;
 }
-async function viaWorkersAI(env, question, style, maxTokens) {
+async function viaWorkersAI(env, question, style, maxTokens, opts={}) {
   if (!env.AI?.run) throw new Error('missing production AI binding');
-  const result = await Promise.race([
-    env.AI.run(WORKERS_MODEL, {messages:[{role:'system',content:instruction(style)},
-      {role:'user',content:question}], max_tokens:maxTokens,
-      chat_template_kwargs:{enable_thinking:false}}),
-    new Promise((_,reject) => setTimeout(() => reject(new Error('timeout')), 9000))
-  ]);
+  const result = await v772ModelLimit(()=>env.AI.run(WORKERS_MODEL, {messages:[{role:'system',content:instruction(style)},{role:'user',content:question}], max_tokens:maxTokens,chat_template_kwargs:{enable_thinking:false},...(opts.review?{response_format:{type:'json_object'}}:{})}),opts.review?12000:9000);
   const text = String(result?.response || result?.choices?.[0]?.message?.content || '').trim();
   if (!text) throw new Error('empty response');
   return text;
@@ -130,20 +125,41 @@ async function ocrWithFallback(env, body){
 }
 
 // V75: trzy niezależne opinie, bez modyfikowania pytań w bazie.
+// Kontrola: osobny budzet na raport, JSON i pojedyncze ponowienie brakujacego modelu.
+const v772ReviewSchema={type:'object',properties:{issues:{type:'array',items:{type:'object',properties:{index:{type:'integer'},reason:{type:'string'}},required:['index','reason'],additionalProperties:false}}},required:['issues'],additionalProperties:false};
+async function v772ModelLimit(invoke,ms){let timer;try{return await Promise.race([Promise.resolve().then(invoke),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('timeout')),ms);})]);}finally{clearTimeout(timer);}}
+function v772ReviewCode(err){
+ const msg=String(err?.message||''),status=msg.match(/^HTTP (\d{3})$/);
+ return /missing key/.test(msg)?'missing-key':/missing production AI binding/.test(msg)?'missing-binding':err?.name==='AbortError'||/timeout/.test(msg)?'timeout':status?'HTTP-'+status[1]:/rate.limit|too many|quota|\b429\b/i.test(msg)?'HTTP-429':/empty response/.test(msg)?'empty-response':err instanceof SyntaxError||/nieprawidlowa liste/.test(msg)?'invalid-review':'provider-error';
+}
+function v772ReviewParse(raw,size){
+ const text=String(raw).replace(/```(?:json)?/gi,'').replace(/```/g,'').trim();let obj;
+ try{obj=JSON.parse(text);}catch{obj=JSON.parse(text.slice(text.indexOf('{'),text.lastIndexOf('}')+1));}
+ if(!Array.isArray(obj?.issues)||obj.issues.some(x=>!x||!['number','string'].includes(typeof x.index)||String(x.index).trim()===''||!Number.isInteger(Number(x.index))||Number(x.index)<0||Number(x.index)>=size||typeof x.reason!=='string'||!x.reason.trim()))throw Error('Model przeslal nieprawidlowa liste ocen');
+ return obj.issues.map(x=>({index:Number(x.index),reason:x.reason.trim().slice(0,500)})).slice(0,12);
+}
 async function reviewThree(env,body){
  const questions=Array.isArray(body.questions)?body.questions.slice(0,4):[];
  if(!questions.length)return send({error:'Brak pytań do sprawdzenia'},400);
- const input=questions.map((q,i)=>({index:i,question:String(q.question||'').slice(0,400),answer:String(q.answer||'').slice(0,120),options:(q.options||[]).slice(0,4).map(x=>String(x).slice(0,120)),sourceQuote:String(q.sourceQuote||'').slice(0,320),source:String(q.source||'').slice(0,1700)}));
- const prompt='Jestes niezaleznym pedagogiem sprawdzajacym pytania edukacyjne dla dziecka. Nie zmieniaj pytan, tylko zglos powazne bledy logiczne, niepoprawne odpowiedzi, jawne zdradzenie odpowiedzi przez tekst zrodlowy, sprzecznosc z materialem, niezrozumialy jezyk. Przedmiot: '+String(body.subject||'')+'. Ocen kazda pozycje osobno. Zwroc TYLKO JSON: {"issues":[{"index":0,"reason":"opis bledu"}]}. Jesli wszystkie poprawne: {"issues":[]}. Nie oznaczaj bez podstaw i nie sugeruj zmian bez bledow. DANE: '+JSON.stringify(input);
- const providers=[['gemini',viaGemini],['groq',viaGroq],['workers-ai',viaWorkersAI]];
- const results=await Promise.all(providers.map(async ([provider,fn])=>{
-  try{let raw=await fn(env,prompt,'tech',1500);raw=String(raw).replace(/```(?:json)?/gi,'').replace(/```/g,'').trim();let obj;try{obj=JSON.parse(raw)}catch{obj=JSON.parse(raw.slice(raw.indexOf('{'),raw.lastIndexOf('}')+1))}
-   if(!Array.isArray(obj?.issues)||obj.issues.some(x=>!x||!['number','string'].includes(typeof x.index)||String(x.index).trim()===''||!Number.isInteger(Number(x.index))||Number(x.index)<0||Number(x.index)>=questions.length||typeof x.reason!=='string'||!x.reason.trim()))throw Error('Model przeslal nieprawidlowa liste ocen');return {provider,issues:obj.issues.map(x=>({index:Number(x.index),reason:x.reason.trim()})).slice(0,8)};
-  }catch(err){const msg=String(err?.message||''),status=msg.match(/^HTTP (\d{3})$/);const code=/missing key/.test(msg)?'missing-key':/missing production AI binding/.test(msg)?'missing-binding':err?.name==='AbortError'||/timeout/.test(msg)?'timeout':status?'HTTP-'+status[1]:/empty response/.test(msg)?'empty-response':'invalid-review';return {provider,code,error:'Ten model nie udostępnił prawidłowego raportu.'}}
+ const all=[['gemini',viaGemini],['groq',viaGroq],['workers-ai',viaWorkersAI]],names=new Set(all.map(x=>x[0]));
+ if(body.providers!==undefined&&(!Array.isArray(body.providers)||!body.providers.length||body.providers.some(x=>!names.has(x))))return send({error:'Nieprawidłowy wybór dostawców'},400);
+ const chosen=body.providers?new Set(body.providers):names,sources=[],input=questions.map((q,i)=>{
+  const source=String(q.source||'').slice(0,1700);let sourceIndex=sources.indexOf(source);if(sourceIndex<0){sourceIndex=sources.length;sources.push(source);}
+  return {index:i,question:String(q.question||'').slice(0,400),answer:String(q.answer||'').slice(0,120),options:(Array.isArray(q.options)?q.options:[]).slice(0,4).map(x=>String(x).slice(0,120)),sourceQuote:String(q.sourceQuote||'').slice(0,320),sourceIndex};
+ });
+ const prompt='Jesteś niezależnym pedagogiem. Sprawdź pytania dziecka. Zgłoś tylko poważne błędy logiczne, błędną lub niejednoznaczną odpowiedź, sprzeczność z materiałem oraz zdradzenie odpowiedzi. Nie zmieniaj pytań. Przedmiot: '+String(body.subject||'')+'. Każdy sourceIndex wskazuje tekst w sources. Zwróć TYLKO JSON {"issues":[{"index":0,"reason":"krótki konkretny opis po polsku"}]}. Jeśli nie ma błędów, {"issues":[]}. Każda uwaga maksymalnie 2 zdania. Dane: '+JSON.stringify({questions:input,sources});
+ const results=await Promise.all(all.filter(([name])=>chosen.has(name)).map(async([provider,fn])=>{
+  let last;
+  for(let attempt=1;attempt<=2;attempt++){
+   try{return {provider,issues:v772ReviewParse(await v772ModelLimit(()=>fn(env,prompt,'tech',3000,{review:true}),12500),questions.length),attempts:attempt};}
+   catch(err){last=v772ReviewCode(err);if(!['timeout','empty-response','invalid-review','provider-error','HTTP-500','HTTP-502','HTTP-503','HTTP-504'].includes(last))break;}
+  }
+  return {provider,code:last,error:'Ten model nie udostępnił prawidłowego raportu.'};
  }));
- if(!results.some(x=>Array.isArray(x.issues)))return send({error:'Żaden z trzech modeli AI nie odpowiedział.'},503);
- return send({reviews:results});
+ const ok=results.some(x=>Array.isArray(x.issues));
+ return send({reviews:results,reviewVersion:'77.2',...(ok?{}:{error:'Żaden z wybranych modeli AI nie udostępnił raportu.'})},ok?200:503);
 }
+
 
 export default {
   async fetch(request, env) {
