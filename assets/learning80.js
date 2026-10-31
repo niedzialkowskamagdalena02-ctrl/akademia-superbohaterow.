@@ -1,4 +1,4 @@
-import {cleanEnglish76,englishRecall774,VOCAB76,readingProgress79} from './english76.js?v=80';
+import {cleanEnglish76,englishRecall774,VOCAB76,readingProgress79} from './english76.js?v=81';
 
 export function derangement80(n,random=Math.random){
  const a=Array.from({length:n},(_,i)=>i);

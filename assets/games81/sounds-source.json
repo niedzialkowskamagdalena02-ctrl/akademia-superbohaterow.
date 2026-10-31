@@ -1,0 +1,23 @@
+[
+  {
+    "file": "cat.ogg",
+    "author": "Dan Crosby",
+    "source": "https://commons.wikimedia.org/wiki/File:Meow.ogg",
+    "license": "CC BY-SA 3.0",
+    "modified": false
+  },
+  {
+    "file": "dog.ogg",
+    "author": "Amada44",
+    "source": "https://commons.wikimedia.org/wiki/File:Barking_of_a_dog.ogg",
+    "license": "CC BY-SA 3.0",
+    "modified": false
+  },
+  {
+    "file": "cow.ogg",
+    "author": "Secretlondon",
+    "source": "https://commons.wikimedia.org/wiki/File:Mudchute_cow_1.ogg",
+    "license": "CC BY-SA 3.0",
+    "modified": false
+  }
+]

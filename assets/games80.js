@@ -1,4 +1,4 @@
-import {PICTURES80} from './pictures80.js?v=80';
+import {PICTURES80} from './pictures80.js?v=81';
 // V80: mechanics contain no textbook content. Every target comes from the selected source pool.
 export const GAME_TITLES80={kitchen:'Kuchnia Potworka','letter-race':'Gwiezdny wyścig liter',island:'Wyspa dźwięków',rebus:'Rebus słowny','word-catcher':'Gwiezdny łapacz słów',egg:'Tajemnicze jajo',spot:'Bystre oko',balloon:'Balonowy słowniczek','monster-tf':'Nakarm Potworka · tak czy nie','monster-speak':'Nakarm Potworka · powiedz'};
 const esc80=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
