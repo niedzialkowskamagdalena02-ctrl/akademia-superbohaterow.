@@ -1341,7 +1341,7 @@ if(action.startsWith('training:')){
   const selected=[...trainingSelectedPages].filter(id=>eligible.has(id));
   if(!selected.length)return note('Wybierz co najmniej jedną stronę, której tekst został odczytany.');
   const first=data.bookPages.find(p=>p.id===selected[0]);
-  return smOpen(first?.bookId||'',{subject:trainingSelectedSubject,pageIds:selected,mode:trainingMode});
+  return smOpen(first?.bookId||'',{subject:trainingSelectedSubject,pageIds:selected,mode:trainingMode,...(trainingMode==='vocab'?{chooseGame80:true}:{})});
  }
  return;
 }
@@ -2177,7 +2177,7 @@ document.addEventListener('change',ev=>{const id=ev.target?.dataset?.v773Chapter
 // V78: panel polaczenia telefonow, bez przebudowy dotychczasowych ekranow.
 let sync78Pair=null,sync78HasUpdates=false;
 function sync78StatusMarkup(){return syncAdapter.device?.()?'<p id="sync78-status" class="muted" role="status">'+e(syncAdapter.status())+'</p>'+(sync78HasUpdates?button('📥 Pokaż nowe dane','sync78:show','alt'):''):'';}
-function sync78Markup(){
+function sync78Markup(){if(globalThis.AKADEMIA_TEST80)return '<p class="muted">Testowe dane pozostają na tym urządzeniu. Łączenie z rodziną jest wyłączone.</p>';
  const d=syncAdapter.device?.();
  if(d?.role==='parent')return '<section class="card"><h2>📱 Połączenie telefonów</h2><p>Udostępnione książki, zdjęcia, pytania i misje trafiają do dzieci. Ich postępy wracają do Ciebie.</p><p data-sync78-message role="status">'+e(syncAdapter.status())+'</p>'+button('🔄 Synchronizuj teraz','sync78:now','gold')+people.map(([id,name])=>'<div class="item"><strong>'+name+'</strong><div class="row">'+button('🔑 Kod dla '+(id==='pawel'?'Pawła':'Patryka'),'sync78:pair:'+id,'gold')+button('Odłącz telefon','sync78:revoke:'+id,'line')+'</div></div>').join('')+(sync78Pair?'<div class="card"><h3>Kod dla '+e(sync78Pair.child==='pawel'?'Pawła':'Patryka')+'</h3><p style="font-size:2rem;font-weight:bold;letter-spacing:.15em;user-select:all">'+e(sync78Pair.code)+'</p><p>Na telefonie dziecka otwórz ten sam link → Połącz z mamą. Kod jest jednorazowy i ważny 10 minut.</p></div>':'')+sync78ConflictMarkup()+'</section>';
  if(d?.role==='child')return '<section class="card"><p data-sync78-message role="status">'+e(syncAdapter.status())+'</p>'+button('🔄 Pobierz od mamy','sync78:now','gold')+sync78ConflictMarkup()+'</section>';

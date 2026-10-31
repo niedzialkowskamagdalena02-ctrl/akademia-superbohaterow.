@@ -176,7 +176,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,childG
 
  // V48_BANK_AI: zapis lokalny w przegladarce, osobny dla kazdego dziecka i podrecznika
  // V76_WORDS_AND_SPEECH: wspolny lektor EN -> PL, slowka i mowienie.
- let v76VocabOnly=launch?.mode==='vocab';
+ let v76VocabOnly=launch?.mode==='vocab',v80VocabularyKind=launch?.chooseGame80?'':'mixed';
  function v76AttachInstruction(t){if(t.game80)return t;if(subject(t)==='angielski'){v774Normalize(t);const x=englishInstruction76(t);t.instructionEn=x.en;t.instructionPl=x.pl;t.question=x.en;t.questionPl=x.pl;}return t}
  function v76SayInstruction(t){
   v774Normalize(t);const x=englishInstruction76(t),current=t;
@@ -203,6 +203,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,childG
  async function v76StartVocabulary(){
   if(busy)return;const ps=scopePages().filter(p=>/ang|english/i.test(books.find(b=>b.id===p.bookId)?.subject||''));
   if(!ps.length){root.innerHTML='<section class="mg-panel"><h2>Wybierz strony z angielskiego</h2><p>Słówka korzystają z odczytanego tekstu wybranych stron.</p>'+btn('← Wróć','back')+'</section>';return}
+  if(!v80VocabularyKind){const eligible=new Set(buildGames80(v76VocabularyPool(ps),0).map(t=>t.game80));root.innerHTML='<section class="mg-panel v77-play"><h2>🃏 Słówka z wybranego materiału</h2><p>Wybrano '+ps.length+' stron. Zagraj w mieszankę ćwiczeń albo wybierz jedną grę.</p>'+btn('🎲 Mieszanka ćwiczeń','v80-vocab:mixed','mg-primary')+'<div class="v80-vocab-games">'+Object.entries(GAME_TITLES80).map(([kind,title])=>'<button type="button" data-mg="v80-vocab:'+kind+'" '+(!eligible.has(kind)?'disabled':'')+'><img src="assets/games80/'+(kind.includes('monster')||kind==='kitchen'?'chef':kind.includes('race')||kind.includes('catcher')?'rocket':'island')+'.webp" alt=""><strong>'+escape(title)+'</strong>'+(!eligible.has(kind)?'<small>Brak potrzebnych słówek w wybranym materiale</small>':'')+'</button>').join('')+'</div>'+btn('← Wróć do wyboru materiału','back')+'</section>';return;}
   busy=true;const prepareEpoch=++stageEpoch;root.innerHTML='<section class="mg-panel"><h2>🃏 Przygotowuję słówka…</h2></section>';
   try{
    const key=v773DeckKey('vocabulary-round',ps);let rotation=Number(v773ReadState(key,0))||0;
@@ -218,6 +219,11 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,childG
    }}
    if(!root.isConnected||stageEpoch!==prepareEpoch)return;
    if(!pool.length)throw Error('Na wybranych stronach nie znalazłem jeszcze słówek do bezpiecznego ćwiczenia. Wybierz inną stronę albo spróbuj ponownie przy dostępnym AI.');
+   if(v80VocabularyKind!=='mixed'){
+    const candidates=[];for(let r=0;r<Math.min(100,pool.length*3);r++){const t=buildGames80(pool,rotation+r).find(t=>t.game80===v80VocabularyKind);if(t)candidates.push({token:t.game80+'|'+t.wordEn,kind:t.game80,page:t.sourcePageId,task:t});}
+    tasks=v773DrawItems(candidates,8,v773DeckKey('v80-chosen-'+v80VocabularyKind,ps)).map(x=>x.task);if(!tasks.length)throw Error('Ta gra wymaga innych słówek. Wybierz mieszankę lub zmień materiał.');
+    idx=0;points=0;award=false;mode='game';reset();remember();v773WriteState(key,rotation+1);draw();return;
+   }
    tasks=makeVocabularyTasks76(pool,rotation,10).map(t=>({...t,vocab76:true}));const extra=v77ExtraWords(chosen,Math.abs(rotation),pool);if(extra.length&&tasks.length>=7)tasks.splice(tasks.length-2,2,...extra);tasks=v80PrepareTasks(v77MixActivities(tasks,chosen,pool),ps);idx=0;points=0;award=false;mode='game';reset();remember();v773WriteState(key,rotation+1);draw();
   }catch(err){root.innerHTML='<section class="mg-panel"><h2>Nie udało się przygotować słówek</h2><p>'+escape(err.message)+'</p>'+btn('Spróbuj ponownie','start')+btn('← Wróć','back')+'</section>'}
   finally{busy=false}
@@ -1274,7 +1280,7 @@ function stage(){
   try{localStorage.setItem(storeKey(),JSON.stringify({date:Date.now(),score:points,total,passed:mode==='test'?passed:null,coins,weak:tasks.filter(t=>!t.correct).map(t=>t.question)}))}catch(e){}
   if(coins>0)reward(coins);audioCue(passed||mode!=='test');sayFeedback(mode==='test'?(passed?'Gratulacje! Sprawdzian zaliczony. Zdobywasz '+coins+' złotych.':'To jeszcze nie koniec przygody. Poćwicz trudniejsze zadania i spróbuj ponownie. Zdobywasz '+coins+' złotych.'):'Misja ukończona! Zdobywasz '+coins+' złotych.');
   const summary=mode==='test'?(passed?'🏆 Sprawdzian zaliczony!':'🌱 Jeszcze trochę poćwiczymy. Spróbuj ponownie, kiedy będziesz gotowy.'):'🎉 Przygoda ukończona!';
-  root.innerHTML='<section class="mg-panel mg-final"><h2>'+summary+'</h2><p>Wynik: <strong>'+points+' / '+total+'</strong> ('+pct+'%).</p><p>🪙 Zdobyte złote: <strong>'+coins+'</strong></p><p>'+(mode==='test'&&!passed?'Wróć do trudnych zadań i poćwicz. Dasz radę!':'Dobra robota!')+'</p>'+btn('🔄 Spróbuj ponownie','start','mg-primary')+btn('📋 Zobacz trudności','report')+btn('📚 Wybierz materiał','back')+'</section>';
+  root.innerHTML='<section class="mg-panel mg-final"><h2>'+summary+'</h2><p>Wynik: <strong>'+points+' / '+total+'</strong> ('+pct+'%).</p><p>🪙 Zdobyte złote: <strong>'+coins+'</strong></p><p>'+(mode==='test'&&!passed?'Wróć do trudnych zadań i poćwicz. Dasz radę!':'Dobra robota!')+'</p>'+btn('🔄 Spróbuj ponownie','start','mg-primary')+btn('📋 Zobacz trudności','report')+(v76VocabOnly?btn('🃏 Wybierz inną grę','v80-vocab-picker'):'')+btn('📚 Wybierz materiał','back')+'</section>';
  }
  function crossStatus(t){
   if(!t||t.type!=='crossword')return false;
@@ -1315,6 +1321,8 @@ function stage(){
  root.addEventListener('click',ev=>{
   const b=ev.target.closest('[data-mg]');if(!b||busy)return;
   const act=b.dataset.mg,t=task();
+  if(act==='v80-vocab-picker'){v80VocabularyKind='';return v76StartVocabulary()}
+  if(act.startsWith('v80-vocab:')){const kind=act.slice(10);if(kind!=='mixed'&&!GAME_TITLES80[kind])return;v80VocabularyKind=kind;return v76StartVocabulary()}
   if(act.startsWith('g80-'))return v80GameAction(act,t);
   if(act==='v80-choice-check'){if(!answered&&Number.isInteger(t?.selected80))return answer(t.options[t.selected80]);return}
   if(act.startsWith('v80-choice:')){const i=Number(act.slice(11));if(!t?.options?.[i])return;t.selected80=i;speakSequence([{text:t.options[i],lang:t.type==='vocab-meaning'?'pl-PL':'en-GB',rate:.72}],{isCurrent:()=>task()===t&&root.isConnected});remember();return draw()}
