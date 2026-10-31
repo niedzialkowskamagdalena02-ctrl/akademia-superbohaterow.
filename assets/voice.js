@@ -34,7 +34,7 @@ export function speakSequence(parts,options={}){
   if(i>=items.length){setVoiceState('idle');options.onDone?.();return}
   const p=items[i],u=utterance(p.text,p.lang||'pl-PL',p.style||options.style||'tech',p.rate||.92);
   u.onstart=()=>{if(epoch===sequenceEpoch)setVoiceState('speaking')};
-  u.onend=()=>{if(epoch===sequenceEpoch)play(i+1)};
+  u.onend=()=>{if(epoch!==sequenceEpoch)return;const pause=Number(p.pauseAfterMs)||0;if(pause>0)setTimeout(()=>{if(epoch===sequenceEpoch)play(i+1)},Math.min(2000,pause));else play(i+1)};
   u.onerror=()=>{if(epoch===sequenceEpoch){sequenceEpoch++;setVoiceState('idle');options.onError?.('Nie udało się odczytać tekstu. Sprawdź głosy w telefonie.')}};
   try{window.speechSynthesis.speak(u)}catch{setVoiceState('idle');options.onError?.('Odczyt głosowy jest niedostępny.')}
  };
@@ -63,4 +63,12 @@ export function listen(onText,onError,options={}){
   r.onend=()=>{if(recognizer===r)recognizer=null;if(!gotText&&!failed&&!r.__cancelled){setVoiceState('idle');onError?.('Nie usłyszałem wypowiedzi. Spróbuj ponownie.')}options.onEnd?.()};
   r.start();return r;
  }catch(e){recognizer=null;setVoiceState('idle');onError?.(e.message||'Nie udało się uruchomić mikrofonu.');return null}
+}
+
+// Jawne literowanie: osobna wypowiedź na literę, z przerwą.
+export function spellEnglish77(word,options={}){
+ const clean=String(word||'').trim();if(!/^[a-z][a-z '-]{0,34}$/i.test(clean))return false;
+ const names={a:'ay',b:'bee',c:'see',d:'dee',e:'ee',f:'ef',g:'jee',h:'aitch',i:'eye',j:'jay',k:'kay',l:'el',m:'em',n:'en',o:'oh',p:'pee',q:'cue',r:'ar',s:'ess',t:'tee',u:'you',v:'vee',w:'double you',x:'ex',y:'why',z:'zed'};
+ const parts=[...(options.prefix?[{text:options.prefix,lang:'pl-PL',rate:.84,pauseAfterMs:650}]:[]),{text:clean,lang:'en-GB',rate:.72,pauseAfterMs:850},...Array.from(clean.toLowerCase()).map(ch=>({text:names[ch]||(ch===' '?'spacja':'myślnik'),lang:names[ch]?'en-GB':'pl-PL',rate:.62,pauseAfterMs:650}))];
+ return speakSequence(parts,options);
 }

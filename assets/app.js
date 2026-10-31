@@ -1,10 +1,10 @@
 // V48_AI_RESPONSE_DIAGNOSTICS
 // V44_BULK_CHAPTERS
 // V42_CHAPTERS
-import {mountMissionGame} from './mission-game.js?v=76-k4';
+import {mountMissionGame} from './mission-game.js?v=77';
 import { initHeadquarters3D } from './headquarters3d.js';
 import {initial,get,put,del,allRecords,replaceRecords,compress,uid,gradeName} from './data.js';
-import {speak,listen,stopVoice,getVoiceState,setVoiceState} from './voice.js?v=76-k4';
+import {speak,listen,stopVoice,getVoiceState,setVoiceState,spellEnglish77} from './voice.js?v=77';
 import {vocabulary,readings,explanation} from './learning.js';
 import {syncAdapter} from './sync.js';
 import {BASE_ITEMS,baseMarkup,migrateBase} from './base.js';
@@ -679,7 +679,7 @@ async function recognizePageAI(page,language='pol',overwriteApproved=false){
  finally{ocrBusy=false;document.querySelectorAll('[data-action="page:ai"],[data-action="reader:ai"]').forEach(b=>b.disabled=false)}
 }
 const grant=async(child,points,reason,key)=>{if(data.history.some(h=>h.key===key))return false;data.profiles[child].xp+=points;data.profiles[child].coins+=points;data.history.unshift({id:uid(),key,child,points,reason,at:new Date().toISOString()});await save();return true};
-function layout(title,content){cancelAIRequests();stopVoice();closeMicBubble();app.innerHTML=`<main class="wrap"><header class="head"><div><div class="brand">⚡ AKADEMIA SUPERBOHATERÓW <span style="display:inline-block;font-size:0.72em;border:1px solid currentColor;border-radius:8px;padding:2px 7px;vertical-align:middle">V76 · korekta 4</span></div><div class="sub">${e(title)}</div></div>${role==='child'?trainingSoundControl():''}${role?button(testMode?'← Zakończ test':'← Profile','exit','alt'):''}</header>${testMode?'<div class="test-banner">🧪 TRYB MAMY — BEZPŁATNY TEST • POSTĘPY NIE SĄ ZAPISYWANE</div>':''}${content}</main>${role==='child'?'<button class="mic" data-action="mic" aria-label="Sterowanie głosowe">🎙️</button>':''}`;document.querySelectorAll('[data-speak]').forEach(b=>b.addEventListener('click',()=>speak(b.dataset.speak,b.dataset.lang,role==='child'?profile().mentor:'tech',data.settings.rate||1)));hydrateImages();v76AfterRender();if(role==='child'&&(tab==='learn'||tab==='subjectmissions'))installMicDrag()}
+function layout(title,content){cancelAIRequests();stopVoice();closeMicBubble();app.innerHTML=`<main class="wrap"><header class="head"><div><div class="brand">⚡ AKADEMIA SUPERBOHATERÓW <span style="display:inline-block;font-size:0.72em;border:1px solid currentColor;border-radius:8px;padding:2px 7px;vertical-align:middle">V77</span></div><div class="sub">${e(title)}</div></div>${role==='child'?trainingSoundControl():''}${role?button(testMode?'← Zakończ test':'← Profile','exit','alt'):''}</header>${testMode?'<div class="test-banner">🧪 TRYB MAMY — BEZPŁATNY TEST • POSTĘPY NIE SĄ ZAPISYWANE</div>':''}${content}</main>${role==='child'?'<button class="mic" data-action="mic" aria-label="Sterowanie głosowe">🎙️</button>':''}`;document.querySelectorAll('[data-speak]').forEach(b=>b.addEventListener('click',()=>speak(b.dataset.speak,b.dataset.lang,role==='child'?profile().mentor:'tech',data.settings.rate||1)));hydrateImages();v76AfterRender();if(role==='child'&&(tab==='learn'||tab==='subjectmissions'))installMicDrag()}
 async function hydrateImages(){for(const el of document.querySelectorAll('[data-image]')){const src=await img(el.dataset.image);if(el.isConnected&&src){el.src=src;el.onload=()=>URL.revokeObjectURL(src)}}}
 function nav(){return role==='admin'?`<div class="tabs">${[['home','Przegląd'],['books','📚 Książki'],['missions','📋 Misje'],['settings','⚙️ Ustawienia'],['test','🧪 Testuj wszystko'],['backup','💾 Kopia']].map(([k,n])=>button(n,'admin:'+k,adminTab===k?'gold':'alt')).join('')}</div>`:`<div class="tabs">${[['home','🎯 Misje'],['books','📚 Książki'],['learn','🧠 Trening'],['academy','📖 Sala odkrywców'],['mentor','🤖 Mentor'],['base','🏙️ Baza Avengersów i gry']].map(([k,n])=>button(n,'child:'+k,tab===k?'gold':'alt')).join('')}</div>`}
 function render(){if(tab!=='arcade')stopArcade();if(!role){layout('Wybierz swoją bazę',`<section class="card"><h1>Witaj w Akademii! 🛡️</h1><p>Każdy bohater ma własne misje i nagrody.</p></section><div class="grid">${people.map(([id,name])=>`<button class="tile" data-action="enter:${id}"><img class="profile-hero" src="assets/art/${data.profiles[id].hero||(id==='pawel'?'iron':'spider')}.svg" alt=""><h2>${name}</h2><small>${gradeName(data.profiles[id].grade)} · ${data.profiles[id].coins} złotych</small></button>`).join('')}</div><section class="card">${button('🔐 Centrum dowodzenia mamy','enter:admin','gold')}<p class="muted">Tryb lokalny: dane z tego telefonu nie synchronizują się jeszcze z innymi urządzeniami. ${syncAdapter.status()}</p></section>`);return}if(role==='admin')adminRender();else childRender()}
@@ -1295,6 +1295,7 @@ async function traceSubmit(){
 async function exportBackup(){const records=await allRecords();const encoded=[];for(const [k,v] of records){if(v instanceof Blob){const base64=await new Promise(ok=>{const r=new FileReader();r.onload=()=>ok(r.result);r.readAsDataURL(v)});encoded.push([k,{__blob:base64}])}else encoded.push([k,v])}const url=URL.createObjectURL(new Blob([JSON.stringify({format:'academy-backup-1',records:encoded})],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='akademia-pelna-kopia-'+date()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),10000)}
 async function importBackup(){const f=$('backupfile').files[0];if(!f)return note('Wybierz plik kopii.');try{const raw=JSON.parse(await f.text());if(raw.format!=='academy-backup-1'||!Array.isArray(raw.records)||!raw.records.some(([k,v])=>k==='state'&&v.profiles?.pawel&&v.profiles?.patryk))throw Error('To nie jest poprawna kopia');if(!confirm('Zastąpić wszystkie lokalne dane tą kopią?'))return;const records=[];for(const [k,v] of raw.records){if(v?.__blob){const res=await fetch(v.__blob);records.push([k,await res.blob()])}else records.push([k,v])}await replaceRecords(records);data=await get('state');role='';render();note('Przywrócono pełną kopię.')}catch(err){note('Nie udało się przywrócić kopii: '+err.message)}}
 async function handle(action,target){
+if(action==='v77:q-fix-all')return v77BatchFix();
 if(action.startsWith('v77:'))return v77Action(action,target);
 if(action.startsWith('page:open:'))v77CaptureBookView();
 if(action==='admin:book'&&adminTab==='page')v77ReturnBook=true;
@@ -1414,7 +1415,7 @@ if(action==='v75:select:all'||action==='v75:select:none'){
 if(action==='v75:questions:delete')return v75BankDelete();
 if(action==='v75:questions:check')return v75CheckQuestionLogic();
 if(action==='v75:questions:ai')return v75ReviewWithThreeAI(target);
-if(action==='v75:questions:stop'){v75ReviewStop=true;v76ReviewController?.abort();return note('⏸ Kontrola zakończy się po bieżącej partii.');}
+if(action==='v75:questions:stop'){v77Batch.stop=true;v77Batch.controller?.abort();v75ReviewStop=true;v76ReviewController?.abort();return note('⏸ Kontrola zakończy się po bieżącej partii.');}
 if(action.startsWith('v75:questions:suggest:'))return v75SuggestQuestion(decodeURIComponent(action.slice('v75:questions:suggest:'.length)),target);
 if(action==='v75:outside:show')return v77OutsideOpen();
 if(action==='v75:outside:generate')return v75OutsideGenerate(target);
@@ -1520,7 +1521,7 @@ if(action==='homework:create'){const p=data.bookPages.find(p=>p.id===$('readerpa
 if(action.startsWith('discovery:start:'))return discoveryStart(c);if(action==='discovery:restart')return discoveryStart(discoveryGame?.mode||'match');if(action.startsWith('discovery:match:'))return discoveryAnswer(discoveryGame?.items[discoveryGame.index]?.[1]===discoveryGame?.items[Number(c)]?.[1]?discoveryGame.items[discoveryGame.index][1]:'');if(action==='discovery:quick')return discoveryAnswer(target.dataset.answer);if(action.startsWith('lesson:answer:')){const l=LESSONS[lessonIndex],ok=Number(c)===l.correct,el=$('lesson-feedback');if(!el)return;el.textContent=ok?'🎉 Świetnie! '+l.why:'💡 Spróbuj ponownie. '+l.rule;el.className=ok?'answer-ok':'answer-retry';speak(el.textContent,'pl-PL',profile().mentor);return}
 if(action.startsWith('arcade:buy:')){const g=ARCADE_GAMES.find(x=>x.id===c),p=profile();if(!g)return;if((p.arcadeUnlocked||[]).includes(g.id))return note('Gra już odblokowana');if(p.coins<g.cost)return note('Brakuje '+(g.cost-p.coins)+' złotych');p.coins-=g.cost;p.arcadeUnlocked??=[];p.arcadeUnlocked.push(g.id);await save();return render()}
 if(action.startsWith('arcade:open:')){if(!testMode&&!(profile().arcadeUnlocked||[]).includes(c))return note('Najpierw odblokuj grę');arcadeId=c;tab='arcade';return render()}
-if(action==='game:crossword'){tab='crossword';return render()}if(action==='game:quiz'){tab='learn';render();trainingChooseKind('quiz');return}if(action==='game:logic'){tab='learn';render();trainingChooseKind('logic');return}if(action==='crossword:check')return checkCrossword();if(action==='exercise:new')return newExercise();if(action==='book:listen')return checkBookReading();if(action==='dictation:play')return speak(practice?.answer||'','pl-PL',profile().mentor,.8);if(action==='dictation:check'){const v=($('dictationanswer')?.value||'').trim().toLocaleLowerCase('pl-PL'),ok=v===practice.answer.toLocaleLowerCase('pl-PL');const fb=$('feedback');if(practiceAnswered)return;if(!ok){fb.textContent=mentorLine(profile(),false);speak(fb.textContent,'pl-PL',profile().mentor);return}practiceAnswered=true;fb.textContent=mentorLine(profile(),true);$('dictationanswer').disabled=true;const key='practice:'+who+':'+date(),count=data.history.filter(h=>h.child===who&&h.key.startsWith(key)).length;if(count<Number(data.settings.dailyPracticeLimit||3)){await grant(who,Number(data.settings.xpPractice)||5,'Trening: '+practice.kind,key+':'+count);fb.textContent+=' +'+data.settings.xpPractice+' złotych'}else fb.textContent+=' Dzienny limit XP wykorzystany.';speak(fb.textContent,'pl-PL',profile().mentor);return}if(action.startsWith('exercise:check:'))return checkExercise(Number(c));if(action==='exercise:pronounce')return practiceEnglishSpeech();if(action==='exercise:spell'){const letters=practice.word.toUpperCase().split('').join(', ');return speak(letters,'en-US',profile().mentor,.75)}if(action==='trace:clear')return drawTrace();if(action==='trace:submit')return traceSubmit();if(action==='mentor:answer'){
+if(action==='game:crossword'){tab='crossword';return render()}if(action==='game:quiz'){tab='learn';render();trainingChooseKind('quiz');return}if(action==='game:logic'){tab='learn';render();trainingChooseKind('logic');return}if(action==='crossword:check')return checkCrossword();if(action==='exercise:new')return newExercise();if(action==='book:listen')return checkBookReading();if(action==='dictation:play')return speak(practice?.answer||'','pl-PL',profile().mentor,.8);if(action==='dictation:check'){const v=($('dictationanswer')?.value||'').trim().toLocaleLowerCase('pl-PL'),ok=v===practice.answer.toLocaleLowerCase('pl-PL');const fb=$('feedback');if(practiceAnswered)return;if(!ok){fb.textContent=mentorLine(profile(),false);speak(fb.textContent,'pl-PL',profile().mentor);return}practiceAnswered=true;fb.textContent=mentorLine(profile(),true);$('dictationanswer').disabled=true;const key='practice:'+who+':'+date(),count=data.history.filter(h=>h.child===who&&h.key.startsWith(key)).length;if(count<Number(data.settings.dailyPracticeLimit||3)){await grant(who,Number(data.settings.xpPractice)||5,'Trening: '+practice.kind,key+':'+count);fb.textContent+=' +'+data.settings.xpPractice+' złotych'}else fb.textContent+=' Dzienny limit XP wykorzystany.';speak(fb.textContent,'pl-PL',profile().mentor);return}if(action.startsWith('exercise:check:'))return checkExercise(Number(c));if(action==='exercise:pronounce')return practiceEnglishSpeech();if(action==='exercise:spell')return spellEnglish77(practice.word);if(action==='trace:clear')return drawTrace();if(action==='trace:submit')return traceSubmit();if(action==='mentor:answer'){
  const q=String($('question')?.value||'').trim();
  if(!q)return note('Najpierw wpisz pytanie.');
  const style=profile().mentor==='fun'?'fun':'tech';
@@ -1531,17 +1532,17 @@ if(action==='game:crossword'){tab='crossword';return render()}if(action==='game:
  output.textContent='⏳ Mentor zastanawia się...';
  const isCurrent=()=>!controller.signal.aborted&&tab==='mentor'&&who===expectedWho&&$('mentoranswer')===output&&output.isConnected;
  try{
-  const answer=await askMentorAI(q,style,mentorHistory[style],controller.signal);
+  const reply=await v77SpellingChat(q,style,mentorHistory[style],controller.signal);const answer=reply.text;
   if(!isCurrent())return;
   mentorHistory[style].push({role:'user',text:q},{role:'model',text:answer});
   mentorHistory[style]=mentorHistory[style].slice(-8);
-  output.textContent=answer;
-  speak(answer,'pl-PL',style);
+  output.textContent=answer;output.dataset.spellWord=reply.word;
+  if(reply.word)spellEnglish77(reply.word,{prefix:answer,isCurrent});else speak(answer,'pl-PL',style);
  }catch(error){
   if(isCurrent()){console.warn('Mentor AI:',error);output.textContent=AI_FRIENDLY_MESSAGE}
  }finally{finishAIRequest('mentor',controller)}
  return;
-}if(action.startsWith('mentor:choose:')){const style=action.split(':')[2];if(!['tech','fun'].includes(style))return;profile().mentor=style;await save();render();return}if(action==='mentor:speak')return speak($('mentoranswer').textContent,'pl-PL',profile().mentor);if(a==='base'&&b==='buy'){const item=BASE_ITEMS.find(x=>x.id===c),p=profile(),base=migrateBase(p);if(!item)return note('Nieznany element');if(base.owned.includes(item.id))return note('To już jest w Twojej bazie');if(p.coins<item.cost)return note('Potrzebujesz jeszcze '+(item.cost-p.coins)+' złotych');p.coins-=item.cost;base.owned.push(item.id);await save();speak('Brawo! Odblokowano '+item.name,'pl-PL',p.mentor);return render()}if(action==='mic')return microphone();}catch(err){console.error(err);note('Nie udało się wykonać operacji: '+err.message)}}
+}if(action.startsWith('mentor:choose:')){const style=action.split(':')[2];if(!['tech','fun'].includes(style))return;profile().mentor=style;await save();render();return}if(action==='mentor:speak'){const out=$('mentoranswer');return out.dataset.spellWord?spellEnglish77(out.dataset.spellWord,{prefix:out.textContent}):speak(out.textContent,'pl-PL',profile().mentor);}if(a==='base'&&b==='buy'){const item=BASE_ITEMS.find(x=>x.id===c),p=profile(),base=migrateBase(p);if(!item)return note('Nieznany element');if(base.owned.includes(item.id))return note('To już jest w Twojej bazie');if(p.coins<item.cost)return note('Potrzebujesz jeszcze '+(item.cost-p.coins)+' złotych');p.coins-=item.cost;base.owned.push(item.id);await save();speak('Brawo! Odblokowano '+item.name,'pl-PL',p.mentor);return render()}if(action==='mic')return microphone();}catch(err){console.error(err);note('Nie udało się wykonać operacji: '+err.message)}}
 function helpForQuestion(question){
  const q=String(question||'').toLocaleLowerCase('pl-PL').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
  if(/(test|sprawdzian|kartkowk)/.test(q))return 'Aby zrobić test, wybierz zakładkę Trening, następnie przedmiot i ćwiczenie Test lub Quiz. Jeśli test jest zadany przez mamę, otwórz Misje i wybierz tę misję.';
@@ -1556,7 +1557,7 @@ function helpForQuestion(question){
  return null;
 }
 function closeMicBubble(){const box=document.getElementById('micanswer');if(box)box.remove();}
-function showMicBubble(answer,readAloud=true){
+function showMicBubble(answer,readAloud=true,spellingWord=''){
  closeMicBubble();
  const box=document.createElement('aside');box.id='micanswer';box.className='mic-answer-card';box.setAttribute('role','status');
  const heading=document.createElement('div');heading.className='mic-answer-heading';
@@ -1564,8 +1565,8 @@ function showMicBubble(answer,readAloud=true){
  const close=document.createElement('button');close.type='button';close.className='mic-answer-close';close.setAttribute('aria-label','Zamknij podpowiedź');close.textContent='✕';close.addEventListener('click',()=>{aiRequests.get('mic-general')?.abort();stopVoice();closeMicBubble()});
  heading.append(title,close);
  const text=document.createElement('p');text.textContent=answer;
- const replay=document.createElement('button');replay.type='button';replay.className='mic-answer-replay';replay.textContent='🔊 Odsłuchaj ponownie';replay.addEventListener('click',()=>speak(answer,'pl-PL',profile().mentor));
- box.append(heading,text,replay);document.body.appendChild(box);if(readAloud)speak(answer,'pl-PL',profile().mentor);
+ const replay=document.createElement('button');replay.type='button';replay.className='mic-answer-replay';replay.textContent='🔊 Odsłuchaj ponownie';replay.addEventListener('click',()=>spellingWord?spellEnglish77(spellingWord,{prefix:answer}):speak(answer,'pl-PL',profile().mentor));
+ box.append(heading,text,replay);document.body.appendChild(box);if(readAloud){if(spellingWord)spellEnglish77(spellingWord,{prefix:answer});else speak(answer,'pl-PL',profile().mentor);}
 }
 async function helpWithExerciseAI(question){
  const exercise=practice;
@@ -1606,9 +1607,9 @@ async function helpWithGeneralAI(question){
  const isCurrent=()=>!controller.signal.aborted&&tab===expectedTab&&who===expectedWho&&document.querySelector('main')===screen;
  showMicBubble('⏳ Mentor zastanawia się...',false);
  try{
-  const answer=await askMentorAI('Pytanie dziecka: '+question.slice(0,390)+'\nOdpowiedz wprost na pytanie, bez przywitania i bez proponowania menu.\nTekst ekranu (wyłącznie pomocniczo): '+visibleText,style,[],controller.signal);
+  const reply=await v77SpellingChat('Pytanie dziecka: '+question.slice(0,390)+'\nOdpowiedz wprost na pytanie, bez przywitania i bez proponowania menu.\nTekst ekranu (wyłącznie pomocniczo): '+visibleText,style,[],controller.signal);
   if(!isCurrent())return;
-  showMicBubble(answer);
+  showMicBubble(reply.text,true,reply.word);
  }catch(error){
   if(isCurrent()){console.warn('Mikrofon AI:',error);closeMicBubble();note(AI_FRIENDLY_MESSAGE)}
  }finally{finishAIRequest('mic-general',controller)}
@@ -1743,7 +1744,7 @@ function v76QuestionView(b){
  if(v76Q.level==='questions'&&group){const numbers=v76QNumbers(b,group.p,group.items),visible=group.items.filter(v77Match);return `<section class="card v76-question-page">${button('← '+b.title+' · wszystkie strony','v76:q-pages')}<h2>Strona ${e(group.p.number)}</h2>${v77FilterBar(b)}${v76QSource(group.p)}${v76Fold('q-list','🔎 Rozwiń pytania z tej strony',v76QToolbar()+visible.map(x=>v77QuestionLink(x,group.p,numbers.get(String(x.key)))).join('')+(visible.length?'':'<p>Brak pytań z wybranym statusem.</p>'))}</section>`}
  v76Q.level='pages';
  const visibleGroups=groups.map(g=>({...g,visible:g.items.filter(v77Match)})).filter(g=>g.visible.length),flat=v77Flat(b).filter(x=>v77Match(x.item));
- return `<section class="card v76-question-pages">${back}<h2>🔎 Przeglądaj i popraw pytania</h2><p>${e(b.subject)} · ${e(b.title)} · ${bank.length} pytań</p><div class="v76-actions">${button('🤖 Sprawdź jakość pytań','v75:questions:ai','gold')}${button('⏸ Zatrzymaj','v75:questions:stop')}${button('Kontrola techniczna','v75:questions:check')}</div><small class="v75-review-progress" role="status">Kontrola AI wymaga co najmniej dwóch niezależnych raportów.</small>${v76Info('Wygenerowane pytanie czeka na kontrolę. „AI bez uwag” oznacza wynik kontroli, a nie gwarancję poprawności. Kontrola techniczna sprawdza budowę zadania. Poprawka automatyczna zapisuje tylko wybrane pytanie i uruchamia jego ponowną kontrolę AI.')}${v77FilterBar(b)}${v76QToolbar()}${v77Q.filter!=='all'?flat.map(({item,page})=>v77QuestionLink(item,page,v76QNumbers(b,page,groups.find(g=>g.p.id===page.id).items).get(String(item.key)))).join(''):visibleGroups.map(g=>`<div class="v76-page-choice"><label><input type="checkbox" data-v76-pagecheck="${e(g.p.id)}" aria-label="Zaznacz pytania ze strony ${e(g.p.number)}" ${g.visible.every(x=>v76Q.selected.has(String(x.key)))?'checked':''}></label><button type="button" data-action="v76:q-page:${encodeURIComponent(g.p.id)}"><span class="v76-page-thumb">📄</span><span><b>Strona ${e(g.p.number)}</b><small>${g.items.length} pytań · ⚠ ${g.items.filter(x=>v77Status(x)==='attention').length} do poprawy · ✓ ${g.items.filter(x=>v77Status(x)==='checked').length} bez uwag AI</small></span><i aria-hidden="true">›</i></button></div>`).join('')}${flat.length?'':'<p>Brak pytań z wybranym statusem.</p>'}</section>`;
+ return `<section class="card v76-question-pages">${back}<h2>🔎 Przeglądaj i popraw pytania</h2><p>${e(b.subject)} · ${e(b.title)} · ${bank.length} pytań</p><div class="v76-actions">${button('🤖 Sprawdź jakość pytań','v75:questions:ai','gold')}${button('⏸ Zatrzymaj','v75:questions:stop')}${button('Kontrola techniczna','v75:questions:check')}${v77BatchButton(b)}</div><small class="v75-review-progress" role="status">Kontrola AI wymaga co najmniej dwóch niezależnych raportów.</small>${v76Info('Wygenerowane pytanie czeka na kontrolę. „AI bez uwag” oznacza wynik kontroli, a nie gwarancję poprawności. Kontrola techniczna sprawdza budowę zadania. Poprawka automatyczna zapisuje tylko wybrane pytanie i uruchamia jego ponowną kontrolę AI.')}${v77FilterBar(b)}${v76QToolbar()}${v77Q.filter!=='all'?flat.map(({item,page})=>v77QuestionLink(item,page,v76QNumbers(b,page,groups.find(g=>g.p.id===page.id).items).get(String(item.key)))).join(''):visibleGroups.map(g=>`<div class="v76-page-choice"><label><input type="checkbox" data-v76-pagecheck="${e(g.p.id)}" aria-label="Zaznacz pytania ze strony ${e(g.p.number)}" ${g.visible.every(x=>v76Q.selected.has(String(x.key)))?'checked':''}></label><button type="button" data-action="v76:q-page:${encodeURIComponent(g.p.id)}"><span class="v76-page-thumb">📄</span><span><b>Strona ${e(g.p.number)}</b><small>${g.items.length} pytań · ⚠ ${g.items.filter(x=>v77Status(x)==='attention').length} do poprawy · ✓ ${g.items.filter(x=>v77Status(x)==='checked').length} bez uwag AI</small></span><i aria-hidden="true">›</i></button></div>`).join('')}${flat.length?'':'<p>Brak pytań z wybranym statusem.</p>'}</section>`;
 }
 
 async function v76Action(action,target){
@@ -1897,11 +1898,11 @@ function v77OutsideNav(items,item){const at=items.indexOf(item);return '<nav cla
 function v77CaptureBookView(){v77BookViews.set(bookId,{filter:$('page-filter')?.value||'none',scroll:window.scrollY||0,selected:[...document.querySelectorAll('[data-page-select]:checked')].map(x=>x.dataset.pageSelect)});v76OpenSections.add('book-pages')}
 function v77RestoreBookView(){if(role!=='admin'||adminTab!=='book')return;const state=v77BookViews.get(bookId),select=$('page-filter');if(!state||!select)return;select.value=state.filter;filterBookPages(state.filter);for(const x of document.querySelectorAll('[data-page-select]'))x.checked=state.selected.includes(x.dataset.pageSelect);updateBookPageSelection();if(v77ReturnBook){v77ReturnBook=false;requestAnimationFrame(()=>window.scrollTo(0,state.scroll))}}
 function v77OutsideOpen(){v76Outside.detail=null;v76OutsideShow();requestAnimationFrame(()=>{$('v75-outside-results')?.scrollIntoView?.({block:'start',behavior:'smooth'});$('v75-outside-results')?.querySelector('h3')?.focus?.()})}
-function v75CheckQuestionLogic(){const b=data.books.find(x=>x.id===bookId);if(!b)return;v77Q.book=b.id;const bank=bookBankItems(b);for(const x of bank){if(!Array.isArray(x.v77AiReasons))x.v77AiReasons=x.v75Flagged?[x.v75Reason||'Wcześniejsza uwaga do sprawdzenia']:[];x.v77Technical={reasons:v77TechnicalReasons(x.task),at:new Date().toISOString()};v77SyncFlags(x)}localStorage.setItem('academy-v48-bank-'+b.child+'-'+b.id,JSON.stringify(bank));const n=bank.filter(x=>v77Status(x)==='attention').length;v77Q.message='Kontrola techniczna zakończona. Wymagają uwagi: '+n+'.';v77Q.filter=n?'attention':'all';v76Q.level='pages';v76Q.selected.clear();render();note(v77Q.message)}
+function v75CheckQuestionLogic(){if(v77Batch.running)return note('Trwa zbiorcza poprawka AI.');const b=data.books.find(x=>x.id===bookId);if(!b)return;v77Q.book=b.id;const bank=bookBankItems(b);for(const x of bank){if(!Array.isArray(x.v77AiReasons))x.v77AiReasons=x.v75Flagged?[x.v75Reason||'Wcześniejsza uwaga do sprawdzenia']:[];x.v77Technical={reasons:v77TechnicalReasons(x.task),at:new Date().toISOString()};v77SyncFlags(x)}localStorage.setItem('academy-v48-bank-'+b.child+'-'+b.id,JSON.stringify(bank));const n=bank.filter(x=>v77Status(x)==='attention').length;v77Q.message='Kontrola techniczna zakończona. Wymagają uwagi: '+n+'.';v77Q.filter=n?'attention':'all';v76Q.level='pages';v76Q.selected.clear();render();note(v77Q.message)}
 async function v77RunReview(b,keys=null,btn=null){
  if(!b||v76ReviewRunning)return;
  const selected=keys?new Set(keys.map(String)):null,bank=bookBankItems(b).filter(x=>!selected||selected.has(String(x.key)));if(!bank.length)return note('Brak pytań do sprawdzenia.');
- if(bookId===b.id)v77Q.book=b.id;v76ReviewRunning=true;v75ReviewStop=false;let checked=0,stale=0,failed='';
+ if(bookId===b.id)v77Q.book=b.id;v76ReviewRunning=true;const batchButton=document.querySelector('[data-action="v77:q-fix-all"]');if(batchButton)batchButton.disabled=true;v75ReviewStop=false;let checked=0,stale=0,failed='';
  if(btn){btn.disabled=true;btn.textContent='⏳ Sprawdzam…'}
  try{for(let i=0;i<bank.length;i+=4){if(v75ReviewStop)break;const group=bank.slice(i,i+4),snapshots=group.map(x=>JSON.stringify(x.task)),ps=sortedBookPages(b.id),ac=new AbortController();v76ReviewController=ac;const timer=setTimeout(()=>ac.abort(),30000);let response,res;
   try{response=await fetch('https://akademia-ai.niedzialkowskamagdalena02.workers.dev/review-three',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subject:b.subject,questions:group.map(x=>({...x.task,source:(ps.find(p=>v75BankMatchesPage(x,p))?.text||'').slice(0,1800)}))}),signal:ac.signal});res=await response.json()}finally{clearTimeout(timer);v76ReviewController=null}
@@ -1915,20 +1916,23 @@ async function v77RunReview(b,keys=null,btn=null){
   if(btn?.isConnected){btn.disabled=false;btn.textContent='Sprawdź ponownie AI'}
  }
 }
-async function v75ReviewWithThreeAI(btn){const b=data.books.find(x=>x.id===bookId);if(!b)return;if(!confirm('Sprawdzić pytania przez AI? Wynik wymaga co najmniej dwóch niezależnych raportów.'))return;return v77RunReview(b,null,btn)}
-async function v77AutoFix(key,btn){
- const b=data.books.find(x=>x.id===bookId),item=b?bookBankItems(b).find(x=>String(x.key)===key):null;if(!item||v77Fixing.has(key))return;
- if(v77Unsaved()&&!confirm('Pobrać poprawkę AI zamiast niezapisanych zmian?'))return;
+async function v75ReviewWithThreeAI(btn){if(v77Batch.running)return note('Trwa zbiorcza poprawka AI.');const b=data.books.find(x=>x.id===bookId);if(!b)return;if(!confirm('Sprawdzić pytania przez AI? Wynik wymaga co najmniej dwóch niezależnych raportów.'))return;return v77RunReview(b,null,btn)}
+async function v77AutoFix(key,btn,options={}){
+ if(v77Batch.running&&!options.batch)return note("Trwa zbiorcza poprawka AI.");
+ const b=options.book||data.books.find(x=>x.id===bookId),item=b?bookBankItems(b).find(x=>String(x.key)===key):null;if(!item||v77Fixing.has(key))return;
+ if(!options.batch&&v77Unsaved()&&!confirm('Pobrać poprawkę AI zamiast niezapisanych zmian?'))return;
  const t=item.task||{};if(!['choice','write','listening','dictation','order','spelling','safe','shop','clock','detective','loki'].includes(t.type||'choice'))return note('Planszę gry popraw ręcznie lub wygeneruj ponownie. AI nie zastąpi jej pytaniem wyboru.');
  const snapshot=JSON.stringify(t),p=sortedBookPages(b.id).find(p=>v75BankMatchesPage(item,p));v77Fixing.add(key);if(btn){btn.disabled=true;btn.textContent='⏳ Poprawiam…'}
- try{const raw=String(await askMentorAI('Popraw zadanie dziecka zgodnie z uwagami i MATERIAŁEM. Zachowaj typ i cel zadania, nie zmieniaj tematu, nie wymyślaj informacji. Dla choice: dokładnie 4 różne opcje, jedna jednoznacznie poprawna odpowiedź. Dla słuchania zachowaj audio, nie pokazuj odpowiedzi w poleceniu. Angielski: question po angielsku i questionPl po polsku. Zwróć TYLKO JSON {"question":"...","questionPl":"...","answer":"...","options":[],"explanation":"...","audio":"..."}. ZADANIE: '+snapshot+' UWAGI: '+v77Issues(item).join('; ')+' MATERIAŁ: '+String(p?.text||'').slice(0,3000),'tech')).replace(/```(?:json)?/gi,'').replace(/```/g,'').trim();const obj=JSON.parse(raw.slice(raw.indexOf('{'),raw.lastIndexOf('}')+1));
+ try{const raw=String(await askMentorAI('Popraw zadanie dziecka zgodnie z uwagami i MATERIAŁEM. Zachowaj typ i cel zadania, nie zmieniaj tematu, nie wymyślaj informacji. Dla choice: dokładnie 4 różne opcje, jedna jednoznacznie poprawna odpowiedź. Dla słuchania zachowaj audio, nie pokazuj odpowiedzi w poleceniu. Angielski: question po angielsku i questionPl po polsku. Zwróć TYLKO JSON {"question":"...","questionPl":"...","answer":"...","options":[],"explanation":"...","audio":"..."}. ZADANIE: '+snapshot+' UWAGI: '+v77Issues(item).join('; ')+' MATERIAŁ: '+String(p?.text||'').slice(0,3000),'tech',[],options.controller?.signal)).replace(/```(?:json)?/gi,'').replace(/```/g,'').trim();const obj=JSON.parse(raw.slice(raw.indexOf('{'),raw.lastIndexOf('}')+1));
   if(typeof obj.question!=='string'||typeof obj.answer!=='string'||!Array.isArray(obj.options)||obj.options.some(x=>typeof x!=='string'))throw Error('Niepełna propozycja AI');
   const next={...t,question:obj.question.trim(),answer:obj.answer.trim(),options:obj.options,questionPl:typeof obj.questionPl==='string'?obj.questionPl.trim():t.questionPl||'',explanation:typeof obj.explanation==='string'?obj.explanation:t.explanation||'',audio:typeof obj.audio==='string'?obj.audio:t.audio||''};delete next.instructionEn;delete next.instructionPl;
   const reasons=v77TechnicalReasons(next);if(reasons.length)throw Error(reasons.join('; '));if(/angiel|english/i.test(b.subject)&&!next.questionPl)throw Error('Brak polskiego tłumaczenia polecenia');
   if(!data.books.some(x=>x.id===b.id))return;const fresh=bookBankItems(b),current=fresh.find(x=>String(x.key)===key);if(!current||JSON.stringify(current.task)!==snapshot)throw Error('Pytanie zmieniło się w czasie pracy AI. Nie nadpisano zmian.');
-  current.task=next;delete current.v76Review;delete current.v77Technical;current.v77AiReasons=[];current.v75Flagged=false;current.v75Reason='';current.v77FixedAt=new Date().toISOString();localStorage.setItem('academy-v48-bank-'+b.child+'-'+b.id,JSON.stringify(fresh));if(bookId===b.id){v77Q.message='Zapisano poprawkę AI. Trwa ponowna kontrola.';render()}
+  current.task=next;delete current.v76Review;delete current.v77Technical;current.v77AiReasons=[];current.v75Flagged=false;current.v75Reason='';current.v77FixedAt=new Date().toISOString();localStorage.setItem('academy-v48-bank-'+b.child+'-'+b.id,JSON.stringify(fresh));if(!options.batch&&bookId===b.id){v77Q.message='Zapisano poprawkę AI. Trwa ponowna kontrola.';render()}
+  if(options.batch)return {saved:true,key};
   if(!v76ReviewRunning)await v77RunReview(b,[key]);else if(bookId===b.id){v77Q.message='Zapisano poprawkę. Sprawdź ją ponownie AI po zakończeniu bieżącej kontroli.';render()}
- }catch(err){note('⚠ '+v75PolishError(err))}finally{v77Fixing.delete(key);if(btn?.isConnected){btn.disabled=false;btn.textContent='🤖 Popraw automatycznie AI'}}
+  return {saved:true,key};
+ }catch(err){if(!options.batch)note('⚠ '+v75PolishError(err));return {saved:false,error:v75PolishError(err)}}finally{v77Fixing.delete(key);if(btn?.isConnected){btn.disabled=false;btn.textContent='🤖 Popraw automatycznie AI'}}
 }
 
 const v77Ranges=new Map();
@@ -1939,3 +1943,33 @@ function v77RangeMarkup(b,ps){const chosen=ps.filter(p=>trainingSelectedPages.ha
 function v77ApplyRange(id){const ps=trainingPageItems().filter(p=>p.bookId===id),controls=[...document.querySelectorAll('[data-v77-range-book]')].filter(x=>x.dataset.v77RangeBook===id);const from=controls.find(x=>x.dataset.v77RangeEdge==='from')?.value,to=controls.find(x=>x.dataset.v77RangeEdge==='to')?.value,a=ps.findIndex(p=>p.id===from),z=ps.findIndex(p=>p.id===to);if(a<0||z<0)return note('Wybierz początek i koniec zakresu.');if(a>z)return note('Początek zakresu musi być przed jego końcem.');for(const p of ps)trainingSelectedPages.delete(p.id);for(const p of ps.slice(a,z+1))trainingSelectedPages.add(p.id);v77Ranges.set(id,{from,to});trainingSelectionChange({checked:true,hasAttribute:()=>false});note('✓ Wybrano '+(z-a+1)+' stron z „'+data.books.find(b=>b.id===id)?.title+'”.')}
 function v77TrainingArt(kind='space'){return `<div class="v77-adventure-art v77-art-${kind}" aria-hidden="true"><span class="v77-rocket">🚀</span><span class="v77-star s1">✦</span><span class="v77-star s2">✧</span><span class="v77-planet">🪐</span><svg class="v77-web" viewBox="0 0 100 100"><path d="M0 0L100 100M0 0L35 100M0 0L100 35M15 15Q40 8 65 23M30 30Q60 15 90 35M45 45Q72 28 100 55M15 15Q8 40 23 65M30 30Q15 60 35 90M45 45Q28 72 55 100" fill="none" stroke="currentColor" stroke-width="2"/></svg></div>`}
 function v77HulkScene(){return '<div class="v77-hulk-scene" aria-hidden="true"><div class="v77-hulk"><img src="assets/art/hulk.svg" alt=""><span>👋</span></div><span class="v77-hulk-spark">✦</span></div>'}
+
+// Zbiorcza poprawka działa na jednym, zapamiętanym podręczniku.
+const v77Batch={running:false,stop:false,book:null,done:0,total:0};
+const v77Repairable=x=>['choice','write','listening','dictation','order','spelling','safe','shop','clock','detective','loki'].includes(x.task?.type||'choice');
+function v77BatchButton(b){const n=bookBankItems(b).filter(x=>v77Status(x)==='attention'&&v77Repairable(x)).length,disabled=v77Q.filter!=='attention'||!n||v76ReviewRunning||v77Batch.running;return `<button type="button" class="gold" data-action="v77:q-fix-all" ${disabled?'disabled':''}>🤖 Popraw automatycznie AI${n?' · '+n+' pytań':''}</button>`}
+async function v77BatchFix(){
+ if(v77Batch.running||v76ReviewRunning)return;const b=data.books.find(x=>x.id===bookId);if(!b||v77Q.filter!=='attention')return;
+ const snapshots=bookBankItems(b).filter(x=>v77Status(x)==='attention'&&v77Repairable(x)).map(x=>({key:String(x.key),task:JSON.stringify(x.task)}));if(!snapshots.length)return;
+ if(!confirm('Poprawić automatycznie '+snapshots.length+' pytań wymagających uwagi z „'+b.title+'”? Następnie AI sprawdzi zapisane poprawki. Zdjęcia, strony i wyniki pozostają bez zmian.'))return;
+ Object.assign(v77Batch,{running:true,stop:false,book:b.id,done:0,total:snapshots.length});let saved=[],failed=0,skipped=0;render();
+ try{
+  for(const snap of snapshots){if(v77Batch.stop||!data.books.some(x=>x.id===b.id))break;
+   const item=bookBankItems(b).find(x=>String(x.key)===snap.key);if(!item||JSON.stringify(item.task)!==snap.task||v77Status(item)!=='attention'){skipped++;continue}
+   v77Batch.controller=new AbortController();const result=await v77AutoFix(snap.key,null,{batch:true,book:b,controller:v77Batch.controller});v77Batch.controller=null;if(v77Batch.stop&&!result?.saved)break;if(result?.saved)saved.push(snap.key);else failed++;
+   v77Batch.done++;if(bookId===b.id){v77Q.message='Poprawianie '+v77Batch.done+'/'+v77Batch.total+' · zapisano '+saved.length+' · nieudane '+failed;const el=document.querySelector('.v75-review-progress');if(el)el.textContent=v77Q.message}
+  }
+  if(saved.length&&!v77Batch.stop&&data.books.some(x=>x.id===b.id))await v77RunReview(b,saved);
+ }finally{
+  const stopped=v77Batch.stop;v77Batch.running=false;v77Batch.book=null;
+  if(bookId===b.id&&data.books.some(x=>x.id===b.id)){const bank=bookBankItems(b),pending=saved.filter(key=>bank.some(x=>String(x.key)===key&&v77Status(x)==='unchecked')).length;v77Q.message=(stopped?'⏸ Zatrzymano. ':'✓ Zakończono poprawianie. ')+'Zapisano: '+saved.length+'. Nieudane: '+failed+'. Pominięte zmienione/usunięte: '+skipped+'. Wymagają uwagi: '+bank.filter(x=>v77Status(x)==='attention').length+'. Zapisane bez pełnej kontroli AI: '+pending+'.';v76Q.level='pages';v77Q.filter='attention';render();note(v77Q.message)}
+ }
+}
+
+async function v77SpellingChat(q,style,history=[],signal){
+ if(!/liter|spell|jak.*pisz/i.test(q))return {text:await askMentorAI(q,style,history,signal),word:''};
+ const raw=String(await askMentorAI('Odpowiedz na pytanie dziecka. Gdy prosi o pisownię lub literowanie słowa ANGIELSKIEGO, podaj ten wyraz w spellWord. Jeśli chodzi o język polski lub inny temat, spellWord ma być pusty. Nie literuj w answer: spokojne literowanie litera po literze zapewnia aplikacja. Zwróć tylko JSON {"answer":"krótkie wyjaśnienie po polsku","spellWord":"angielski wyraz lub pusty tekst"}. Pytanie: '+q,style,history,signal)).replace(/```(?:json)?/gi,'').replace(/```/g,'').trim();
+ let obj;try{obj=JSON.parse(raw.slice(raw.indexOf('{'),raw.lastIndexOf('}')+1))}catch{throw Error('Nie udało się przygotować spokojnego literowania. Spróbuj ponownie.')}
+ if(typeof obj.answer!=='string'||!obj.answer.trim()||typeof obj.spellWord!=='string'||obj.spellWord&&!/^[a-z][a-z '-]{0,34}$/i.test(obj.spellWord))throw Error('Niepełna odpowiedź o pisowni.');
+ return {text:obj.answer.trim(),word:obj.spellWord.trim()};
+}

@@ -1,5 +1,5 @@
-import {speakSequence,stopVoice,setVoiceState} from './voice.js?v=76-k4';
-import {cleanEnglish76,vocabulary76,checkedVocabulary76,englishInstruction76,makeVocabularyTasks76,spokenMatch76,englishTaskSafe76} from './english76.js?v=76-k4';
+import {speakSequence,stopVoice,setVoiceState,spellEnglish77} from './voice.js?v=77';
+import {cleanEnglish76,vocabulary76,checkedVocabulary76,englishInstruction76,makeVocabularyTasks76,spokenMatch76,englishTaskSafe76} from './english76.js?v=77';
 // V53_TEST_FIXES_01
 // V53_CONSOLIDATED_CROSSING_CHAPTERS
 // V55_FULL_REVIEW
@@ -101,7 +101,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,childG
    }}
    if(!root.isConnected||stageEpoch!==prepareEpoch)return;
    if(!pool.length)throw Error('Na wybranych stronach nie znalazłem jeszcze słówek do bezpiecznego ćwiczenia. Wybierz inną stronę albo spróbuj ponownie przy dostępnym AI.');
-   tasks=makeVocabularyTasks76(pool,rotation,10).map(t=>({...t,vocab76:true}));const extra=v77ExtraWords(chosen,Math.abs(rotation),pool);if(extra.length&&tasks.length>=7)tasks.splice(tasks.length-2,2,...extra);idx=0;points=0;award=false;mode='game';reset();remember();try{localStorage.setItem(key,String(rotation+1))}catch{}draw();
+   tasks=makeVocabularyTasks76(pool,rotation,10).map(t=>({...t,vocab76:true}));const extra=v77ExtraWords(chosen,Math.abs(rotation),pool);if(extra.length&&tasks.length>=7)tasks.splice(tasks.length-2,2,...extra);tasks=v77MixActivities(tasks,chosen,pool);idx=0;points=0;award=false;mode='game';reset();remember();try{localStorage.setItem(key,String(rotation+1))}catch{}draw();
   }catch(err){root.innerHTML='<section class="mg-panel"><h2>Nie udało się przygotować słówek</h2><p>'+escape(err.message)+'</p>'+btn('Spróbuj ponownie','start')+btn('← Wróć','back')+'</section>'}
   finally{busy=false}
  }
@@ -875,7 +875,7 @@ Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj
     for(const [question,options,ok] of basic){all.push({type:'choice',question,options,answer:options[ok],explanation:'',sourceBookId:bookId,sourceTitle:'Zabawy przedszkolaka',pageNumber:0,done:false,correct:false})}
    }
    if(!all.length)throw Error(errors.join('; ')||'Nie udało się utworzyć misji');
-   tasks=v76MixWords(all,chosen).map(t=>({...t,sourceBookId:t.sourceBookId||bookId,sourceTitle:t.sourceTitle||'Strona '+t.pageNumber}));
+   tasks=v77MixActivities(v76MixWords(all,chosen),chosen).map(t=>({...t,sourceBookId:t.sourceBookId||bookId,sourceTitle:t.sourceTitle||'Strona '+t.pageNumber}));
    idx=0;points=0;award=false;reset();remember();draw();
   }catch(err){console.warn('Tworzenie misji:',err);if(root.isConnected)root.innerHTML='<section class="mg-panel"><h2>Nie udało się przygotować misji</h2><p>Spróbuj ponownie, kiedy AI będzie dostępne.</p>'+btn('Spróbuj ponownie','start')+btn('Wróć','back')+'</section>'}
   finally{busy=false}
@@ -928,7 +928,7 @@ Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj
  }
  function tutorPanel(){
   const messages=tutorMessages.slice(-6).map(m=>'<p class="mg-tutor-message"><strong>'+(m.who==='uczen'?'Paweł':m.who==='system'?'Komunikat':'Nauczyciel AI')+':</strong> '+escape(m.text)+'</p>').join('');
-  return '<section class="mg-tutor" style="margin-top:18px;padding:14px;border:2px solid #64748b;border-radius:16px"><h3>💬 Zapytaj nauczyciela AI '+btn('🔊','tutor-instruction')+'</h3><p>Naciśnij czerwony mikrofon z boku ekranu, żeby zapytać o zadanie. Możesz też napisać pytanie.</p><div aria-live="polite">'+messages+'</div><textarea id="mg-tutor-input" rows="2" placeholder="Wpisz pytanie do nauczyciela..."></textarea>'+btn(tutorBusy?'⏳ Odpowiadam...':'Wyślij pytanie','tutor-send','mg-primary')+(task()?.v77HintDelivered&&!task()?.v77Revealed&&!answered?btn('Pokaż odpowiedź i wyjaśnij · bez monet','v77-reveal'):'')+(task()?.v77Revealed?'<p class="v77-assisted">💡 Ćwiczymy z pomocą — za to zadanie bez monet.</p>':'')+'</section>';
+  return '<details class="mg-tutor a77-help" '+(tutorMessages.length||tutorBusy?'open':'')+'><summary>💬 Zapytaj nauczyciela AI</summary><div><h3>Pomoc nauczyciela '+btn('🔊','tutor-instruction')+'</h3><p>Naciśnij czerwony mikrofon z boku ekranu, żeby zapytać o zadanie. Możesz też napisać pytanie.</p><div aria-live="polite">'+messages+'</div><textarea id="mg-tutor-input" rows="2" placeholder="Wpisz pytanie do nauczyciela..."></textarea>'+btn(tutorBusy?'⏳ Odpowiadam...':'Wyślij pytanie','tutor-send','mg-primary')+(Number(task()?.v77HintCount)>=2&&!task()?.v77Revealed&&!answered?btn('Pokaż odpowiedź i wyjaśnij · bez monet','v77-reveal'):'')+(task()?.v77Revealed?'<p class="v77-assisted">💡 Ćwiczymy z pomocą — za to zadanie bez monet.</p>':'')+'</div></details>';
  }
  function v77SafeHint(t){
   if(['listening','dictation','vocab-listen'].includes(t.type))return 'Naciśnij głośnik i posłuchaj jeszcze raz. Zwróć uwagę na pierwszy dźwięk, a potem spróbuj zapisać usłyszane słowo.';
@@ -940,7 +940,7 @@ Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj
  }
  function v77HintLeaks(text,t){
   const clean=s=>' '+String(s||'').toLocaleLowerCase('pl-PL').replace(/[^\p{L}\p{N}]+/gu,' ').trim()+' ',response=clean(text);
-  const answers=[t.answer,...(t.crossWords||[]).map(x=>x.word)];
+  const answers=[t.answer,...(t.crossWords||[]).map(x=>x.word),...(t.solutions77||[]).flatMap(x=>String(x).split(' — ')),...(t.exercises||[]).map(x=>String(x.answer))];
   return answers.some(a=>String(a||'').trim()&&response.includes(clean(a)))||/poprawna odpowiedź|odpowiedź (?:to|brzmi)|wybierz (?:pierwsz|drug|trzeci|czwart)|opcja [abcd1234]/i.test(text);
  }
  async function tutorAsk(question){
@@ -952,7 +952,9 @@ Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj
   const procedure=/\b(?:jak|gdzie|czym)\b.{0,45}(?:wpisa|zaznacz|klik|nacis|mikrofon|głośnik|przycisk|kratk|pole)|co mam zrobić|poleceni|instrukcj/i.test(q);
   const requestedSolution=/(?:podaj|pokaż|zdradź|daj|powiedz).{0,35}(?:odpowied[zź]|rozwiązani)|(?:jaka|która).{0,25}(?:poprawna|prawidłowa) odpowied[zź]|poddaję się/i.test(q);
   const stillStuck=/nie (?:wiem|umiem|potrafię|rozumiem)/i.test(q);
-  const reveal=!!t.v77HintDelivered&&(t.v77Revealed||requestedSolution||stillStuck&&!procedure);
+  const hintCount=Number(t.v77HintCount)||(t.v77HintDelivered?1:0);
+  const consent=/^(?:tak|proszę|poproszę|chcę|dobrze|okej|ok)(?:[,.! ]+(?:proszę|poproszę|chcę|odpowiedź|rozwiązanie|tak))*[.! ]*$/i.test(q)||requestedSolution||/przeliter|spell|jak.*pisz/i.test(q);
+  const reveal=!!t.v77Revealed||(hintCount>=2&&!procedure&&consent);
   const epoch=stageEpoch,current=t,currentIndex=idx,isCurrent=()=>root.isConnected&&stageEpoch===epoch&&idx===currentIndex&&task()===current;
   tutorMessages.push({who:'uczen',text:q});tutorBusy=true;t.v77Revealing=reveal;draw();
   try{
@@ -960,18 +962,20 @@ Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj
    if(reveal){
     // Pokazanie znanego rozwiązania natychmiast wyłącza monety za to zadanie.
     t.v77Revealed=true;t.v77Revealing=false;remember();
-    const answer=t.type==='crossword'?(t.crossWords||[]).map((x,i)=>(i+1)+'. '+x.word).join('; ')+'. Hasło: '+t.answer:t.type==='vocab-match'?(t.pairs||[]).map(x=>x.en+' — '+x.pl).join('; '):t.answer;
+    const answer=t.solutions77?.length?t.solutions77.join('; '):t.type==='crossword'?(t.crossWords||[]).map((x,i)=>(i+1)+'. '+x.word).join('; ')+'. Hasło: '+t.answer:t.type==='vocab-match'?(t.pairs||[]).map(x=>x.en+' — '+x.pl).join('; '):t.answer;
     response='Odpowiedź: '+answer+'. '+(t.explanation||'Przejdźmy przez rozwiązanie spokojnie, krok po kroku.')+' To zadanie ćwiczymy z pomocą, więc nie otrzymasz za nie monet.';
     const message={who:'ai',text:response};tutorMessages.push(message);draw();
     try{const extra=String(await ask('Wyjaśnij ośmiolatkowi DLACZEGO podana odpowiedź jest poprawna. Nie zmieniaj poprawnej odpowiedzi. Krótko, prosto, po polsku, do 4 zdań. Zadanie: '+t.question+'. Odpowiedź: '+answer+'. Uzasadnienie: '+(t.explanation||'')+'. Kontekst: '+pageText(t).slice(0,900),12000)).replace(/\*\*|__|[`#]/g,'').trim();if(isCurrent()&&extra){response+=' '+extra.slice(0,1000);message.text=response}}catch{}
-    if(isCurrent())speak(response,'pl-PL');
+    if(isCurrent()){const spelling=/liter|spell|jak.*pisz/i.test(q)&&subject(t)==='angielski'&&/^[a-z '-]{1,35}$/i.test(t.wordEn||t.answer||'');if(spelling)spellEnglish77(t.wordEn||t.answer,{prefix:response,isCurrent});else speak(response,'pl-PL');}
    }else{
     // W pierwszej prośbie nie przekazujemy mentorowi klucza odpowiedzi.
-    const prompt='Pomóż ośmiolatkowi rozwiązać zadanie SAMODZIELNIE. To pierwsza wskazówka: NIE PODAWAJ rozwiązania, liter odpowiedzi, numeru opcji, tłumaczenia rozwiązywanego słowa ani synonimu odpowiedzi. Daj jedną krótką wskazówkę o sposobie myślenia. Nie wybieraj żadnej z opcji. Polecenie: '+t.question+'. Typ: '+t.type+'. Prośba: '+q+'. Odpowiedz po polsku, do 3 zdań, bez markdown.';
+    const prompt='Pomóż ośmiolatkowi rozwiązać zadanie SAMODZIELNIE. Wskazówka numer '+(hintCount+1)+'. '+(hintCount?'Podaj INNĄ małą wskazówkę niż poprzednio. Poprzednia: '+String(t.v77LastHint||'')+'. ':'')+'Zasady: NIE PODAWAJ rozwiązania, liter odpowiedzi, numeru opcji, tłumaczenia rozwiązywanego słowa ani synonimu odpowiedzi. Daj jedną krótką wskazówkę o sposobie myślenia. Nie wybieraj żadnej z opcji. Polecenie: '+t.question+'. Typ: '+t.type+'. Prośba: '+q+'. Odpowiedz po polsku, do 3 zdań, bez markdown.';
     try{response=String(await ask(prompt)).replace(/\*\*|__|[`#]/g,'').trim()}catch{response=''}
     if(!isCurrent())return;
     if(!response||v77HintLeaks(response,t))response=v77SafeHint(t);
-    t.v77HintDelivered=true;remember();tutorMessages.push({who:'ai',text:response.slice(0,900)});speak(response,'pl-PL');
+    t.v77HintDelivered=true;t.v77HintCount=hintCount+1;t.v77LastHint=response;
+    if(t.v77HintCount>=2)response='Dam Ci jeszcze jedną małą podpowiedź. '+response+' Jeśli chcesz, mogę podać prawidłową odpowiedź i wyjaśnić ją. Wtedy za to zadanie nie otrzymasz monet.';
+    remember();tutorMessages.push({who:'ai',text:response.slice(0,1400)});speak(response,'pl-PL');
    }
   }finally{if(isCurrent()){t.v77Revealing=false;tutorBusy=false;draw()}}
  }
@@ -1035,7 +1039,7 @@ Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj
  // V75_AUDYT_ZGODNOSCI_2
  function v75InstructionSpeech(t,mode){return v76SayInstruction(t)}
 function stage(){
-  const t=task();if(['vocab-build','vocab-match'].includes(t.type))return v77WordGameStage(t);if(t.vocab76)return v76WordStage(t);let html='<style>.mg-panel [data-mg]{transition:transform .13s ease,filter .13s ease,box-shadow .13s ease}.mg-panel [data-mg]:active{transform:scale(.94);filter:brightness(1.35)}.mg-panel [data-mg]:focus-visible{outline:3px solid #fbbf24;outline-offset:3px}.mg-panel input:focus,.mg-panel textarea:focus{outline:3px solid #fbbf24}.mg-panel .mg-feedback{animation:mg-pop .35s ease-out}@keyframes mg-pop{from{opacity:.2;transform:scale(.94)}to{opacity:1;transform:scale(1)}}</style><h3>'+escape(t.question)+'</h3>'+ (subject(t)==='angielski'&&mode!=='test'&&t.questionPl?'<p class="mg-translation">🇵🇱 '+escape(t.questionPl)+'</p>':'');
+  const t=task();if(t.visual77)return v77VisualStage(t);if(['vocab-build','vocab-match'].includes(t.type))return v77WordGameStage(t);if(t.vocab76)return v76WordStage(t);let html='<style>.mg-panel [data-mg]{transition:transform .13s ease,filter .13s ease,box-shadow .13s ease}.mg-panel [data-mg]:active{transform:scale(.94);filter:brightness(1.35)}.mg-panel [data-mg]:focus-visible{outline:3px solid #fbbf24;outline-offset:3px}.mg-panel input:focus,.mg-panel textarea:focus{outline:3px solid #fbbf24}.mg-panel .mg-feedback{animation:mg-pop .35s ease-out}@keyframes mg-pop{from{opacity:.2;transform:scale(.94)}to{opacity:1;transform:scale(1)}}</style><h3>'+escape(t.question)+'</h3>'+ (subject(t)==='angielski'&&mode!=='test'&&t.questionPl?'<p class="mg-translation">🇵🇱 '+escape(t.questionPl)+'</p>':'');
   const q=String(t.question||'').toLocaleLowerCase('pl-PL');
   const storyHint=/(czytank|tekst|wiersz|opowiadani|bohater|autor|narrator|histori|według|na podstawie|co (?:się|robi|zrobił|zrobiła|zauważył|powiedział|woła|nawołuje)|kto (?:powiedział|woła|spotkał|zobaczył|zrobił)|dlaczego|w jaki sposób|co wydarzyło|o czym)/i.test(q);
   const noSource=['reading','wordsearch','crossword','rebus','syllables','dictation','listening','spelling','order'].includes(t.type)||/(sylab|głosk|samogłosk|spółgłosk|liter|alfabet|ortografi|wyraz[ieyu]? [„"'])/i.test(q);
@@ -1126,7 +1130,7 @@ function stage(){
  function draw(){
   if(idx>=tasks.length)return finish();
   const t=task();
-  const names={safe:'🔐 Sejf Iron Mana',shop:'🛒 Sklep Avengersów',clock:'⏰ Zegar misji',detective:'🕵️ Detektyw Spider-Mana',loki:'🦹 Bitwa z Lokim',reading:'🎙️ Laboratorium czytania',order:'🧩 Szyfr Avengersów',dictation:'✍️ Dyktando Kapitana',syllables:'🔠 Sylaby i głoski','vocab-choice':'🃏 Słówka · wybierz','vocab-write':'✍️ Słówka · napisz','vocab-speak':'🎙️ Słówka · powiedz','vocab-repeat':'🗣️ Słówka · powtórz','vocab-meaning':'💡 Słówka · znaczenie','vocab-listen':'🎧 Słówka · posłuchaj','vocab-reading':'📖 Słówka · przeczytaj','vocab-build':'🧩 Złóż słowo ze słuchu','vocab-match':'🔗 Połącz słówka',crossword:'📝 Krzyżówka',choice:'⚡ Zagadka bohatera',listening:'🎧 Misja słuchowa',memory:'🃏 Memory',spelling:'✍️ Pisownia',rebus:'🧩 Rebus Avengersów',memory:'🃏 Memory',"reading-mini":'🎙️ Czytaj słowo po słowie'};
+  const names={safe:'🔐 Sejf Iron Mana',shop:'🛒 Sklep Avengersów',clock:'⏰ Zegar misji',detective:'🕵️ Detektyw Spider-Mana',loki:'🦹 Bitwa z Lokim',reading:'🎙️ Laboratorium czytania',order:'🧩 Szyfr Avengersów',dictation:'✍️ Dyktando Kapitana',syllables:'🔠 Sylaby i głoski','vocab-choice':'🃏 Słówka · wybierz','vocab-write':'✍️ Słówka · napisz','vocab-speak':'🎙️ Słówka · powiedz','vocab-repeat':'🗣️ Słówka · powtórz','vocab-meaning':'💡 Słówka · znaczenie','vocab-listen':'🎧 Słówka · posłuchaj','vocab-reading':'📖 Słówka · przeczytaj','vocab-build':'🧩 Złóż słowo ze słuchu','vocab-match':'🔗 Połącz słówka',gallery77:'Galeria słów',radar77:'Radar słuchowy',command77:'Wykonaj polecenie',scene77:'Ustaw scenę',sort77:'Sortownia słów',detective77:'Detektyw tekstu',mosaic77:'Mozaika matematyczna',workshop77:'Warsztat liczenia',crossword:'📝 Krzyżówka',choice:'⚡ Zagadka bohatera',listening:'🎧 Misja słuchowa',memory:'🃏 Memory',spelling:'✍️ Pisownia',rebus:'🧩 Rebus Avengersów',memory:'🃏 Memory',"reading-mini":'🎙️ Czytaj słowo po słowie'};
   root.innerHTML=`<section class="mg-panel v77-play"><header class="mg-header"><div class="v77-adventure-art" aria-hidden="true"><span class="v77-rocket">🚀</span><span class="v77-star s1">✦</span><span class="v77-star s2">✧</span></div><small>${mode==='test'?'🏆 PRÓBNY SPRAWDZIAN':'⚡ MISJA SPECJALNA'} · ${escape(t.sourceTitle||('STRONA '+(t.pageNumber||'?')))}</small>${btn('🔊 Odczytaj polecenie','read-instruction')}<h2>${t.type==='reading'?'📜 Tajny przekaz Avengersów':t.type==='loki'?'🦹 Pułapka Lokiego':t.type==='detective'?'🕵️ Detektyw Spider-Mana':t.type==='wordsearch'?'🔎 Wykreślanka':t.type==='draw'?'🎨 Misja rysunkowa':names[t.type]||'🎮 Misja bohatera'}</h2><p>Wyzwanie ${idx+1} z ${tasks.length}</p><div class="mg-bar"><div style="width:${Math.round(idx/tasks.length*100)}%"></div></div>${btn('⏸ Stop / zapisz','pause')}</header><div class="v77-task-surface">${stage()}</div></section>`;
   const canvas=root.querySelector('#mg-draw');if(canvas){const ctx=canvas.getContext('2d');ctx.lineWidth=4;ctx.lineCap='round';let painting=false;const point=e=>{const r=canvas.getBoundingClientRect();return [(e.clientX-r.left)*canvas.width/r.width,(e.clientY-r.top)*canvas.height/r.height]};canvas.onpointerdown=e=>{painting=true;canvas.setPointerCapture(e.pointerId);ctx.beginPath();ctx.moveTo(...point(e))};canvas.onpointermove=e=>{if(painting){ctx.lineTo(...point(e));ctx.stroke()}};canvas.onpointerup=()=>painting=false;}
  }
@@ -1184,6 +1188,7 @@ function stage(){
  root.addEventListener('click',ev=>{
   const b=ev.target.closest('[data-mg]');if(!b||busy)return;
   const act=b.dataset.mg,t=task();
+  if(act.startsWith('a77-'))return v77VisualAction(act,t);
   if(act.startsWith('v77-')&&act!=='v77-reveal')return v77GameAction(act,t);
   if(act==='v77-reveal')return tutorAsk('Podaj odpowiedź i wyjaśnij dlaczego.');
   if(act==='v76-word-model')return t?.vocab76?v76WordModel(t):undefined;
@@ -1318,6 +1323,80 @@ function stage(){
   if(act==='v77-letter-check')return answer(t.picked.map(i=>t.letters[i]).join(''));
   if(act.startsWith('v77-pair-left:')){const i=Number(act.slice(14));if(Number.isInteger(i)&&t.pairs[i]&&!t.matched.includes(i)){t.left=i;t.miss=false;draw()}return}
   if(act.startsWith('v77-pair-right:')){const i=Number(act.slice(15));if(t.left===null||!t.pairs[i]||t.matched.includes(i))return;if(t.left===i){t.matched.push(i);t.left=null;t.miss=false;audioCue(true);if(t.matched.length===t.pairs.length)return answer(t.answer)}else{t.miss=true;t.left=null;wrongAttempts++;audioCue(false)}return draw()}
+ }
+
+ // V77: gry budowane wyłącznie z odczytanej, wybranej strony.
+ const v77Illustrated={cat:['kot','kot'],dog:['pies','pies'],sun:['słońce','słońce'],house:['dom','dom'],book:['książka','książka'],tree:['drzewo','drzewo'],bird:['ptak','ptak'],fish:['ryba','ryba'],apple:['jabłko','jabłko'],water:['woda','woda'],milk:['mleko','mleko'],car:['samochód','samochód'],ball:['piłka','piłka'],flower:['kwiat','kwiat'],school:['szkoła','szkoła'],'t shirt':['koszulka','koszulka'],shirt:['koszula','koszula'],skirt:['spódnica','spódnica'],shorts:['szorty','szorty'],trousers:['spodnie','spodnie'],dress:['sukienka','sukienka'],shoes:['buty','buty'],hat:['czapka','czapka'],socks:['skarpetki','skarpetki'],listen:['słuchać','słucha'],think:['myśleć','myśli'],say:['powiedzieć','mówi'],ask:['zapytać','pyta'],write:['pisać','pisze'],read:['czytać','czyta']};
+ const v77Has=(text,word)=>(' '+String(text||'').toLocaleLowerCase('pl-PL').replace(/[^\p{L}\p{N}]+/gu,' ').trim()+' ').includes(' '+word.toLocaleLowerCase('pl-PL')+' ');
+ function v77Art(key){
+  const nounAssets=['cat','dog','sun','house','book','tree','bird','fish','apple','water','milk','car','ball','flower','school'];
+  const title=v77Illustrated[key]?.[0]||'Ilustracja';
+  if(nounAssets.includes(key))return '<img class="a77-picture" src="assets/art/vocab-'+key+'.svg" alt="'+escape(title)+'" draggable="false">';
+  const clothes={'t shirt':'<path d="M55 31l-31 20 17 29 17-9v69h65V71l17 9 17-29-32-20-20 10H76Z" fill="#9dd09c"/><path d="M76 32q14 27 29 0" fill="none"/>',shirt:'<path d="M55 31l-31 20 17 29 17-9v69h65V71l17 9 17-29-32-20-20 10H76Z" fill="#50c9d3"/><path d="M76 32l-7 19 17-8 5 11 5-11 17 8-8-19M91 54v80" fill="none"/><circle cx="98" cy="75" r="2"/><circle cx="98" cy="91" r="2"/>',skirt:'<path d="M61 38h59l28 102H32Z" fill="#e885bc"/><path d="M62 38h58v15H62Z" fill="#9770cc"/><path d="M73 58l-12 72m34-72v72m12-72 15 72" fill="none"/>',shorts:'<path d="M47 43h86l5 82H98l-8-38-8 38H42Z" fill="#f3bb50"/><path d="M47 44h86v15H47M90 62v25M59 63q0 20-13 20m75-20q0 20 13 20" fill="none"/>',trousers:'<path d="M52 27h76l5 121h-32L90 75 79 148H47Z" fill="#6b9ae2"/><path d="M52 27h76v14H52M90 45v30M62 45q0 15-11 16m66-16q0 15 11 16" fill="none"/>',dress:'<path d="M62 25l-19 35 20 12-30 75h115l-31-75 20-12-20-35-15 15H77Z" fill="#ad87e7"/><path d="M63 72h54M77 26q12 32 25 0" fill="none"/>',shoes:'<path d="M25 85l17-28 32 11 12 38-2 23H22q-9-22 3-44M104 71l27-14 26 28q12 22 1 44H96l-2-23Z" fill="#ec7775"/><path d="M22 116h64m10 0h63M43 78l23 8m-27 5 32 9m50-22 23 9m-27 5 31 9" fill="none"/>',hat:'<path d="M44 105V80q0-47 46-47t46 47v25Z" fill="#ffc65c"/><path d="M30 100h119q15 4 8 18H24q-9-14 6-18" fill="#f18c76"/><circle cx="90" cy="28" r="13" fill="#b68cdd"/>',socks:'<path d="M41 31h35v72l-25 34q-28 7-30-16l20-26ZM107 31h35v72l-25 34q-28 7-30-16l20-26Z" fill="#67d6ad"/><path d="M41 48h35m31 0h35M28 106l24 17m42-17 24 17" fill="none"/>'};
+  const faces='<circle cx="85" cy="62" r="29" fill="#ffd3a7"/><path d="M57 55q4-38 45-21l11 22-31-12Z" fill="#66508b"/><circle cx="75" cy="61" r="2"/><circle cx="95" cy="61" r="2"/><path d="M72 95q13-10 27 0l17 54H51Z" fill="#62b9d7"/>';
+  const scenes={listen:faces+'<path d="M53 69V54q31-43 63 0v15" fill="none" stroke="#a17de0" stroke-width="9"/><rect x="46" y="57" width="13" height="29" rx="6" fill="#a17de0"/><rect x="109" y="57" width="13" height="29" rx="6" fill="#a17de0"/><path d="M136 49q18 18 0 36m12-49q27 31 0 62" fill="none" stroke="#efac3f"/>',think:faces+'<path d="M72 77q13 7 26 0" fill="none"/><circle cx="120" cy="29" r="5" fill="#fff"/><path d="M126 17q-18-17 6-21 18-8 24 8 20 20-1 27-16 9-29-14" fill="#fff"/><text x="135" y="19" fill="#7958b0" stroke="none" font-size="28" font-weight="900">?</text>',say:faces+'<ellipse cx="86" cy="77" rx="7" ry="6" fill="#aa5475"/><path d="M123 58q17 14 0 29m12-38q26 24 0 47" fill="none" stroke="#d88cc0"/>',ask:faces+'<path d="M103 105l33-40V39m-9 4 9 8 8-12" fill="none" stroke="#ffd3a7" stroke-width="12"/><text x="129" y="28" fill="#9572d6" stroke="none" font-size="33" font-weight="900">?</text>',write:'<rect x="29" y="24" width="109" height="126" rx="12" fill="#fff"/><path d="M43 54h55M43 73h43M43 92h30" stroke="#8caccb"/><path d="M75 123l58-79 15 13-58 79-23 8Z" fill="#ffc55d"/><path d="M67 144l8-21 15 13Z" fill="#715687"/>',read:faces+'<path d="M19 91q34-16 65 3 33-20 70-3v62q-35-17-70 1-31-17-65-1Z" fill="#ffdc88"/><path d="M84 94v60M31 109l39 5m27-1 43-5M32 128l37 5m29-1 41-5" fill="none"/>'};
+  const body=clothes[key]||scenes[key];if(!body)return '';
+  return '<svg class="a77-picture" viewBox="0 -8 180 180" role="img" aria-label="'+escape(title)+'"><rect x="3" y="0" width="174" height="164" rx="28" fill="#f0f9ff"/><g stroke="#385571" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">'+body+'</g></svg>';
+ }
+ function v77SourceVocabulary(p){const en=/ang|english/i.test(sourceBook(p)?.subject||'');return Object.entries(v77Illustrated).filter(([key,[pl,form]])=>v77Has(en&&key==='shirt'?String(p.text).replace(/\bt[ -]shirts?\b/gi,' '):p.text,en?key:form)).map(([key,[pl,form]])=>({key,label:en?key:form,pl,en:key,sourcePageId:p.id}));}
+ function v77SourceMath(text){const found=[],seen=new Set();for(const m of String(text||'').matchAll(/(?<![\d.,])(\d{1,2})\s*([+−\-×*])\s*(\d{1,2})\s*=\s*(\d{1,3}|\?|_+)?/g)){const a=+m[1],b=+m[3],op=m[2],n=op==='+'?a+b:op==='-'||op==='−'?a-b:a*b,key=a+op+b;if(n<0||n>100||seen.has(key)||m[4]&&/^\d+$/.test(m[4])&&+m[4]!==n)continue;seen.add(key);found.push({a,b,op:op==='*'?'×':op,answer:n,label:a+' '+(op==='*'?'×':op)+' '+b})}return found;}
+ function v77Garden(){return '<svg viewBox="0 0 400 250" aria-label="Kolorowy ogród" role="img"><rect width="400" height="250" fill="#c8efff"/><circle cx="325" cy="47" r="27" fill="#ffd56d"/><path d="M0 180Q100 100 220 180Q320 130 400 170V250H0" fill="#6bd6a0"/><path d="M55 190V85" stroke="#a07959" stroke-width="15"/><g fill="#3cac8d"><circle cx="55" cy="72" r="36"/><circle cx="30" cy="95" r="29"/><circle cx="80" cy="98" r="29"/></g><path d="M170 195v-72h94v72Z" fill="#fff1c4"/><path d="M153 128l66-53 64 53Z" fill="#e98599"/><rect x="207" y="150" width="24" height="45" rx="4" fill="#7c8ed0"/><g fill="#fff"><ellipse cx="135" cy="45" rx="40" ry="15"/><ellipse cx="174" cy="39" rx="30" ry="19"/></g><g stroke="#47996d" stroke-width="4"><path d="M295 231v-30m36 28v-41"/></g><g fill="#ef9ed6"><circle cx="295" cy="196" r="12"/><circle cx="331" cy="182" r="13"/></g></svg>';}
+ function v77ActivityPool(ps,rotation=0){const out=[];
+  for(const p of ps){const en=/ang|english/i.test(sourceBook(p)?.subject||''),subjectName=String(sourceBook(p)?.subject||'').toLocaleLowerCase('pl-PL'),words=v77SourceVocabulary(p),rotated=words.length?[...words.slice(rotation%words.length),...words.slice(0,rotation%words.length)]:[],items=rotated.slice(0,4);
+   const base={visual77:true,sourcePageId:p.id,sourceBookId:p.bookId,sourceTitle:sourceLabel(p),pageNumber:p.number,options:[],done:false,correct:false};
+   const add=(type,question,questionPl,answer,extra={})=>out.push({...base,type,question,questionPl,answer:String(answer),...extra});
+   if(items.length>=3){
+    add('gallery77',en?'Match the words to the pictures.':'Dopasuj podpisy do obrazków.',en?'Dopasuj angielskie podpisy do obrazków.':'','Wszystkie pary',{items,right:shuffle(items.map((_,i)=>i)),matched:[],left:null,miss:false,solutions77:items.map(x=>x.label+' — '+x.pl)});
+    const target=items[rotation%items.length];add('radar77',en?'Listen and choose the picture.':'Posłuchaj i wybierz obrazek.',en?'Posłuchaj i wybierz pasujący obrazek.':'',target.key,{items:shuffle(items),audio:target.label,solutions77:[target.label+' — '+target.pl]});
+    const objects=rotated.filter(x=>!['listen','think','say','ask','write','read'].includes(x.key)).slice(0,4),objectTarget=objects[rotation%Math.max(1,objects.length)];if(en&&v77Has(p.text,'circle')&&objects.length>=3)add('command77','Circle the '+objectTarget.label+'.','Otocz kółkiem: '+objectTarget.pl+'.',objectTarget.key,{items:shuffle(objects),solutions77:[objectTarget.label+' — '+objectTarget.pl]});
+   }
+   const object=rotated.find(x=>['cat','dog','ball','apple','book'].includes(x.key)),relations=['on','in','under','next to'].filter(x=>v77Has(p.text,x));
+   if(en&&object&&relations.length&&v77Has(p.text,'box')){const target=relations[rotation%relations.length];add('scene77','Put the '+object.label+' '+target+' the box.','Umieść '+({cat:'kota',dog:'psa',apple:'jabłko',ball:'piłkę',book:'książkę'}[object.key]||object.pl)+' '+({'on':'na pudełku','in':'w pudełku','under':'pod pudełkiem','next to':'obok pudełka'}[target])+'.',target,{object,placed:null,solutions77:[object.label+' '+target+' the box']});}
+   if(/polsk/.test(subjectName)){
+    const cats=[['Rzeczowniki',['kot','pies','dom','las','ryba','drzewo','szkoła','książka','kwiat','piłka']],['Czasowniki',['czyta','pisze','biega','śpiewa','rysuje','rośnie','słucha','skacze','mówi']],['Przymiotniki',['mały','mała','duży','duża','zielony','zielona','czerwony','czerwona','wysoki','wysoka']]];
+    const tokens=cats.flatMap(([category,list],index)=>list.filter(x=>v77Has(p.text,x)).map(word=>({word,category,index}))).slice(0,8);
+    if(tokens.length>=3&&new Set(tokens.map(x=>x.index)).size>=2)add('sort77','Przenieś wyrazy do właściwych skrzyń.','','Wszystkie wyrazy',{tokens:shuffle(tokens),categories:cats.map(x=>x[0]),sorted:[],selected:null,miss:false,solutions77:tokens.map(x=>x.word+' — '+x.category)});
+    const bank=readBank().filter(x=>v75MatchesPage(x,p)&&x.task?.needsSource===true&&x.task?.answer),candidate=bank.find(x=>{const ss=String(p.text).match(/[^.!?]+[.!?]+|[^.!?]+$/g)||[];return ss.filter(s=>visibleInText(s,x.task.answer)).length===1});
+    if(candidate){const sentences=(String(p.text).match(/[^.!?]+[.!?]+|[^.!?]+$/g)||[]).map(s=>s.trim()).filter(Boolean),proof=sentences.find(s=>visibleInText(s,candidate.task.answer));if(proof&&sentences.length>=3)add('detective77','Znajdź zdanie, które uzasadnia odpowiedź: '+candidate.task.question,'',proof,{sentences:shuffle([proof,...sentences.filter(s=>s!==proof).slice(0,3)]),solutions77:[proof]});}
+   }
+   if(/matemat/.test(subjectName)){
+    const sums=v77SourceMath(p.text);if(sums.length>=3){const exercises=[...sums.slice(rotation%sums.length),...sums.slice(0,rotation%sums.length)].slice(0,6);add('mosaic77','Rozwiąż działania i odkryj ilustrację.','','Mozaika odkryta',{exercises:exercises.map(ex=>({...ex,choices:shuffle([ex.answer,ex.answer+1,ex.answer?ex.answer-1:ex.answer+3,ex.answer+2])})),at:0,miss:false,solutions77:exercises.map(x=>x.label+' = '+x.answer)});}
+    const sum=sums.find(x=>x.answer<=20);if(sum)add('workshop77','Włóż do skrzyni tyle kryształów, ile wynosi '+sum.label+'.','',''+sum.answer,{sum,count:0,solutions77:[sum.label+' = '+sum.answer]});
+   }
+  }
+  return out;
+ }
+ function v77MixActivities(all,ps,explicitPool=null){if(mode==='test'||childGrade==='P')return all;const key='academy-v77-activity-rotation-'+child+'-'+ps.map(p=>p.id).join('|').slice(0,180);let at=0;try{at=Number(localStorage.getItem(key)||0)||0}catch{}const pool=v77ActivityPool(ps,Math.abs(at));if(!pool.length)return all;
+  const byType=[...new Map(pool.map(t=>[t.type,t])).values()],rotated=[...byType.slice(Math.abs(at)%byType.length),...byType.slice(0,Math.abs(at)%byType.length)],result=[...all],slots=[0,3,6];
+  for(let i=0;i<Math.min(slots.length,rotated.length);i++){if(slots[i]<result.length)result[slots[i]]=rotated[i];else if(result.length<10)result.push(rotated[i])}try{localStorage.setItem(key,String(at+1))}catch{}return result;
+ }
+ function v77VisualStage(t){let html='<div class="a77-board a77-'+t.type+'"><h3>'+escape(t.question)+'</h3>'+(subject(t)==='angielski'&&t.questionPl?'<p class="mg-translation">'+escape(t.questionPl)+'</p>':'');
+  if(t.type==='gallery77'){html+='<p class="a77-instruction">Dotknij podpisu, potem pasującego obrazka.</p><div class="a77-matching"><div class="a77-labels">'+t.items.map((x,i)=>'<button data-mg="a77-left:'+i+'" '+(t.matched.includes(i)||answered?'disabled':'')+' aria-pressed="'+(t.left===i)+'">'+escape(x.label)+(t.matched.includes(i)?' ✓':'')+'</button>').join('')+'</div><div class="a77-images">'+t.right.map(i=>'<button data-mg="a77-right:'+i+'" '+(t.matched.includes(i)||answered?'disabled':'')+' aria-label="'+escape(t.items[i].pl)+'">'+v77Art(t.items[i].key)+(t.matched.includes(i)?'<span class="a77-check">✓</span>':'')+'</button>').join('')+'</div></div>';}
+  if(['radar77','command77'].includes(t.type)){if(t.type==='radar77')html+='<div class="a77-radar"><div class="a77-radar-rings" aria-hidden="true"></div>'+btn('🔊 Posłuchaj','a77-audio','mg-primary')+'</div>';html+='<div class="a77-picture-choices">'+t.items.map((x,i)=>'<button class="'+(t.type==='command77'&&answered&&x.key===t.answer?'a77-circled':'')+'" data-mg="a77-picture:'+i+'" aria-label="'+escape(x.pl)+'" '+(answered?'disabled':'')+'>'+v77Art(x.key)+(answered&&x.key===t.answer?'<span class="a77-check">✓</span>':'')+'</button>').join('')+'</div>';}
+  if(t.type==='scene77'){html+='<p class="a77-instruction">Dotknij wybranego miejsca, aby umieścić tam obrazek.</p><div class="a77-object">'+v77Art(t.object.key)+'</div><div class="a77-room"><div class="a77-box" aria-hidden="true"></div>'+['on','in','under','next to'].map((pos,i)=>'<button class="a77-zone zone-'+i+'" data-mg="a77-zone:'+i+'" aria-label="'+['Na pudełku','W pudełku','Pod pudełkiem','Obok pudełka'][i]+'" '+(answered?'disabled':'')+'>'+(t.placed===pos?v77Art(t.object.key):'<span aria-hidden="true">＋</span>')+'</button>').join('')+'</div>'+btn('✓ Sprawdź ustawienie','a77-scene-check','mg-primary');}
+  if(t.type==='sort77'){html+='<div class="a77-sort-words">'+t.tokens.map((x,i)=>'<button data-mg="a77-token:'+i+'" aria-pressed="'+(t.selected===i)+'" '+(t.sorted.includes(i)||answered?'disabled':'')+'>'+escape(x.word)+'</button>').join('')+'</div><div class="a77-crates">'+t.categories.map((category,i)=>'<button data-mg="a77-crate:'+i+'" '+(answered?'disabled':'')+'><span class="a77-crate-art" aria-hidden="true"></span><strong>'+escape(category)+'</strong><small>'+escape(t.sorted.filter(j=>t.tokens[j].index===i).map(j=>t.tokens[j].word).join(', '))+'</small></button>').join('')+'</div><p class="a77-instruction">Dotknij wyrazu, a potem skrzyni.</p>';}
+  if(t.type==='detective77'){html+='<div class="a77-detective-art" aria-hidden="true"><span></span><i></i></div><div class="a77-evidence">'+t.sentences.map((s,i)=>'<button data-mg="a77-evidence:'+i+'" '+(answered?'disabled':'')+'>'+escape(s)+'</button>').join('')+'</div>';}
+  if(t.type==='mosaic77'){const n=t.exercises.length,ex=t.exercises[t.at];html+='<div class="a77-mosaic">'+v77Garden()+'<div class="a77-covers" style="--tiles:'+n+'">'+Array.from({length:n},(_,i)=>'<span class="'+(i<t.at?'a77-uncovered':'')+'" aria-hidden="true">✦</span>').join('')+'</div></div><p class="a77-round">Odkryto '+t.at+' z '+n+' fragmentów</p>';if(ex){const choices=ex.choices;html+='<div class="a77-equation">'+escape(ex.label)+' = ?</div><div class="a77-numbers">'+choices.map(value=>btn(String(value),'a77-number:'+value)).join('')+'</div>';}}
+  if(t.type==='workshop77'){html+='<div class="a77-equation">'+escape(t.sum.label)+' = ?</div><div class="a77-treasure" aria-label="Kryształy w skrzyni">'+Array.from({length:t.count},()=>'<span class="a77-gem" aria-hidden="true"></span>').join('')+'</div><p>W skrzyni: <strong>'+t.count+'</strong></p><div class="a77-workshop-tools">'+btn('＋ Dołóż kryształ','a77-add')+btn('− Zabierz kryształ','a77-remove')+'</div>'+btn('✓ Sprawdź skrzynię','a77-count-check','mg-primary');}
+  if(t.miss&&!answered)html+='<p class="a77-try" role="status">Jeszcze nie. Spróbuj ponownie — wybrane elementy możesz zmienić.</p>';
+  if(answered)html+='<div class="a77-finish" role="status"><span aria-hidden="true">✦</span> Brawo! Gotowe.</div>'+btn(idx===tasks.length-1?'🏆 Zakończ misję':'➡️ Następne zadanie','next','mg-primary');else html+=btn('Pomiń bez zaliczenia — następne zadanie','skip');
+  return html+'</div>'+tutorPanel();
+ }
+ function v77VisualAction(act,t){if(!t?.visual77||answered)return;const pick=Number(act.slice(act.indexOf(':')+1));
+  const miss=()=>{t.miss=true;wrongAttempts++;audioCue(false);remember();draw()};
+  const done=()=>{t.miss=false;answer(t.answer)};
+  if(act==='a77-audio')return speakSequence([{text:t.audio,lang:subject(t)==='angielski'?'en-US':'pl-PL',rate:.76}],{isCurrent:()=>root.isConnected&&task()===t});
+  if(act.startsWith('a77-left:')){if(t.items[pick]&&!t.matched.includes(pick)){t.left=pick;t.miss=false;draw()}return}
+  if(act.startsWith('a77-right:')){if(t.left===null||!t.items[pick]||t.matched.includes(pick))return;if(t.left===pick){t.matched.push(pick);t.left=null;t.miss=false;audioCue(true);if(t.matched.length===t.items.length)return done();remember();draw()}else{t.left=null;miss()}return}
+  if(act.startsWith('a77-picture:')){const x=t.items[pick];if(!x)return;return x.key===t.answer?done():miss()}
+  if(act.startsWith('a77-zone:')){const pos=['on','in','under','next to'][pick];if(pos){t.placed=pos;t.miss=false;remember();draw()}return}
+  if(act==='a77-scene-check')return t.placed===t.answer?done():miss();
+  if(act.startsWith('a77-token:')){if(t.tokens[pick]&&!t.sorted.includes(pick)){t.selected=pick;t.miss=false;draw()}return}
+  if(act.startsWith('a77-crate:')){const selected=t.selected;if(selected===null||!t.tokens[selected])return;if(t.tokens[selected].index===pick){t.sorted.push(selected);t.selected=null;t.miss=false;audioCue(true);if(t.sorted.length===t.tokens.length)return done();remember();draw()}else{t.selected=null;miss()}return}
+  if(act.startsWith('a77-evidence:'))return t.sentences[pick]===t.answer?done():miss();
+  if(act.startsWith('a77-number:')){const ex=t.exercises[t.at];if(!ex)return;if(ex.answer!==pick)return miss();t.at++;t.miss=false;audioCue(true);if(t.at===t.exercises.length)return done();remember();draw();return}
+  if(act==='a77-add'||act==='a77-remove'){t.count=Math.max(0,Math.min(22,t.count+(act==='a77-add'?1:-1)));t.miss=false;remember();draw();return}
+  if(act==='a77-count-check')return t.count===+t.answer?done():miss();
  }
 
  if(batchGenerate){
