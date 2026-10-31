@@ -29,9 +29,9 @@ Każda mini-gra jest jednym zadaniem. Podetapy nie przyznają dodatkowych Kredyt
 
 ## Weryfikacja
 
-367 kontroli automatycznych zakończonych bez błędów:
+368 kontroli automatycznych zakończonych bez błędów:
 
-- tests/v81.cjs: 64 — wszystkie 12 mechanik w obu trybach, błędy, zakres źródłowy, wznowienie, nagrody, pomoc.
+- tests/v81.cjs: 65 — wszystkie 12 mechanik w obu trybach, błędy, zakres źródłowy, wznowienie, nagrody, pomoc.
 - tests/v80.cjs: 52 — poprzednie gry, słówka, losowanie, zasoby offline i izolacja.
 - tests/v79.cjs: 43 — czytanie, słuchanie, symulowany kanał mowy Androida.
 - tests/legacy/test.cjs: 176 — panel mamy, materiały, działy, generator, kontrola pytań, nawigacja, misje i uprawnienia.
