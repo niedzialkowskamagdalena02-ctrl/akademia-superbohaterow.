@@ -16,7 +16,6 @@ export const BASE_ITEMS=[
 {id:'inventor',name:'Spider-Man',icon:'🕷️',cost:90,zone:'team',type:'bohater'},
 {id:'shadow',name:'Hulk',icon:'💚',cost:85,zone:'team',type:'bohater'},
 {id:'cosmo',name:'Thor',icon:'⚡',cost:110,zone:'team',type:'bohater'},
-,
 {id:'vibranium',name:'Pazury Czarnej Pantery',icon:'🐾',cost:20,zone:'armory',type:'gadżet'},
 {id:'thorhammer',name:'Młot Thora',icon:'🔨',cost:35,zone:'armory',type:'broń'},
 {id:'spidermask',name:'Maska Spider-Mana',icon:'🕷️',cost:15,zone:'armory',type:'maska'},
