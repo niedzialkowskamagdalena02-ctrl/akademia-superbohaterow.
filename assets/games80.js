@@ -31,11 +31,11 @@ export function buildGames80(pool,round=0){
  }
  return out;
 }
-function picture80(x,art){if(PICTURES80[x.en])return '<img class="g80-picture80" src="assets/games80/pictures/'+PICTURES80[x.en]+'" alt="'+esc80(x.pl)+'" draggable="false">';const visual=basicArt80.has(x.en)?art(x.en):'';return visual||'<span class="g80-emoji" role="img" aria-label="'+esc80(x.pl)+'">'+esc80(x.picture||'')+'</span>';}
+function picture80(x,art){if(x.cue82)return '<div class="subject82-cue">'+esc80(x.cue82)+'</div>';if(PICTURES80[x.en])return '<img class="g80-picture80" src="assets/games80/pictures/'+PICTURES80[x.en]+'" alt="'+esc80(x.pl)+'" draggable="false">';const visual=basicArt80.has(x.en)?art(x.en):'';return visual||'<span class="g80-emoji" role="img" aria-label="'+esc80(x.pl)+'">'+esc80(x.picture||'')+'</span>';}
 const button80=(label,action,cls='',attrs='')=>'<button type="button" class="'+cls+'" data-mg="g80-'+action+'" '+attrs+'>'+label+'</button>';
 export function renderGame80(t,{answered=false,mode='game',art=()=>''}={}){
  const k=t.game80,locked=answered?'disabled':'',picture=x=>picture80(x,art),chef='<img class="g80-chef" src="assets/games80/chef.webp" alt="Przyjazny potworek kucharz" draggable="false">';
- let html='<section class="g80-board g80-'+k+(answered?' g80-complete':'')+'"><div class="g80-heading"><span>PRZYGODA ZE SŁÓWKAMI</span><h3>'+esc80(GAME_TITLES80[k])+'</h3></div><p class="g80-en" lang="en">'+esc80(t.question)+'</p><p class="g80-instruction">'+esc80(t.questionPl)+'</p>';
+ let html='<section class="g80-board g80-'+k+(answered?' g80-complete':'')+'"><div class="g80-heading"><span>'+(t.subject82==='matematyka'?'PRZYGODA Z MATEMATYKĄ':t.subject82==='polski'?'PRZYGODA Z POLSKIM':'PRZYGODA ZE SŁÓWKAMI')+'</span><h3>'+esc80(GAME_TITLES80[k])+'</h3></div><p class="g80-en" lang="en">'+esc80(t.question)+'</p><p class="g80-instruction">'+esc80(t.questionPl)+'</p>';
  if(k==='kitchen')html+='<div class="g80-kitchen-scene">'+chef+'<div class="g80-order">'+button80('🔊 Posłuchaj zamówienia','sound','mg-primary')+'<p>Zamówienie: '+t.progress80+' / '+t.amount80+'</p><div class="g80-bowl" aria-hidden="true">'+('✦'.repeat(t.progress80))+'</div></div></div><div class="g80-shelf">'+t.items80.map((x,i)=>button80(picture(x)+'<span lang="en">'+esc80(x.en)+'</span>','item:'+i,'g80-food',locked)).join('')+'</div>';
  if(k==='island')html+=button80('🔊 Posłuchaj głoski','sound','mg-primary')+'<div class="g80-island-scene">'+t.items80.map((x,i)=>button80(picture(x),'item:'+i,'g80-island-object','aria-label="'+esc80(x.pl)+'" '+locked)).join('')+'</div>';
  if(k==='spot')html+='<ul class="g80-find-list">'+t.targets80.map(en=>'<li class="'+(t.found80.includes(en)?'found':'')+'">'+esc80(en)+(t.found80.includes(en)?' ✓':'')+'</li>').join('')+'</ul><div class="g80-island-scene g80-hidden-scene">'+t.items80.map((x,i)=>button80(picture(x),'item:'+i,'g80-island-object '+(t.found80.includes(x.en)?'found':''),'aria-label="'+esc80(x.pl)+'" '+locked)).join('')+'</div><p>Odnalezione: '+t.found80.length+' / '+t.targets80.length+'</p>';
@@ -62,7 +62,7 @@ export function stopGameAudio80(){if(phonemeAudio80){phonemeAudio80.pause();phon
 export function playPhoneme80(sound,onError=()=>{}){stopGameAudio80();if(!/^(ae|b|m|f|p|k|l|t|s)$/.test(sound))return false;try{const a=new Audio('assets/games80/phoneme-'+sound+'.ogg');phonemeAudio80=a;a.onended=()=>{if(phonemeAudio80===a)phonemeAudio80=null};a.play().catch(onError);return true}catch{onError();return false}}
 export function gameAction80(t,act,api){
  if(!t?.game80||!act.startsWith('g80-'))return false;
- const {answer,draw,say,mic,answered,root,mode,save}=api,k=t.game80,a=act.slice(4),word=(x,lang='en-GB')=>say([{text:x,lang,rate:.72}]);
+ const {answer,draw,say,mic,answered,root,mode,save}=api,k=t.game80,a=act.slice(4),word=(x,lang=t.language82||'en-GB')=>say([{text:x,lang,rate:.72}]);
  if(a==='label'){word(t.label80);return true}
  if(a==='sound'){
   if(k==='island'){api.stopSpeech();playPhoneme80(t.sound80,()=>{t.miss80=true;draw()});}
@@ -86,7 +86,7 @@ export function gameAction80(t,act,api){
  if(a.startsWith('balloon:')){const c=t.fly80[Number(a.split(':')[1])],expected=t.answer[t.slots80[t.progress80]];if(!c)return true;if(c===expected){t.progress80++;t.miss80=false;if(t.progress80===t.slots80.length)answer(t.answer);else{save();draw()}}else miss();return true}
  if(a.startsWith('letter:')){const i=Number(a.split(':')[1]);if(Number.isInteger(i)&&t.letters80[i]&&!t.picked80.includes(i)){t.picked80.push(i);t.miss80=false;save();draw()}return true}
  if(a==='undo'){t.picked80.pop();t.miss80=false;save();draw();return true}
- if(a==='check'){const value=k==='rebus'?root.querySelector('#mg-written')?.value:t.picked80.map(i=>t.letters80[i]).join('');if(String(value||'').trim().toLowerCase()===t.answer)answer(t.answer);else miss();return true}
+ if(a==='check'){const value=k==='rebus'?root.querySelector('#mg-written')?.value:t.picked80.map(i=>t.letters80[i]).join('');if(String(value||'').trim().toLocaleLowerCase('pl-PL')===t.answer)answer(t.answer);else miss();return true}
  if(a.startsWith('bool:')){const value=a.split(':')[1];if(value===t.answer)answer(value);else miss();return true}
  return true;
 }

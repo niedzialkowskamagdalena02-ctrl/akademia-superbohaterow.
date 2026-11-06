@@ -6,7 +6,7 @@ async function test(name,fn){try{await fn();passed++;console.log('PASS',name)}ca
 function ui({who='pawel',coins=9000,device=null}={}){
  const e=env(),records=new Map(),saves=[];let queued=0,cycles=0;
  e.ctx.put=async(k,v)=>{records.set(k,plain(v));saves.push(k)};e.ctx.get=async k=>records.get(k);e.ctx.syncAdapter={device:()=>device,status:()=>device?'Połączono':'Nie połączono',onLocalChange:async()=>{queued++},cycle:async()=>{cycles++;return true}};
- vm.runInContext(fs.readFileSync(ROOT+'/assets/base.js','utf8').replace(/export /g,''),e.ctx);
+ vm.runInContext(fs.readFileSync(ROOT+'/assets/base.js','utf8').replace(/^import .*;\s*$/gm,'').replace(/export /g,''),e.ctx);
  const code=fs.readFileSync(ROOT+'/assets/app.js','utf8').replace(/^import .*;\s*$/gm,'').replace(/^start\(\);$/m,'');
  vm.runInContext(code+`;globalThis.fixApi={handle,trainingFlowMarkup,render,sync81ChildConnectionMarkup,sync78StatusMarkup,exportBackup,importBackup,set:(v,o={})=>{data=v;who=o.who||'pawel';role=o.role||'child';tab=o.tab||'home';adminTab=o.adminTab||'home';trainingStep=o.step||'subject';v37Classic=false;avengersRun=null;trainingSelectedPages=new Set();},state:()=>data,run:()=>avengersRun,mode:()=>trainingMode,items:BASE_ITEMS,base:migrateBase,step:()=>trainingStep,setTest:()=>testMode=true};`,e.ctx);
  const v=data();v.profiles[who].coins=coins;v.bookPages=[];e.ctx.fixApi.set(v,{who});return {...e,v,api:e.ctx.fixApi,records,saves,queued:()=>queued,cycles:()=>cycles};

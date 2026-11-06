@@ -950,3 +950,8 @@ button:not(:disabled):not(.tr72-subject-card):not(.mic):active,label.v73-file-co
 @media(prefers-reduced-motion:reduce){.n81-game *{animation:none!important;transition:none!important}.n81-game .n81-moving-block{left:50%}.n81-game .n81-thief{left:calc(3% + var(--lane)*25%)!important;top:calc(10px + var(--lane)*80px)}.n81-powered .n81-repulsor{width:60%;opacity:.45}}
 
 @media(max-width:390px){.n81-building{left:18%;right:3%}.n81-game .n81-floor button{font-size:12px;line-height:1.15;padding:2px;hyphens:none}.n81-game .n81-flavors strong{overflow-wrap:anywhere}}
+
+/* V82: polecenia z polskiego i matematyki w istniejących planszach. */
+.subject82-cue{font-size:clamp(1rem,4.5vw,1.5rem);line-height:1.4;font-weight:750;color:#123e53;background:linear-gradient(135deg,#d6f1ff,#d7f4e2);border:2px solid #67bcb6;border-radius:18px;padding:14px;white-space:normal;overflow-wrap:anywhere;max-width:100%}.n81-match-column .subject82-cue{font-size:clamp(.9rem,3.3vw,1.2rem);padding:8px}.tutor82-consent{background:#fff4c7;color:#173449;border:2px solid #ddac38;border-radius:16px;padding:14px}.tutor82-consent button{display:block;width:100%;margin:8px 0}.base-item button:disabled{opacity:.65;cursor:default;box-shadow:none}
+
+.study82-card{text-align:center;padding:20px;background:linear-gradient(145deg,#d5eeff,#c4efec,#d7f4d4);color:#153f52;border:2px solid #63b5af;border-radius:22px}.study82-card svg,.study82-card img{width:120px;max-height:140px}.study82-card h3{font-size:2.5rem;margin:14px 0}.study82-card p{line-height:1.5}.study82-model{background:#fff3c4;color:#2b3c4b;border:2px solid #d7ae43;border-radius:14px;padding:14px;font-size:1.2rem}

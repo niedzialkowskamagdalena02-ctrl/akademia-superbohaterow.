@@ -16,7 +16,7 @@ const hud=()=>{status.textContent=`🚀 Wynik: ${score}   💎 Kryształy: ${sta
 reset=()=>{score=0;stars=0;level=1;ticks=0;over=false;paused=false;snake=[{x:4,y:7},{x:3,y:7},{x:2,y:7}];dir={x:1,y:0};next=dir;obstacles=[];food=freeCell();bonus=null;hud();draw()};
 move=d=>{const dirs={left:{x:-1,y:0},right:{x:1,y:0},up:{x:0,y:-1},down:{x:0,y:1}};const nd=dirs[d];if(nd&&!(nd.x===-dir.x&&nd.y===-dir.y))next=nd};
 const tick=()=>{if(over||paused)return;ticks++;dir=next;const h={x:snake[0].x+dir.x,y:snake[0].y+dir.y};const eat=food&&h.x===food.x&&h.y===food.y,superEat=bonus&&h.x===bonus.x&&h.y===bonus.y;if(h.x<0||h.y<0||h.x>=W||h.y>=H||obstacles.some(p=>p.x===h.x&&p.y===h.y)||snake.slice(0,eat||superEat?undefined:-1).some(p=>p.x===h.x&&p.y===h.y)){over=true;status.textContent=`🌠 Koniec misji! Wynik: ${score} · Poziom ${level}. Spróbuj pobić rekord!`;draw();return}snake.unshift(h);if(eat){score+=10;stars++;food=null;food=freeCell();if(stars%4===0){level++;const spot=freeCell();if(spot)obstacles.push(spot)}}else if(superEat){score+=40;bonus=null}else snake.pop();if(ticks%35===0&&!bonus)bonus=freeCell();if(ticks%35===12)bonus=null;hud();draw()};
-reset();timer=setInterval(tick,165);
+reset();timer=setInterval(tick,320);
 }else{
 const shapes=[[[1,1,1,1]],[[1,1],[1,1]],[[0,1,0],[1,1,1]],[[1,0,0],[1,1,1]],[[0,0,1],[1,1,1]],[[1,1,0],[0,1,1]],[[0,1,1],[1,1,0]]];let board,piece;
 const newPiece=()=>{const a=shapes[Math.floor(Math.random()*shapes.length)];return {shape:a.map(r=>[...r]),x:Math.floor((W-a[0].length)/2),y:0,color:['#f4c34c','#42c7c1','#b986f5','#ff7c86'][Math.floor(Math.random()*4)]}};
