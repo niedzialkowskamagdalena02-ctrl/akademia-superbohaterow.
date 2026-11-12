@@ -1,19 +1,20 @@
-import {hqPet,hqPlaced,hqRead} from './headquarters84.js?v=88';
-import {baseArt88} from './base-art88.js?v=88';
+import {hqPet,hqPlaced,hqRead} from './headquarters84.js?v=91';
+import {baseArt88} from './base-art88.js?v=91';
 import {drawHeroHands,loadHeroHands88} from './hero-hands85.js?v=90';
-import {walkRooms,FLOOR_DEPTH,FULL_TURN,PHOTO_FOV,VERTICAL_SCALE,advance86,cameraBasis86,clamp86,roomAnchor86,wrapAngle} from './base-map86.js?v=88';
+import {walkRooms,FLOOR_DEPTH,FULL_TURN,PHOTO_FOV,VERTICAL_SCALE,advance86,cameraBasis86,clamp86,roomAnchor86,wrapAngle} from './base-map86.js?v=91';
 import {energy86} from './base-training86.js?v=87';
 import {petSprite86} from './pet-care86.js?v=90';
-import {mentorMarkup87,drawMentor87,MENTOR_GREETING_MS} from './base-mentor87.js?v=87';
+import {mentorMarkup87,drawMentor87,MENTOR_GREETING_MS} from './base-mentor87.js?v=91';
 import {drawQuinjet88} from './quinjet88.js?v=88';
 
 const routes=new Map(),images=new Map();
 const pose=room=>({room,x:0,z:0,yaw:((walkRooms[room].heading??.5)-.5)*FULL_TURN,pitch:0});
 const current=child=>routes.get(child)?.at(-1)??pose('hall');
 const casePositions={a:[.194,.567],b:[.81,.567],c:[.5,.574]};
+const labShelf=walkRooms.polish.points.find(point=>point.fixture==='shelf');
 const escapeText=value=>String(value).replace(/[&<>]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[ch]));
 const prop=(room,u,v,front,art,key,paint='',extra='')=>
- `<img class="hq86-prop hq88-item-art${extra?' '+extra:''}" data-room="${room}" data-u="${u}" data-v="${v}" data-front="${front?1:0}" data-prop="${key}" data-paint="${paint}" style="--hq-art-hue:${art.hue}deg" data-tall="${art.tall}" src="${art.src}" alt="" hidden>`;
+ `<img class="hq86-prop hq88-item-art${extra?' '+extra:''}" data-room="${room}" data-u="${u}" data-v="${v}" data-front="${front?1:0}" data-prop="${key}" data-paint="${paint}" style="--hq-art-hue:${art.hue}deg" data-tall="${art.tall}"${art.caseScale?` data-case-scale="${art.caseScale}"`:''} src="${art.src}" alt="" hidden>`;
 
 export function baseWalkMarkup(profile,child,hero,release,panel,mic=''){
  const state=hqRead(profile),animal=hqPet(profile),scene=walkRooms[current(child).room];
@@ -36,12 +37,16 @@ export function baseWalkMarkup(profile,child,hero,release,panel,mic=''){
     if(profile.grade==='P'&&(p.action?.startsWith('hq:exercise:')||p.action==='hq:master'))return '';
     if(p.action==='hq:flight'&&!jet)return '';
     const mentor=p.action==='hq:area:mentor',orb=p.action==='hq:joke',explorer=p.room==='explorer';
-    const style=mentor?' hq87-mentor-actor':orb?' hq87-orb':explorer?' hq87-discovery-door':p.room==='shop'?' hq88-shop-door':p.icon?' hq86-holo':'';
+    const locked=p.room==='workshop'&&!profile.base?.owned?.includes('workshop');
+    const style=mentor?' hq87-mentor-actor':orb?' hq87-orb':explorer?' hq87-discovery-door':p.room==='shop'?' hq88-shop-door':
+     p.room==='workshop'?' hq91-workshop-door':p.action==='hq:workbench'?' hq91-reactor':p.fixture?' hq91-fixture hq91-fixture-'+p.fixture:p.icon?' hq86-holo':'';
     const label=p.action==='hq:pet'&&animal?escapeText(animal.name):p.label;
-    const content=mentor?mentorMarkup87(profile.mentor):`${p.icon?`<span aria-hidden="true">${p.icon}</span>`:''}<b>${label}</b>`;
-    return `<button type="button" class="hq86-point${style}" data-room="${room}" data-index="${i}" ${p.room?`data-walk-door="${p.room}"`:`data-action="${p.action}"`} hidden>${content}</button>`;
+    const art=p.fixture?`<img src="assets/hq/${p.fixture}91.webp" alt="" draggable="false">`:p.icon?`<span aria-hidden="true">${p.icon}</span>`:'';
+    const content=mentor?mentorMarkup87(profile.mentor):`${art}<b>${label}</b>`;
+    const action=locked?'data-action="hq:room:workshop"':p.room?`data-walk-door="${p.room}"`:`data-action="${p.action}"`;
+    return `<button type="button" class="hq86-point${style}" data-room="${room}" data-index="${i}" ${action} hidden>${content}</button>`;
    })).join('')}
-   ${Object.entries(casePositions).map(([slot,[u,v]])=>trophy(slot,'armory',u,v)).join('')+trophy('lab','polish',.96,.483,false)+pet+shop}
+   ${Object.entries(casePositions).map(([slot,[u,v]])=>trophy(slot,'armory',u,v)).join('')+trophy('lab','polish',labShelf.u,labShelf.v-.041,false)+pet+shop}
    <header class="hq86-top">
     <button type="button" data-action="hq:view:menu">‹ Wybór widoku</button>
     <button type="button" data-walk-back hidden>‹ Wróć</button>
@@ -68,9 +73,10 @@ export function openWalkRoom87(child,name){
 
 export function focusWalkCase88(child,slot){
  const view=current(child),room=walkRooms[view.room];
- if(view.room!=='armory'||!Object.hasOwn(casePositions,slot))return false;
- const [u,v]=casePositions[slot];
- const [x,y,z]=roomAnchor86(room,{u,v,front:true},543/724);
+ const point=view.room==='polish'&&slot==='lab'?labShelf:
+  view.room==='armory'&&Object.hasOwn(casePositions,slot)?{u:casePositions[slot][0],v:casePositions[slot][1],front:true}:null;
+ if(!point)return false;
+ const [x,y,z]=roomAnchor86(room,point,543/724);
  const distance=Math.hypot(x-view.x,z-view.z);
  view.yaw=Math.atan2(x-view.x,z-view.z);
  view.pitch=clamp86(Math.atan2(y+.33,distance),-.57,.57);
@@ -198,7 +204,7 @@ export function mountBaseWalk(root){
  let world=panoramaWorld(canvas),width=0,height=0,frame=0,last=0,step=0;
  let pointer=null,transition=null,busy=false,effect=null,ignoreClickUntil=0,forwarding=false;
  let portraitRatio=.73,sceneMarkers=[],greeting=null;
- let handArt=null,jetBounds=null;
+ let handArt=null,ironArt=null,jetBounds=null;
  const on=(target,name,listener,options={})=>target.addEventListener(name,listener,{...options,signal});
  const state=()=>stack.at(-1);
  const room=()=>walkRooms[state().room];
@@ -212,6 +218,9 @@ export function mountBaseWalk(root){
  loadHeroHands88(root.dataset.hero).then(image=>{
   if(!signal.aborted&&image){handArt=image;renderSoon();}
  });
+ if(stage.querySelector('[data-mentor="iron"]'))image86('mentor-iron91-sheet.webp').then(image=>{
+  if(!signal.aborted){ironArt=image;renderSoon();}
+ }).catch(()=>{});
  function resize(){
   const rect=stage.getBoundingClientRect();
   width=rect.width;height=rect.height;
@@ -240,7 +249,8 @@ export function mountBaseWalk(root){
   if(aircraft)aircraft.hidden=state().room!=='hangar';
   greeting=null;sceneMarkers=[];markers.forEach(marker=>marker.hidden=true);
   jetBounds=null;
-  fallback.style.backgroundImage=`url("assets/hq/${selected.art}")`;
+  fallback.style.backgroundImage=`url("assets/hq/${selected.portrait??selected.art}")`;
+  fallback.classList.toggle('has-portrait',!!selected.portrait);
   try{
    const [image,front]=await Promise.all([image86(selected.art),selected.portrait?image86(selected.portrait):null]);
    if(signal.aborted)return;
@@ -273,7 +283,7 @@ export function mountBaseWalk(root){
    if(figure){
     const player=state(),distance=Math.hypot(player.x-anchor[0],player.z-anchor[2]);
     if(!greeting&&distance<2.05&&!reduced)greeting={at:now,open:false};
-    drawMentor87(figure,clamp86((width*.5-x)/width,-.48,.48),greeting?now-greeting.at:0);
+    drawMentor87(figure,clamp86((width*.5-x)/width,-.48,.48),greeting?now-greeting.at:0,ironArt);
    }
    const isButton=marker.tagName==='BUTTON';
    const size=clamp86((isButton?1.08:.92)*(4/depth)**.22,.72,1.15);
@@ -282,14 +292,17 @@ export function mountBaseWalk(root){
    marker.style.top=y+'px';
    const active=effect&&(effect.slot&&effect.slot===marker.dataset.prop||
     effect.kind==='egg'&&p.action==='hq:egg'||
+    effect.kind==='workbench'&&p.action==='hq:workbench'||
     effect.kind==='feed'&&(p.action==='hq:bowl'||marker.dataset.prop==='pet'));
    const amount=active?Math.sin(Math.min(1,(now-effect.start)/650)*Math.PI):0;
    marker.style.setProperty('--hq-scale',size);
    marker.style.setProperty('--hq-squish',1-(effect?.kind==='egg'?amount*.40:0));
    marker.style.setProperty('--hq-effect',String(amount));
+   if(p.action==='hq:workbench')marker.toggleAttribute('data-powered',amount>.08);
    if(marker.classList.contains('hq88-case-art')){
     const photoHeight=(marker.dataset.tall==='true'?.225:.155)*PHOTO_FOV/fy*height;
-    marker.style.setProperty('--hq-case-size',clamp86(photoHeight*anchor[2]/depth,44,height*.57)+'px');
+    const scale=Number(marker.dataset.caseScale??1);
+    marker.style.setProperty('--hq-case-size',clamp86(photoHeight*anchor[2]/depth,44,height*.57)*scale+'px');
    }
   }
  }
@@ -330,7 +343,8 @@ export function mountBaseWalk(root){
   }
   if(moving&&!reduced)step+=dt*7.7;
   if(effect&&now-effect.start>650)effect=null;
-  const aspect=width/height,fy=Math.min(.94,.60/aspect),fx=fy*aspect;
+  const aspect=width/height;
+  const fx=Math.max(Math.min(.94*aspect,.60),selected.minHorizontalFov??0),fy=fx/aspect;
   const live=state(),basis=cameraBasis86(live.yaw,live.pitch);
   const squish=live.room==='pet'&&effect?.kind==='egg'?Math.sin((now-effect.start)/650*Math.PI):0;
   if(world&&!busy&&stage.classList.contains('has-depth'))world.draw(live,basis,fx,fy,squish);
@@ -424,10 +438,11 @@ export function mountBaseWalk(root){
   const next=marker.dataset.walkDoor;
   if(marker.classList.contains('hq87-mentor-actor')&&!reduced){
    event.preventDefault();event.stopPropagation();
-   greeting??={at:performance.now()};
+   const now=performance.now();
+   if(!greeting||now-greeting.at>=MENTOR_GREETING_MS)greeting={at:now};
    greeting.open=true;greeting.marker=marker;renderSoon();return;
   }
-  if(!next&&!marker.classList.contains('hq86-holo'))return;
+  if(!next&&!marker.matches('.hq86-holo,.hq91-fixture'))return;
   event.preventDefault();event.stopPropagation();
   travel(marker,()=>{
    if(next){stack.push(pose(next));void load();return;}

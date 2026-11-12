@@ -1,6 +1,6 @@
 import {BASE_ITEMS} from './base.js?v=82';
 import {affordable82,balance82} from './wallet82.js?v=82';
-import {baseArt88} from './base-art88.js?v=88';
+import {baseArt88} from './base-art88.js?v=91';
 
 export const HQ_ROOMS = [
  ['entry','Wejście','🧭'], ['lab','Laboratorium','🔬'], ['arcade','Rozrywka','🕹️'],
@@ -167,7 +167,7 @@ export function hqWallet(profile){
  const {coins,gems,energy}=hqBalances(profile);
  return `<div class="hq87-vault-panel"><h3>🔐 Portfel w skarbcu</h3><dl class="hq84-wallet"><dt>Złote z misji</dt><dd>🪙 ${coins}</dd><dt>Kryształy z gier</dt><dd>💎 ${gems}</dd><dt>Żetony do automatów</dt><dd>⚡ ${energy}</dd></dl></div>`;
 }
-export function hqShop(profile,slot,button,collection=false){
+export function hqShop(profile,slot,button,collection=false,walking=false){
  const {gems,coins}=hqBalances(profile),owned=new Set(profile.base?.owned??[]);
  const title=HQ_SLOTS.find(([id])=>id===slot)?.[1];
  const items=hqItems().filter(item=>!collection||owned.has(item.id)).sort((a,b)=>Number(b.zone==='armory')-Number(a.zone==='armory'));
@@ -182,7 +182,8 @@ export function hqShop(profile,slot,button,collection=false){
    const buy=affordable82(profile,item)?button(item.cost?'🪙 '+item.cost+' złotych':'🎁 Odbierz','base:buy:'+item.id,'gold'):`<button type="button" disabled>🪙 ${item.cost} złotych</button>`;
    const gemsBuy=gemPrice?(gems>=gemPrice?button('💎 '+gemPrice+' kryształów','hq:buy-gems:'+item.id,'alt'):`<button type="button" disabled>💎 ${gemPrice} kryształów</button>`):'';
    const locked=item.awardOnly?'<small>🏆 Nagroda w Language Master</small>':buy+gemsBuy;
-   return `<article>${photo}<h4>${escape(item.name)}</h4><div>${owned.has(item.id)?place:locked}</div></article>`;
+   const ownedActions=item.id==='workshop'&&walking&&!collection?button('Wejdź do warsztatu','hq:room:workshop','gold'):place;
+   return `<article>${photo}<h4>${escape(item.name)}</h4><div>${owned.has(item.id)?ownedActions:locked}</div></article>`;
   }).join('')}</div>`;
 }
 export function hqFoodQuiz88(quiz,button,voice){

@@ -10,8 +10,8 @@ import {syncAdapter} from './sync.js?v=81';
 import {BASE_ITEMS,baseMarkup,migrateBase} from './base.js?v=82';
 import {mountArcade,stopArcade} from './arcade.js?v=84';
 import {mountBaseScene84} from './base-scene84.js?v=88';
-import {baseWalkMarkup,mountBaseWalk,resetBaseWalk,openWalkRoom87,focusWalkCase88} from './base-walk85.js?v=90';
-import {HQ_SLOTS,hqItems,hqRead,hqBalances,hqEarnToken,hqSpendToken,hqRecordCrystals,hqBuyWithGems,hqPlaced,hqPlace,hqDisplayPurchase88,hqPet,hqChoosePet88,hqPaint,hqEarnFood,hqChoices,hqMarkup,hqWallet,hqShop,hqFoodQuiz88} from './headquarters84.js?v=88';
+import {baseWalkMarkup,mountBaseWalk,resetBaseWalk,openWalkRoom87,focusWalkCase88} from './base-walk85.js?v=91';
+import {HQ_SLOTS,hqItems,hqRead,hqBalances,hqEarnToken,hqSpendToken,hqRecordCrystals,hqBuyWithGems,hqPlaced,hqPlace,hqDisplayPurchase88,hqPet,hqChoosePet88,hqPaint,hqEarnFood,hqChoices,hqMarkup,hqWallet,hqShop,hqFoodQuiz88} from './headquarters84.js?v=91';
 import {petRoom86,petCareMarkup86,petPicker88,mountPetCare86,setPetCare86,servePet87} from './pet-care86.js?v=90';
 import {flightMarkup88,mountNounFlight88} from './noun-flight88.js?v=90';
 import {petQuiz88} from './pet-quiz88.js?v=88';
@@ -69,7 +69,7 @@ const select=(id,label,options,value)=>`<label for="${id}">${label}</label><sele
 const grades=[['P','Przedszkole'],...Array.from({length:12},(_,i)=>[String(i+1),`Klasa ${i+1}`])];
 const people=[['pawel','Paweł'],['patryk','Patryk']];
 const note=t=>{const n=$('hq85-notice')||$('notice');if(!n){console.warn('Powiadomienie:',t);return}n.textContent=t;n.classList.add('visible');setTimeout(()=>{if(n.isConnected)n.classList.remove('visible')},4500)};
-const ACADEMY_RELEASE=90;
+const ACADEMY_RELEASE=91;
 async function checkAcademyUpdate(button){
  if(!button||button.disabled)return;
  const label=button.textContent,controller=new AbortController();
@@ -1212,14 +1212,17 @@ function hqRoomPanel84(p){
  if(!hqPanel84)return '';
  let body='';
  if(hqPanel84==='wallet')body=hqWallet(p);
- if(hqPanel84==='shop'||hqPanel84==='collection')body=hqShop(p,hqSlot84,button,hqPanel84==='collection');
+ if(hqPanel84==='shop'||hqPanel84==='collection')body=hqShop(p,hqSlot84,button,hqPanel84==='collection',hqViews84.get(who)==='walk');
+ if(hqPanel84==='workshop')body='<h3>Warsztat Tony’ego Starka</h3>'+button('🎁 Odbierz i wejdź','hq:unlock-workshop','gold');
  if(hqPanel84==='places'){
   const item=hqItems().find(x=>x.id===hqItem84);
   body='<h3>Ustaw '+e(item?.name)+'</h3>'+HQ_SLOTS.map(([id,label])=>button(label,'hq:place:'+hqItem84+':'+id,'alt')).join('');
  }
  if(hqPanel84==='trophy'){
   const item=hqItems().find(x=>x.id===hqPlaced(p,hqSlot84));
-  body='<h3>'+e(item?.name||'Gablota')+'</h3>'+button('✨ Uruchom efekt','hq:spark:'+hqSlot84,'gold')+button('Ustaw inne trofeum','hq:gallery:'+hqSlot84,'alt');
+  const workshop=item?.id==='workshop'&&hqViews84.get(who)==='walk';
+  body='<h3>'+e(item?.name||'Gablota')+'</h3>'+(workshop?button('Wejdź do warsztatu','hq:room:workshop','gold'):
+   button('✨ Uruchom efekt','hq:spark:'+hqSlot84,'gold'))+button('Ustaw inne trofeum','hq:gallery:'+hqSlot84,'alt');
  }
  if(hqPanel84==='hero')body='<h3>🦸 Wybierz swojego bohatera</h3>'+heroPicker(who);
  if(hqPanel84==='pet')body=petCareMarkup86(p,petRooms86.get(who),petEffects86.get(who),button,petPlay87.has(who));
@@ -1324,6 +1327,23 @@ async function hqAction84(action,target){
   if(hqViews84.get(child)!=='walk')return hqShow84('shop');
   if(openWalkRoom87(child,id))return hqShow84();
  }
+ if(what==='room'&&id==='workshop'&&hqViews84.get(child)==='walk'){
+  if(!p.base?.owned?.includes(id))return hqShow84('workshop');
+  if(openWalkRoom87(child,id))return hqShow84();
+ }
+ if(what==='unlock-workshop'&&hqPanel84==='workshop'){
+  const base=migrateBase(p);
+  if(!base.owned.includes('workshop')){
+   const result=purchase82(p,BASE_ITEMS.find(item=>item.id==='workshop'),base.owned);
+   if(!result.ok)return note(result.message);
+   await save();
+  }
+  if(who===child&&tab==='base'&&hqPanel84==='workshop'&&openWalkRoom87(child,'workshop'))return hqShow84();
+  return;
+ }
+ if(what==='workbench'){
+  hqTone84(425);hqEffect84('workbench');return note('⚡ Reaktor warsztatu uruchomiony!');
+ }
  if(what==='training')return openBaseTraining86();
  if(['subject','exercise','master'].includes(what)){
   if(p.grade==='P')return openBaseTraining86();
@@ -1371,7 +1391,9 @@ async function hqAction84(action,target){
   if(!hqPlace(p,id,extra))return;
   await save();
   if(who===child&&tab==='base'){
-   const focused=hqViews84.get(child)==='walk'&&focusWalkCase88(child,extra);
+   const walking=hqViews84.get(child)==='walk';
+   if(walking&&extra==='lab')openWalkRoom87(child,'polish');
+   const focused=walking&&focusWalkCase88(child,extra);
    hqShow84(focused?'':'trophy',extra);
    note('✨ Trofeum jest już w bazie.');
   }

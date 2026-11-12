@@ -1008,6 +1008,7 @@ button:not(:disabled):not(.tr72-subject-card):not(.mic):active,label.v73-file-co
 .hq86-stage:focus-visible{outline:2px solid #8affed;outline-offset:-2px}
 .hq86-fallback,.hq86-world,.hq86-hands{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .hq86-fallback{background:url("hq/hall86.webp") 50% 50% / auto 128% repeat-x}
+.hq86-fallback.has-portrait{background-size:cover;background-repeat:no-repeat}
 .hq86-stage canvas{display:block;background:transparent;border:0;border-radius:0}
 .hq86-world{opacity:0}
 .hq86-stage.has-depth .hq86-world{opacity:1}
@@ -1258,6 +1259,21 @@ button:not(:disabled):not(.tr72-subject-card):not(.mic):active,label.v73-file-co
 /* V88 – gabloty, przyciski bazy, ruch zwierzaka i lot Quinjetem. */
 .hq86-stage .hq88-shop-door{border-color:#ffe1a3;color:#fff7de;background:linear-gradient(155deg,#236879,#132443)}
 .hq86-stage .hq88-shop-door::before{background:#ffdf90;box-shadow:0 0 10px #ffe7a2}
+.hq86-stage .hq91-workshop-door{border-color:#ffda95;background:linear-gradient(145deg,#5a392a,#172641);color:#fff5d9}
+.hq86-stage .hq91-workshop-door[data-walk-door]::before{background:#ffda95;box-shadow:0 0 9px #ffca70}
+.hq86-stage button.hq91-fixture:not(:disabled):not(.mic){
+ display:grid;justify-items:center;gap:2px;width:var(--fixture-width);min-height:48px;
+ padding:0;background:none;border:0;box-shadow:none!important;overflow:visible;
+}
+.hq86-stage .hq91-fixture img{display:block;width:100%;height:auto;filter:drop-shadow(0 5px 7px #10203590);pointer-events:none}
+.hq86-stage .hq91-fixture b{padding:4px 6px;border:1px solid #88dae6a0;border-radius:7px;background:#102741ed;font-size:.73rem;line-height:1.12}
+.hq86-stage .hq91-fixture:active img{filter:brightness(1.26) drop-shadow(0 0 8px #74e6ffa6)}
+.hq91-fixture-training{--fixture-width:clamp(47px,15vw,99px)}
+.hq91-fixture-missions{--fixture-width:clamp(82px,26vw,165px)}
+.hq91-fixture-simulator{--fixture-width:clamp(72px,23vw,136px)}
+.hq91-fixture-shelf{--fixture-width:clamp(85px,26vw,145px)}
+.hq86-stage .hq91-reactor{border-color:#69f1fc;background:#123858de;white-space:nowrap}
+.hq86-stage .hq91-reactor[data-powered]{filter:brightness(calc(1 + var(--hq-effect,0)*.55));outline:3px solid #83ffff;outline-offset:calc(3px + var(--hq-effect,0)*9px)}
 .hq84-catalog article{grid-template-rows:auto 1fr auto;background:radial-gradient(ellipse at 50% 10%,#2a5975,#192946 70%)}
 .hq84-catalog article .hq88-item-art{height:clamp(82px,22vw,135px);object-fit:contain;filter:hue-rotate(var(--hq-art-hue,0deg)) drop-shadow(0 5px 7px #0b1325b0)}
 .hq86-prop.hq88-item-art{filter:hue-rotate(var(--hq-art-hue,0deg)) drop-shadow(0 3px 5px #182633a6)}

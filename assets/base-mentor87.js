@@ -8,7 +8,7 @@ export function mentorMarkup87(style){
  return `<canvas class="hq87-mentor-figure" width="225" height="316" data-mentor="${style==='fun'?'spider':'iron'}" aria-hidden="true"></canvas><b>${name}</b>`;
 }
 
-export function drawMentor87(canvas,turn,elapsed){
+export function drawMentor87(canvas,turn,elapsed,ironArt=null){
  const ctx=canvas.getContext('2d');
  if(!ctx)return;
  const spider=canvas.dataset.mentor==='spider',w=canvas.width,h=canvas.height;
@@ -17,6 +17,22 @@ export function drawMentor87(canvas,turn,elapsed){
  const wave=t<.55?Math.sin(Math.min(t/.12,1)*Math.PI/2)*(1.82+.22*Math.sin(t*43)):1.84;
  const boost=t>.54?Math.sin((t-.54)/.46*Math.PI):0;
  const lift=active?boost*(spider?.86:.64):0;
+ if(!spider&&ironArt){
+  const frame=active?Math.round(t*16):turn<-.16?17:turn>.16?18:0;
+  const cellWidth=ironArt.naturalWidth/5,cellHeight=ironArt.naturalHeight/4;
+  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle='#0a152d70';ctx.beginPath();ctx.ellipse(w*.50,h*.925,36-lift*13,6,0,0,Math.PI*2);ctx.fill();
+  if(lift>.045){
+   for(const side of [-1,1]){
+    const x=w*(.5+side*.12),y=h*(.92-.15*boost);
+    const flame=ctx.createLinearGradient(x,y,x,y+36*boost);
+    flame.addColorStop(0,'#e6ffff');flame.addColorStop(.3,'#63dfff');flame.addColorStop(1,'#2589ff00');
+    ctx.fillStyle=flame;ctx.beginPath();ctx.moveTo(x-5,y);ctx.lineTo(x+5,y);ctx.lineTo(x,y+36*boost);ctx.fill();
+   }
+  }
+  ctx.drawImage(ironArt,frame%5*cellWidth,Math.floor(frame/5)*cellHeight,cellWidth,cellHeight,0,0,w,h);
+  return;
+ }
  const cs=Math.cos(turn),sn=Math.sin(turn);
  const red=spider?[208,45,63]:[185,44,57],accent=spider?[32,93,158]:[248,191,72],dark=[29,44,64],cyan=[178,248,255];
  const polygons=[];

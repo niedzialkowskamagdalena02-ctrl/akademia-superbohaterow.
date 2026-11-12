@@ -11,7 +11,8 @@ const figures={
 };
 
 export function baseArt88(id){
- if(displayItems.has(id))return {src:'assets/hq/equipment88/'+id+'.webp',hue:0,tall:largeItems.has(id)};
+ if(displayItems.has(id))return {src:'assets/hq/equipment88/'+id+'.webp',hue:0,tall:largeItems.has(id),caseScale:id==='helmet'?.66:1};
+ if(id==='guardian')return {src:'assets/hq/mentor-iron91.webp',hue:0,tall:true};
  if(Object.hasOwn(stoneHues,id))return {src:'assets/hq/equipment88/stone.webp',hue:stoneHues[id],tall:false};
  if(Object.hasOwn(figures,id))return {src:'assets/art/'+figures[id]+'.svg',hue:0,tall:true};
  return null;

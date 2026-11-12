@@ -1,6 +1,7 @@
 const door=(label,u,v,room)=>({label,u,v,room});
 const station=(label,u,v,action,icon='',front=false)=>({label,u,v,action,icon,front});
 const photo=(label,u,v,action)=>station(label,u,v,action,'',true);
+const fixture=(label,u,v,action,kind)=>({...station(label,u,v,action),fixture:kind});
 
 export const walkRooms={
  hall:{
@@ -15,24 +16,30 @@ export const walkRooms={
   ]
  },
  training:{
-  name:'Sala Treningowa Avengers',art:'training86.webp',heading:.555,bounds:[6.4,2.9,5.8],points:[
+  name:'Sala Treningowa Avengers',art:'training86.webp',heading:.486,minHorizontalFov:.64,bounds:[6.4,2.9,5.8],points:[
    door('Wieża Języka Angielskiego',.055,.43,'english'),
    door('Laboratorium Języka Polskiego',.718,.429,'polish'),
    station('Moje podręczniki',.19,.437,'hq:area:books','📚'),
-   station('Trening',.528,.448,'hq:training','🎯'),
-   station('Misje',.42,.409,'hq:area:home','🛰️'),
-   station('Symulator misji',.40,.522,'hq:exercise:mixed','⚡'),
+   fixture('Trening',.564,.445,'hq:training','training'),
+   fixture('Misje',.49,.55,'hq:area:home','missions'),
+   fixture('Symulator misji',.409,.473,'hq:exercise:mixed','simulator'),
    door('Sala Odkrywców',.803,.395,'explorer'),
    station('Language Master',.947,.476,'hq:master','🏆'),
-   station('Mentor',.602,.497,'hq:area:mentor')
+   station('Mentor',.624,.515,'hq:area:mentor')
   ]
  },
  polish:{
-  name:'Laboratorium Gramatyki i Słów',art:'polish86.webp',heading:.388,bounds:[5.4,2.6,5],points:[
+  name:'Laboratorium Gramatyki i Słów',art:'polish86.webp',heading:.826,minHorizontalFov:.62,bounds:[5.4,2.6,5],points:[
    station('Mistrz rzeczowników',.206,.488,'hq:exercise:nouns','🤖'),
    station('Polski z podręcznika',.387,.442,'hq:subject:polish','📖'),
-   station('Ortografia U/Ó i RZ/Ż',.805,.489,'hq:exercise:spelling','🧪'),
-   station('Półka na trofeum',.96,.44,'hq:slot:lab')
+   station('Ortografia U/Ó i RZ/Ż',.675,.479,'hq:exercise:spelling','🧪'),
+   fixture('Półka na trofeum',.885,.512,'hq:slot:lab','shelf'),
+   door('Warsztat Tony’ego Starka',.766,.435,'workshop')
+  ]
+ },
+ workshop:{
+  name:'Warsztat Tony’ego Starka',art:'annex86.webp',portrait:'workshop91.webp',tint:[.88,.97,1.04],bounds:[4.5,2.5,4.5],points:[
+   photo('Reaktor warsztatu',.5,.438,'hq:workbench')
   ]
  },
  english:{
