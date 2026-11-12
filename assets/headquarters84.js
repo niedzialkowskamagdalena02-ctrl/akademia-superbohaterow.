@@ -6,7 +6,7 @@ export const HQ_ROOMS = [
  ['armory','Zbrojownia','🛡️'], ['hangar','Hangar','🛩️'], ['pet','Kącik zwierzaka','🐾']
 ];
 export const HQ_SPOTS = [
- ['entry',-.68,1.0,2.85,'👛 Portfel','hq:wallet'],
+ ['entry',-.68,1.0,2.85,'🔐 Skarbiec','hq:wallet'],
  ['lab',-5.2,1.6,-4.35,'📚 Trening','hq:training'],
  ['arcade',4.8,1.6,-4.4,'🎮 Automaty','hq:arcade'],
  ['arcade',6.5,1.1,-2.1,'🔮 Kula sucharów','hq:joke'],
@@ -78,9 +78,11 @@ export function hqPlace(profile,id,slot){
  places[id]=slot;
  return true;
 }
+const PET_DEFAULT_NAMES={cat:'Puszek',dog:'Drops',guinea:'Fistaszek'};
+export const hqPetName=name=>String(name??'').trim().slice(0,22);
 export function hqAdopt(profile,species,name){
- if(!['cat','dog'].includes(species)||hqRead(profile).pet)return false;
- hqWrite(profile).pet={species,name:String(name??'').trim().slice(0,22)||(species==='cat'?'Puszek':'Drops')};
+ if(!Object.hasOwn(PET_DEFAULT_NAMES,species)||hqRead(profile).pet)return false;
+ hqWrite(profile).pet={species,name:hqPetName(name)||PET_DEFAULT_NAMES[species]};
  return true;
 }
 export function hqPaint(profile,paint){
@@ -106,8 +108,8 @@ export function hqFeed(profile){
  return true;
 }
 const mainButtons = [
- ['👛 Portfel','hq:wallet'],['📚 Trening','hq:training'],['🎮 Rozrywka','hq:arcade'],
- ['🛡️ Zbrojownia','hq:shop'],['🛩️ Hangar','hq:hangar'],['🐾 Zwierzak','hq:pet']
+ ['🔐 Skarbiec','hq:wallet'],['📚 Trening','hq:training'],['🎮 Rozrywka','hq:arcade'],
+ ['🛡️ Zbrojownia','hq:gallery'],['🛒 Sklep','hq:shop'],['🛩️ Hangar','hq:hangar'],['🐾 Zwierzak','hq:pet']
 ];
 export function hqChoices(button){
  return '<div class="hq84-choices">'+button('☰ Widok klasyczny','hq:view:classic','alt')+
@@ -122,7 +124,7 @@ export function hqMarkup(profile,child,view,button){
   <div class="hq84-balances" aria-label="Stan portfela">
    <span>🪙 <b>${balances.coins}</b> złotych</span><span>💎 <b>${balances.gems}</b> kryształów</span><span>⚡ <b>${balances.energy}</b> żetonów</span>
   </div>
-  <div class="hq84-stage" data-hq84-scene data-child="${escape(child)}" data-view="${view}" data-pet="${state.pet?.species==='dog'?'dog':state.pet?'cat':''}" data-quinjet="${profile.base?.owned?.includes('quinjet')?'yes':''}" data-paint="${['gold','mint','blue'].includes(state.paint)?state.paint:'blue'}">
+  <div class="hq84-stage" data-hq84-scene data-child="${escape(child)}" data-view="${view}" data-pet="${['cat','dog','guinea'].includes(state.pet?.species)?state.pet.species:''}" data-quinjet="${profile.base?.owned?.includes('quinjet')?'yes':''}" data-paint="${['gold','mint','blue'].includes(state.paint)?state.paint:'blue'}">
    <canvas aria-label="${walk?'Pierwszoosobowy widok bazy':'Widok całej bazy z góry'}"></canvas>
    <div class="hq84-hotspots">${HQ_SPOTS.map(([room,x,y,z,label,action],index)=>{
     const item=action.startsWith('hq:slot:')?hqItems().find(v=>v.id===hqPlaced(profile,action.split(':')[2])):null;
@@ -135,17 +137,18 @@ export function hqMarkup(profile,child,view,button){
   <div class="hq84-shortcuts" aria-label="Skróty w bazie">${mainButtons.map(([label,action])=>button(label,action,'alt')).join('')}</div>
  </section>`;
 }
-export function hqWallet(profile,button){
+export function hqWallet(profile){
  const {coins,gems,energy}=hqBalances(profile);
- return `<h3>👛 Portfel</h3><dl class="hq84-wallet"><dt>Złote z misji</dt><dd>🪙 ${coins}</dd><dt>Kryształy z gier</dt><dd>💎 ${gems}</dd><dt>Żetony do automatów</dt><dd>⚡ ${energy}</dd></dl>${button('🛡️ Otwórz sklep ze zbrojami','hq:shop','gold')}`;
+ return `<div class="hq87-vault-panel"><h3>🔐 Portfel w skarbcu</h3><dl class="hq84-wallet"><dt>Złote z misji</dt><dd>🪙 ${coins}</dd><dt>Kryształy z gier</dt><dd>💎 ${gems}</dd><dt>Żetony do automatów</dt><dd>⚡ ${energy}</dd></dl></div>`;
 }
-export function hqShop(profile,slot,button){
- const {gems}=hqBalances(profile),owned=new Set(profile.base?.owned??[]);
+export function hqShop(profile,slot,button,collection=false){
+ const {gems,coins}=hqBalances(profile),owned=new Set(profile.base?.owned??[]);
  const title=HQ_SLOTS.find(([id])=>id===slot)?.[1];
- const items=hqItems().sort((a,b)=>Number(b.zone==='armory')-Number(a.zone==='armory'));
- return `<h3>🛡️ Sklep i kolekcja</h3><p>${title?'Miejsce na trofeum: '+title+'.':'Kup wyposażenie i wybierz, gdzie je ustawić.'}</p>
-  ${button('👛 Portfel','hq:wallet','alt')}
-  <div class="hq84-catalog">${items.map(item=>{
+ const items=hqItems().filter(item=>!collection||owned.has(item.id)).sort((a,b)=>Number(b.zone==='armory')-Number(a.zone==='armory'));
+ return `<h3>${collection?'🛡️ Zbrojownia':'🛒 Sklep z wyposażeniem'}</h3>${collection?
+   `<p>${title?'Wybierz trofeum do gabloty „'+title+'”.':'Wybierz, gdzie wystawić zdobyte wyposażenie.'}</p>`:
+   `<div class="hq87-shop-balance" aria-label="Środki na zakupy"><span>🪙 ${coins} złotych</span><span>💎 ${gems} kryształów</span></div>`}
+  ${items.length?'':'<p>Zdobyte wyposażenie pojawi się tutaj.</p>'}<div class="hq84-catalog">${items.map(item=>{
    const gemPrice=GEM_PRICES[item.id];
    const art=item.id==='language-cape'?'cape':HQ_ART.has(item.id)?item.id:'';
    const photo=art?`<img class="${item.id==='language-cape'?'hq86-language-cape':''}" src="assets/art/item-${art}.svg" alt="" loading="lazy">`:`<span aria-hidden="true">${item.icon}</span>`;
@@ -164,5 +167,5 @@ export function hqPetMarkup(profile,quiz,button){
   return `<h3>🥣 Trening po karmę</h3><p>Pytanie ${quiz.index+1} z ${quiz.items.length}</p><h4>${escape(q)}</h4>${pl?`<p>${escape(pl)}</p>`:''}<div class="hq84-answers">${answers.map((answer,index)=>button(escape(answer),'hq:answer:'+index,'alt')).join('')}</div><p id="hq84-answer-status" role="status"></p>`;
  }
  return `<h3>${pet.species==='dog'?'🐶':'🐱'} ${escape(pet.name)}</h3><p>🥣 Porcje karmy: <b>${food}</b> · Nakarmienia: ${new Set(hqRead(profile).foodServed??[]).size}</p>
-  ${food?button('🥣 Nakarm zwierzaka','hq:feed','gold'):''}${button('📚 Zdobądź karmę · 5 pytań','hq:food','alt')}`;
+  ${food?button('🥣 Nakarm zwierzaka','hq:feed:kibble','gold'):''}${button('📚 Zdobądź karmę · 5 pytań','hq:food','alt')}`;
 }

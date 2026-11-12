@@ -1,4 +1,4 @@
-import {HQ_SPOTS,HQ_ART} from './headquarters84.js?v=86';
+import {HQ_SPOTS,HQ_ART} from './headquarters84.js?v=87';
 
 const rooms={
  entry:{at:[0,4.7],look:[0,-3],bounds:[-1.94,1.94,-6.87,5.6],color:'#394d71'},

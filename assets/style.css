@@ -1131,7 +1131,7 @@ button:not(:disabled):not(.tr72-subject-card):not(.mic):active,label.v73-file-co
 .hq86-outfits i{display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--fabric);flex:0 0 auto}
 .hq86-pet-reaction{position:absolute;z-index:3;top:16%;right:22%;font-size:2.2rem;animation:hq86-pet-react .65s ease-out both}
 .hq86-pet-status{text-align:center;margin:8px 0 0;color:#c7ffe9;font-weight:750}
-.hq86-pet-scene:is([data-effect="feed"],[data-effect="play"],[data-effect="wash"]) .hq86-animal{animation:hq86-pet-hop .63s ease-out}
+.hq86-pet-scene:is([data-effect^="feed-"],[data-effect="play"],[data-effect="wash"]) .hq86-animal{animation:hq86-pet-hop .63s ease-out}
 .hq86-pet-scene[data-effect="nap"]::after{content:"";position:absolute;inset:0;background:#111a644d;pointer-events:none}
 @keyframes hq86-pet-react{from{transform:translateY(9px) scale(.55);opacity:.25}to{transform:translateY(-8px) scale(1);opacity:1}}
 @keyframes hq86-pet-hop{0%,100%{transform:translate(-50%,0)}35%{transform:translate(-50%,-16%) rotate(-5deg)}68%{transform:translate(-50%,0) rotate(5deg)}}
@@ -1155,4 +1155,101 @@ button:not(:disabled):not(.tr72-subject-card):not(.mic):active,label.v73-file-co
 @media (prefers-reduced-motion:reduce){
  .hq86-stage .hq86-world,.hq86-stage .hq86-fallback,.hq86-training-console span{transition:none}
  .hq86-pet-reaction,.hq86-pet-scene .hq86-animal{animation:none!important}
+}
+
+/* V87 – wyposażenie bazy, Mentor i opieka nad zwierzakiem. */
+.hq86-stage button.hq87-mentor-actor:not(:disabled):not(.mic),.hq86-stage button.hq87-orb:not(:disabled):not(.mic){
+ background:none;border:0;padding:0;box-shadow:none!important;overflow:visible;
+}
+.hq86-stage .hq87-mentor-actor{display:grid;justify-items:center;width:clamp(118px,38vw,210px);max-width:48vw;gap:2px}
+.hq87-mentor-actor b,.hq87-orb b{
+ font-size:.78rem;color:#f7fcff;background:#132540e8;border:1px solid #8eeaff80;
+ padding:5px 8px;border-radius:8px;line-height:1.2;
+}
+.hq86-stage .hq87-mentor-figure{display:block;width:100%;height:auto;filter:drop-shadow(0 3px 10px #71d8ff63)}
+.hq86-stage .hq87-orb{width:96px;height:74px;align-items:flex-end;filter:drop-shadow(0 0 9px #ffe57790)}
+.hq87-orb b{font-size:.69rem;white-space:nowrap;border-color:#e8c47e8c;background:#342715ed}
+.hq86-stage .hq87-discovery-door{
+ background:linear-gradient(140deg,#216475ed,#153456);border-color:#7af7e3;box-shadow:0 0 24px #57d4ed80!important;
+}
+.hq87-discovery-door::before{content:"✦"!important;background:none!important;box-shadow:none!important;width:auto!important;color:#afffed;font-size:.9rem}
+.hq87-joke{display:flex;clear:both;gap:10px;align-items:center;margin-bottom:10px}
+.hq87-joke .listen{flex:none;min-height:42px;min-width:42px}
+.hq87-vault-panel{clear:both;border:1px solid #caaa6d89;border-radius:13px;padding:14px;background:linear-gradient(150deg,#183753,#112035 70%);color:#ffe7ab}
+.hq87-vault-panel .hq84-wallet{color:#e8f4ff;margin-bottom:0}
+.hq87-vault-panel dd{color:#ffe8ab}
+.hq87-shop-balance{display:flex;clear:both;flex-wrap:wrap;gap:8px;color:#caf8f5}
+.hq87-shop-balance span{background:#12394b;border:1px solid #6fcec99e;border-radius:10px;padding:5px 9px}
+.hq86-main .hq87-mic{right:max(9px,env(safe-area-inset-right));bottom:max(9px,env(safe-area-inset-bottom));width:66px!important;height:66px!important;min-height:66px!important}
+.hq86-main .hq86-help{left:43%;max-width:56%}
+.hq86-main .hq85-dialog[open]{display:flex;flex-direction:column;overflow:hidden}
+.hq86-main .hq85-dialog .hq84-panel{min-height:0;overflow-y:auto;overscroll-behavior:contain}
+.hq87-dialog-mic{flex:none;z-index:10;display:flex;justify-content:flex-end;align-items:flex-end;padding:4px 8px 8px;pointer-events:none}
+.hq87-dialog-mic .hq87-mic{position:static;margin:0;flex:none;width:59px!important;height:59px!important;min-height:59px!important;pointer-events:auto}
+.hq87-dialog-mic .mic-answer-card{position:static;order:-1;flex:1;max-height:34dvh;overflow:auto;margin:0 8px 0 0;pointer-events:auto}
+.hq86-adopt-pets{grid-template-columns:repeat(3,minmax(0,1fr))}
+.hq86-adopt-pets button{font-size:clamp(.68rem,2.8vw,.95rem)}
+.hq86-adopt-pets .hq86-animal{width:88%;height:clamp(65px,21vw,108px)}
+.hq86-animal[data-animal="guinea"] .hq86-outfit{left:50%;top:61%;width:35%}
+.hq86-pet-scene .hq86-animal[data-asleep=true]{bottom:25%;width:clamp(121px,56%,245px)}
+.hq86-animal[data-asleep=true] .hq86-outfit{display:none}
+.hq86-pet-scene[data-sleeping=true]{box-shadow:inset 0 0 22px #34255f7a}
+.hq86-animal[data-settling]>img:first-child{animation:hq87-nap .5s ease-out both}
+.hq87-pet-fall-asleep{position:absolute;bottom:0;left:16%;width:68%!important;transform-origin:50% 90%;animation:hq87-lie-down .51s ease-in both}
+@keyframes hq87-nap{0%,35%{opacity:0;transform:translateY(-3px)}100%{opacity:1}}
+@keyframes hq87-lie-down{0%{opacity:1}100%{opacity:0;transform:scale(.88,.59) rotate(-20deg)}}
+.hq87-pet-tail{display:none;position:absolute;inset:0}
+.hq87-petted .hq87-pet-tail{display:block;clip-path:polygon(77% 52%,100% 52%,100% 94%,77% 94%);transform-origin:79% 89%;animation:hq87-tail .3s ease-in-out infinite alternate}
+.hq87-petted:has(.hq87-pet-tail) .hq87-pet-body{clip-path:polygon(0 0,100% 0,100% 52%,77% 52%,77% 94%,100% 94%,100% 100%,0 100%)}
+@keyframes hq87-tail{from{transform:rotate(-9deg)}to{transform:rotate(14deg)}}
+.hq87-gesture-help{margin:3px 1px 7px;color:#d5effa;font-size:.79rem;text-align:center;line-height:1.3}
+.hq87-gesture-help:empty{display:none}
+.hq87-pet-name{margin:12px 0 0;color:#e1f3ff}
+.hq87-pet-name summary{cursor:pointer;color:#b6e7fb}
+.hq87-pet-name button{margin-top:7px}
+.hq86-pet-scene .hq87-pet-effects{
+ position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;background:none;border:none;
+}
+.hq86-pet-scene>button.hq87-tool{
+ left:17%;top:80%;width:48px;height:48px;min-height:48px;transform:translate(-50%,-50%);
+ touch-action:none;cursor:grab;font-size:1.5rem;background:#14344ddd;z-index:4;
+}
+.hq86-pet-scene>button.hq87-tool[data-pet-tool="shower"]{left:83%;top:80%}
+.hq86-pet-scene>button.hq87-tool[data-pet-tool="ball"]{left:79%;top:79%;background:none;border:0}
+.hq86-pet-scene>button.hq87-tool.is-held{z-index:6;cursor:grabbing}
+.hq86-pet-scene>button.hq87-tool[data-pet-tool="ball"] i{
+ display:block;width:32px;height:32px;margin:auto;border-radius:50%;border:2px solid #ffb0a8;
+ background:radial-gradient(circle at 31% 24%,#fff7db 2%,#ff8b7d 16%,#f04950 42%,#8f142a 92%);box-shadow:0 6px 8px #0a081f7e;
+}
+.hq86-pet-scene>button.hq87-tool[data-pet-tool="ball"]:disabled{opacity:1;filter:none}
+.hq87-pet-hand{position:absolute;z-index:5;pointer-events:none;transform:translate(-50%,-67%) rotate(-24deg);font-size:2.1rem;filter:drop-shadow(0 3px 4px #281b42b0)}
+.hq87-meal{position:absolute;inset:0;z-index:2;pointer-events:none;--meal-x:79%;--meal-y:66%;--food:#cb8047}
+.hq87-meal[data-mouth=true]{--meal-x:51%;--meal-y:57%}
+.hq87-meal[data-meal=water]{--food:#73d9fc}
+.hq87-meal[data-meal=wet]{--food:#ae562f}
+.hq87-meal[data-meal=greens]{--food:#8cbd57}
+.hq87-feed-hand{position:absolute;left:var(--meal-x);top:var(--meal-y);font-size:2.3rem;animation:hq87-serve 1.22s ease-in-out both}
+.hq87-feed-hand i{position:absolute;top:-12px;left:-12px;font-style:normal;font-size:.74em}
+.hq87-food-stream{position:absolute;left:calc(var(--meal-x) - 5%);top:calc(var(--meal-y) + 1%);width:25px}
+.hq87-food-stream i{position:absolute;left:var(--dx,0px);width:6px;height:9px;border-radius:65%;background:var(--food);animation:hq87-pour .44s var(--delay,.36s) ease-in both}
+.hq87-food-stream i:nth-child(2){--dx:7px;--delay:.46s}
+.hq87-food-stream i:nth-child(3){--dx:12px;--delay:.55s}
+.hq87-food-stream i:nth-child(4){--dx:4px;--delay:.61s}
+.hq87-bowl-fill{position:absolute;left:83.5%;top:71%;transform:translateX(-50%);width:13%;height:4%;border-radius:50%;background:var(--food);box-shadow:inset 0 2px 2px #fffb;animation:hq87-fill .86s ease both}
+@keyframes hq87-serve{0%{transform:translate(140px,36px) rotate(-12deg);opacity:0}33%,73%{transform:translate(-9px,-21px) rotate(-45deg);opacity:1}100%{transform:translate(100px,33px);opacity:0}}
+@keyframes hq87-pour{0%{opacity:0;transform:translateY(-15px)}29%{opacity:1}100%{opacity:0;transform:translateY(10px)}}
+@keyframes hq87-fill{0%,60%{opacity:0;scale:.2}100%{opacity:.95;scale:1}}
+.hq87-pet-mess{position:absolute;z-index:1;bottom:18%;pointer-events:none}
+.hq87-puddle{left:22%;width:21%;height:8%;transform:rotate(-12deg);border-radius:54% 46% 58% 42%;background:#f6cf72c7;box-shadow:inset 2px 1px 1px #fff4bd}
+.hq87-droppings{right:22%;font-size:1.55rem}
+.hq87-pet-mess.is-cleaning{animation:hq87-cleaned .9s ease-out both}
+.hq87-cleaning{position:absolute;z-index:5;bottom:19%;font-size:2.1rem;pointer-events:none;animation:hq87-wipe .9s ease-in-out both}
+.hq87-wiping{left:26%}
+.hq87-wiping i{position:absolute;left:-5px;bottom:-3px;width:23px;height:13px;background:#76e0e9;border-radius:4px;transform:rotate(-12deg)}
+.hq87-sweeping{right:21%}
+@keyframes hq87-wipe{0%,100%{opacity:0;transform:translate(-22px,4px) rotate(-20deg)}22%,71%{opacity:1;transform:translate(12px,0) rotate(23deg)}45%,87%{opacity:1;transform:translate(-10px,0) rotate(-18deg)}}
+@keyframes hq87-cleaned{0%,30%{opacity:1}100%{opacity:0}}
+@media(prefers-reduced-motion:reduce){
+ .hq87-pet-fall-asleep,.hq87-feed-hand,.hq87-food-stream,.hq87-cleaning,.hq87-pet-mess.is-cleaning{display:none!important}
+ .hq86-animal[data-settling]>img,.hq87-petted .hq87-pet-tail,.hq87-bowl-fill{animation:none!important}
 }

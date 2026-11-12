@@ -10,7 +10,8 @@ export const walkRooms={
    door('Centrum Rozrywki',.745,.428,'arcade'),
    door('Hangar',.871,.425,'hangar'),
    door('Kącik zwierzaka',.046,.563,'pet'),
-   station('Portfel',.257,.527,'hq:wallet','👛')
+   door('Sklep',.257,.495,'shop'),
+   door('Skarbiec',.365,.49,'vault')
   ]
  },
  training:{
@@ -18,12 +19,12 @@ export const walkRooms={
    door('Wieża Języka Angielskiego',.055,.43,'english'),
    door('Laboratorium Języka Polskiego',.718,.429,'polish'),
    station('Moje podręczniki',.19,.437,'hq:area:books','📚'),
-   station('Trening',.565,.448,'hq:training','🎯'),
+   station('Trening',.528,.448,'hq:training','🎯'),
    station('Misje',.42,.409,'hq:area:home','🛰️'),
    station('Symulator misji',.40,.522,'hq:exercise:mixed','⚡'),
-   station('Sala Odkrywców',.805,.395,'hq:area:academy','🔎'),
+   door('Sala Odkrywców',.803,.395,'explorer'),
    station('Language Master',.947,.476,'hq:master','🏆'),
-   station('Mentor',.843,.512,'hq:area:mentor','🤖')
+   station('Mentor',.602,.497,'hq:area:mentor')
   ]
  },
  polish:{
@@ -44,7 +45,7 @@ export const walkRooms={
  },
  armory:{
   name:'Zbrojownia',art:'annex86.webp',portrait:'armory.webp',tint:[1.08,.95,.83],bounds:[4,2.35,3.7],points:[
-   photo('Sklep ze zbrojami',.5,.427,'hq:shop'),
+   photo('Kolekcja zbroi',.5,.445,'hq:gallery'),
    photo('Gablota A',.25,.59,'hq:slot:a'),
    photo('Gablota B',.74,.59,'hq:slot:b'),
    station('Zmień bohatera',.705,.46,'hq:hero','🦸')
@@ -53,7 +54,22 @@ export const walkRooms={
  arcade:{
   name:'Centrum Rozrywki',art:'annex86.webp',portrait:'arcade.webp',tint:[1.1,.84,1.12],bounds:[4.2,2.35,4],points:[
    photo('Automaty',.51,.475,'hq:arcade'),
-   station('Kula sucharów',.695,.48,'hq:joke','🔮')
+   photo('Kula sucharów',.49,.671,'hq:joke')
+  ]
+ },
+ explorer:{
+  name:'Sala Odkrywców',art:'explorer87.webp',bounds:[5.5,2.8,5.2],points:[
+   station('Odkrywaj z globusem',.5,.48,'hq:area:academy','🌍')
+  ]
+ },
+ shop:{
+  name:'Sklep',art:'annex86.webp',portrait:'shop87.webp',tint:[.82,1.06,1.08],bounds:[4.2,2.4,4],points:[
+   photo('Kup wyposażenie',.5,.56,'hq:shop')
+  ]
+ },
+ vault:{
+  name:'Skarbiec',art:'annex86.webp',portrait:'vault87.webp',tint:[.94,.94,1.05],bounds:[4,2.35,3.8],points:[
+   photo('Portfel',.5,.60,'hq:wallet')
   ]
  },
  hangar:{

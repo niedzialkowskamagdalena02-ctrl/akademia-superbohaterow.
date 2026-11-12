@@ -9,11 +9,11 @@ import {vocabulary,readings,explanation} from './learning.js';
 import {syncAdapter} from './sync.js?v=81';
 import {BASE_ITEMS,baseMarkup,migrateBase} from './base.js?v=82';
 import {mountArcade,stopArcade} from './arcade.js?v=84';
-import {mountBaseScene84} from './base-scene84.js?v=86';
-import {baseWalkMarkup,mountBaseWalk,resetBaseWalk} from './base-walk85.js?v=86';
-import {HQ_SLOTS,hqItems,hqRead,hqBalances,hqEarnToken,hqSpendToken,hqRecordCrystals,hqBuyWithGems,hqPlaced,hqPlace,hqAdopt,hqPaint,hqEarnFood,hqFeed,hqChoices,hqMarkup,hqWallet,hqShop,hqPetMarkup} from './headquarters84.js?v=86';
-import {petRoom86,petCareMarkup86,mountPetCare86,setPetCare86} from './pet-care86.js?v=86';
-import {MASTER_PRIZES86,MASTER_SCORE86,recordEnergy86,trainingRound86,trainingConsole86,unlockMaster86} from './base-training86.js?v=86';
+import {mountBaseScene84} from './base-scene84.js?v=87';
+import {baseWalkMarkup,mountBaseWalk,resetBaseWalk,openWalkRoom87} from './base-walk85.js?v=87';
+import {HQ_SLOTS,hqItems,hqRead,hqBalances,hqEarnToken,hqSpendToken,hqRecordCrystals,hqBuyWithGems,hqPlaced,hqPlace,hqAdopt,hqPaint,hqEarnFood,hqChoices,hqMarkup,hqWallet,hqShop,hqPetMarkup} from './headquarters84.js?v=87';
+import {petRoom86,petCareMarkup86,mountPetCare86,setPetCare86,servePet87} from './pet-care86.js?v=87';
+import {MASTER_PRIZES86,MASTER_SCORE86,recordEnergy86,trainingRound86,trainingConsole86,unlockMaster86} from './base-training86.js?v=87';
 import {affordable82,purchase82,credit82} from './wallet82.js?v=82';
 import {REVEAL_OFFER82,consent82,requestedAnswer82,solutions82,leaks82,parseTutor82,promptTutor82} from './tutor82.js?v=82';
 let mentorHistory={tech:[],fun:[]};
@@ -67,7 +67,7 @@ const select=(id,label,options,value)=>`<label for="${id}">${label}</label><sele
 const grades=[['P','Przedszkole'],...Array.from({length:12},(_,i)=>[String(i+1),`Klasa ${i+1}`])];
 const people=[['pawel','Paweł'],['patryk','Patryk']];
 const note=t=>{const n=$('hq85-notice')||$('notice');if(!n){console.warn('Powiadomienie:',t);return}n.textContent=t;n.classList.add('visible');setTimeout(()=>{if(n.isConnected)n.classList.remove('visible')},4500)};
-const ACADEMY_RELEASE=86;
+const ACADEMY_RELEASE=87;
 async function checkAcademyUpdate(button){
  if(!button||button.disabled)return;
  const label=button.textContent,controller=new AbortController();
@@ -1200,15 +1200,15 @@ function trainingSelectionChange(el){
 }
 
 const hqViews84=new Map(),hqSessions84=new Set(),hqQuizzes84=new Map(),hqLessonAttempts84=new Set();
-const petRooms86=new Map(),petEffects86=new Map();
+const petRooms86=new Map(),petEffects86=new Map(),petPlay87=new Set();
 let hqPanel84='',hqSlot84='',hqItem84='',hqReturn84=false,hqJoke84=0;
 const hqJokes84=['Co mówi książka do książki? Jesteśmy na tej samej stronie!','Dlaczego robot nosi kapcie? Żeby nie robić zwarcia!','Co robi kot przy komputerze? Pilnuje myszki!'];
 
 function hqRoomPanel84(p){
  if(!hqPanel84)return '';
  let body='';
- if(hqPanel84==='wallet')body=hqWallet(p,button);
- if(hqPanel84==='shop')body=hqShop(p,hqSlot84,button);
+ if(hqPanel84==='wallet')body=hqWallet(p);
+ if(hqPanel84==='shop'||hqPanel84==='collection')body=hqShop(p,hqSlot84,button,hqPanel84==='collection');
  if(hqPanel84==='places'){
   const item=hqItems().find(x=>x.id===hqItem84);
   body='<h3>Ustaw '+e(item?.name)+'</h3>'+HQ_SLOTS.map(([id,label])=>button(label,'hq:place:'+hqItem84+':'+id,'alt')).join('');
@@ -1218,20 +1218,24 @@ function hqRoomPanel84(p){
   body='<h3>'+e(item?.name||'Gablota')+'</h3>'+button('✨ Uruchom efekt','hq:spark:'+hqSlot84,'gold')+button('Ustaw inne trofeum','hq:gallery:'+hqSlot84,'alt');
  }
  if(hqPanel84==='hero')body='<h3>🦸 Wybierz swojego bohatera</h3>'+heroPicker(who);
- if(hqPanel84==='pet')body=petCareMarkup86(p,petRooms86.get(who),petEffects86.get(who),button);
+ if(hqPanel84==='pet')body=petCareMarkup86(p,petRooms86.get(who),petEffects86.get(who),button,petPlay87.has(who));
  if(hqPanel84==='pet-quiz')body=hqPetMarkup(p,hqQuizzes84.get(who),button);
  if(hqPanel84==='master'){
   const won=MASTER_PRIZES86.every(id=>p.base?.owned?.includes(id));
   body='<h3>🏆 Language Master</h3><p>Odpowiedz samodzielnie na '+MASTER_SCORE86+' z 10 pytań z polskiego i angielskiego. Wygraj puchar i pelerynę mistrza.</p>'+
-   (won?'<p class="hq86-master-won">✓ Puchar i peleryna w kolekcji.</p>'+button('Zobacz kolekcję','hq:shop','alt'):'')+
+   (won?'<p class="hq86-master-won">✓ Puchar i peleryna w kolekcji.</p>'+button('Zobacz kolekcję','hq:gallery','alt'):'')+
    button(won?'Zagraj jeszcze raz':'Rozpocznij próbę','hq:exercise:master','gold');
  }
  if(hqPanel84==='hangar'){
   const jet=p.base?.owned?.includes('quinjet');
   body='<h3>🛩️ Hangar</h3>'+(jet?'<p>Wybierz malowanie Quinjeta.</p>'+[['blue','Niebieskie'],['mint','Miętowe'],['gold','Złote']].map(([id,label])=>button(label,'hq:paint:'+id,hqRead(p).paint===id?'gold':'alt')).join(''):
-   '<p>Na lądowisku jest miejsce na Quinjeta.</p>'+button('🛡️ Zobacz w sklepie','hq:shop','gold'));
+   '<p>Na lądowisku jest miejsce na Quinjeta.</p>'+button('🛒 Idź do sklepu','hq:room:shop','gold'));
  }
- if(hqPanel84==='joke')body='<h3>🔮 Kula sucharów</h3><p>'+hqJokes84[hqJoke84]+'</p>'+button('🔮 Następny suchar','hq:joke','alt');
+ if(hqPanel84==='joke'){
+  const joke=hqJokes84[hqJoke84];
+  body='<h3>🔮 Kula sucharów</h3><div class="hq87-joke"><p>'+e(joke)+'</p>'+speakBtn(joke)+'</div>'+
+   button('🔮 Następny suchar','hq:joke','alt');
+ }
  if(hqPanel84==='arcade'){
   const {energy}=hqBalances(p),pass=hqSessions84.has(who)||testMode;
   body='<h3>🕹️ Centrum Rozrywki</h3><p>'+(pass?'Sesja gier jest otwarta.':'Bezbłędny trening z polskiego lub angielskiego daje żeton. Jeden żeton otwiera automaty na czas wizyty.')+'</p>'+
@@ -1311,6 +1315,10 @@ async function hqAction84(action,target){
   hqReturn84=true;hqPanel84='';tab=id;render();window.scrollTo(0,0);return;
  }
  if(what==='back'){hqReturn84=false;return hqShow84();}
+ if(what==='room'&&id==='shop'){
+  if(hqViews84.get(child)!=='walk')return hqShow84('shop');
+  if(openWalkRoom87(child,id))return hqShow84();
+ }
  if(what==='training')return openBaseTraining86();
  if(['subject','exercise','master'].includes(what)){
   if(p.grade==='P')return openBaseTraining86();
@@ -1325,9 +1333,18 @@ async function hqAction84(action,target){
   if(what!=='pet')petRooms86.set(child,what==='bowl'?'kitchen':petRoom86(id));
   return hqShow84('pet');
  }
+ if(what==='pet-play'){
+  if(hqPanel84!=='pet'||!hqRead(p).pet||hqRead(p).pet.care?.asleep)return;
+  if(petPlay87.has(child))petPlay87.delete(child);else petPlay87.add(child);
+  petEffects86.delete(child);return hqShow84('pet');
+ }
  if(what==='care'){
-  if(hqPanel84!=='pet'||!setPetCare86(p,id,extra))return;
-  petEffects86.set(child,id);
+  if(hqPanel84!=='pet')return;
+  const value=id==='name'?$('hq87-pet-name')?.value:extra;
+  if(id==='name'&&!value?.trim())return note('Wpisz imię zwierzaka.');
+  if(!setPetCare86(p,id,value))return;
+  if(id==='nap')petPlay87.delete(child);
+  petEffects86.set(child,id==='clean'?'clean-'+value:id);
   await save();
   if(who===child&&tab==='base'&&hqPanel84==='pet')hqShow84('pet');
   return;
@@ -1335,8 +1352,8 @@ async function hqAction84(action,target){
  if(['wallet','shop','arcade','hangar','hero'].includes(what))return hqShow84(what);
  if(what==='joke'){if(hqPanel84==='joke')hqJoke84=(hqJoke84+1)%hqJokes84.length;return hqShow84('joke');}
  if(what==='egg'){hqTone84(210);hqEffect84('egg','',!target?.matches('[data-hq84-spot]'));return note('🥚 Puf!');}
- if(what==='slot')return hqShow84(hqPlaced(p,id)?'trophy':'shop',id);
- if(what==='gallery')return hqShow84('shop',id);
+ if(what==='slot')return hqShow84(hqPlaced(p,id)?'trophy':'collection',id);
+ if(what==='gallery')return hqShow84('collection',id);
  if(what==='spark'){
   const item=hqPlaced(p,id);
   if(!item)return;
@@ -1389,8 +1406,8 @@ async function hqAction84(action,target){
   }
   return hqShow84('pet-quiz');
  }
- if(what==='feed'&&hqPanel84==='pet'&&hqFeed(p)){
-  petRooms86.set(child,'kitchen');petEffects86.set(child,'feed');
+ if(what==='feed'&&hqPanel84==='pet'&&servePet87(p,id)){
+  petRooms86.set(child,'kitchen');petEffects86.set(child,'feed-'+id);
   await save();
   if(who===child&&tab==='base'&&hqPanel84==='pet'){hqShow84('pet');hqTone84(520);}
  }
@@ -1406,14 +1423,17 @@ function hqMountArcade84(){
 
 function childRender(){
  const p=profile(),walking=hqViews84.get(who)==='walk';
+ const careGesture=kind=>handle('hq:care:'+kind);
  if(tab==='view-choice')return layout('Akademia '+p.name,hqChoices(button),'choice');
  if(tab==='base'&&walking){
   const panel=hqRoomPanel84(p);
   const care=hqPanel84==='pet'||hqPanel84==='pet-quiz';
-  const walk=baseWalkMarkup(p,who,hero(p.hero||(who==='pawel'?'iron':'spider'))[0],ACADEMY_RELEASE,
-   panel?'<dialog class="hq85-dialog'+(care?' hq86-pet-dialog':'')+'" aria-label="'+(care?'Kącik zwierzaka':'Interakcja w bazie')+'">'+panel+'<div id="hq85-notice" role="status"></div></dialog>':'');
+  const mic='<button type="button" class="mic hq87-mic" data-action="mic" aria-label="Zadaj pytanie">🎙️</button>';
+  const dialog=panel?'<dialog class="hq85-dialog'+(care?' hq86-pet-dialog':'')+'" aria-label="'+(care?'Kącik zwierzaka':'Interakcja w bazie')+'">'+panel+
+   '<div id="hq85-notice" role="status"></div><div class="hq87-dialog-mic">'+mic+'</div></dialog>':'';
+  const walk=baseWalkMarkup(p,who,hero(p.hero||(who==='pawel'?'iron':'spider'))[0],ACADEMY_RELEASE,dialog,mic);
   layout('Spacer po bazie',walk,'walk');
-  mountBaseWalk(document.querySelector('[data-hq86-walk]'));mountPetCare86(app);return;
+  mountBaseWalk(document.querySelector('[data-hq86-walk]'));mountPetCare86(app,careGesture);return;
  }
  let html=walking?'':`<section class="card"><div class="row between"><div><h2>${p.name} ${hero(p.hero||(who==='pawel'?'iron':'spider'))[2]}</h2><small>${gradeName(p.grade)} · Baza poziom ${1+Math.floor(p.xp/100)}</small></div><b class="xp" data-wallet82="${who}">🪙 ${p.coins} złotych</b></div><div class="progress"><div style="width:${p.xp%100}%"></div></div></section>`+nav();
 if(tab==='song'){const mission=data.missions.find(m=>m.id===missionId);const song=data.settings.songs.find(x=>x.id===mission?.songId);html+=song?songScreen(song,mission):'<section class="card">Nie znaleziono piosenki.</section>'}
@@ -1444,7 +1464,7 @@ if(tab==='learn'){
    html+=trainingFlowMarkup();
   }
   if(avengersRun)html+=avengersPanel();
- }layout('Akademia '+p.name,html);if(tab==='base'){mountBaseScene84(document.querySelector('[data-hq84-scene]'));mountPetCare86(app);}if(tab==='arcade')hqMountArcade84();if(tab==='learn'&&v37Classic)newExercise();if(tab==='trace')drawTrace()}
+ }layout('Akademia '+p.name,html);if(tab==='base'){mountBaseScene84(document.querySelector('[data-hq84-scene]'));mountPetCare86(app,careGesture);}if(tab==='arcade')hqMountArcade84();if(tab==='learn'&&v37Classic)newExercise();if(tab==='trace')drawTrace()}
 const CROSSWORDS=[
  {word:'KOT',clue:'Miauczy i mruczy',r:0,c:2,dir:'v'},
  {word:'DOM',clue:'Mieszkamy w nim',r:1,c:1,dir:'h'},
@@ -1948,7 +1968,7 @@ function showMicBubble(answer,readAloud=true,spellingWord=''){
  heading.append(title,close);
  const text=document.createElement('p');text.textContent=answer;
  const replay=document.createElement('button');replay.type='button';replay.className='mic-answer-replay';replay.textContent='🔊 Odsłuchaj ponownie';replay.addEventListener('click',()=>spellingWord?spellEnglish77(spellingWord,{prefix:answer}):speak(answer,'pl-PL',profile().mentor));
- box.append(heading,text,replay);document.body.appendChild(box);if(readAloud){if(spellingWord)spellEnglish77(spellingWord,{prefix:answer});else speak(answer,'pl-PL',profile().mentor);}
+ box.append(heading,text,replay);(document.querySelector('.hq85-dialog[open] .hq87-dialog-mic')||document.body).appendChild(box);if(readAloud){if(spellingWord)spellEnglish77(spellingWord,{prefix:answer});else speak(answer,'pl-PL',profile().mentor);}
 }
 async function trainingReply82(question,exercise,isCurrent,emit,mode='game'){
  const q=String(question||'').trim();if(!q||exercise.v82TutorBusy)return;
@@ -2002,7 +2022,7 @@ async function helpWithGeneralAI(question){
 }
 let micDragIgnoreClick=false;
 function installMicDrag(){
- const mic=document.querySelector('.mic');if(!mic)return;
+ const mic=document.querySelector('.mic');if(!mic||mic.classList.contains('hq87-mic'))return;
  let saved=null;try{saved=JSON.parse(localStorage.getItem('academy-v70-mic-position')||'null')}catch{}
  const putPos=(x,y)=>{const w=window.visualViewport?.width||innerWidth,h=window.visualViewport?.height||innerHeight;
   mic.style.left=Math.max(0,Math.min(w-mic.offsetWidth,x))+'px';mic.style.top=Math.max(0,Math.min(h-mic.offsetHeight,y))+'px';mic.style.right='auto';mic.style.bottom='auto';};
@@ -2041,7 +2061,7 @@ function microphone(){
 
   if(document.querySelector('.mg-tutor')){document.dispatchEvent(new CustomEvent('academy:tutor-question',{detail:{question}}));return;}
 
-  if(avengersRun&&!avengersRun.done&&avengersRun.items[avengersRun.i]){helpWithQuiz82(question);return;}
+  if(tab==='learn'&&avengersRun&&!avengersRun.done&&avengersRun.items[avengersRun.i]){helpWithQuiz82(question);return;}
 
   if(practice && document.getElementById('exercise')){
    helpWithExerciseAI(question);
@@ -2148,7 +2168,7 @@ async function v76Action(action,target){
  if(action==='v76:report-show'){v76ReportChild=$('v76-report-child')?.value||v76ReportChild;v76ReportShown=true;render();return}
  if(action==='v76:report-clear'){const id=$('v76-report-child')?.value||v76ReportChild;if(!confirm('Wyczyścić raport dla '+(data.profiles[id]?.name||id)+'? Książki, pytania i punkty pozostaną.'))return;for(const b of data.books)localStorage.removeItem('academy-v53-stats-'+id+'-'+b.id);v76ReportShown=true;v76ReportChild=id;render();note('✅ Wyczyszczono raport wybranego dziecka.');return}
 }
-function v76MicPaint(){const state=getVoiceState(),label={idle:'Zadaj pytanie',starting:'Uruchamiam…',listening:'Słucham…',thinking:'Myślę…',speaking:'Mówię…'}[state]||'Zadaj pytanie';for(const mic of document.querySelectorAll('.mic')){mic.dataset.state=state;mic.setAttribute('aria-label',state==='idle'?'Nagraj pytanie':state==='listening'?'Zatrzymaj nagrywanie':'Przerwij odpowiedź lub oczekiwanie');if(!mic.querySelector('.v76-mic-glyph'))mic.innerHTML='<span class="v76-mic-glyph" aria-hidden="true">🎙️</span><small class="v76-mic-label" aria-live="polite"></small>';const el=mic.querySelector('.v76-mic-label');if(el)el.textContent=label}}
+function v76MicPaint(){const state=getVoiceState(),label={idle:'Zadaj pytanie',starting:'Uruchamiam…',listening:'Słucham…',thinking:'Myślę…',speaking:'Mówię…'}[state]||'Zadaj pytanie';for(const mic of document.querySelectorAll('.mic')){mic.dataset.state=state;mic.setAttribute('aria-label',state==='idle'?'Zadaj pytanie':state==='listening'?'Zatrzymaj nagrywanie':'Przerwij odpowiedź lub oczekiwanie');if(!mic.querySelector('.v76-mic-glyph'))mic.innerHTML='<span class="v76-mic-glyph" aria-hidden="true">🎙️</span><small class="v76-mic-label" aria-live="polite"></small>';const el=mic.querySelector('.v76-mic-label');if(el)el.textContent=label}}
 function v76AfterRender(){
  v77RestoreBookView();v76MicPaint();v77QuestionScopeRefresh();setQuestionBuildButtons();
  if($('v75-outside-child')){$('v75-outside-child').value=v76Outside.child;$('v75-outside-subject').value=v76Outside.subject;if(v76Outside.shown)v76OutsideShow()}
