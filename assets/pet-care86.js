@@ -1,5 +1,5 @@
 import {hqRead,hqFood,hqFeed,hqPet,hqPetName} from './headquarters84.js?v=88';
-import {petTools87,mountPetGestures87} from './pet-gestures87.js?v=88';
+import {petTools87,mountPetGestures87} from './pet-gestures87.js?v=90';
 
 const ROOMS=[
  ['nest','Legowisko','🌙'],
@@ -99,7 +99,7 @@ function mealAnimation(meal){
  const mouth=['bone','fish','carrot'].includes(id);
  return `<div class="hq87-meal" data-meal="${id}" data-mouth="${mouth}" aria-hidden="true">
   ${mouth?'':'<span class="hq87-bowl-fill"></span>'}
-  <span class="hq87-feed-hand">✋<i>${icon}</i></span>
+  ${id==='fish'?'<img class="hq90-fish" src="assets/games80/pictures/fish.svg" alt="">':`<span class="hq87-feed-hand">✋<i>${icon}</i></span>`}
   ${mouth?'':'<span class="hq87-food-stream"><i></i><i></i><i></i><i></i></span>'}
  </div>`;
 }
@@ -138,12 +138,13 @@ export function petCareMarkup86(profile,room,effect,button,playing=false){
   'clean-pee':['✨','Kałuża wytarta.'],'clean-poop':['✨','Podłoga zamieciona.'],
   outfit:['✨','Ubranko zapisane.'],food:['🥣','Zdobywasz porcję karmy!'],name:['✎','Imię zapisane.']
  };
- const reaction=meal?['💛',meal[0]==='water'?'Woda w misce!':'Smacznego!']:Object.hasOwn(reactions,effect)?reactions[effect]:null;
+ const reaction=meal?['💛',({water:'Woda w misce!',fish:'Kot dostał rybę!'}[meal[0]]??'Smacznego!')]:Object.hasOwn(reactions,effect)?reactions[effect]:null;
  const wake=button('☀️ Obudź','hq:care:wake','gold');
  const controls={
   nest:button('🌙 Połóż spać','hq:care:nap','alt')+button(playing?'Schowaj piłkę':'🎾 Pobaw się','hq:pet-play','gold')+
    '<button type="button" data-pet-stroke>🤚 Pogłaszcz</button>',
   kitchen:`<p>Porcje karmy <b>${food}</b> <span aria-hidden="true">·</span> Nakarmienia <b>${meals}</b></p>`+
+   (meal?`<p class="hq86-pet-status" role="status">${reaction[1]}</p>`:food?'':'<p>Zdobądź porcję karmy, żeby nakarmić zwierzaka.</p>')+
    petMeals(pet.species).map(([id,label,icon])=>id==='water'||food?button(icon+' '+label,'hq:feed:'+id,'gold'):`<button type="button" disabled>${icon} ${label}</button>`).join('')+
    button('📚 Zdobądź karmę · 5 pytań','hq:food','alt'),
   bath:'',
@@ -171,39 +172,37 @@ export function petCareMarkup86(profile,room,effect,button,playing=false){
   </nav>
   <p class="hq87-gesture-help" role="status">${instruction}</p>
   <div class="hq86-pet-controls">${asleep?wake:controls[current]}</div>
-  ${reaction?`<p class="hq86-pet-status" role="status">${reaction[1]}</p>`:''}
+  ${reaction&&!meal?`<p class="hq86-pet-status" role="status">${reaction[1]}</p>`:''}
  </div>`;
 }
 
-export function mountPetCare86(root,complete){
+export function mountPetCare86(root,complete,markup){
  const panel=root.querySelector('.hq86-pet-panel');
  if(!panel)return;
- const scene=panel.querySelector('[data-pet-swipe]');
- mountPetGestures87(panel,scene,complete);
- let start=null,handled=null;
- panel.addEventListener('pointerdown',event=>{
-  handled=null;
-  const button=event.target.closest('button');
-  const swipe=scene?.contains(event.target)&&!button;
-  if(event.button!==0||button?.hasAttribute('data-pet-tool')||!swipe&&!button)return;
-  start={id:event.pointerId,x:event.clientX,y:event.clientY,swipe,button};
-  if(swipe)scene.setPointerCapture(event.pointerId);
+ let care=panel.querySelector('.hq86-pet-care');
+ if(!care)return;
+ if(markup){
+  const scroll=panel.scrollTop;
+  care.outerHTML=markup;
+  panel.scrollTop=scroll;
+  care=panel.querySelector('.hq86-pet-care');
+ }
+ const scene=care.querySelector('[data-pet-swipe]');
+ mountPetGestures87(care,scene,complete);
+ if(!scene)return;
+ let start=null;
+ scene.addEventListener('pointerdown',event=>{
+  if(event.button!==0||start||event.target.closest('button'))return;
+  start={id:event.pointerId,x:event.clientX,y:event.clientY};
+  scene.setPointerCapture(event.pointerId);
  });
- panel.addEventListener('pointerup',event=>{
+ scene.addEventListener('pointerup',event=>{
   if(start?.id!==event.pointerId)return;
-  const {x,y,swipe,button}=start,dx=event.clientX-x,dy=event.clientY-y;
+  const dx=event.clientX-start.x,dy=event.clientY-start.y;
   start=null;
-  if(swipe&&Math.abs(dx)>=44&&Math.abs(dx)>Math.abs(dy)*1.35){
+  if(Math.abs(dx)>=44&&Math.abs(dx)>Math.abs(dy)*1.35){
    scene.querySelector(dx<0?'.hq86-pet-next':'.hq86-pet-prev').click();
-  }else if(button&&event.pointerType==='touch'&&Math.hypot(dx,dy)<9){
-   handled=button;
-   event.preventDefault();button.click();
   }
  });
- panel.addEventListener('pointercancel',()=>{start=null;});
- panel.addEventListener('click',event=>{
-  if(event.detail&&handled&&handled.contains(event.target)){
-   event.preventDefault();event.stopPropagation();
-  }
- },true);
+ scene.addEventListener('pointercancel',event=>{if(start?.id===event.pointerId)start=null;});
 }

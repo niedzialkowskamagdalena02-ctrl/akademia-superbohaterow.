@@ -1,9 +1,9 @@
 import {hqPet,hqPlaced,hqRead} from './headquarters84.js?v=88';
 import {baseArt88} from './base-art88.js?v=88';
-import {drawHeroHands,loadHeroHands88} from './hero-hands85.js?v=88';
+import {drawHeroHands,loadHeroHands88} from './hero-hands85.js?v=90';
 import {walkRooms,FLOOR_DEPTH,FULL_TURN,PHOTO_FOV,VERTICAL_SCALE,advance86,cameraBasis86,clamp86,roomAnchor86,wrapAngle} from './base-map86.js?v=88';
 import {energy86} from './base-training86.js?v=87';
-import {petSprite86} from './pet-care86.js?v=88';
+import {petSprite86} from './pet-care86.js?v=90';
 import {mentorMarkup87,drawMentor87,MENTOR_GREETING_MS} from './base-mentor87.js?v=87';
 import {drawQuinjet88} from './quinjet88.js?v=88';
 

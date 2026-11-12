@@ -24,13 +24,13 @@ const spellings={
 };
 
 const missions=[
- {title:'Rzeczowniki',instruction:'Wlatuj w rzeczowniki. Szukaj nazw osób, zwierząt, miejsc i rzeczy.',kind:'rzeczownik',seconds:3.5},
- {title:'Przymiotniki',instruction:'Wlatuj w przymiotniki. Szukaj słów, które mówią, jaki ktoś lub coś jest.',kind:'przymiotnik',seconds:3.7},
- {title:'Czasowniki',instruction:'Wlatuj w czasowniki. Szukaj słów, które mówią, co ktoś robi lub co się dzieje.',kind:'czasownik',seconds:3.7},
- {title:'Ó czy U?',instruction:'Wlatuj w słowa, w których poprawnie napisano ó zamknięte lub u otwarte.',pairs:spellings.ou,seconds:4.8},
- {title:'Ż czy RZ?',instruction:'Wlatuj w słowa, w których poprawnie napisano ż z kropką lub rz.',pairs:spellings.zrz,seconds:4.8},
- {title:'Strzał w literówkę',instruction:'Wybierz pas z błędnie zapisanym słowem i naciśnij Strzał.',pairs:Object.values(spellings).flat(),shoot:true,seconds:6},
- {title:'H czy CH?',instruction:'Wlatuj w słowa, w których poprawnie napisano h lub ch.',pairs:spellings.hch,seconds:4.8}
+ {title:'Rzeczowniki',goal:'Złap wszystkie rzeczowniki.',instruction:'Szukaj nazw osób, zwierząt, miejsc i rzeczy.',kind:'rzeczownik',seconds:5.5},
+ {title:'Przymiotniki',goal:'Złap wszystkie przymiotniki.',instruction:'Szukaj słów, które mówią, jaki ktoś lub coś jest.',kind:'przymiotnik',seconds:5.5},
+ {title:'Czasowniki',goal:'Złap wszystkie czasowniki.',instruction:'Szukaj słów, które mówią, co ktoś robi lub co się dzieje.',kind:'czasownik',seconds:5.5},
+ {title:'Ó czy U?',goal:'Złap wyrazy z poprawnym ó lub u.',instruction:'Sprawdź, czy w słowie pasuje ó zamknięte, czy u otwarte.',pairs:spellings.ou,seconds:7},
+ {title:'Ż czy RZ?',goal:'Złap wyrazy z poprawnym ż lub rz.',instruction:'Sprawdź, czy w słowie pasuje ż z kropką, czy rz.',pairs:spellings.zrz,seconds:7},
+ {title:'Strzał w literówkę',goal:'Traf w wyrazy z literówką.',instruction:'Wybierz pas z błędnie zapisanym słowem i naciśnij Strzał.',pairs:Object.values(spellings).flat(),shoot:true,seconds:8},
+ {title:'H czy CH?',goal:'Złap wyrazy z poprawnym h lub ch.',instruction:'Sprawdź, czy w słowie pasuje h, czy ch.',pairs:spellings.hch,seconds:7}
 ];
 
 export const FLIGHT_ROUNDS89=3;

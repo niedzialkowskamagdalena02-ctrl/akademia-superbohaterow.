@@ -10,10 +10,10 @@ import {syncAdapter} from './sync.js?v=81';
 import {BASE_ITEMS,baseMarkup,migrateBase} from './base.js?v=82';
 import {mountArcade,stopArcade} from './arcade.js?v=84';
 import {mountBaseScene84} from './base-scene84.js?v=88';
-import {baseWalkMarkup,mountBaseWalk,resetBaseWalk,openWalkRoom87,focusWalkCase88} from './base-walk85.js?v=88';
+import {baseWalkMarkup,mountBaseWalk,resetBaseWalk,openWalkRoom87,focusWalkCase88} from './base-walk85.js?v=90';
 import {HQ_SLOTS,hqItems,hqRead,hqBalances,hqEarnToken,hqSpendToken,hqRecordCrystals,hqBuyWithGems,hqPlaced,hqPlace,hqDisplayPurchase88,hqPet,hqChoosePet88,hqPaint,hqEarnFood,hqChoices,hqMarkup,hqWallet,hqShop,hqFoodQuiz88} from './headquarters84.js?v=88';
-import {petRoom86,petCareMarkup86,petPicker88,mountPetCare86,setPetCare86,servePet87} from './pet-care86.js?v=88';
-import {flightMarkup88,mountNounFlight88} from './noun-flight88.js?v=89';
+import {petRoom86,petCareMarkup86,petPicker88,mountPetCare86,setPetCare86,servePet87} from './pet-care86.js?v=90';
+import {flightMarkup88,mountNounFlight88} from './noun-flight88.js?v=90';
 import {petQuiz88} from './pet-quiz88.js?v=88';
 import {MASTER_PRIZES86,MASTER_SCORE86,recordEnergy86,trainingRound86,trainingConsole86,unlockMaster86} from './base-training86.js?v=87';
 import {affordable82,purchase82,credit82} from './wallet82.js?v=82';
@@ -69,7 +69,7 @@ const select=(id,label,options,value)=>`<label for="${id}">${label}</label><sele
 const grades=[['P','Przedszkole'],...Array.from({length:12},(_,i)=>[String(i+1),`Klasa ${i+1}`])];
 const people=[['pawel','Paweł'],['patryk','Patryk']];
 const note=t=>{const n=$('hq85-notice')||$('notice');if(!n){console.warn('Powiadomienie:',t);return}n.textContent=t;n.classList.add('visible');setTimeout(()=>{if(n.isConnected)n.classList.remove('visible')},4500)};
-const ACADEMY_RELEASE=89;
+const ACADEMY_RELEASE=90;
 async function checkAcademyUpdate(button){
  if(!button||button.disabled)return;
  const label=button.textContent,controller=new AbortController();
@@ -1203,6 +1203,8 @@ function trainingSelectionChange(el){
 
 const hqViews84=new Map(),hqSessions84=new Set(),hqQuizzes84=new Map(),hqLessonAttempts84=new Set();
 const petRooms86=new Map(),petEffects86=new Map(),petPlay87=new Set();
+const petFeeding90=new Set();
+const careGesture=kind=>handle('hq:care:'+kind);
 let hqPanel84='',hqSlot84='',hqItem84='',hqReturn84=false,hqJoke84=0;
 const hqJokes84=['Co mówi książka do książki? Jesteśmy na tej samej stronie!','Dlaczego robot nosi kapcie? Żeby nie robić zwarcia!','Co robi kot przy komputerze? Pilnuje myszki!'];
 
@@ -1347,7 +1349,7 @@ async function hqAction84(action,target){
   if(hqPanel84!=='pet')return;
   if(!setPetCare86(p,id,extra))return;
   if(id==='nap')petPlay87.delete(child);
-  petEffects86.set(child,id==='clean'?'clean-'+value:id);
+  petEffects86.set(child,id==='clean'?'clean-'+extra:id);
   await save();
   if(who===child&&tab==='base'&&hqPanel84==='pet')hqShow84('pet');
   return;
@@ -1414,10 +1416,19 @@ async function hqAction84(action,target){
   }
   return hqShow84('pet-quiz');
  }
- if(what==='feed'&&hqPanel84==='pet'&&servePet87(p,id)){
-  petRooms86.set(child,'kitchen');petEffects86.set(child,'feed-'+id);
-  await save();
-  if(who===child&&tab==='base'&&hqPanel84==='pet'){hqShow84('pet');hqTone84(520);}
+ if(what==='feed'&&hqPanel84==='pet'&&petRooms86.get(child)==='kitchen'){
+  const care=app.querySelector('.hq86-pet-care');
+  if(!care||petFeeding90.has(child)||!servePet87(p,id))return;
+  petFeeding90.add(child);
+  try{
+   await save();
+   if(care.isConnected&&who===child&&tab==='base'&&hqPanel84==='pet'){
+    const effect='feed-'+id;
+    petEffects86.set(child,effect);
+    mountPetCare86(app,careGesture,petCareMarkup86(p,'kitchen',effect,button,petPlay87.has(child)));
+    hqTone84(520);
+   }
+  }finally{petFeeding90.delete(child);}
  }
 }
 function hqMountArcade84(){
@@ -1431,7 +1442,6 @@ function hqMountArcade84(){
 
 function childRender(){
  const p=profile(),walking=hqViews84.get(who)==='walk';
- const careGesture=kind=>handle('hq:care:'+kind);
  if(tab==='view-choice')return layout('Akademia '+p.name,hqChoices(button),'choice');
  if(tab==='base'&&walking){
   const panel=hqRoomPanel84(p);

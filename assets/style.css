@@ -1124,6 +1124,8 @@ button:not(:disabled):not(.tr72-subject-card):not(.mic):active,label.v73-file-co
 .hq86-pet-controls{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
 .hq86-pet-controls>p{width:100%;text-align:center;margin:4px 0 1px;font-size:.87rem;color:#d7ecff}
 .hq86-pet-controls button{font-size:.88rem;min-height:41px;padding:6px 10px}
+.hq86-pet-panel button:not([data-pet-tool]){touch-action:manipulation}
+.hq86-pet-controls>.hq86-pet-status{color:#c7ffe9}
 .hq86-outfits{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
 .hq86-outfits button{display:flex;align-items:center;justify-content:center;gap:7px;border:1px solid #6185a4;background:#233a5c;color:#f1faff}
 .hq86-outfits i{display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--fabric);flex:0 0 auto}
@@ -1225,6 +1227,14 @@ button:not(:disabled):not(.tr72-subject-card):not(.mic):active,label.v73-file-co
 .hq87-meal[data-meal=greens]{--food:#8cbd57}
 .hq87-feed-hand{position:absolute;left:var(--meal-x);top:var(--meal-y);font-size:2.3rem;animation:hq87-serve 1.22s ease-in-out both}
 .hq87-feed-hand i{position:absolute;top:-12px;left:-12px;font-style:normal;font-size:.74em}
+.hq90-fish{position:absolute;left:50%;top:53%;width:clamp(36px,16%,64px);height:auto;transform:translate(-50%,-50%);filter:drop-shadow(0 3px 3px #07192ab3);animation:hq90-serve-fish 1.55s ease-in-out both}
+@keyframes hq90-serve-fish{
+ 0%{left:88%;top:75%;opacity:0;transform:translate(-50%,-50%) rotate(-12deg) scale(.85)}
+ 12%{opacity:1}
+ 46%,69%{left:50%;top:53%;opacity:1;transform:translate(-50%,-50%) rotate(5deg) scale(1)}
+ 100%{left:50%;top:53%;opacity:0;transform:translate(-50%,-50%) scale(.15)}
+}
+@keyframes hq90-fish-static{0%{opacity:1}100%{opacity:0}}
 .hq87-food-stream{position:absolute;left:calc(var(--meal-x) - 5%);top:calc(var(--meal-y) + 1%);width:25px}
 .hq87-food-stream i{position:absolute;left:var(--dx,0px);width:6px;height:9px;border-radius:65%;background:var(--food);animation:hq87-pour .44s var(--delay,.36s) ease-in both}
 .hq87-food-stream i:nth-child(2){--dx:7px;--delay:.46s}
@@ -1242,6 +1252,7 @@ button:not(:disabled):not(.tr72-subject-card):not(.mic):active,label.v73-file-co
 @media(prefers-reduced-motion:reduce){
  .hq87-pet-fall-asleep,.hq87-feed-hand,.hq87-food-stream,.hq87-cleaning,.hq87-pet-mess.is-cleaning{display:none!important}
  .hq86-animal[data-settling]>img,.hq87-petted .hq87-pet-tail,.hq87-bowl-fill{animation:none!important}
+ .hq90-fish{animation:hq90-fish-static 1.55s steps(1,end) both}
 }
 
 /* V88 – gabloty, przyciski bazy, ruch zwierzaka i lot Quinjetem. */
@@ -1331,7 +1342,7 @@ button:not(:disabled):not(.tr72-subject-card):not(.mic):active,label.v73-file-co
 :is(.hq86-main,.hq88-base-page,.hq84-choices) :is(button,summary):focus-visible{
  outline:2px solid #a3ffee;outline-offset:3px;
 }
-.hq88-flight{clear:both}
+.hq88-flight{clear:both;display:flex;flex-direction:column}
 .hq88-flight h3{margin:0 0 5px}
 .hq88-flight-rules{line-height:1.4;margin:0 0 8px}
 .hq88-flight-score,.hq88-flight-controls,.hq88-flight-gates{display:flex;align-items:center;justify-content:space-between;gap:6px}
@@ -1340,15 +1351,23 @@ button:not(:disabled):not(.tr72-subject-card):not(.mic):active,label.v73-file-co
 .hq88-flight-gates span{flex:1;min-width:0;overflow-wrap:anywhere;border-radius:8px;background:#163457;color:#e8f8ff;padding:5px 2px;text-align:center;font-size:.82rem}
 .hq89-flight-round{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:2px 8px;margin:5px 0;color:#aeeef7;font-size:.86rem}
 .hq89-flight-round b{color:#fff1b9}
+.hq90-flight-goal{font-size:clamp(1rem,4.7vw,1.25rem);line-height:1.2;margin:2px 0 6px;color:#f5fbff}
 .hq88-flight-rules{display:flex;align-items:center;gap:6px}
 .hq88-flight-rules .listen{flex:none;margin:0}
 .hq88-flight-gates [data-current]{background:#24527b;box-shadow:inset 0 0 0 1px #a6efff;color:#fff}
 .hq89-flight-fire{margin-top:6px}
 .hq89-flight-fire:not([hidden]){display:flex;justify-content:center}
 .hq89-flight-fire button{min-width:120px}
-.hq88-flight-view{display:block;width:100%;height:clamp(180px,42dvh,380px);touch-action:none;outline-offset:3px;border-radius:14px;border:1px solid #85c8ec}
-.hq88-flight-controls{margin-top:8px}
+.hq88-flight-view{display:block;width:100%;height:clamp(165px,35dvh,350px);touch-action:none;outline-offset:3px;border-radius:14px;border:1px solid #85c8ec}
+.hq88-flight-controls{margin:4px 0 8px}
 .hq88-flight-controls button{min-width:44px;min-height:44px}
+.hq88-flight[data-flight-phase=flying] .hq88-flight-controls{order:1;margin:8px 0 0}
+.hq88-flight:not([data-flight-phase=flying]) .hq88-flight-controls{justify-content:center}
+.hq88-flight:not([data-flight-phase=flying]) :is([data-action="hq:flight:left"],[data-action="hq:flight:right"],.hq88-flight-gates){display:none}
+.hq88-flight:is([data-flight-phase=ready],[data-flight-phase=between]) .hq88-flight-score{display:none}
+.hq89-flight-fire{order:2}
+.hq88-flight-status{order:3}
+.hq88-flight-status:empty{display:none}
 .hq88-flight-status{min-height:2.4em;margin:8px 0 0;font-size:.9rem;color:#c5f4eb}
 @media(prefers-reduced-motion:reduce){
  .hq88-pet-motion>*{animation:none!important}

@@ -55,11 +55,13 @@ function fakeNode(){
  };
 
  const names=['canvas','[data-flight-score]','[data-flight-hearts]','[data-flight-status]',
-  '[data-action="hq:flight:start"]','[data-flight-topic]','[data-flight-round]','[data-flight-instruction]',
+  '[data-action="hq:flight:start"]','[data-flight-topic]','[data-flight-round]','[data-flight-goal]','[data-flight-instruction]',
   '.hq88-flight-rules [data-speak]','.hq89-flight-fire'];
  const nodes=Object.fromEntries(names.map(name=>[name,fakeNode()]));
- const [canvas,points,hearts,status,start,topic,round,,voice,fire]=names.map(name=>nodes[name]);
+ const [canvas,points,hearts,status,start,topic,round,goal,,voice,fire]=names.map(name=>nodes[name]);
  const controls=fakeNode(),fireButton=fakeNode(),lanes=[fakeNode(),fakeNode(),fakeNode()];
+ const panel={scrollTop:0};
+ controls.closest=()=>panel;
  fire.querySelector=()=>fireButton;
  controls.querySelector=name=>nodes[name];controls.querySelectorAll=()=>lanes;
  canvas.getContext=()=>new Proxy({},{
@@ -77,33 +79,52 @@ function fakeNode(){
    assert.equal(lanes[index].textContent,gate[index].word);
    select(index);assert.ok(lanes[index].attrs.has('data-current'));
    const previous=lanes.map(node=>node.textContent).join('|');
-   for(let j=0;j<140&&lanes.map(node=>node.textContent).join('|')===previous;j++)tick(50);
+   for(let j=0;j<190&&lanes.map(node=>node.textContent).join('|')===previous;j++)tick(50);
    assert.notEqual(lanes.map(node=>node.textContent).join('|'),previous);
   }
  };
  mount({child:'pawel'});
  for(const [index,scenery] of ['Słoneczny dzień','Gwiaździsty wieczór','Różowy zachód'].entries()){
+  if(index){
+   assert.equal(controls.dataset.flightPhase,'between');
+   assert.equal(goal.textContent,flightMission89(index).goal);
+   assert.equal(panel.scrollTop,0);
+   tick(9000);
+   assert.ok(lanes.every(node=>node.textContent==='—'));
+  }
   action('start');
   assert.match(round.textContent,new RegExp(scenery));
-  assert.equal(topic.textContent,themes[index]);
-  assert.equal(voice.dataset.speak,flightMission89(index).instruction);
+  assert.equal(topic.textContent,'Misja '+(index+1));
+  assert.equal(goal.textContent,flightMission89(index).goal);
+  assert.equal(voice.dataset.speak,flightMission89(index).goal+' '+flightMission89(index).instruction);
+  if(index===0){
+   const words=lanes.map(node=>node.textContent);
+   tick(5300);
+   assert.deepEqual(lanes.map(node=>node.textContent),words);
+  }
   play(flightMission89(index));
   assert.equal(readFlightMission89('pawel'),index+1);
-  assert.equal(start.textContent,index===2?'Następny lot':'Następna runda');
+  assert.equal(start.textContent,index===2?'Następny lot':'Start misji '+(index+2));
  }
  assert.equal(points.textContent,'Trafienia 12');
  assert.match(status.textContent,/12 z 12/);
 
  action('start');
- assert.equal(topic.textContent,themes[3]);play(flightMission89(3));
+ assert.equal(controls.dataset.flightPhase,'ready');
+ assert.equal(topic.textContent,'Misja 1');
+ assert.equal(goal.textContent,flightMission89(3).goal);
+ tick(9000);
+ assert.ok(lanes.every(node=>node.textContent==='—'));
  action('start');
- assert.equal(topic.textContent,themes[4]);play(flightMission89(4));
+ play(flightMission89(3));
  action('start');
- assert.equal(topic.textContent,themes[5]);
+ assert.equal(goal.textContent,flightMission89(4).goal);play(flightMission89(4));
+ action('start');
+ assert.equal(goal.textContent,flightMission89(5).goal);
  assert.equal(fire.hidden,false);
  const findTypo=()=>lanes.findIndex(({textContent})=>flightMission89(5).pairs.some(([,wrong])=>wrong===textContent));
  select(findTypo());
- tick(6100);
+ tick(8100);
  assert.equal(points.textContent,'Trafienia 8','Przelot przez literówkę nie daje punktu za strzał.');
  assert.equal(hearts.textContent,'Osłony 3');
  select((findTypo()+1)%3);action('fire');
@@ -120,12 +141,14 @@ function fakeNode(){
  assert.equal(readFlightMission89('pawel'),6);
  assert.equal(readFlightMission89('patryk'),0);
  const button=(label,action)=>`<button data-action="${action}">${label}</button>`;
- assert.match(flightMarkup88(button,()=>'',{child:'pawel'}),/H czy CH\?/);
- assert.match(flightMarkup88(button,()=>'',{child:'pawel',preview:true}),/Rzeczowniki/);
+ assert.match(flightMarkup88(button,()=>'',{child:'pawel'}),/Złap wyrazy z poprawnym h lub ch/);
+ assert.match(flightMarkup88(button,()=>'',{child:'pawel',preview:true}),/Złap wszystkie rzeczowniki/);
+ saveFlightMission89('adjectives',false,1);
+ assert.match(flightMarkup88(button,()=>'',{child:'adjectives'}),/Misja 1[\s\S]*Złap wszystkie przymiotniki/);
  saveFlightMission89('pawel',true,1);
  assert.equal(readFlightMission89('pawel'),6);
  mountNounFlight88(null);
  Math.random=oldRandom;
  assert.equal(frames.size,0);
- console.log('PASS V89 – trzy scenerie, siedem tematów, dwa pełne loty, strzały i osobny postęp profili.');
+ console.log('PASS lot – odprawa, tempo czytania, trzy scenerie, siedem tematów, dwa pełne loty, strzały i osobny postęp profili.');
 })().catch(error=>{console.error(error);process.exitCode=1;});

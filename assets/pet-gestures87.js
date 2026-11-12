@@ -87,8 +87,10 @@ export function mountPetGestures87(panel,scene,complete){
  }
  function animateMeal(meal){
   if(meal.dataset.mouth==='true'){
-   if(!reduced)animateFor(1150,t=>{
-    animal.style.setProperty('--hq-pet-chew',String(Math.sin(t*Math.PI*13)**2));
+   const fish=meal.dataset.meal==='fish';
+   if(!reduced)animateFor(fish?1750:1150,t=>{
+    const bite=fish?clamp((t-.40)/.60,0,1):t;
+    animal.style.setProperty('--hq-pet-chew',String(Math.sin(bite*Math.PI*9)**2));
    },()=>animal.style.removeProperty('--hq-pet-chew'));
    return;
   }
