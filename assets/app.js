@@ -8,7 +8,7 @@ import {speak,listen,stopVoice,getVoiceState,setVoiceState,spellEnglish77} from 
 import {vocabulary,readings,explanation} from './learning.js';
 import {syncAdapter} from './sync.js?v=81';
 import {BASE_ITEMS,baseMarkup,migrateBase} from './base.js?v=82';
-import {mountArcade,stopArcade} from './arcade.js?v=82';
+import {mountArcade,stopArcade} from './arcade.js?v=83';
 import {affordable82,purchase82,credit82} from './wallet82.js?v=82';
 import {REVEAL_OFFER82,consent82,requestedAnswer82,solutions82,leaks82,parseTutor82,promptTutor82} from './tutor82.js?v=82';
 let mentorHistory={tech:[],fun:[]};
@@ -62,6 +62,31 @@ const select=(id,label,options,value)=>`<label for="${id}">${label}</label><sele
 const grades=[['P','Przedszkole'],...Array.from({length:12},(_,i)=>[String(i+1),`Klasa ${i+1}`])];
 const people=[['pawel','Paweł'],['patryk','Patryk']];
 const note=t=>{const n=$('notice');if(!n){console.warn('Powiadomienie:',t);return}n.textContent=t;n.classList.add('visible');setTimeout(()=>{if(n.isConnected)n.classList.remove('visible')},4500)};
+const ACADEMY_RELEASE=83;
+async function checkAcademyUpdate(button){
+ if(!button||button.disabled)return;
+ const label=button.textContent,controller=new AbortController();
+ button.disabled=true;
+ button.textContent='⏳ Sprawdzam aktualizację…';
+ const timeout=setTimeout(()=>controller.abort(),10000);
+ try{
+  const url=new URL(window.location.href);
+  url.searchParams.set('academy-update',String(Date.now()));
+  url.hash='';
+  const response=await fetch(url,{cache:'no-store',signal:controller.signal});
+  if(!response.ok)throw Error('Nie udało się sprawdzić wersji.');
+  const page=await response.text();
+  const release=Number(page.match(/<meta name="academy-release" content="(\d+)">/)?.[1]);
+  if(!Number.isSafeInteger(release)||release<1)throw Error('Brak numeru wersji.');
+  if(release<=ACADEMY_RELEASE)return note('✅ Masz aktualną wersję Akademii.');
+  if(button.isConnected)window.location.replace(url.href);
+ }catch{
+  if(button.isConnected)note('Nie udało się sprawdzić aktualizacji. Sprawdź internet i spróbuj ponownie.');
+ }finally{
+  clearTimeout(timeout);
+  if(button.isConnected){button.disabled=false;button.textContent=label}
+ }
+}
 const save=async()=>{if(testMode)return;await put('state',data);await syncAdapter.onLocalChange(data)};
 const img=async id=>{const blob=await get('image:'+id);return blob?URL.createObjectURL(blob):''};
 let ocrBusy=false;
@@ -235,14 +260,19 @@ async function v75OutsideGenerate(btn){
  const ch=$('v75-outside-child')?.value,sub=$('v75-outside-subject')?.value;if(!ch||!sub)return;
  const grade=data.profiles[ch]?.grade||'2',age=grade==='P'?'przedszkolaka 3-6 lat':'ucznia klasy '+grade;
  const current=v75OutsideBank(ch,sub);
- const prompt='Jestes nauczycielem. Wymysl 10 CIEKAWYCH, JEDNOZNACZNYCH, ROZNORODNYCH pytan o wiedze i umiejetnosci dla '+age+', przedmiot '+sub+'. Nie powtarzaj tych pytan: '+JSON.stringify(current.slice(-20).map(x=>x.q))+'. Uzywaj co najmniej 5 roznych kategorii pasujacych do wieku, np. obrazowe skojarzenia, logika, slowa, matematyka, zjawiska. W jezyku angielskim tylko latwe slowa, bez czytania ze zrozumieniem, bez zdradzania odpowiedzi. Kazde pytanie ma 3 rozne odpowiedzi, poprawna dokladnie jedna. Odpowiedz TYLKO JSON: {"tasks":[{"q":"Pytanie?","a":["odpowiedz 1","odpowiedz 2","odpowiedz 3"],"ok":0}]}.';
+ const english=sub==='angielski';
+ const language=english?' Polecenie q po angielsku i jego wierne tlumaczenie qPl po polsku. Nie tlumacz szukanego slowa w samym poleceniu i nie zdradzaj odpowiedzi. Tylko latwe slowa, bez czytania ze zrozumieniem. Wszystkie odpowiedzi w tym samym jezyku: answerLang=en-US dla angielskich lub pl-PL dla polskich.':' Pytania i odpowiedzi po polsku.';
+ const fields=english?',"qPl":"Polskie tłumaczenie polecenia","answerLang":"en-US"':'';
+ const prompt='Jestes nauczycielem. Wymysl 10 CIEKAWYCH, JEDNOZNACZNYCH, ROZNORODNYCH pytan o wiedze i umiejetnosci dla '+age+', przedmiot '+sub+'. Nie powtarzaj tych pytan: '+JSON.stringify(current.slice(-20).map(x=>x.q))+'. Uzywaj co najmniej 5 roznych kategorii pasujacych do wieku, np. obrazowe skojarzenia, logika, slowa, matematyka, zjawiska.'+language+' Kazde pytanie ma 3 rozne odpowiedzi, poprawna dokladnie jedna. Odpowiedz TYLKO JSON: {"tasks":[{"q":"Pytanie?","a":["odpowiedz 1","odpowiedz 2","odpowiedz 3"],"ok":0'+fields+'}]}.';
  if(btn){btn.disabled=true;btn.textContent='⏳ Generuję propozycje…'}
  try{const raw=await askMentorAI(prompt,'tech'),clean=String(raw).replace(/```(?:json)?/g,'').replace(/```/g,'').trim();let obj;try{obj=JSON.parse(clean)}catch{obj=JSON.parse(clean.slice(clean.indexOf('{'),clean.lastIndexOf('}')+1))}
   const arr=Array.isArray(obj.tasks)?obj.tasks:[],normalize=x=>String(x).trim().toLocaleLowerCase('pl-PL'),seen=new Set(current.map(x=>normalize(x.q||''))),fresh=[];
   for(const t of arr){
    if(!t||typeof t.q!=='string'||!t.q.trim()||!Array.isArray(t.a)||t.a.length!==3||t.a.some(x=>typeof x!=='string'||!x.trim())||!['number','string'].includes(typeof t.ok)||String(t.ok).trim()===''||!Number.isInteger(Number(t.ok))||Number(t.ok)<0||Number(t.ok)>=3)continue;
    const q=t.q.trim().slice(0,280),a=t.a.map(x=>x.trim()),key=normalize(q);if(new Set(a.map(normalize)).size!==3||seen.has(key))continue;
-   seen.add(key);fresh.push({q,a,ok:Number(t.ok)});if(fresh.length>=10)break;
+   const qPl=typeof t.qPl==='string'?t.qPl.trim().slice(0,280):'';
+   if(english&&(!qPl||normalize(qPl)===key||!['pl-PL','en-US'].includes(t.answerLang)))continue;
+   seen.add(key);fresh.push({q,a,ok:Number(t.ok),...(english?{qPl,answerLang:t.answerLang}:{})});if(fresh.length>=10)break;
   }
   if(!fresh.length)throw Error('AI nie przygotowało poprawnych pytań. Spróbuj ponownie.');
   localStorage.setItem(v75OutsideKey(ch,sub),JSON.stringify([...current,...fresh].slice(-500)));if($('v75-outside-child')?.value===ch&&$('v75-outside-subject')?.value===sub){v76OutsideScope();v76Outside.status='✅ Zakończono · zapisano '+fresh.length+' pytań w bazie.';v75OutsideShow()}note('✅ Dodano '+fresh.length+' pytań do bazy '+ch+'.');
@@ -700,10 +730,10 @@ const grant=async(child,points,reason,key)=>{
  try{await syncAdapter.onLocalChange(data);}catch{note('Nagroda zapisana na telefonie. Ponów synchronizację, kiedy wróci połączenie.');}
  return true;
 };
-function layout(title,content){cancelAIRequests();stopVoice();closeMicBubble();app.innerHTML=`<main class="wrap"><header class="head"><div><div class="brand">⚡ AKADEMIA SUPERBOHATERÓW <span style="display:inline-block;font-size:0.72em;border:1px solid currentColor;border-radius:8px;padding:2px 7px;vertical-align:middle">V82 · gry i pomoc</span></div><div class="sub">${e(title)}</div>${sync78StatusMarkup()}</div>${role==='child'?trainingSoundControl():''}${role?button(testMode?'← Zakończ test':'← Profile','exit','alt'):''}</header>${testMode?'<div class="test-banner">🧪 TRYB MAMY — BEZPŁATNY TEST • POSTĘPY NIE SĄ ZAPISYWANE</div>':''}${content}</main>${role==='child'?'<button class="mic" data-action="mic" aria-label="Sterowanie głosowe">🎙️</button>':''}`;document.querySelectorAll('[data-speak]').forEach(b=>b.addEventListener('click',()=>speak(b.dataset.speak,b.dataset.lang,role==='child'?profile().mentor:'tech',data.settings.rate||1)));hydrateImages();v76AfterRender();if(role==='child'&&(tab==='learn'||tab==='subjectmissions'))installMicDrag()}
+function layout(title,content){cancelAIRequests();stopVoice();closeMicBubble();app.innerHTML=`<main class="wrap"><header class="head"><div><div class="brand">⚡ AKADEMIA SUPERBOHATERÓW <span style="display:inline-block;font-size:0.72em;border:1px solid currentColor;border-radius:8px;padding:2px 7px;vertical-align:middle">V${ACADEMY_RELEASE}</span></div><div class="sub">${e(title)}</div>${sync78StatusMarkup()}</div>${role==='child'?trainingSoundControl():''}${role?button(testMode?'← Zakończ test':'← Profile','exit','alt'):''}</header>${testMode?'<div class="test-banner">🧪 TRYB MAMY — BEZPŁATNY TEST • POSTĘPY NIE SĄ ZAPISYWANE</div>':''}${content}</main>${role==='child'?'<button class="mic" data-action="mic" aria-label="Sterowanie głosowe">🎙️</button>':''}`;document.querySelectorAll('[data-speak]').forEach(b=>b.addEventListener('click',()=>speak(b.dataset.speak,b.dataset.lang,role==='child'?profile().mentor:'tech',data.settings.rate||1)));hydrateImages();v76AfterRender();if(role==='child'&&(tab==='learn'||tab==='subjectmissions'))installMicDrag()}
 async function hydrateImages(){for(const el of document.querySelectorAll('[data-image]')){const src=await img(el.dataset.image);if(el.isConnected&&src){el.src=src;el.onload=()=>URL.revokeObjectURL(src)}}}
 function nav(){return role==='admin'?`<div class="tabs">${[['home','Przegląd'],['books','📚 Książki'],['missions','📋 Misje'],['settings','⚙️ Ustawienia'],['test','🧪 Testuj wszystko'],['sync','📱 Telefony'],['backup','💾 Kopia']].map(([k,n])=>button(n,'admin:'+k,adminTab===k?'gold':'alt')).join('')}</div>`:`<div class="tabs">${[['home','🎯 Misje'],['books','📚 Książki'],['learn','🧠 Trening'],['academy','📖 Sala odkrywców'],['mentor','🤖 Mentor'],['base','🏙️ Baza Avengersów i gry']].map(([k,n])=>button(n,'child:'+k,tab===k?'gold':'alt')).join('')}</div>`}
-function render(){if(tab!=='arcade')stopArcade();if(!role){layout('Wybierz swoją bazę',`<section class="card"><h1>Witaj w Akademii! 🛡️</h1><p>Każdy bohater ma własne misje i nagrody.</p></section><div class="grid">${people.filter(([id])=>!syncAdapter.device?.()||syncAdapter.device().role!=='child'||syncAdapter.device().child===id).map(([id,name])=>`<button class="tile" data-action="enter:${id}"><img class="profile-hero" src="assets/art/${data.profiles[id].hero||(id==='pawel'?'iron':'spider')}.svg" alt=""><h2>${name}</h2><small>${gradeName(data.profiles[id].grade)} · ${data.profiles[id].coins} złotych</small></button>`).join('')}</div><section class="card">${syncAdapter.device?.()?.role==='child'?'':button('🔐 Centrum dowodzenia mamy','enter:admin','gold')}<p class="muted">${syncAdapter.status()}</p></section>${!syncAdapter.device?.()?sync78Markup():''}`);return}if(role==='admin')adminRender();else childRender()}
+function render(){if(tab!=='arcade')stopArcade();if(!role){layout('Wybierz swoją bazę',`<section class="card"><h1>Witaj w Akademii! 🛡️</h1><p>Każdy bohater ma własne misje i nagrody.</p></section><div class="grid">${people.filter(([id])=>!syncAdapter.device?.()||syncAdapter.device().role!=='child'||syncAdapter.device().child===id).map(([id,name])=>`<button class="tile" data-action="enter:${id}"><img class="profile-hero" src="assets/art/${data.profiles[id].hero||(id==='pawel'?'iron':'spider')}.svg" alt=""><h2>${name}</h2><small>${gradeName(data.profiles[id].grade)} · ${data.profiles[id].coins} złotych</small></button>`).join('')}</div><section class="card">${syncAdapter.device?.()?.role==='child'?'':button('🔐 Centrum dowodzenia mamy','enter:admin','gold')}<p class="muted">${syncAdapter.status()}</p></section>${!syncAdapter.device?.()?sync78Markup():''}${globalThis.AKADEMIA_TEST80?'':`<footer class="academy-update">${button('🔄 Aktualizuj Akademię','academy:update','line')}</footer>`}`);return}if(role==='admin')adminRender();else childRender()}
 const DEFAULT_SUBJECTS=['Polski','Matematyka','Angielski','Przyroda','Plastyka','Muzyka','Informatyka','Wychowanie fizyczne','Etyka','Religia','Przedszkole'];
 function subjectChecks(id){const current=data.profiles[id].subjects||[],items=[...new Set([...DEFAULT_SUBJECTS,...current])];return `<label>Przedmioty — zaznacz właściwe</label><div class="subject-list">${items.map(x=>`<label class="subject-chip"><input type="checkbox" data-subject-for="${id}" value="${e(x)}" ${current.includes(x)?'checked':''}> ${e(x)}</label>`).join('')}</div>`}
 const VOCAB_ASSETS={apple:'apple',cat:'cat',dog:'dog',house:'house',book:'book',sun:'sun',tree:'tree',car:'car',bird:'bird',fish:'fish',ball:'ball',milk:'milk',school:'school',water:'water',flower:'flower'};
@@ -817,11 +847,11 @@ function discoveryAnswer(value){
 // V36_AVENGERS_GAME
 const avengersQuiz = [
  {q:'Ile to 7 + 5?',a:['10','12','14'],ok:1,hero:'iron'},
- {q:'Które słowo oznacza KOT?',a:['DOG','CAT','SUN'],ok:1,hero:'spider'},
+ {q:'Which word means „kot”?',qPl:'Które słowo oznacza „kot”?',lang:'en-US',a:['DOG','CAT','SUN'],ok:1,hero:'spider'},
  {q:'Ile to 9 × 3?',a:['18','27','36'],ok:1,hero:'thor'},
- {q:'Które słowo oznacza DOM?',a:['HOUSE','TREE','BOOK'],ok:0,hero:'iron'},
+ {q:'Which word means „dom”?',qPl:'Które słowo oznacza „dom”?',lang:'en-US',a:['HOUSE','TREE','BOOK'],ok:0,hero:'iron'},
  {q:'Ile to 20 − 8?',a:['14','12','10'],ok:1,hero:'spider'},
- {q:'Które słowo oznacza WODA?',a:['MILK','APPLE','WATER'],ok:2,hero:'thor'}
+ {q:'Which word means „woda”?',qPl:'Które słowo oznacza „woda”?',lang:'en-US',a:['MILK','APPLE','WATER'],ok:2,hero:'thor'}
 ];
 let avengersRun=null;
 
@@ -844,7 +874,8 @@ function avengersPanel(){
   <div class="av36-progress"><div style="width:${g.i/g.items.length*100}%"></div></div>
   <img class="av36-hero" src="assets/art/${q.hero}.svg" alt="Avenger">
   <p>Wyzwanie ${g.i+1} z ${g.items.length}</p>
-  <h2>${e(q.q)} ${v37Voice(q.q)}</h2>
+  <h2><span lang="${q.qPl?'en':'pl'}">${e(q.q)}</span> ${v37Voice(q.q,q.qPl?'en-US':'pl-PL')}</h2>
+  ${q.qPl?'<p class="av36-translation" lang="pl">🇵🇱 '+e(q.qPl)+' '+v37Voice(q.qPl,'pl-PL')+'</p>':''}
   <div class="av36-answers">${q.a.map((answer,i)=>`<div class="v37-answer">
  <button data-action="av36:answer:${i}" ${g.done?'disabled':''}>${e(answer)}</button>
  ${v37Voice(answer,q.lang||'pl-PL')}
@@ -886,12 +917,12 @@ const v37Bank={
  ['Ile to 6 razy 4?',['20','24','28'],1]
  ],
  angielski:[
- ['Co oznacza CAT?',['pies','kot','dom'],1],
- ['Co oznacza HOUSE?',['dom','drzewo','książka'],0],
- ['Co oznacza WATER?',['mleko','woda','słońce'],1],
- ['Co oznacza BOOK?',['szkoła','piłka','książka'],2],
- ['Co oznacza DOG?',['kot','pies','ptak'],1],
- ['Co oznacza SUN?',['słońce','księżyc','deszcz'],0]
+ ['What does CAT mean?',['pies','kot','dom'],1,'Co oznacza CAT?','pl-PL'],
+ ['What does HOUSE mean?',['dom','drzewo','książka'],0,'Co oznacza HOUSE?','pl-PL'],
+ ['What does WATER mean?',['mleko','woda','słońce'],1,'Co oznacza WATER?','pl-PL'],
+ ['What does BOOK mean?',['szkoła','piłka','książka'],2,'Co oznacza BOOK?','pl-PL'],
+ ['What does DOG mean?',['kot','pies','ptak'],1,'Co oznacza DOG?','pl-PL'],
+ ['What does SUN mean?',['słońce','księżyc','deszcz'],0,'Co oznacza SUN?','pl-PL']
  ],
  przyroda:[
  ['Na jakiej planecie żyjemy?',['Mars','Ziemia','Wenus'],1],
@@ -910,32 +941,79 @@ v37Bank.polski.push(
  ['Który wyraz pasuje na koniec zdania: „Dziś świeci…”?',['słońce','biegać','szybko'],0],
  ['Które słowo piszemy wielką literą?',['warszawa','Warszawa','warszAWA'],1]);
 v37Bank.matematyka.push(['Ile to 13 + 6?',['18','19','20'],1],['Ile to 16 − 7?',['8','9','10'],1],['Co jest większe?',['38','83','33'],1],['Ile boków ma kwadrat?',['3','4','5'],1],['Ile minut ma godzina?',['30','60','100'],1],['Ile to 4 × 5?',['15','20','25'],1]);
-v37Bank.angielski.push(['What does BLUE mean?',['Niebieski','Zielony','Czerwony'],0],['What does APPLE mean?',['Jabłko','Jajko','Zupa'],0],['What does SCHOOL mean?',['Sklep','Szkoła','Samochód'],1],['Which word means PIES?',['Cat','Dog','Bird'],1],['What does GOODBYE mean?',['Do widzenia','Dzień dobry','Dziękuję'],0],['Which word means CZERWONY?',['Yellow','Green','Red'],2]);
+v37Bank.angielski.push(
+ ['What does BLUE mean?',['Niebieski','Zielony','Czerwony'],0,'Co oznacza BLUE?','pl-PL'],
+ ['What does APPLE mean?',['Jabłko','Jajko','Zupa'],0,'Co oznacza APPLE?','pl-PL'],
+ ['What does SCHOOL mean?',['Sklep','Szkoła','Samochód'],1,'Co oznacza SCHOOL?','pl-PL'],
+ ['Which word means PIES?',['Cat','Dog','Bird'],1,'Które słowo oznacza PIES?','en-US'],
+ ['What does GOODBYE mean?',['Do widzenia','Dzień dobry','Dziękuję'],0,'Co oznacza GOODBYE?','pl-PL'],
+ ['Which word means CZERWONY?',['Yellow','Green','Red'],2,'Które słowo oznacza CZERWONY?','en-US']);
 v37Bank.przyroda.push(['Co potrzebują rośliny do wzrostu?',['Światła i wody','Pilota','Guzików'],0],['Które zwierzę jest ptakiem?',['Kot','Wróbel','Pies'],1],['Co zmienia się w ciągu roku?',['Pory roku','Liczba palców','Liczba boków koła'],0],['Co leci z chmur podczas deszczu?',['Woda','Piasek','Kamyki'],0],['Gdzie mieszkają ryby?',['W wodzie','W piaskownicy','Na drzewie'],0],['Jaka pora roku jest po zimie?',['Lato','Wiosna','Jesień'],1]);
 
-function v37Questions(subject){
- const ids=subject==='all'
-  ?Object.keys(v37Bank):[subject];
- let questions=ids.flatMap(id=>
-  (v37Bank[id]||[]).map(q=>({
-   q:q[0],a:q[1],ok:q[2],
-   lang:id==='angielski'?'en-US':'pl-PL',
-   hero:id==='angielski'?'spider':
-        id==='matematyka'?'iron':
-        id==='przyroda'?'groot':'captain'
-  }))
- );
+function isOutsideEnglish(task,subject){
+ return subject==='angielski'||!!(task.qEn||task.qPl)||subject==='all'&&/^(?:what|which|who|where|when|why|how|choose|find|name|complete|select|pick|match|can|is|are|do|does|write|read|listen)\b/i.test(task.q);
+}
+function outsideQuestion(task,subject){
+ if(!isOutsideEnglish(task,subject))return {q:task.q,a:task.a,ok:Number(task.ok),lang:'pl-PL',hero:'iron'};
+ const polish=!!task.qEn||!task.qPl&&/^(?:co|kt\S+|jak\S*|gdzie|ile|kiedy|czym|czego|czy|wybierz|wskaż|dopasuj|napisz|podaj|znajdź|uzupełnij|dokończ|nazwij|powiedz|przeczytaj|posłuchaj)\s/i.test(task.q);
+ let q=polish?task.qEn:task.q,qPl=polish?task.q:task.qPl;
+ const meaning=task.q.match(/^(?:What does (.+) mean|Co oznacza (.+))\?$/i);
+ if(meaning){
+  q??='What does '+meaning[2]+' mean?';
+  qPl??='Co oznacza '+meaning[1]+'?';
+ }
+ const word=task.q.match(/^Which word means (.+)\?$/i);
+ if(word)qPl??='Które słowo oznacza '+word[1]+'?';
+ if(task.q==='What do we call the water that falls from the clouds?')qPl??='Jak nazywamy wodę, która spada z chmur?';
+ return {q,qPl,a:task.a,ok:Number(task.ok),lang:task.answerLang||(meaning?'pl-PL':'en-US'),hero:'iron'};
+}
+async function v37Questions(subject,child,controller){
+ const ids=subject==='all'?Object.keys(v37Bank):[subject];
+ const builtIn=ids.flatMap(id=>(v37Bank[id]||[]).map(([q,a,ok,qPl,lang='pl-PL'])=>({
+  q,a,ok,qPl,lang,hero:{angielski:'spider',matematyka:'iron',przyroda:'groot'}[id]||'captain'
+ })));
+ const sources=subject==='all'?['all',...ids]:ids;
+ const saved=sources.flatMap(sub=>v75OutsideBank(child,sub).filter(t=>typeof t?.q==='string').map(task=>({task,sub,question:outsideQuestion(task,sub)})));
+ const questions=[...builtIn.map(question=>({question})),...saved];
  for(let i=questions.length-1;i>0;i--){
   const j=Math.floor(Math.random()*(i+1));
   [questions[i],questions[j]]=[questions[j],questions[i]];
  }
- const sources=subject==='all'?['all','polski','matematyka','angielski','przyroda']:[subject];for(const sub of sources){const saved=v75OutsideBank(who,sub);questions.push(...saved.map(t=>({q:t.q,a:t.a,ok:Number(t.ok),lang:sub==='angielski'?'en-US':'pl-PL',hero:'iron'})))}for(let i=questions.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[questions[i],questions[j]]=[questions[j],questions[i]]}return questions.slice(0,10);
+ const needsTranslation=questions.slice(0,10).filter(x=>x.task&&isOutsideEnglish(x.task,x.sub)&&(!x.question.q||!x.question.qPl));
+ if(needsTranslation.length){
+  const input=needsTranslation.map(({task,question},index)=>({index,text:task.q,to:question.q?'pl':'en'}));
+  const timeout=setTimeout(()=>controller.abort(),6500);
+  try{
+   const raw=await askMentorAI('Przetłumacz polecenia dla dziecka. Nie podawaj odpowiedzi, nie tłumacz słowa, o które zadanie pyta, nie zmieniaj sensu. Zwróć tylko JSON {"translations":[{"index":0,"text":"tłumaczenie"}]}. Dane: '+JSON.stringify(input),'tech',[],controller.signal);
+   if(!controller.signal.aborted){
+    const result=JSON.parse(raw.replace(/^```(?:json)?\s*|\s*```$/gi,''));
+    const edits=new Map(),translated=new Set();
+    for(const item of Array.isArray(result.translations)?result.translations:[]){
+     const index=item?.index;
+     if(!Number.isInteger(index)||translated.has(index))continue;
+     const entry=needsTranslation[index],text=typeof item?.text==='string'?item.text.trim():'';
+     if(!entry||!text||text.length>280||text.toLowerCase()===entry.task.q.trim().toLowerCase())continue;
+     translated.add(index);
+     const field=input[index].to==='pl'?'qPl':'qEn';
+     entry.question[field==='qPl'?'qPl':'q']=text;
+     if(!edits.has(entry.sub))edits.set(entry.sub,new Map());
+     edits.get(entry.sub).set(v76OutsideKey(entry.task),{[field]:text});
+    }
+    if(!testMode)for(const [sub,byKey] of edits){
+     const latest=v75OutsideBank(child,sub);
+     localStorage.setItem(v75OutsideKey(child,sub),JSON.stringify(latest.map(task=>({...task,...byKey.get(v76OutsideKey(task))}))));
+    }
+   }
+  }catch{/* Pula wbudowana działa także bez połączenia z usługą tłumaczeń. */}
+  finally{clearTimeout(timeout)}
+ }
+ return questions.filter(({task,sub,question})=>!task||!isOutsideEnglish(task,sub)||question.q&&question.qPl).slice(0,10).map(x=>x.question);
 }
 
 function v37Voice(text,lang='pl-PL'){
  return `<button type="button" class="v37-voice"
  data-action="v37:say:${lang}:${encodeURIComponent(text)}"
- aria-label="Odczytaj na głos">🔊</button>`;
+ aria-label="Odczytaj ${lang==='en-US'?'po angielsku':'po polsku'}">🔊</button>`;
 }
 
 
@@ -1325,6 +1403,7 @@ async function traceSubmit(){
 async function exportBackup(){const records=(await allRecords()).filter(([k])=>!String(k).startsWith('sync78:'));const encoded=[];for(const [k,v] of records){if(v instanceof Blob){const base64=await new Promise(ok=>{const r=new FileReader();r.onload=()=>ok(r.result);r.readAsDataURL(v)});encoded.push([k,{__blob:base64}])}else encoded.push([k,v])}const url=URL.createObjectURL(new Blob([JSON.stringify({format:'academy-backup-1',records:encoded})],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='akademia-pelna-kopia-'+date()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),10000)}
 async function importBackup(){const f=$('backupfile').files[0];if(!f)return note('Wybierz plik kopii.');try{const raw=JSON.parse(await f.text());if(raw.format!=='academy-backup-1'||!Array.isArray(raw.records)||!raw.records.some(([k,v])=>k==='state'&&v.profiles?.pawel&&v.profiles?.patryk))throw Error('To nie jest poprawna kopia');if(!confirm('Zastąpić wszystkie lokalne dane tą kopią?'))return;const records=[];for(const [k,v] of raw.records){if(v?.__blob){const res=await fetch(v.__blob);records.push([k,await res.blob()])}else records.push([k,v])}await replaceRecords(records);data=await get('state');role='';render();note('Przywrócono pełną kopię.')}catch(err){note('Nie udało się przywrócić kopii: '+err.message)}}
 async function handle(action,target){
+ if(action==='academy:update')return checkAcademyUpdate(target);
  if(action.startsWith('sync78:'))return sync78Action(action,target);
  const linked=syncAdapter.device?.();if(linked?.role==='child'&&(action.startsWith('admin:')||action.startsWith('test:enter')||action.startsWith('enter:')&&action!=='enter:'+linked.child))return note('Ten telefon jest połączony z profilem dziecka.');
  if(action.startsWith('test:start:'))return sync78AssignedTest(action.slice(11));
@@ -1379,9 +1458,20 @@ if(action.startsWith('v37:subject:')){
  return render();
 }
 if(action==='v37:play'){
+ if(target?.disabled)return;
+ const child=who,subject=v37Subject,step=trainingStep;
+ const controller=beginAIRequest('outside-translation');
+ if(target){target.disabled=true;target.setAttribute('aria-busy','true')}
+ let items;
+ try{items=await v37Questions(subject,child,controller)}
+ finally{
+  finishAIRequest('outside-translation',controller);
+  if(target?.isConnected){target.disabled=false;target.removeAttribute('aria-busy')}
+ }
+ if(target?.isConnected===false||who!==child||trainingStep!==step||v37Subject!==subject)return;
  trainingStep='outside-quiz';
  avengersRun={
-  items:v37Questions(v37Subject),
+  items,
   i:0,points:0,done:false,good:false
  };
  v37Classic=false;
@@ -1823,11 +1913,14 @@ function v76OutsideScope(){
  v76Outside.child=ch;v76Outside.subject=sub;return {ch,sub,items:v75OutsideBank(ch,sub)};
 }
 function v76OutsideShow(){
- const el=$('v75-outside-results');if(!el)return;v76Outside.shown=true;const {items}=v76OutsideScope();
+ const el=$('v75-outside-results');if(!el)return;v76Outside.shown=true;const {sub,items}=v76OutsideScope();
  const item=items.find(t=>v76OutsideKey(t)===v76Outside.detail);
  const status=v76Outside.status?`<p role="status" class="v76-complete">${e(v76Outside.status)}</p>`:'';
  if(item){const options=Array.isArray(item.a)?item.a:[];
-  el.innerHTML=status+button('← Wróć do listy pytań','v76:outside-back')+`<h3>Pytanie ${items.indexOf(item)+1}</h3>${v77OutsideNav(items,item)}<label for="v76-outside-q">Treść pytania</label><textarea id="v76-outside-q" rows="3">${e(item.q||'')}</textarea>`+Array.from({length:3},(_,i)=>input('v76-outside-a'+i,'Odpowiedź '+(i+1),options[i]||'')).join('')+select('v76-outside-ok','Prawidłowa odpowiedź',[[0,'1'],[1,'2'],[2,'3']],Number(item.ok))+`<div class="v76-actions">${button('Zapisz','v76:outside-save','gold')}${button('Anuluj','v76:outside-cancel')}</div>`+button('🗑 Usuń to pytanie','v76:outside-delete-one','line');return;
+  const translated=isOutsideEnglish(item,sub)?outsideQuestion(item,sub):null;
+  const polishFirst=translated&&translated.qPl===item.q;
+  const translation=translated?`<label for="v76-outside-translation">${polishFirst?'Polecenie po angielsku':'Polecenie po polsku'}</label><textarea id="v76-outside-translation" rows="3" data-field="${polishFirst?'qEn':'qPl'}">${e((polishFirst?translated.q:translated.qPl)||'')}</textarea>`+select('v76-outside-answer-lang','Język odpowiedzi',[['en-US','Angielski'],['pl-PL','Polski']],translated.lang):'';
+  el.innerHTML=status+button('← Wróć do listy pytań','v76:outside-back')+`<h3>Pytanie ${items.indexOf(item)+1}</h3>${v77OutsideNav(items,item)}<label for="v76-outside-q">Treść pytania</label><textarea id="v76-outside-q" rows="3">${e(item.q||'')}</textarea>`+translation+Array.from({length:3},(_,i)=>input('v76-outside-a'+i,'Odpowiedź '+(i+1),options[i]||'')).join('')+select('v76-outside-ok','Prawidłowa odpowiedź',[[0,'1'],[1,'2'],[2,'3']],Number(item.ok))+`<div class="v76-actions">${button('Zapisz','v76:outside-save','gold')}${button('Anuluj','v76:outside-cancel')}</div>`+button('🗑 Usuń to pytanie','v76:outside-delete-one','line');return;
  }
  v76Outside.detail=null;const count=items.filter(t=>v76Outside.selected.has(v76OutsideKey(t))).length;
  el.innerHTML=status+`<h3 tabindex="-1">Pytania: ${items.length}</h3>`+(items.length?`<div class="v76-qtoolbar"><div class="v76-actions">${button('Zaznacz wszystkie','v76:outside-all')}${button('Odznacz wszystkie','v76:outside-none')}</div>${button('🗑 Usuń zaznaczone pytania','v76:outside-delete','line')}<small>Zaznaczono: ${count}</small></div>`+items.map((t,i)=>{const key=v76OutsideKey(t),encoded=encodeURIComponent(key);return `<div class="v76-qrow ${v76Outside.last===key?'v76-visited':''}"><label><input type="checkbox" data-v76-outside-check="${e(encoded)}" aria-label="Zaznacz pytanie ${i+1}" ${v76Outside.selected.has(key)?'checked':''}></label><button type="button" data-action="v76:outside-open:${e(encoded)}"><b>${i+1}.</b><span>${e(t.q||'Bez treści')}<small>Naciśnij, aby przejrzeć lub poprawić</small></span><i aria-hidden="true">›</i></button></div>`}).join(''):'<p class="muted">Brak pytań. Wygeneruj propozycje dla wybranego dziecka i przedmiotu.</p>');
@@ -1842,7 +1935,15 @@ async function v76OutsideAction(action){
   const at=items.findIndex(t=>v76OutsideKey(t)===v76Outside.detail);if(at<0)return note('Nie znaleziono pytania.');
   const q=$('v76-outside-q')?.value.trim()||'',a=[0,1,2].map(i=>$('v76-outside-a'+i)?.value.trim()||''),ok=Number($('v76-outside-ok')?.value);
   if(!q||a.some(x=>!x)||new Set(a.map(x=>x.toLocaleLowerCase('pl-PL'))).size!==3||!Number.isInteger(ok)||ok<0||ok>2)return note('Wpisz pytanie, trzy różne odpowiedzi i wskaż prawidłową.');
-  const old=v76Outside.detail,wasSelected=v76Outside.selected.delete(old);items[at]={...items[at],q,a,ok};const key=v76OutsideKey(items[at]);v76Outside.detail=key;v76Outside.last=key;if(wasSelected)v76Outside.selected.add(key);localStorage.setItem(v75OutsideKey(ch,sub),JSON.stringify(items));v76Outside.status='✅ Zapisano poprawione pytanie.';return v76OutsideShow();
+  const translation=$('v76-outside-translation'),next={...items[at],q,a,ok};
+  if(translation){
+   const text=translation.value.trim();
+   if(!text||text.toLowerCase()===q.toLowerCase())return note('Wpisz polecenie w obu językach.');
+   delete next.qPl;delete next.qEn;
+   next[translation.dataset.field]=text;
+   next.answerLang=$('v76-outside-answer-lang').value;
+  }
+  const old=v76Outside.detail,wasSelected=v76Outside.selected.delete(old);items[at]=next;const key=v76OutsideKey(next);v76Outside.detail=key;v76Outside.last=key;if(wasSelected)v76Outside.selected.add(key);localStorage.setItem(v75OutsideKey(ch,sub),JSON.stringify(items));v76Outside.status='✅ Zapisano poprawione pytanie.';return v76OutsideShow();
  }
  if(action==='v76:outside-delete'||action==='v76:outside-delete-one'){
   const chosen=action.endsWith('-one')?new Set([v76Outside.detail]):v76Outside.selected,count=items.filter(t=>chosen.has(v76OutsideKey(t))).length;

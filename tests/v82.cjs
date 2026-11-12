@@ -44,6 +44,25 @@ await test('Trening pokazuje lekcję, lektora EN/PL i dopiero potem zadanie',()=
 await test('Sprawdzian nie otrzymuje lekcji ani wzoru',()=>{const e=mission();e.api.setTask(task(),'test');const list=e.api.v80PrepareTasks([],e.pages);assert.ok(list.every(t=>!t.study82&&!t.model82));});
 await test('Kopiowanie wzoru nie nalicza pieniędzy ani opanowania słowa',async()=>{const e=mission(),t=task({copyPractice82:true,study82:[{en:'cat'}]});e.api.setTask(t);t.studyDone82=true;e.api.answer('cat');await e.api.finish();assert.deepEqual(plain(e.api.coinsRewards()),[]);const progress=e.ctx.recordStudy82(t,{});assert.equal(progress.cat.correct,undefined);assert.equal(progress.cat.guided,1);});
 await test('Lekcja i postęp nie wychodzą poza słówka z materiału; pomagane nie liczą się jako opanowane',()=>{const e=env(),pool=[{en:'water',pl:'woda',sourcePageId:'p1'}],t={type:'write',answer:'browser',correct:true};assert.equal(e.ctx.scaffoldStudy82([t],pool,{})[0].study82,undefined);assert.deepEqual(plain(e.ctx.recordStudy82({correct:true,v77Revealed:true,study82:[{en:'water'}]},{})),{});});
-await test('Wąż ma wolniejsze tempo i tylko jeden timer, pauza i restart zachowane',()=>{const e=env();let timers=[],cleared=0;const gradient={addColorStop(){}};const ctx=new Proxy({createLinearGradient:()=>gradient},{get:(o,k)=>o[k]||(()=>{})});const buttons={};for(const key of ['canvas','#arcade-status','#arcade-restart','#arcade-pause'])buttons[key]={textContent:'',addEventListener(n,f){this[n]=f;},getContext:()=>ctx,width:240,height:384};e.root.querySelector=s=>buttons[s];e.root.querySelectorAll=()=>[];e.ctx.setInterval=(fn,ms)=>{timers.push({fn,ms});return 1};e.ctx.clearInterval=()=>cleared++;e.ctx.window.removeEventListener=()=>{};vm.runInContext(fs.readFileSync(ROOT+'/assets/arcade.js','utf8').replace(/export /g,''),e.ctx);e.ctx.mountArcade('snake',e.root);assert.equal(timers.length,1);assert.equal(timers[0].ms,320);buttons['#arcade-pause'].click({currentTarget:buttons['#arcade-pause']});assert.equal(buttons['#arcade-pause'].textContent,'▶ Wznów');buttons['#arcade-restart'].click();assert.equal(timers.length,1);e.ctx.stopArcade();assert.equal(cleared,1);});
+await test('Wąż czeka na ruch, rośnie po krysztale i utrzymuje wolniejsze tempo',()=>{
+ const e=env(),timers=new Map(),buttons={};let id=0;
+ const gradient={addColorStop(){}};
+ const ctx=new Proxy({createLinearGradient:()=>gradient},{get:(o,k)=>o[k]||(()=>{})});
+ for(const key of ['canvas','#arcade-status','#arcade-restart','#arcade-pause'])buttons[key]={textContent:'',addEventListener(n,f){this[n]=f;},getContext:()=>ctx,width:240,height:384};
+ e.root.querySelector=s=>buttons[s];e.root.querySelectorAll=()=>[];
+ e.ctx.setInterval=(fn,ms)=>{timers.set(++id,{fn,ms});return id};e.ctx.clearInterval=id=>timers.delete(id);
+ e.ctx.window.addEventListener=(n,fn)=>e.ctx.window[n]=fn;e.ctx.window.removeEventListener=n=>delete e.ctx.window[n];
+ vm.runInContext('Math.random=()=>49.5/109;',e.ctx);
+ vm.runInContext(fs.readFileSync(ROOT+'/assets/arcade.js','utf8').replace(/export /g,''),e.ctx);
+ e.ctx.mountArcade('snake',e.root);
+ const hud=buttons['#arcade-status'],press=key=>e.ctx.window.keydown({key,preventDefault(){}});
+ assert.equal(timers.size,0);assert.match(hud.textContent,/Długość: 3.*aby zacząć/);
+ press('ArrowLeft');assert.equal(timers.size,0);press('ArrowRight');press('ArrowRight');assert.equal(timers.size,1);
+ const tick=[...timers.values()][0];assert.equal(tick.ms,520);tick.fn();assert.match(hud.textContent,/Kryształy: 1.*Długość: 4/);
+ press('ArrowDown');tick.fn();assert.match(hud.textContent,/Długość: 4/);
+ buttons['#arcade-pause'].click();assert.equal(buttons['#arcade-pause'].textContent,'▶ Wznów');
+ buttons['#arcade-restart'].click();assert.equal(timers.size,0);assert.match(hud.textContent,/Długość: 3/);
+ press('ArrowUp');assert.equal(timers.size,1);e.ctx.stopArcade();assert.equal(timers.size,0);
+});
 console.log(JSON.stringify({passed,failed,scope:'V82: ceny, mentor, zgoda, źródła PL/MAT, nauka EN, Wąż'}));if(failed)process.exitCode=1;
 })();

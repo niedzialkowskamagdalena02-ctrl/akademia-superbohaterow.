@@ -415,6 +415,8 @@ body:has(.learning-exercise) {
 .av36-progress{height:12px;border-radius:20px;background:#ffffff30;margin:16px 0;overflow:hidden}
 .av36-progress div{height:100%;background:linear-gradient(90deg,#4ee6ff,#ffdc61)}
 .av36-hero{display:block;width:190px;max-width:80%;height:180px;object-fit:contain;margin:auto;filter:drop-shadow(0 0 18px #6adfff)}
+.avengers-v36 .av36-translation{color:#dbedff;border-top:1px solid #85d9ff55;padding-top:12px;margin:12px 0;font-size:1.02rem}
+.academy-update{display:flex;justify-content:center;margin:16px 0 24px}
 .av36-answers{display:grid;gap:12px;margin:20px 0}
 .av36-answers button{
  background:#ffffff20!important;color:#fff!important;
