@@ -1,4 +1,4 @@
-import {hqRead,HQ_AWARDS86} from './headquarters84.js?v=87';
+import {hqRead,HQ_AWARDS86} from './headquarters84.js?v=88';
 
 export const MASTER_PRIZES86=HQ_AWARDS86.map(item=>item.id);
 export const MASTER_SCORE86=8;

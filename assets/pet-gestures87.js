@@ -1,12 +1,15 @@
 const clamp=(n,low,high)=>Math.max(low,Math.min(high,n));
 const mix=(a,b,t)=>a+(b-a)*t;
 
-export function petTools87(room,playing,asleep){
- if(asleep||!['nest','bath'].includes(room))return '';
+export function petTools87(room,playing,asleep,pee=false,poop=false){
+ if(asleep&&!pee&&!poop)return '';
  const tool=(id,icon,label)=>`<button type="button" class="hq87-tool" data-pet-tool="${id}" aria-label="${label}" title="${label}">${icon}</button>`;
- return '<canvas class="hq87-pet-effects" aria-hidden="true"></canvas>'+
-  (room==='bath'?tool('soap','🧼','Przesuń mydło po zwierzaku')+tool('shower','🚿','Spłucz pianę prysznicem'):
-   '<span class="hq87-pet-hand" aria-hidden="true" hidden>🤚</span>'+(playing?tool('ball','<i aria-hidden="true"></i>','Przytrzymaj i rzuć piłkę'):''));
+ const care=asleep?'':room==='bath'?tool('soap','🧼','Przesuń mydło po zwierzaku')+tool('shower','🚿','Spłucz pianę prysznicem'):
+  room==='nest'?'<span class="hq87-pet-hand" aria-hidden="true" hidden>🤚</span>'+
+   (playing?tool('ball','<i aria-hidden="true"></i>','Przytrzymaj i rzuć piłkę'):''):'';
+ return '<canvas class="hq87-pet-effects" aria-hidden="true"></canvas>'+care+
+  (pee?tool('cloth','<i class="hq88-cloth" aria-hidden="true"></i>','Wytrzyj kałużę ścierką'):'')+
+  (poop?tool('broom','🧹','Zmieć zmiotką'):'');
 }
 
 export function mountPetGestures87(panel,scene,complete){
@@ -77,6 +80,42 @@ export function mountPetGestures87(panel,scene,complete){
   };
   requestAnimationFrame(tick);
  }
+ function petPose(pose,facing=1){
+  animal.classList.toggle('hq88-moving',pose==='walk');
+  animal.classList.toggle('hq88-eating',pose==='eat');
+  animal.dataset.facing=facing<0?'left':'right';
+ }
+ function animateMeal(meal){
+  if(meal.dataset.mouth==='true'){
+   if(!reduced)animateFor(1150,t=>{
+    animal.style.setProperty('--hq-pet-chew',String(Math.sin(t*Math.PI*13)**2));
+   },()=>animal.style.removeProperty('--hq-pet-chew'));
+   return;
+  }
+  if(reduced)return;
+  size();
+  const box=animalBox(),shift=width*.835-(box.x+box.w*.85);
+  const vertical=height*.72-(box.y+box.h*.89);
+  animateFor(3050,t=>{
+   const outward=clamp((t-.19)/.22,0,1),back=clamp((t-.81)/.19,0,1);
+   const progress=outward-back;
+   petPose(t>.19&&t<.41||back>0&&back<1?'walk':t>=.41&&t<=.81?'eat':'idle',back>0?-1:1);
+   animal.style.translate=`${shift*progress}px ${vertical*progress}px`;
+   meal.classList.toggle('hq88-at-bowl',t>=.41&&t<=.81);
+  },()=>{petPose('idle');animal.style.translate='';meal.classList.add('hq88-bowl-empty');});
+ }
+ const messType={cloth:'pee',broom:'poop'};
+ function clean(kind,p){
+  const type=messType[kind],target=scene.querySelector('[data-mess="'+type+'"]');
+  if(!target)return;
+  if(p){
+   const rect=target.getBoundingClientRect(),parent=scene.getBoundingClientRect();
+   const x=p.x+parent.left,y=p.y+parent.top;
+   if(x<rect.left-17||x>rect.right+17||y<rect.top-20||y>rect.bottom+16)return;
+  }
+  task=true;target.classList.add('is-cleaning');
+  setTimeout(()=>finish('clean:'+type),reduced?0:280);
+ }
  function toss(button,p,dx){
   if(task)return;
   size();task=true;button.disabled=true;
@@ -93,11 +132,12 @@ export function mountPetGestures87(panel,scene,complete){
     return;
    }
    const back=t>=.68,progress=back?1-(t-.68)/.32:(t-.34)/.34;
-   const bounce=reduced?0:Math.abs(Math.sin(progress*Math.PI*5))*9;
+   petPose(reduced?'idle':'walk',back?-travel:travel);
+   const bounce=reduced?0:Math.abs(Math.sin(progress*Math.PI*5))*5;
    animal.style.translate=`${travel*progress}px ${petY*progress-bounce}px`;
-   if(back)put(button,{x:center+travel*progress,y:mouthY+petY*progress-bounce});
+   if(back)put(button,{x:center+travel*progress-Math.sign(travel)*box.w*.24*progress,y:mouthY+petY*progress-bounce});
   },()=>{
-   animal.style.translate='';button.style.left='';button.style.top='';button.disabled=false;
+   petPose('idle');animal.style.translate='';button.style.left='';button.style.top='';button.disabled=false;
    setHelp('Piłka wróciła. Możesz rzucić jeszcze raz.');
    finish('play');
   });
@@ -117,6 +157,7 @@ export function mountPetGestures87(panel,scene,complete){
  }
  for(const button of scene.querySelectorAll('[data-pet-tool]')){
   const id=button.dataset.petTool;
+  const cleaning=Object.hasOwn(messType,id);
   button.addEventListener('pointerdown',event=>{
    if(event.button!==0||drag||task)return;
    size();button.setPointerCapture(event.pointerId);
@@ -124,14 +165,17 @@ export function mountPetGestures87(panel,scene,complete){
    drag={id,p,start:p,at:performance.now(),pointer:event.pointerId};
    button.classList.add('is-held');
    if(id==='shower'&&!foam.length)setHelp('Najpierw rozprowadź mydło po futerku.');
-   if(id!=='ball'){brush(id,p,animalBox());put(button,p);if(!frame)draw();}
+   if(id==='soap'||id==='shower'){brush(id,p,animalBox());put(button,p);if(!frame)draw();}
   });
   button.addEventListener('pointermove',event=>{
    if(drag?.pointer!==event.pointerId||task)return;
    const next=point(event);
    if(id!=='ball'){
     const a=animalBox(),span=Math.hypot(next.x-drag.p.x,next.y-drag.p.y),steps=Math.min(45,Math.max(1,Math.ceil(span/8)));
-    for(let i=1;i<=steps&&!task;i++)brush(id,{x:mix(drag.p.x,next.x,i/steps),y:mix(drag.p.y,next.y,i/steps)},a);
+    for(let i=1;i<=steps&&!task;i++){
+     const p={x:mix(drag.p.x,next.x,i/steps),y:mix(drag.p.y,next.y,i/steps)};
+     if(cleaning)clean(id,p);else brush(id,p,a);
+    }
    }
    drag.p=next;put(button,next);
    if(id!=='ball'&&!frame&&!task)draw();
@@ -150,6 +194,7 @@ export function mountPetGestures87(panel,scene,complete){
   button.addEventListener('click',event=>{
    if(event.detail!==0||task)return;
    size();const a=animalBox();
+   if(cleaning){clean(id);return;}
    if(id==='ball'){toss(button,{x:width*.79,y:height*.76},-width*.45);return;}
    if(id==='shower'){
     if(added<8){setHelp('Najpierw użyj mydła.');return;}
@@ -160,4 +205,6 @@ export function mountPetGestures87(panel,scene,complete){
   });
  }
  panel.querySelector('[data-pet-stroke]')?.addEventListener('click',stroke);
+ const meal=scene.querySelector('[data-meal]');
+ if(meal)animateMeal(meal);
 }

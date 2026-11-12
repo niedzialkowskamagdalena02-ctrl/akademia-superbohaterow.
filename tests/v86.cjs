@@ -42,12 +42,12 @@ const url=name=>new URL('../assets/'+name,pathToFileURL(__filename));
  assert.equal(study.energy86(profile).charged,6);
 
  const legacy=structuredClone(profile),button=(label,action)=>`<button data-action="${action}">${label}</button>`;
- assert.equal(pet.servePet87(legacy,'water'),true);
+ assert.equal(pet.servePet87(legacy,'water',()=>0),true);
  assert.equal(pet.servePet87(legacy,'bone'),false);
  assert.equal(hq.hqEarnFood(legacy,'quiz-two'),true);
- assert.equal(pet.servePet87(legacy,'bone'),true);
+ assert.equal(pet.servePet87(legacy,'bone',()=>0),true);
  assert.equal(hq.hqFood(legacy).length,0);
- assert.deepEqual(hq.hqRead(legacy).pet.care.dirt,{pee:true,poop:true});
+ assert.deepEqual(hq.hqRead(legacy).pet.care.dirt,{pee:'nest',poop:'kitchen'});
  assert.equal(pet.setPetCare86(legacy,'clean','pee'),true);
  assert.equal(pet.setPetCare86(legacy,'clean','poop'),true);
  assert.equal(pet.setPetCare86(legacy,'nap'),true);

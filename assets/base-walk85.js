@@ -1,40 +1,47 @@
-import {HQ_ART,hqPlaced,hqRead} from './headquarters84.js?v=87';
-import {drawHeroHands} from './hero-hands85.js?v=85';
-import {walkRooms,FLOOR_DEPTH,FULL_TURN,PHOTO_FOV,VERTICAL_SCALE,advance86,cameraBasis86,clamp86,roomAnchor86,wrapAngle} from './base-map86.js?v=87';
+import {hqPet,hqPlaced,hqRead} from './headquarters84.js?v=88';
+import {baseArt88} from './base-art88.js?v=88';
+import {drawHeroHands,loadHeroHands88} from './hero-hands85.js?v=88';
+import {walkRooms,FLOOR_DEPTH,FULL_TURN,PHOTO_FOV,VERTICAL_SCALE,advance86,cameraBasis86,clamp86,roomAnchor86,wrapAngle} from './base-map86.js?v=88';
 import {energy86} from './base-training86.js?v=87';
-import {petSprite86} from './pet-care86.js?v=87';
+import {petSprite86} from './pet-care86.js?v=88';
 import {mentorMarkup87,drawMentor87,MENTOR_GREETING_MS} from './base-mentor87.js?v=87';
+import {drawQuinjet88} from './quinjet88.js?v=88';
 
 const routes=new Map(),images=new Map();
 const pose=room=>({room,x:0,z:0,yaw:((walkRooms[room].heading??.5)-.5)*FULL_TURN,pitch:0});
 const current=child=>routes.get(child)?.at(-1)??pose('hall');
-const prop=(room,u,v,front,source,key,paint='')=>
- `<img class="hq86-prop" data-room="${room}" data-u="${u}" data-v="${v}" data-front="${front?1:0}" data-prop="${key}" data-paint="${paint}" src="${source}" alt="" hidden>`;
+const casePositions={a:[.194,.567],b:[.81,.567],c:[.5,.574]};
+const escapeText=value=>String(value).replace(/[&<>]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[ch]));
+const prop=(room,u,v,front,art,key,paint='',extra='')=>
+ `<img class="hq86-prop hq88-item-art${extra?' '+extra:''}" data-room="${room}" data-u="${u}" data-v="${v}" data-front="${front?1:0}" data-prop="${key}" data-paint="${paint}" style="--hq-art-hue:${art.hue}deg" data-tall="${art.tall}" src="${art.src}" alt="" hidden>`;
 
 export function baseWalkMarkup(profile,child,hero,release,panel,mic=''){
- const state=hqRead(profile),scene=walkRooms[current(child).room];
+ const state=hqRead(profile),animal=hqPet(profile),scene=walkRooms[current(child).room];
  const trophy=(slot,room,u,v,front=true)=>{
-  const item=hqPlaced(profile,slot);
-  if(item==='language-cup')return `<span class="hq86-prop hq86-cup" data-room="${room}" data-u="${u}" data-v="${v}" data-front="${front?1:0}" data-prop="${slot}" aria-hidden="true" hidden>🏆</span>`;
-  if(item==='language-cape')return prop(room,u,v,front,'assets/art/item-cape.svg',slot,'language');
-  return item&&HQ_ART.has(item)?prop(room,u,v,front,'assets/art/item-'+item+'.svg',slot):'';
+  const art=baseArt88(hqPlaced(profile,slot));
+  return art?prop(room,u,v,front,art,slot,'',room==='armory'?'hq88-case-art':''):'';
  };
- const pet=state.pet?`<span class="hq86-prop hq86-nook-pet" data-room="pet" data-u=".499" data-v=".516" data-front="1" data-prop="pet" hidden>${petSprite86(state.pet.species,state.pet.care?.outfit,state.pet.care?.asleep)}</span>`:'';
+ const pet=animal?`<span class="hq86-prop hq86-nook-pet" data-room="pet" data-u=".499" data-v=".516" data-front="1" data-prop="pet" hidden>${petSprite86(animal.species,animal.care?.outfit,animal.care?.asleep,false,true)}</span>`:'';
  const paint=['mint','gold'].includes(state.paint)?state.paint:'blue';
- const jet=profile.base?.owned?.includes('quinjet')?prop('hangar',.5,.603,true,'assets/art/item-quinjet.svg','jet',paint):'';
+ const jet=profile.base?.owned?.includes('quinjet');
+ const shop=prop('shop',.085,.425,true,baseArt88('shield'),'shop-shield','','hq88-shop-display')+
+  prop('shop',.905,.391,true,baseArt88('thorhammer'),'shop-hammer','','hq88-shop-display')+
+  prop('shop',.892,.507,true,baseArt88('boots'),'shop-boots','','hq88-shop-display');
  const {crystals,charged,capacity,level}=energy86(profile);
- return `<section class="hq86-walk" data-hq84-scene data-hq86-walk data-child="${child}" data-hero="${hero}">
+ return `<section class="hq86-walk" data-hq84-scene data-hq86-walk data-child="${child}" data-hero="${hero}" data-jet="${jet?paint:''}">
   <div class="hq86-stage" tabindex="0" aria-label="Przesuń palcem, aby się rozejrzeć. Przytrzymaj ekran, żeby iść. Na klawiaturze użyj strzałek i spacji.">
    <div class="hq86-fallback" aria-hidden="true"></div>
-   <canvas class="hq86-world" aria-hidden="true"></canvas><canvas class="hq86-hands" aria-hidden="true"></canvas>
+   <canvas class="hq86-world" aria-hidden="true"></canvas>${jet?'<canvas class="hq88-aircraft" aria-hidden="true" hidden></canvas>':''}<canvas class="hq86-hands" aria-hidden="true"></canvas>
    ${Object.entries(walkRooms).flatMap(([room,value])=>value.points.map((p,i)=>{
     if(profile.grade==='P'&&(p.action?.startsWith('hq:exercise:')||p.action==='hq:master'))return '';
+    if(p.action==='hq:flight'&&!jet)return '';
     const mentor=p.action==='hq:area:mentor',orb=p.action==='hq:joke',explorer=p.room==='explorer';
-    const style=mentor?' hq87-mentor-actor':orb?' hq87-orb':explorer?' hq87-discovery-door':p.icon?' hq86-holo':'';
-    const content=mentor?mentorMarkup87(profile.mentor):`${p.icon?`<span aria-hidden="true">${p.icon}</span>`:''}<b>${p.label}</b>`;
+    const style=mentor?' hq87-mentor-actor':orb?' hq87-orb':explorer?' hq87-discovery-door':p.room==='shop'?' hq88-shop-door':p.icon?' hq86-holo':'';
+    const label=p.action==='hq:pet'&&animal?escapeText(animal.name):p.label;
+    const content=mentor?mentorMarkup87(profile.mentor):`${p.icon?`<span aria-hidden="true">${p.icon}</span>`:''}<b>${label}</b>`;
     return `<button type="button" class="hq86-point${style}" data-room="${room}" data-index="${i}" ${p.room?`data-walk-door="${p.room}"`:`data-action="${p.action}"`} hidden>${content}</button>`;
    })).join('')}
-   ${trophy('a','armory',.25,.455)+trophy('b','armory',.74,.455)+trophy('lab','polish',.96,.483,false)+pet+jet}
+   ${Object.entries(casePositions).map(([slot,[u,v]])=>trophy(slot,'armory',u,v)).join('')+trophy('lab','polish',.96,.483,false)+pet+shop}
    <header class="hq86-top">
     <button type="button" data-action="hq:view:menu">‹ Wybór widoku</button>
     <button type="button" data-walk-back hidden>‹ Wróć</button>
@@ -56,6 +63,17 @@ export function openWalkRoom87(child,name){
  const stack=routes.get(child)??[pose('hall')];
  if(stack.at(-1).room!==name)stack.push(pose(name));
  routes.set(child,stack);
+ return true;
+}
+
+export function focusWalkCase88(child,slot){
+ const view=current(child),room=walkRooms[view.room];
+ if(view.room!=='armory'||!Object.hasOwn(casePositions,slot))return false;
+ const [u,v]=casePositions[slot];
+ const [x,y,z]=roomAnchor86(room,{u,v,front:true},543/724);
+ const distance=Math.hypot(x-view.x,z-view.z);
+ view.yaw=Math.atan2(x-view.x,z-view.z);
+ view.pitch=clamp86(Math.atan2(y+.33,distance),-.57,.57);
  return true;
 }
 
@@ -168,9 +186,11 @@ export function mountBaseWalk(root){
  if(!root)return;
  const stage=root.querySelector('.hq86-stage'),canvas=root.querySelector('.hq86-world');
  const fallback=root.querySelector('.hq86-fallback'),hands=root.querySelector('.hq86-hands');
+ const aircraft=root.querySelector('.hq88-aircraft'),jetContext=aircraft?.getContext('2d');
  const location=root.querySelector('.hq86-location'),dialog=root.querySelector('dialog');
  const back=stage.querySelector('[data-walk-back]'),menu=stage.querySelector('[data-action="hq:view:menu"]');
  const markers=[...stage.querySelectorAll('.hq86-point,.hq86-prop')];
+ const flightButton=stage.querySelector('[data-action="hq:flight"]');
  const ctx=hands.getContext('2d'),controller=new AbortController(),{signal}=controller;
  const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
  const child=root.dataset.child,stack=routes.get(child)??[pose('hall')];
@@ -178,6 +198,7 @@ export function mountBaseWalk(root){
  let world=panoramaWorld(canvas),width=0,height=0,frame=0,last=0,step=0;
  let pointer=null,transition=null,busy=false,effect=null,ignoreClickUntil=0,forwarding=false;
  let portraitRatio=.73,sceneMarkers=[],greeting=null;
+ let handArt=null,jetBounds=null;
  const on=(target,name,listener,options={})=>target.addEventListener(name,listener,{...options,signal});
  const state=()=>stack.at(-1);
  const room=()=>walkRooms[state().room];
@@ -188,12 +209,15 @@ export function mountBaseWalk(root){
   });
  }
  function renderSoon(){if(!frame)frame=requestAnimationFrame(draw);}
+ loadHeroHands88(root.dataset.hero).then(image=>{
+  if(!signal.aborted&&image){handArt=image;renderSoon();}
+ });
  function resize(){
   const rect=stage.getBoundingClientRect();
   width=rect.width;height=rect.height;
   if(!width||!height)return;
   const density=Math.min(window.devicePixelRatio||1,1.55);
-  for(const surface of [canvas,hands]){
+  for(const surface of [canvas,hands,aircraft].filter(Boolean)){
    surface.width=Math.round(width*density);surface.height=Math.round(height*density);
   }
   renderSoon();
@@ -213,7 +237,9 @@ export function mountBaseWalk(root){
   busy=true;
   location.textContent=selected.name;stage.dataset.room=state().room;
   back.hidden=stack.length===1;menu.hidden=stack.length!==1;
+  if(aircraft)aircraft.hidden=state().room!=='hangar';
   greeting=null;sceneMarkers=[];markers.forEach(marker=>marker.hidden=true);
+  jetBounds=null;
   fallback.style.backgroundImage=`url("assets/hq/${selected.art}")`;
   try{
    const [image,front]=await Promise.all([image86(selected.art),selected.portrait?image86(selected.portrait):null]);
@@ -261,6 +287,10 @@ export function mountBaseWalk(root){
    marker.style.setProperty('--hq-scale',size);
    marker.style.setProperty('--hq-squish',1-(effect?.kind==='egg'?amount*.40:0));
    marker.style.setProperty('--hq-effect',String(amount));
+   if(marker.classList.contains('hq88-case-art')){
+    const photoHeight=(marker.dataset.tall==='true'?.225:.155)*PHOTO_FOV/fy*height;
+    marker.style.setProperty('--hq-case-size',clamp86(photoHeight*anchor[2]/depth,44,height*.57)+'px');
+   }
   }
  }
  function stop(event){
@@ -309,14 +339,36 @@ export function mountBaseWalk(root){
    fallback.style.backgroundPosition=`calc(50% - ${yaw/FULL_TURN*height*2.56}px) ${50-live.pitch*34}%`;
    fallback.style.transform=`scale(${1+Math.min(.16,Math.hypot(live.x,live.z)*.025)})`;
   }
-  if(ctx)drawHeroHands(ctx,hands,root.dataset.hero,reduced?0:step,moving);
+  if(ctx)drawHeroHands(ctx,hands,root.dataset.hero,reduced?0:step,moving,handArt);
+  if(jetContext&&live.room==='hangar'){
+   const density=aircraft.width/width;
+   jetContext.setTransform(density,0,0,density,0,0);
+   jetContext.clearRect(0,0,width,height);
+   const [x,y,z]=roomAnchor86(selected,{u:.5,v:.625,front:true},portraitRatio);
+   const shadow=project(basis,fx,fy,[x,y,z]);
+   if(shadow){
+    jetContext.fillStyle='#071b35a0';jetContext.beginPath();
+    jetContext.ellipse(shadow[0],shadow[1],width*.33,Math.min(26,height*.033),0,0,Math.PI*2);jetContext.fill();
+   }
+   jetBounds=drawQuinjet88(jetContext,point=>project(basis,fx,fy,point),{
+    x,y:y+.03,z,yaw:-2.40,scale:.88,paint:root.dataset.jet
+   });
+  }
   paintMarkers(basis,fx,fy,now);
   if(greeting?.open&&now-greeting.at>=MENTOR_GREETING_MS){
-   greeting.open=false;forwarding=true;
-   try{greeting.marker.click();}finally{forwarding=false;}
+   greeting.open=false;forwardPoint(greeting.marker);
    if(signal.aborted)return;
   }
   if(pointer||transition||effect||greeting&&now-greeting.at<MENTOR_GREETING_MS)renderSoon();else last=0;
+ }
+ function forwardPoint(marker){
+  forwarding=true;marker.dataset.hqForwarded='1';
+  try{marker.click();}finally{delete marker.dataset.hqForwarded;forwarding=false;}
+ }
+ function jetTarget(event){
+  if(!jetBounds||!flightButton)return null;
+  const rect=stage.getBoundingClientRect(),x=event.clientX-rect.left,y=event.clientY-rect.top;
+  return x>=jetBounds.left&&x<=jetBounds.right&&y>=jetBounds.top&&y<=jetBounds.bottom?flightButton:null;
  }
  function travel(marker,done){
   const found=sceneMarkers.find(item=>item.marker===marker);
@@ -333,7 +385,7 @@ export function mountBaseWalk(root){
  on(stage,'pointerdown',event=>{
   ignoreClickUntil=0;
   if(event.button!==0||pointer||busy||transition||dialog||event.target.closest('.hq86-top'))return;
-  const point=event.target.closest('.hq86-point');
+  const point=event.target.closest('.hq86-point')||jetTarget(event);
   pointer={id:event.pointerId,time:performance.now(),x:event.clientX,y:event.clientY,drag:false,walk:false,point};
   if(!point)stage.setPointerCapture(event.pointerId);
   renderSoon();
@@ -362,6 +414,9 @@ export function mountBaseWalk(root){
    return;
   }
   const marker=event.target.closest('.hq86-point');
+  if(!marker&&!busy&&!transition&&event.detail&&jetTarget(event)){
+   event.preventDefault();flightButton.click();return;
+  }
   if(!marker||busy||transition){
    if(marker){event.preventDefault();event.stopPropagation();}
    return;
@@ -377,8 +432,7 @@ export function mountBaseWalk(root){
   travel(marker,()=>{
    if(next){stack.push(pose(next));void load();return;}
    stage.classList.remove('is-travelling');
-   forwarding=true;
-   try{marker.click();}finally{forwarding=false;}
+   forwardPoint(marker);
   });
  },{capture:true});
  on(stage,'keydown',event=>{

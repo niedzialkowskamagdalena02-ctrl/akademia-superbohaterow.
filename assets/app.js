@@ -9,10 +9,12 @@ import {vocabulary,readings,explanation} from './learning.js';
 import {syncAdapter} from './sync.js?v=81';
 import {BASE_ITEMS,baseMarkup,migrateBase} from './base.js?v=82';
 import {mountArcade,stopArcade} from './arcade.js?v=84';
-import {mountBaseScene84} from './base-scene84.js?v=87';
-import {baseWalkMarkup,mountBaseWalk,resetBaseWalk,openWalkRoom87} from './base-walk85.js?v=87';
-import {HQ_SLOTS,hqItems,hqRead,hqBalances,hqEarnToken,hqSpendToken,hqRecordCrystals,hqBuyWithGems,hqPlaced,hqPlace,hqAdopt,hqPaint,hqEarnFood,hqChoices,hqMarkup,hqWallet,hqShop,hqPetMarkup} from './headquarters84.js?v=87';
-import {petRoom86,petCareMarkup86,mountPetCare86,setPetCare86,servePet87} from './pet-care86.js?v=87';
+import {mountBaseScene84} from './base-scene84.js?v=88';
+import {baseWalkMarkup,mountBaseWalk,resetBaseWalk,openWalkRoom87,focusWalkCase88} from './base-walk85.js?v=88';
+import {HQ_SLOTS,hqItems,hqRead,hqBalances,hqEarnToken,hqSpendToken,hqRecordCrystals,hqBuyWithGems,hqPlaced,hqPlace,hqDisplayPurchase88,hqPet,hqChoosePet88,hqPaint,hqEarnFood,hqChoices,hqMarkup,hqWallet,hqShop,hqFoodQuiz88} from './headquarters84.js?v=88';
+import {petRoom86,petCareMarkup86,petPicker88,mountPetCare86,setPetCare86,servePet87} from './pet-care86.js?v=88';
+import {flightMarkup88,mountNounFlight88} from './noun-flight88.js?v=88';
+import {petQuiz88} from './pet-quiz88.js?v=88';
 import {MASTER_PRIZES86,MASTER_SCORE86,recordEnergy86,trainingRound86,trainingConsole86,unlockMaster86} from './base-training86.js?v=87';
 import {affordable82,purchase82,credit82} from './wallet82.js?v=82';
 import {REVEAL_OFFER82,consent82,requestedAnswer82,solutions82,leaks82,parseTutor82,promptTutor82} from './tutor82.js?v=82';
@@ -67,7 +69,7 @@ const select=(id,label,options,value)=>`<label for="${id}">${label}</label><sele
 const grades=[['P','Przedszkole'],...Array.from({length:12},(_,i)=>[String(i+1),`Klasa ${i+1}`])];
 const people=[['pawel','Paweł'],['patryk','Patryk']];
 const note=t=>{const n=$('hq85-notice')||$('notice');if(!n){console.warn('Powiadomienie:',t);return}n.textContent=t;n.classList.add('visible');setTimeout(()=>{if(n.isConnected)n.classList.remove('visible')},4500)};
-const ACADEMY_RELEASE=87;
+const ACADEMY_RELEASE=88;
 async function checkAcademyUpdate(button){
  if(!button||button.disabled)return;
  const label=button.textContent,controller=new AbortController();
@@ -287,7 +289,7 @@ function v75OutsideDelete(index){const ch=$('v75-outside-child')?.value,sub=$('v
 
 function v75PreschoolView(){return `<section class="v75-preschool"><div class="v75-preschool-orbit" aria-hidden="true">🌍<span>⭐</span><span>🦋</span></div><h2>Odkrywaj świat z bohaterami!</h2><div class="v75-pre-buttons"><button data-action="v75:pre:game">🎮 Sala treningowa<small>Uczymy się przez zabawę</small></button><button data-action="v75:pre:test">🏆 Próba bohatera<small>Pokaż, co już umiesz</small></button></div></section>`}
 
-function v75PreschoolQuestions(){
+function v75PreschoolQuestions(limit=10){
  const arr=[
  ['Który kolor ma niebo w słoneczny dzień?',['Niebieski','Czarny','Różowy'],0],
  ['Ile nóg ma pies?',['Dwie','Cztery','Sześć'],1],
@@ -301,7 +303,7 @@ function v75PreschoolQuestions(){
  ['Co świeci na niebie w dzień?',['Księżyc','Słońce','Latarka'],1],
  ['Co robimy przed jedzeniem?',['Myjemy ręce','Skaczemy na łóżku','Malujemy ściany'],0],
  ['Który owoc jest zwykle żółty?',['Banan','Wiśnia','Śliwka'],0]
- ];return [...[...arr].map(([q,a,ok])=>({q,a,ok,lang:'pl-PL',hero:'spider'})),...v75OutsideBank(who,'przedszkole').map(t=>({...t,lang:'pl-PL',hero:'spider'}))].sort(()=>Math.random()-.5).slice(0,10);
+ ];return [...[...arr].map(([q,a,ok])=>({q,a,ok,lang:'pl-PL',hero:'spider'})),...v75OutsideBank(who,'przedszkole').map(t=>({...t,lang:'pl-PL',hero:'spider'}))].sort(()=>Math.random()-.5).slice(0,limit);
 }
 
 // V74_PANEL_MAMY: układ formularzy i filtrowanie raportu
@@ -735,7 +737,7 @@ const grant=async(child,points,reason,key)=>{
  try{await syncAdapter.onLocalChange(data);}catch{note('Nagroda zapisana na telefonie. Ponów synchronizację, kiedy wróci połączenie.');}
  return true;
 };
-function layout(title,content,scene=''){if(typeof mountBaseScene84==='function')mountBaseScene84(null);if(typeof mountBaseWalk==='function')mountBaseWalk(null);cancelAIRequests();stopVoice();closeMicBubble();app.innerHTML=scene==='walk'?'<main class="hq86-main">'+content+'</main>':`<main class="wrap"><header class="head"><div><div class="brand">⚡ AKADEMIA SUPERBOHATERÓW <span style="display:inline-block;font-size:0.72em;border:1px solid currentColor;border-radius:8px;padding:2px 7px;vertical-align:middle">V${ACADEMY_RELEASE}</span></div><div class="sub">${e(title)}</div>${sync78StatusMarkup()}</div>${role==='child'&&scene!=='choice'?trainingSoundControl():''}${role?button(testMode?'← Zakończ test':'← Profile','exit','alt'):''}</header>${testMode?'<div class="test-banner">🧪 TRYB MAMY — BEZPŁATNY TEST • POSTĘPY NIE SĄ ZAPISYWANE</div>':''}${content}</main>${role==='child'&&scene!=='choice'?'<button class="mic" data-action="mic" aria-label="Sterowanie głosowe">🎙️</button>':''}`;document.querySelectorAll('[data-speak]').forEach(b=>b.addEventListener('click',()=>speak(b.dataset.speak,b.dataset.lang,role==='child'?profile().mentor:'tech',data.settings.rate||1)));hydrateImages();v76AfterRender();if(role==='child'&&(tab==='learn'||tab==='subjectmissions'))installMicDrag()}
+function layout(title,content,scene=''){if(typeof mountNounFlight88==='function')mountNounFlight88(null);if(typeof mountBaseScene84==='function')mountBaseScene84(null);if(typeof mountBaseWalk==='function')mountBaseWalk(null);cancelAIRequests();stopVoice();closeMicBubble();app.innerHTML=scene==='walk'?'<main class="hq86-main">'+content+'</main>':`<main class="wrap${role==='child'&&(tab==='base'||hqViews84.get(who)==='walk')?' hq88-base-page':''}"><header class="head"><div><div class="brand">⚡ AKADEMIA SUPERBOHATERÓW <span style="display:inline-block;font-size:0.72em;border:1px solid currentColor;border-radius:8px;padding:2px 7px;vertical-align:middle">V${ACADEMY_RELEASE}</span></div><div class="sub">${e(title)}</div>${sync78StatusMarkup()}</div>${role==='child'&&scene!=='choice'?trainingSoundControl():''}${role?button(testMode?'← Zakończ test':'← Profile','exit','alt'):''}</header>${testMode?'<div class="test-banner">🧪 TRYB MAMY — BEZPŁATNY TEST • POSTĘPY NIE SĄ ZAPISYWANE</div>':''}${content}</main>${role==='child'&&scene!=='choice'?'<button class="mic" data-action="mic" aria-label="Sterowanie głosowe">🎙️</button>':''}`;document.querySelectorAll('[data-speak]').forEach(b=>b.addEventListener('click',()=>speak(b.dataset.speak,b.dataset.lang,role==='child'?profile().mentor:'tech',data.settings.rate||1)));hydrateImages();v76AfterRender();if(role==='child'&&(tab==='learn'||tab==='subjectmissions'))installMicDrag()}
 async function hydrateImages(){for(const el of document.querySelectorAll('[data-image]')){const src=await img(el.dataset.image);if(el.isConnected&&src){el.src=src;el.onload=()=>URL.revokeObjectURL(src)}}}
 function nav(){return role==='admin'?`<div class="tabs">${[['home','Przegląd'],['books','📚 Książki'],['missions','📋 Misje'],['settings','⚙️ Ustawienia'],['test','🧪 Testuj wszystko'],['sync','📱 Telefony'],['backup','💾 Kopia']].map(([k,n])=>button(n,'admin:'+k,adminTab===k?'gold':'alt')).join('')}</div>`:`<div class="tabs">${[['home','🎯 Misje'],['books','📚 Książki'],['learn','🧠 Trening'],['academy','📖 Sala odkrywców'],['mentor','🤖 Mentor'],['base','🏙️ Baza Avengersów i gry']].map(([k,n])=>button(n,'child:'+k,tab===k?'gold':'alt')).join('')}</div>`}
 function render(){if(tab!=='arcade')stopArcade();if(!role){layout('Wybierz swoją bazę',`<section class="card"><h1>Witaj w Akademii! 🛡️</h1><p>Każdy bohater ma własne misje i nagrody.</p></section><div class="grid">${people.filter(([id])=>!syncAdapter.device?.()||syncAdapter.device().role!=='child'||syncAdapter.device().child===id).map(([id,name])=>`<button class="tile" data-action="enter:${id}"><img class="profile-hero" src="assets/art/${data.profiles[id].hero||(id==='pawel'?'iron':'spider')}.svg" alt=""><h2>${name}</h2><small>${gradeName(data.profiles[id].grade)} · ${data.profiles[id].coins} złotych</small></button>`).join('')}</div><section class="card">${syncAdapter.device?.()?.role==='child'?'':button('🔐 Centrum dowodzenia mamy','enter:admin','gold')}<p class="muted">${syncAdapter.status()}</p></section>${!syncAdapter.device?.()?sync78Markup():''}${globalThis.AKADEMIA_TEST80?'':`<footer class="academy-update">${button('🔄 Aktualizuj Akademię','academy:update','line')}</footer>`}`);return}if(role==='admin')adminRender();else childRender()}
@@ -1133,9 +1135,9 @@ function trainingSubjectCard(subject){
  };
  return `<button type="button" class="tr71-choice tr72-subject-card" data-theme="${key}" data-action="training:subject:${encodeURIComponent(name)}" aria-label="Wybierz przedmiot ${e(name)}"><span class="tr72-illustration-frame">${illustrations[key]}</span>${key==='wiedza'?'<div class="v76-knowledge-decor" aria-hidden="true"><i class="v76-pyramid"></i><span class="v76-letter">A</span><span class="v76-letter">7</span><span class="v76-letter">b</span><span class="v76-letter">3</span><span class="v76-leaf">🌿</span><span class="v76-mag">🔎</span><span class="v76-bulb">💡</span></div>':''}<strong>${e(name)}</strong></button>`;
 }
-function trainingTapSound(){
+function trainingTapSound(whileSpeaking=false){
  if(localStorage.getItem('academy-v72-training-silent')==='1')return;
- if(window.speechSynthesis?.speaking||window.speechSynthesis?.pending)return;
+ if(!whileSpeaking&&(window.speechSynthesis?.speaking||window.speechSynthesis?.pending))return;
  try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;
   const c=new C(),o=c.createOscillator(),g=c.createGain();
   o.type='sine';o.frequency.setValueAtTime(570,c.currentTime);o.frequency.exponentialRampToValueAtTime(790,c.currentTime+.085);
@@ -1219,16 +1221,18 @@ function hqRoomPanel84(p){
  }
  if(hqPanel84==='hero')body='<h3>🦸 Wybierz swojego bohatera</h3>'+heroPicker(who);
  if(hqPanel84==='pet')body=petCareMarkup86(p,petRooms86.get(who),petEffects86.get(who),button,petPlay87.has(who));
- if(hqPanel84==='pet-quiz')body=hqPetMarkup(p,hqQuizzes84.get(who),button);
+ if(hqPanel84==='pet-select')body=petPicker88(p);
+ if(hqPanel84==='pet-quiz')body=hqFoodQuiz88(hqQuizzes84.get(who),button,speakBtn);
  if(hqPanel84==='master'){
   const won=MASTER_PRIZES86.every(id=>p.base?.owned?.includes(id));
   body='<h3>🏆 Language Master</h3><p>Odpowiedz samodzielnie na '+MASTER_SCORE86+' z 10 pytań z polskiego i angielskiego. Wygraj puchar i pelerynę mistrza.</p>'+
    (won?'<p class="hq86-master-won">✓ Puchar i peleryna w kolekcji.</p>'+button('Zobacz kolekcję','hq:gallery','alt'):'')+
    button(won?'Zagraj jeszcze raz':'Rozpocznij próbę','hq:exercise:master','gold');
  }
+ if(hqPanel84==='flight')body=flightMarkup88(button,speakBtn);
  if(hqPanel84==='hangar'){
   const jet=p.base?.owned?.includes('quinjet');
-  body='<h3>🛩️ Hangar</h3>'+(jet?'<p>Wybierz malowanie Quinjeta.</p>'+[['blue','Niebieskie'],['mint','Miętowe'],['gold','Złote']].map(([id,label])=>button(label,'hq:paint:'+id,hqRead(p).paint===id?'gold':'alt')).join(''):
+  body='<h3>🛩️ Hangar</h3>'+(jet?button('✈️ Lot po rzeczowniki','hq:flight','gold')+'<p>Wybierz malowanie Quinjeta.</p>'+[['blue','Niebieskie'],['mint','Miętowe'],['gold','Złote']].map(([id,label])=>button(label,'hq:paint:'+id,hqRead(p).paint===id?'gold':'alt')).join(''):
    '<p>Na lądowisku jest miejsce na Quinjeta.</p>'+button('🛒 Idź do sklepu','hq:room:shop','gold'));
  }
  if(hqPanel84==='joke'){
@@ -1244,7 +1248,7 @@ function hqRoomPanel84(p){
     return `<div class="arcade-offer"><div><b>${g.icon} ${g.title}</b><small>${g.desc}</small></div>${open||energy?button(open?'▶ Graj':'⚡ Graj za 1 żeton','arcade:open:'+g.id,'gold'):'<button disabled>🔒 Potrzebny żeton</button>'}</div>`;
    }).join('')+'<div class="hq84-shortcuts">'+button('📚 Idź na trening','hq:training','alt')+button('🧩 Krzyżówka','game:crossword','alt')+button('🏆 Quiz','game:quiz','alt')+button('🧠 Zagadki','game:logic','alt')+'</div>';
  }
- const care=hqPanel84==='pet'||hqPanel84==='pet-quiz';
+ const care=['pet','pet-select','pet-quiz'].includes(hqPanel84);
  return '<section class="card hq84-panel'+(care?' hq86-pet-panel':'')+'" id="hq84-panel" tabindex="-1">'+
   button(care?'‹ Wróć':'✕ Zamknij','hq:close','alt')+body+'</section>';
 }
@@ -1279,13 +1283,8 @@ async function hqToken84(child,id,subject,perfect){
  return true;
 }
 function hqFoodQuestions84(){
- const pool=profile().grade==='P'?v75PreschoolQuestions().map(x=>[x.q,x.a,x.ok]):
-  Object.values(v37Bank).flat();
- const list=[...pool];
- for(let i=list.length-1;i>0;i--){
-  const j=Math.floor(Math.random()*(i+1));[list[i],list[j]]=[list[j],list[i]];
- }
- return list.slice(0,5);
+ const grade=profile().grade;
+ return petQuiz88(grade,grade==='P'?v75PreschoolQuestions(Infinity):[],v37Bank);
 }
 function openBaseTraining86(step='subject',subject='Polski'){
  hqReturn84=true;hqPanel84='';hqSessions84.delete(who);
@@ -1315,6 +1314,10 @@ async function hqAction84(action,target){
   hqReturn84=true;hqPanel84='';tab=id;render();window.scrollTo(0,0);return;
  }
  if(what==='back'){hqReturn84=false;return hqShow84();}
+ if(what==='flight'){
+  if(!id&&p.base?.owned?.includes('quinjet'))return hqShow84('flight');
+  return;
+ }
  if(what==='room'&&id==='shop'){
   if(hqViews84.get(child)!=='walk')return hqShow84('shop');
   if(openWalkRoom87(child,id))return hqShow84();
@@ -1327,22 +1330,22 @@ async function hqAction84(action,target){
   if(id==='polish'||id==='english-training')return openBaseTraining86('source',id==='polish'?'Polski':'Angielski');
   if(id==='english'){trainingMode='vocab';return openBaseTraining86('range','Angielski');}
  }
- if(what==='close')return hqShow84(hqPanel84==='pet-quiz'?'pet':'');
+ if(what==='close')return hqShow84(hqPanel84==='pet-quiz'||hqPanel84==='pet-select'&&hqPet(p)?'pet':'');
+ if(what==='pet-select')return hqShow84('pet-select');
  if(what==='pet'||what==='bowl'||what==='pet-room'){
   petEffects86.delete(child);
   if(what!=='pet')petRooms86.set(child,what==='bowl'?'kitchen':petRoom86(id));
-  return hqShow84('pet');
+  return hqShow84(hqPet(p)?'pet':'pet-select');
  }
  if(what==='pet-play'){
-  if(hqPanel84!=='pet'||!hqRead(p).pet||hqRead(p).pet.care?.asleep)return;
+  const pet=hqPet(p);
+  if(hqPanel84!=='pet'||!pet||pet.care?.asleep)return;
   if(petPlay87.has(child))petPlay87.delete(child);else petPlay87.add(child);
   petEffects86.delete(child);return hqShow84('pet');
  }
  if(what==='care'){
   if(hqPanel84!=='pet')return;
-  const value=id==='name'?$('hq87-pet-name')?.value:extra;
-  if(id==='name'&&!value?.trim())return note('Wpisz imię zwierzaka.');
-  if(!setPetCare86(p,id,value))return;
+  if(!setPetCare86(p,id,extra))return;
   if(id==='nap')petPlay87.delete(child);
   petEffects86.set(child,id==='clean'?'clean-'+value:id);
   await save();
@@ -1365,7 +1368,11 @@ async function hqAction84(action,target){
  if(what==='place'){
   if(!hqPlace(p,id,extra))return;
   await save();
-  if(who===child&&tab==='base'){hqShow84('trophy',extra);note('✨ Trofeum jest już w bazie.');}
+  if(who===child&&tab==='base'){
+   const focused=hqViews84.get(child)==='walk'&&focusWalkCase88(child,extra);
+   hqShow84(focused?'':'trophy',extra);
+   note('✨ Trofeum jest już w bazie.');
+  }
   return;
  }
  if(what==='buy-gems'){
@@ -1378,12 +1385,13 @@ async function hqAction84(action,target){
   await save();if(who===child&&tab==='base')hqShow84('hangar');return;
  }
  if(what==='adopt'){
-  if(hqPanel84!=='pet'||!hqAdopt(p,id,$('hq84-pet-name')?.value))return;
-  await save();if(who===child&&tab==='base')hqShow84('pet');return;
+  if(hqPanel84!=='pet-select'||!hqChoosePet88(p,id,$('hq84-pet-name')?.value))return;
+  petRooms86.set(child,'nest');petPlay87.delete(child);petEffects86.delete(child);
+  await save();if(who===child&&tab==='base'&&hqPanel84==='pet-select')hqShow84('pet');return;
  }
  if(what==='food'){
   if(hqPanel84!=='pet')return;
-  if(!hqRead(p).pet)return hqShow84('pet');
+  if(!hqPet(p))return hqShow84('pet-select');
   petRooms86.set(child,'kitchen');petEffects86.delete(child);
   if(!hqQuizzes84.has(child))hqQuizzes84.set(child,{id:uid(),index:0,items:hqFoodQuestions84()});
   return hqShow84('pet-quiz');
@@ -1427,13 +1435,15 @@ function childRender(){
  if(tab==='view-choice')return layout('Akademia '+p.name,hqChoices(button),'choice');
  if(tab==='base'&&walking){
   const panel=hqRoomPanel84(p);
-  const care=hqPanel84==='pet'||hqPanel84==='pet-quiz';
+  const care=['pet','pet-select','pet-quiz'].includes(hqPanel84);
   const mic='<button type="button" class="mic hq87-mic" data-action="mic" aria-label="Zadaj pytanie">🎙️</button>';
   const dialog=panel?'<dialog class="hq85-dialog'+(care?' hq86-pet-dialog':'')+'" aria-label="'+(care?'Kącik zwierzaka':'Interakcja w bazie')+'">'+panel+
    '<div id="hq85-notice" role="status"></div><div class="hq87-dialog-mic">'+mic+'</div></dialog>':'';
   const walk=baseWalkMarkup(p,who,hero(p.hero||(who==='pawel'?'iron':'spider'))[0],ACADEMY_RELEASE,dialog,mic);
   layout('Spacer po bazie',walk,'walk');
-  mountBaseWalk(document.querySelector('[data-hq86-walk]'));mountPetCare86(app,careGesture);return;
+  mountBaseWalk(document.querySelector('[data-hq86-walk]'));mountPetCare86(app,careGesture);
+  if(hqPanel84==='flight')mountNounFlight88(app,hqRead(p).paint);
+  return;
  }
  let html=walking?'':`<section class="card"><div class="row between"><div><h2>${p.name} ${hero(p.hero||(who==='pawel'?'iron':'spider'))[2]}</h2><small>${gradeName(p.grade)} · Baza poziom ${1+Math.floor(p.xp/100)}</small></div><b class="xp" data-wallet82="${who}">🪙 ${p.coins} złotych</b></div><div class="progress"><div style="width:${p.xp%100}%"></div></div></section>`+nav();
 if(tab==='song'){const mission=data.missions.find(m=>m.id===missionId);const song=data.settings.songs.find(x=>x.id===mission?.songId);html+=song?songScreen(song,mission):'<section class="card">Nie znaleziono piosenki.</section>'}
@@ -1464,7 +1474,7 @@ if(tab==='learn'){
    html+=trainingFlowMarkup();
   }
   if(avengersRun)html+=avengersPanel();
- }layout('Akademia '+p.name,html);if(tab==='base'){mountBaseScene84(document.querySelector('[data-hq84-scene]'));mountPetCare86(app,careGesture);}if(tab==='arcade')hqMountArcade84();if(tab==='learn'&&v37Classic)newExercise();if(tab==='trace')drawTrace()}
+ }layout('Akademia '+p.name,html);if(tab==='base'){mountBaseScene84(document.querySelector('[data-hq84-scene]'));mountPetCare86(app,careGesture);if(hqPanel84==='flight')mountNounFlight88(app,hqRead(p).paint);}if(tab==='arcade')hqMountArcade84();if(tab==='learn'&&v37Classic)newExercise();if(tab==='trace')drawTrace()}
 const CROSSWORDS=[
  {word:'KOT',clue:'Miauczy i mruczy',r:0,c:2,dir:'v'},
  {word:'DOM',clue:'Mieszkamy w nim',r:1,c:1,dir:'h'},
@@ -1944,7 +1954,7 @@ if(action==='game:crossword'){tab='crossword';return render()}if(action==='game:
   if(isCurrent()){console.warn('Mentor AI:',error);output.textContent=AI_FRIENDLY_MESSAGE}
  }finally{finishAIRequest('mentor',controller)}
  return;
-}if(action.startsWith('mentor:choose:')){const style=action.split(':')[2];if(!['tech','fun'].includes(style))return;profile().mentor=style;await save();render();return}if(action==='mentor:speak'){const out=$('mentoranswer');return out.dataset.spellWord?spellEnglish77(out.dataset.spellWord,{prefix:out.textContent}):speak(out.textContent,'pl-PL',profile().mentor);}if(a==='base'&&b==='buy'){const item=BASE_ITEMS.find(x=>x?.id===c),p=profile(),base=migrateBase(p),result=purchase82(p,item,base.owned);if(!result.ok)return note(result.message);await save();render();speak('Brawo! Odblokowano '+item.name,'pl-PL',p.mentor);return}if(action==='mic')return microphone();}catch(err){console.error(err);note('Nie udało się wykonać operacji: '+err.message)}}
+}if(action.startsWith('mentor:choose:')){const style=action.split(':')[2];if(!['tech','fun'].includes(style))return;profile().mentor=style;await save();render();return}if(action==='mentor:speak'){const out=$('mentoranswer');return out.dataset.spellWord?spellEnglish77(out.dataset.spellWord,{prefix:out.textContent}):speak(out.textContent,'pl-PL',profile().mentor);}if(a==='base'&&b==='buy'){const item=BASE_ITEMS.find(x=>x?.id===c),p=profile(),base=migrateBase(p),result=purchase82(p,item,base.owned);if(!result.ok)return note(result.message);hqDisplayPurchase88(p,item.id);await save();render();speak('Brawo! Odblokowano '+item.name,'pl-PL',p.mentor);return}if(action==='mic')return microphone();}catch(err){console.error(err);note('Nie udało się wykonać operacji: '+err.message)}}
 function helpForQuestion(question){
  const q=String(question||'').toLocaleLowerCase('pl-PL').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
  if(/(test|sprawdzian|kartkowk)/.test(q))return 'Aby zrobić test, wybierz zakładkę Trening, następnie przedmiot i ćwiczenie Test lub Quiz. Jeśli test jest zadany przez mamę, otwórz Misje i wybierz tę misję.';
@@ -2083,6 +2093,24 @@ document.addEventListener('toggle',ev=>{
   const id=image.dataset.v75LazyImage;if(!id||image.dataset.v75Loading)return;
   image.dataset.v75Loading='1';img(id).then(url=>{if(image.isConnected&&url){image.src=url;image.onload=()=>URL.revokeObjectURL(url)}}).catch(err=>console.warn('Nie udało się wyświetlić zdjęcia strony',err));
  }
+},true);
+const baseButtonClicks88=new WeakMap();
+document.addEventListener('pointerdown',event=>{
+ const tool=event.target.closest?.('[data-pet-tool]');
+ if(!tool||tool.disabled||event.button!==0)return;
+ trainingTapSound(true);
+},true);
+document.addEventListener('click',event=>{
+ const control=event.target.closest?.('button,summary');
+ if(!control||control.disabled||control.dataset.hqForwarded||control.dataset.petTool&&event.detail||
+    !control.closest('.hq86-main,.hq88-base-page,.hq84-choices'))return;
+ const action=control.dataset.action;
+ if(control.classList.contains('tr72-subject-card')||
+    control.closest('.tr71')&&action?.startsWith('training:')&&action!=='training:toggle-sound')return;
+ const now=performance.now(),last=baseButtonClicks88.get(control);
+ if(last&&now-last.at<100&&last.trusted!==event.isTrusted)return;
+ baseButtonClicks88.set(control,{at:now,trusted:event.isTrusted});
+ trainingTapSound(true);
 },true);
 document.addEventListener('click',ev=>{const btn=ev.target.closest('[data-action]');if(btn){if(ev.target.closest('[data-speak]'))return;if(btn.dataset.action==='mic'&&micDragIgnoreClick){ev.preventDefault();ev.stopPropagation();return}if(btn.classList.contains('tr72-subject-card')){if(btn.dataset.opening)return;btn.dataset.opening='1';btn.classList.add('tr72-selected');trainingTapSound();setTimeout(()=>{if(btn.isConnected)handle(btn.dataset.action,btn)},['matematyka','przyroda','wiedza'].includes(btn.dataset.theme)?1150:480);return}if(btn.closest('.tr71')&&/^training:(source|mode):/.test(btn.dataset.action||'')){if(btn.dataset.opening)return;btn.dataset.opening='1';btn.classList.add('v76-tile-pressed');btn.setAttribute('aria-busy','true');trainingTapSound();setTimeout(()=>{if(btn.isConnected)handle(btn.dataset.action,btn)},280);return}if(btn.closest('.tr71')&&btn.dataset.action?.startsWith('training:')&&btn.dataset.action!=='training:toggle-sound')trainingTapSound();handle(btn.dataset.action,btn)}});
 document.addEventListener('input',ev=>{const box=ev.target.closest('[data-v74-edit]');if(!box||!ev.target.matches('[data-v74-field],[data-v75-field]'))return;const key=decodeURIComponent(box.dataset.v74Edit||'');const btn=box.querySelector('[data-action^="book:save-question:"]');if(btn)btn.disabled=!v74QuestionModified(box,key);});

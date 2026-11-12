@@ -4,13 +4,13 @@ const photo=(label,u,v,action)=>station(label,u,v,action,'',true);
 
 export const walkRooms={
  hall:{
-  name:'Hol główny',art:'hall86.webp',bounds:[7,3.2,6.3],points:[
+  name:'Hol główny',art:'hall88.webp',bounds:[7,3.2,6.3],points:[
    door('Sala Treningowa',.50,.423,'training'),
    door('Zbrojownia',.14,.419,'armory'),
    door('Centrum Rozrywki',.745,.428,'arcade'),
    door('Hangar',.871,.425,'hangar'),
    door('Kącik zwierzaka',.046,.563,'pet'),
-   door('Sklep',.257,.495,'shop'),
+   door('Wejdź do sklepu',.257,.538,'shop'),
    door('Skarbiec',.365,.49,'vault')
   ]
  },
@@ -45,9 +45,10 @@ export const walkRooms={
  },
  armory:{
   name:'Zbrojownia',art:'annex86.webp',portrait:'armory.webp',tint:[1.08,.95,.83],bounds:[4,2.35,3.7],points:[
-   photo('Kolekcja zbroi',.5,.445,'hq:gallery'),
-   photo('Gablota A',.25,.59,'hq:slot:a'),
-   photo('Gablota B',.74,.59,'hq:slot:b'),
+   photo('Kolekcja zbroi',.5,.259,'hq:gallery'),
+   photo('Gablota A',.194,.626,'hq:slot:a'),
+   photo('Gablota B',.81,.626,'hq:slot:b'),
+   photo('Gablota C',.5,.641,'hq:slot:c'),
    station('Zmień bohatera',.705,.46,'hq:hero','🦸')
   ]
  },
@@ -74,15 +75,14 @@ export const walkRooms={
  },
  hangar:{
   name:'Hangar',art:'annex86.webp',portrait:'hangar.webp',tint:[.87,1,1.12],bounds:[4.6,2.8,5.1],points:[
-   photo('Lądowisko',.5,.557,'hq:hangar')
+   photo('Lądowisko',.5,.65,'hq:hangar'),
+   photo('Wsiądź do Quinjeta',.5,.491,'hq:flight')
   ]
  },
  pet:{
   name:'Kącik zwierzaka',art:'annex86.webp',portrait:'nook86.webp',tint:[1.12,.91,.96],bounds:[3.45,2.1,3.4],points:[
-   photo('Miska',.325,.669,'hq:bowl'),
-   photo('Zwierzak',.495,.54,'hq:pet'),
-   photo('Gniotek',.815,.584,'hq:egg'),
-   station('Garderoba',.715,.49,'hq:pet-room:closet','🧣')
+   photo('Wybierz zwierzaka',.495,.612,'hq:pet'),
+   photo('Gniotek',.815,.584,'hq:egg')
   ]
  }
 };

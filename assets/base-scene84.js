@@ -1,4 +1,5 @@
-import {HQ_SPOTS,HQ_ART} from './headquarters84.js?v=87';
+import {HQ_SPOTS} from './headquarters84.js?v=88';
+import {baseArt88} from './base-art88.js?v=88';
 
 const rooms={
  entry:{at:[0,4.7],look:[0,-3],bounds:[-1.94,1.94,-6.87,5.6],color:'#394d71'},
@@ -35,7 +36,7 @@ export function mountBaseScene84(stage){
  memories.set(child,poses);
  const reduced=typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches;
  let frame=0,last=0,motion=null,drag=null,effect=null;
- const tailShapes=new Set(),visors=new Map();
+ const tailShapes=new Set();
  const held=new Set();
  const solid=(x,z,w,d)=>barriers.push([x-w/2,x+w/2,z-d/2,z+d/2]);
  function face(points,color,edge='',alpha=1,floor=false){shapes.push({points,color,edge,alpha,floor})}
@@ -56,7 +57,6 @@ export function mountBaseScene84(stage){
   for(let i=0;i<n;i++){const j=(i+1)%n;face([bottom[i],bottom[j],top[j],top[i]],shade(color,Math.cos(i/n*6.28)*.19));}
   face(top,shade(color,.15));
  }
- function sprite(asset,x,y,z,height){shapes.push({asset,point:[x,y,z],height})}
  function neon(x,y,z,w,d,color){box(x,y,z,w,.055,d,color)}
  function roomWall(x,z,w,d,room){
   box(x,0,z,w,2.95,d,shade(rooms[room].color,-.12),{wall:true,collision:true,edge:'#566384'});
@@ -141,12 +141,12 @@ export function mountBaseScene84(stage){
   neon(x,.78,z,.9,.72,spot==='lab'?'#78f1f6':'#ffcb78');
   box(x,.84,z,.79,.84,.59,'#95d5e3',{edge:'#a7d7e399',alpha:.16});
  }
- box(0,0,-9.2,1.75,.83,.58,'#715743',{collision:true});box(0,.84,-9.45,1.27,.43,.09,'#f9bf6c');
  for(const spot of spots){
   const item=spot.dataset.trophy;
   if(!item)continue;
   const [,x,,z]=HQ_SPOTS[Number(spot.dataset.hq84Spot)];
-  trophy(item,x,z,HQ_SPOTS[Number(spot.dataset.hq84Spot)][5].split(':')[2]);
+  const art=baseArt88(item);
+  if(art)shapes.push({art,point:[x,.86,z],height:art.tall?.84:.59,slot:spot.dataset.action.split(':')[2]});
  }
  // Hangar and pet area.
  face([[-7.55,.005,.84],[-2.4,.005,.84],[-2.4,.005,5.15],[-7.55,.005,5.15]],'#2a3b58','',1,true);
@@ -172,28 +172,6 @@ export function mountBaseScene84(stage){
  const eggStart=shapes.length;
  drum(6.55,.35,3.6,.31,.21,'#9ee0bf');drum(6.55,.56,3.6,.29,.17,'#f8a6ce');drum(6.55,.73,3.6,.21,.13,'#ace4ca');
  const eggShapes=shapes.slice(eggStart);
- function trophy(id,x,z,slot){
-  const y=.86;
-  if(id==='thorhammer'){
-   box(x,y,z,.14,.56,.16,'#8a6255');
-   box(x,y+.48,z,.53,.27,.27,'#adbed6');
-  }else if(id==='armor'){
-   box(x,y,z,.35,.42,.21,'#a83651');box(x,y+.42,z,.46,.42,.24,'#ba3e50');
-   const start=shapes.length;box(x,y+.83,z,.29,.23,.24,'#dfac5b');
-   shapes.slice(start).forEach(shape=>visors.set(shape,slot));
-   box(x,y+.63,z+.14,.12,.11,.035,'#6bf6ff');
-   for(const dx of [-.31,.31])box(x+dx,y+.31,z,.13,.43,.16,'#c56266');
-  }else if(id==='shield'){
-   for(let i=0;i<12;i++){const a=i/12*Math.PI*2,b=(i+1)/12*Math.PI*2;face([[x,y+.42,z],[x+Math.cos(a)*.38,y+.42+Math.sin(a)*.38,z],[x+Math.cos(b)*.38,y+.42+Math.sin(b)*.38,z]],i%2?'#d45c68':'#e2b3b4');}
-   box(x,y+.32,z+.03,.18,.19,.03,'#6fb9ee');
-  }else if(id==='language-cup'){
-   drum(x,y,z,.22,.09,'#dc9d43');
-   drum(x,y+.09,z,.075,.18,'#edba52');
-   drum(x,y+.27,z,.26,.22,'#ffcc65');
-  }else if(id==='language-cape')sprite('item-cape',x,y,z,.72);
-  else if(HQ_ART.has(id))sprite('item-'+id,x,y,z,.72);
-  else drum(x,y,z,.20,.52,'#e5b567',6);
- }
  function projectFrame(width,height,now){
   const camera=walk?[state.x,1.43,state.z]:[
    state.x+Math.sin(state.yaw)*Math.cos(state.pitch)*state.distance,
@@ -209,12 +187,15 @@ export function mountBaseScene84(stage){
   const distance=(x,z)=>Math.hypot(x-state.x,z-state.z);
   const renderable=[];
   for(const shape of shapes){
-   if(shape.asset){const p=cameraPoint(shape.point);if(p[2]>near)renderable.push({...shape,p:screen(p),depth:p[2]});continue;}
+   if(shape.art){
+    const p=cameraPoint(shape.point);
+    if(p[2]>near)renderable.push({...shape,p:screen(p),depth:p[2]-.44});
+    continue;
+   }
    const movingEgg=effect?.kind==='egg'&&eggShapes.includes(shape);
    const scale=movingEgg?1-Math.sin(Math.PI*clamp((now-effect.start)/520,0,1))*.46:1;
-   const raise=effect?.kind==='spark'&&visors.get(shape)===effect.slot?Math.sin(Math.PI*clamp((now-effect.start)/560,0,1))*.27:0;
    const wag=effect?.kind==='feed'&&tailShapes.has(shape)?Math.sin((now-effect.start)/47)*.11:0;
-   const points=shape.points.map(([x,y,z])=>cameraPoint([x+wag,(movingEgg?.35+(y-.35)*scale:y)+raise,z]));
+   const points=shape.points.map(([x,y,z])=>cameraPoint([x+wag,movingEgg?.35+(y-.35)*scale:y,z]));
    const clipped=clip(points);
    if(clipped.length<3)continue;
    const p=clipped.map(screen);
@@ -223,10 +204,15 @@ export function mountBaseScene84(stage){
   }
   renderable.sort((a,b)=>(Number(b.floor)||0)-(Number(a.floor)||0)||b.depth-a.depth);
   for(const s of renderable){
-   if(s.asset){
-    let im=images.get(s.asset);
-    if(!im){im=new Image();im.onload=request;im.src='assets/art/'+s.asset+'.svg';images.set(s.asset,im);}
-    if(im.complete&&im.naturalWidth){const h=s.height*focal/s.p[2];ctx.drawImage(im,s.p[0]-h/2,s.p[1]-h,h,h);}
+   if(s.art){
+    let im=images.get(s.art.src);
+    if(!im){im=new Image();im.onload=request;im.src=s.art.src;images.set(s.art.src,im);}
+    if(im.complete&&im.naturalWidth){
+     const h=s.height*focal/s.p[2],w=h*im.naturalWidth/im.naturalHeight;
+     const lift=effect?.kind==='spark'&&s.slot===effect.slot?Math.sin(Math.PI*clamp((now-effect.start)/560,0,1))*h*.18:0;
+     ctx.filter=s.art.hue?'hue-rotate('+s.art.hue+'deg)':'none';
+     ctx.drawImage(im,s.p[0]-w/2,s.p[1]-h-lift,w,h);ctx.filter='none';
+    }
     continue;
    }
    ctx.globalAlpha=s.alpha;ctx.beginPath();ctx.moveTo(s.p[0][0],s.p[0][1]);

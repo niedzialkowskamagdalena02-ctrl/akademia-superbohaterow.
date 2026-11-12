@@ -11,6 +11,20 @@ const costumes={
  gamora:['#508852','#a2ce80','#253d32','#472750','#e489cc','bands']
 };
 
+const handImages=new Map(),illustratedHands=new Set(['hulk','iron','spider','captain']);
+export function loadHeroHands88(hero){
+ if(!illustratedHands.has(hero))return Promise.resolve(null);
+ if(!handImages.has(hero)){
+  handImages.set(hero,new Promise(resolve=>{
+   const image=new Image();
+   image.onload=()=>resolve(image);
+   image.onerror=()=>{handImages.delete(hero);resolve(null);};
+   image.src='assets/hq/hands88-'+hero+'.webp';
+  }));
+ }
+ return handImages.get(hero);
+}
+
 let paths;
 function geometry(){
  if(paths)return paths;
@@ -31,11 +45,24 @@ function geometry(){
  return paths;
 }
 
-export function drawHeroHands(ctx,canvas,hero,step,moving){
+export function drawHeroHands(ctx,canvas,hero,step,moving,image=null){
  const {width,height}=canvas;
- const [base,light,shade,cuff,accent,kind]=costumes[hero]??costumes.iron;
- const p=geometry(),scale=Math.min(width*.00335,height*.00137)*(kind==='skin'?1.15:1);
  ctx.clearRect(0,0,width,height);
+ if(image){
+  const scale=Math.min(width*.34/image.naturalWidth,height*.22/image.naturalHeight)*(hero==='hulk'?1.11:1);
+  const w=image.naturalWidth*scale,h=image.naturalHeight*scale;
+  for(const side of [-1,1]){
+   const sway=moving?Math.sin(step+side*Math.PI/2):0;
+   ctx.save();
+   ctx.translate(width*(side<0?.067:.933),height+h*(.04+sway*.037));
+   ctx.scale(-side,1);ctx.rotate(sway*.04);
+   ctx.drawImage(image,0,-h,w,h);
+   ctx.restore();
+  }
+  return;
+ }
+ const [base,light,shade,cuff,accent,kind]=costumes[hero]??costumes.iron;
+ const p=geometry(),scale=Math.min(width*.00315,height*.00132)*(kind==='skin'?1.15:1);
  for(const side of [-1,1]){
   const sway=moving?Math.sin(step+side*Math.PI/2):0;
   ctx.save();
@@ -43,17 +70,19 @@ export function drawHeroHands(ctx,canvas,hero,step,moving){
   ctx.scale(-side*scale,scale);
   ctx.rotate(-.13-sway*.048);
   ctx.shadowColor='#070a17cc';ctx.shadowBlur=9*scale;ctx.shadowOffsetY=4*scale;
-  ctx.lineJoin='round';ctx.lineWidth=2.2;ctx.strokeStyle=shade;
+  ctx.lineJoin='round';ctx.lineWidth=1.25;ctx.strokeStyle=shade;
   const sleeve=ctx.createLinearGradient(0,121,61,140);
   sleeve.addColorStop(0,shade);sleeve.addColorStop(.46,cuff);sleeve.addColorStop(1,kind==='skin'?base:shade);
   ctx.fillStyle=sleeve;ctx.fill(p.sleeve);ctx.stroke(p.sleeve);
   ctx.shadowBlur=0;ctx.shadowOffsetY=0;
-  const skin=ctx.createLinearGradient(34,37,58,112);
+  const skin=ctx.createRadialGradient(47,48,4,49,65,58);
   skin.addColorStop(0,light);skin.addColorStop(.48,base);skin.addColorStop(1,shade);
   ctx.fillStyle=skin;ctx.fill(p.fist);ctx.stroke(p.fist);
-  ctx.fillStyle=light;ctx.globalAlpha=.39;ctx.fill(p.knuckles);ctx.globalAlpha=1;
+  const gloss=ctx.createLinearGradient(30,37,62,76);
+  gloss.addColorStop(0,light);gloss.addColorStop(1,'#ffffff00');
+  ctx.fillStyle=gloss;ctx.globalAlpha=.32;ctx.fill(p.knuckles);ctx.globalAlpha=1;
   ctx.fillStyle=skin;ctx.fill(p.thumb);ctx.stroke(p.thumb);
-  ctx.lineWidth=1.7;ctx.stroke(p.lines);
+  ctx.lineWidth=1.05;ctx.stroke(p.lines);
   if(kind==='armor'||kind==='bands'||kind==='shield'||kind==='claws'){
    ctx.fillStyle=cuff;ctx.fill(p.cuff);ctx.stroke(p.cuff);
    ctx.strokeStyle=accent;ctx.lineWidth=1.45;ctx.stroke(p.cuff);

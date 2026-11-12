@@ -1023,8 +1023,6 @@ button:not(:disabled):not(.tr72-subject-card):not(.mic):active,label.v73-file-co
 .hq86-prop[data-prop="jet"]{width:clamp(120px,38%,230px)}
 .hq86-prop[data-prop="jet"][data-paint="mint"]{filter:hue-rotate(295deg) drop-shadow(0 2px 8px #00102299)}
 .hq86-prop[data-prop="jet"][data-paint="gold"]{filter:sepia(.9) saturate(1.35) drop-shadow(0 2px 8px #00102299)}
-.hq86-language-cape,.hq86-prop[data-paint="language"]{filter:sepia(.55) hue-rotate(120deg) saturate(2.4) brightness(1.35)}
-.hq86-cup{width:auto;font-size:clamp(2.1rem,10vw,4.4rem)}
 .hq86-nook-pet{width:clamp(70px,22%,160px)}
 .hq86-stage .hq86-point{
  position:absolute;z-index:3;display:flex;align-items:center;justify-content:center;gap:.43rem;
@@ -1204,9 +1202,6 @@ button:not(:disabled):not(.tr72-subject-card):not(.mic):active,label.v73-file-co
 @keyframes hq87-tail{from{transform:rotate(-9deg)}to{transform:rotate(14deg)}}
 .hq87-gesture-help{margin:3px 1px 7px;color:#d5effa;font-size:.79rem;text-align:center;line-height:1.3}
 .hq87-gesture-help:empty{display:none}
-.hq87-pet-name{margin:12px 0 0;color:#e1f3ff}
-.hq87-pet-name summary{cursor:pointer;color:#b6e7fb}
-.hq87-pet-name button{margin-top:7px}
 .hq86-pet-scene .hq87-pet-effects{
  position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;background:none;border:none;
 }
@@ -1243,13 +1238,111 @@ button:not(:disabled):not(.tr72-subject-card):not(.mic):active,label.v73-file-co
 .hq87-puddle{left:22%;width:21%;height:8%;transform:rotate(-12deg);border-radius:54% 46% 58% 42%;background:#f6cf72c7;box-shadow:inset 2px 1px 1px #fff4bd}
 .hq87-droppings{right:22%;font-size:1.55rem}
 .hq87-pet-mess.is-cleaning{animation:hq87-cleaned .9s ease-out both}
-.hq87-cleaning{position:absolute;z-index:5;bottom:19%;font-size:2.1rem;pointer-events:none;animation:hq87-wipe .9s ease-in-out both}
-.hq87-wiping{left:26%}
-.hq87-wiping i{position:absolute;left:-5px;bottom:-3px;width:23px;height:13px;background:#76e0e9;border-radius:4px;transform:rotate(-12deg)}
-.hq87-sweeping{right:21%}
-@keyframes hq87-wipe{0%,100%{opacity:0;transform:translate(-22px,4px) rotate(-20deg)}22%,71%{opacity:1;transform:translate(12px,0) rotate(23deg)}45%,87%{opacity:1;transform:translate(-10px,0) rotate(-18deg)}}
 @keyframes hq87-cleaned{0%,30%{opacity:1}100%{opacity:0}}
 @media(prefers-reduced-motion:reduce){
  .hq87-pet-fall-asleep,.hq87-feed-hand,.hq87-food-stream,.hq87-cleaning,.hq87-pet-mess.is-cleaning{display:none!important}
  .hq86-animal[data-settling]>img,.hq87-petted .hq87-pet-tail,.hq87-bowl-fill{animation:none!important}
+}
+
+/* V88 – gabloty, przyciski bazy, ruch zwierzaka i lot Quinjetem. */
+.hq86-stage .hq88-shop-door{border-color:#ffe1a3;color:#fff7de;background:linear-gradient(155deg,#236879,#132443)}
+.hq86-stage .hq88-shop-door::before{background:#ffdf90;box-shadow:0 0 10px #ffe7a2}
+.hq84-catalog article{grid-template-rows:auto 1fr auto;background:radial-gradient(ellipse at 50% 10%,#2a5975,#192946 70%)}
+.hq84-catalog article .hq88-item-art{height:clamp(82px,22vw,135px);object-fit:contain;filter:hue-rotate(var(--hq-art-hue,0deg)) drop-shadow(0 5px 7px #0b1325b0)}
+.hq86-prop.hq88-item-art{filter:hue-rotate(var(--hq-art-hue,0deg)) drop-shadow(0 3px 5px #182633a6)}
+.hq86-prop.hq88-case-art{
+ width:min(var(--hq-case-size,85px),38vw);height:var(--hq-case-size,85px);object-fit:contain;object-position:center bottom;
+ transform:translate(-50%,calc(-100% - var(--hq-effect,0)*13px));transform-origin:50% 100%;
+ filter:hue-rotate(var(--hq-art-hue,0deg)) drop-shadow(0 4px 7px #75341c91) drop-shadow(0 -1px 4px #ffc56399);
+}
+.hq86-prop.hq88-shop-display{width:clamp(24px,8.8%,75px)}
+.hq88-aircraft{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
+.hq88-quiz-question{display:flex;gap:9px;align-items:center;justify-content:space-between}
+.hq88-quiz-question .listen{flex:none;min-width:44px;min-height:42px}
+.hq86-pet-heading .hq88-pet-picker{min-height:35px;margin:0 0 6px;padding:5px 9px;font-size:.8rem}
+.hq86-adopt-pets small{max-width:100%;overflow-wrap:anywhere;color:#d6effb}
+.hq86-pet-rooms button{position:relative}
+.hq88-dirty{position:absolute;top:5px;right:5px;width:8px;height:8px;background:#ffcc66;border-radius:50%;box-shadow:0 0 8px #ffaf6a}
+.hq86-pet-scene>button.hq87-tool[data-pet-tool=cloth]{left:27%;top:91%;font-size:1.28rem}
+.hq88-cloth{display:block;width:24px;height:20px;margin:auto;border-radius:5px 6px 4px 5px;transform:rotate(-18deg);
+ background:repeating-linear-gradient(30deg,#ffffff40 0 1px,transparent 1px 3px),linear-gradient(155deg,#fff8b6,#e3a54c);
+ box-shadow:inset 0 0 0 1px #b4743380,2px 2px 3px #28233380}
+.hq86-pet-scene>button.hq87-tool[data-pet-tool=broom]{left:71%;top:91%;font-size:1.28rem}
+.hq86-pet-scene>button.hq87-tool.is-held{translate:0}
+.hq87-pet-mess.is-cleaning{animation:hq87-cleaned .28s ease-out both}
+.hq88-pet-motion{position:absolute;inset:0;pointer-events:none}
+.hq88-pet-motion>img:not(.hq87-pet-tail){position:absolute;left:-11%;bottom:0;width:122%;height:103%;display:none;object-fit:contain;object-position:center bottom}
+.hq88-pet-paws,.hq88-pet-face{position:absolute;inset:0;background:var(--pet-image) center/100% 100% no-repeat}
+.hq88-pet-paws{
+ clip-path:inset(83% 4% 0 4%);transform-origin:50% 89%;
+ animation:hq88-paws 4.2s ease-in-out infinite;
+}
+.hq88-pet-face{
+ clip-path:ellipse(19% 12% at 50% 44%);transform-origin:50% 44%;
+ transform:translateY(calc(var(--hq-pet-chew,0)*2px)) scaleY(calc(1 + var(--hq-pet-chew,0)*.19));
+}
+.hq86-animal[data-animal=cat] .hq88-pet-face{clip-path:ellipse(17% 9% at 45% 45%);transform-origin:45% 45%}
+.hq86-animal[data-animal=guinea] .hq88-pet-face{clip-path:ellipse(17% 12% at 50% 51%);transform-origin:50% 51%}
+.hq86-animal:has(.hq88-pet-motion):not(.hq88-moving,.hq88-eating)>.hq87-pet-body{clip-path:inset(0 0 5% 0)}
+.hq86-animal:has(.hq88-pet-motion):not(.hq88-moving,.hq88-eating)[data-animal=dog]>.hq87-pet-body,
+.hq86-animal:has(.hq88-pet-motion):not(.hq88-moving,.hq88-eating)[data-animal=cat]>.hq87-pet-body{
+ clip-path:polygon(0 0,100% 0,100% 54%,81% 54%,81% 94%,0 94%);
+}
+.hq88-pet-motion>.hq87-pet-tail{
+ display:block;clip-path:polygon(78% 51%,100% 51%,100% 95%,78% 95%);transform-origin:81% 83%;
+ animation:hq88-tail-idle 3.7s ease-in-out infinite;
+}
+.hq87-petted .hq88-pet-motion>.hq87-pet-tail{animation:hq87-tail .27s ease-in-out infinite alternate}
+.hq88-moving>.hq87-pet-body,.hq88-eating>.hq87-pet-body,
+.hq88-moving>.hq86-outfit,.hq88-eating>.hq86-outfit,
+.hq88-moving .hq88-pet-paws,.hq88-eating .hq88-pet-paws,
+.hq88-moving .hq88-pet-face,.hq88-eating .hq88-pet-face,
+.hq88-moving .hq87-pet-tail,.hq88-eating .hq87-pet-tail{visibility:hidden}
+.hq88-moving .hq88-pet-motion>.hq88-step-a,.hq88-moving .hq88-pet-motion>.hq88-step-b{
+ display:block;animation:hq88-step .30s steps(1,end) infinite;
+}
+.hq88-moving .hq88-pet-motion>.hq88-step-b{animation-delay:-.15s}
+.hq88-eating .hq88-pet-motion>.hq88-lap{display:block;transform-origin:48% 99%;animation:hq88-lap .25s ease-in-out infinite alternate}
+.hq88-moving[data-facing=left] .hq88-pet-motion{transform:scaleX(-1)}
+.hq88-pet-tongue{display:none}
+.hq88-eating .hq88-pet-tongue{
+ display:block;position:absolute;left:77%;bottom:2.5%;width:6%;height:8%;
+ border-radius:45% 40% 70% 70%;background:linear-gradient(#aa445e,#ff8a9e);transform-origin:50% 0;
+ animation:hq88-tongue .25s ease-in-out infinite alternate;
+}
+.hq88-at-bowl[data-meal=water] .hq87-bowl-fill{animation:hq88-drink .30s ease-in-out infinite alternate}
+.hq88-bowl-empty .hq87-bowl-fill{visibility:hidden}
+@keyframes hq88-tail-idle{0%,50%,100%{transform:rotate(0)}56%,74%{transform:rotate(7deg)}64%,82%{transform:rotate(-6deg)}}
+@keyframes hq88-paws{0%,80%,100%{transform:translateY(0)}87%{transform:translateY(-2%)}}
+@keyframes hq88-step{0%{opacity:1}50%,100%{opacity:0}}
+@keyframes hq88-lap{from{transform:rotate(-1deg)}to{transform:rotate(1.8deg)}}
+@keyframes hq88-tongue{from{transform:rotate(-15deg) scaleY(.32);opacity:0}to{transform:rotate(-9deg) scaleY(1);opacity:1}}
+@keyframes hq88-drink{from{transform:translateX(-50%) scaleX(.89);box-shadow:inset 0 1px 1px #fff8}to{transform:translateX(-50%) scaleX(1);box-shadow:inset 0 2px 3px #fff}}
+
+:is(.hq86-main,.hq88-base-page,.hq84-choices) :is(button,summary):not(:disabled):not(.hq87-mentor-actor,.hq87-orb){
+ --hq-button-lift:inset 0 1px 1px #ffffff5c,inset 0 -3px 5px #0003,0 4px 0 #101f3a,0 7px 12px #080c1b60;
+ box-shadow:var(--hq-button-lift)!important;
+ transition:translate .10s,filter .10s,box-shadow .10s;
+}
+:is(.hq86-main,.hq88-base-page,.hq84-choices) :is(button,summary):not(:disabled):active{
+ translate:0 3px;filter:brightness(1.22) saturate(1.19);
+ box-shadow:inset 0 2px 5px #0005,inset 0 0 9px #c5efff36,0 1px 1px #132949!important;
+}
+:is(.hq86-main,.hq88-base-page,.hq84-choices) :is(button,summary):focus-visible{
+ outline:2px solid #a3ffee;outline-offset:3px;
+}
+.hq88-flight{clear:both}
+.hq88-flight h3{margin:0 0 5px}
+.hq88-flight-rules{line-height:1.4;margin:0 0 8px}
+.hq88-flight-score,.hq88-flight-controls,.hq88-flight-gates{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.hq88-flight-score{margin-bottom:5px;color:#dbf8ff;font-size:.85rem}
+.hq88-flight-gates{margin-bottom:6px}
+.hq88-flight-gates span{flex:1;min-width:0;overflow-wrap:anywhere;border-radius:8px;background:#163457;color:#e8f8ff;padding:5px 2px;text-align:center;font-size:.82rem}
+.hq88-flight-view{display:block;width:100%;height:clamp(180px,42dvh,380px);touch-action:none;outline-offset:3px;border-radius:14px;border:1px solid #85c8ec}
+.hq88-flight-controls{margin-top:8px}
+.hq88-flight-controls button{min-width:44px;min-height:44px}
+.hq88-flight-status{min-height:2.4em;margin:8px 0 0;font-size:.9rem;color:#c5f4eb}
+@media(prefers-reduced-motion:reduce){
+ .hq88-pet-motion>*{animation:none!important}
+ :is(.hq86-main,.hq88-base-page,.hq84-choices) :is(button,summary):not(:disabled){transition:none}
 }
