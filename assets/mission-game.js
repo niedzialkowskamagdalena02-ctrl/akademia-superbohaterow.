@@ -1302,7 +1302,7 @@ function stage(){
   const epoch=stageEpoch;
   if(coins>0){
    root.innerHTML='<section class="mg-panel"><h2>🪙 Zapisuję nagrodę w portfelu…</h2></section>';
-   try{const trainingSubject=subject();const perfect=mode!=='test'&&total>0&&independent===total&&tasks.every(t=>!t.hqWrong84&&subject(t)===trainingSubject);const credited=await reward(coins,rewardRun82,mode,{subject:trainingSubject,perfect});coins=Number.isFinite(credited)&&credited>=0?credited:0;}
+   try{const trainingSubject=subject();const perfect=mode!=='test'&&total>0&&independent===total&&tasks.every(t=>!t.hqWrong84&&subject(t)===trainingSubject);const credited=await reward(coins,rewardRun82,mode,{subject:trainingSubject,perfect,independent});coins=Number.isFinite(credited)&&credited>=0?credited:0;}
    catch{award=false;remember();if(root.isConnected&&stageEpoch===epoch)root.innerHTML='<section class="mg-panel"><h2>Nie udało się zapisać nagrody</h2><p>Wynik pozostaje zapisany. Spróbuj ponownie.</p>'+btn('🪙 Ponów zapis nagrody','reward82-retry','mg-primary')+'</section>';return;}
   }
   if(!root.isConnected||stageEpoch!==epoch)return;

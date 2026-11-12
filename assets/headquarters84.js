@@ -20,6 +20,11 @@ export const HQ_SPOTS = [
 ];
 export const HQ_SLOTS = [['a','Gablota A'],['b','Gablota B'],['lab','Półka w laboratorium']];
 const GEM_PRICES = {spidermask:3,thorhammer:4,helmet:5,armor:7,gauntlet:9,quinjet:8};
+export const HQ_AWARDS86=[
+ {id:'language-cup',name:'Puchar mistrza języków',icon:'🏆',awardOnly:true,zone:'armory'},
+ {id:'language-cape',name:'Peleryna mistrza języków',icon:'🦸',awardOnly:true,zone:'armory'}
+];
+export const hqItems=()=>[...BASE_ITEMS,...HQ_AWARDS86];
 export const HQ_ART = new Set(['helmet','armor','cape','gauntlet','quinjet','shield','web','arc','thorhammer','spidermask']);
 const escape = value => String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 export const hqRead = profile => profile?.base?.headquarters ?? {};
@@ -67,7 +72,7 @@ export function hqPlaced(profile,slot){
  return Object.entries(hqRead(profile).placements??{}).find(([id,value])=>value===slot&&profile.base?.owned?.includes(id))?.[0];
 }
 export function hqPlace(profile,id,slot){
- if(!HQ_SLOTS.some(([key])=>key===slot)||!BASE_ITEMS.some(item=>item.id===id)||!profile.base?.owned?.includes(id))return false;
+ if(!HQ_SLOTS.some(([key])=>key===slot)||!hqItems().some(item=>item.id===id)||!profile.base?.owned?.includes(id))return false;
  const places=hqWrite(profile).placements??={};
  for(const other of Object.keys(places))if(places[other]===slot)delete places[other];
  places[id]=slot;
@@ -120,7 +125,7 @@ export function hqMarkup(profile,child,view,button){
   <div class="hq84-stage" data-hq84-scene data-child="${escape(child)}" data-view="${view}" data-pet="${state.pet?.species==='dog'?'dog':state.pet?'cat':''}" data-quinjet="${profile.base?.owned?.includes('quinjet')?'yes':''}" data-paint="${['gold','mint','blue'].includes(state.paint)?state.paint:'blue'}">
    <canvas aria-label="${walk?'Pierwszoosobowy widok bazy':'Widok całej bazy z góry'}"></canvas>
    <div class="hq84-hotspots">${HQ_SPOTS.map(([room,x,y,z,label,action],index)=>{
-    const item=action.startsWith('hq:slot:')?BASE_ITEMS.find(v=>v.id===hqPlaced(profile,action.split(':')[2])):null;
+    const item=action.startsWith('hq:slot:')?hqItems().find(v=>v.id===hqPlaced(profile,action.split(':')[2])):null;
     return `<button type="button" data-hq84-spot="${index}" data-action="${action}" data-trophy="${item?.id??''}" hidden>${item?escape(item.name):label}</button>`;
    }).join('')}</div>
    ${walk?'<div class="hq84-drive" aria-label="Sterowanie ruchem"><button data-move="forward" type="button" aria-label="Do przodu">▲</button><button data-move="left" type="button" aria-label="Krok w lewo">◀</button><button data-move="back" type="button" aria-label="Do tyłu">▼</button><button data-move="right" type="button" aria-label="Krok w prawo">▶</button></div>':''}
@@ -137,16 +142,18 @@ export function hqWallet(profile,button){
 export function hqShop(profile,slot,button){
  const {gems}=hqBalances(profile),owned=new Set(profile.base?.owned??[]);
  const title=HQ_SLOTS.find(([id])=>id===slot)?.[1];
- const items=[...BASE_ITEMS].sort((a,b)=>Number(b.zone==='armory')-Number(a.zone==='armory'));
+ const items=hqItems().sort((a,b)=>Number(b.zone==='armory')-Number(a.zone==='armory'));
  return `<h3>🛡️ Sklep i kolekcja</h3><p>${title?'Miejsce na trofeum: '+title+'.':'Kup wyposażenie i wybierz, gdzie je ustawić.'}</p>
   ${button('👛 Portfel','hq:wallet','alt')}
   <div class="hq84-catalog">${items.map(item=>{
    const gemPrice=GEM_PRICES[item.id];
-   const photo=HQ_ART.has(item.id)?`<img src="assets/art/item-${item.id}.svg" alt="" loading="lazy">`:`<span aria-hidden="true">${item.icon}</span>`;
+   const art=item.id==='language-cape'?'cape':HQ_ART.has(item.id)?item.id:'';
+   const photo=art?`<img class="${item.id==='language-cape'?'hq86-language-cape':''}" src="assets/art/item-${art}.svg" alt="" loading="lazy">`:`<span aria-hidden="true">${item.icon}</span>`;
    const place=slot?button('Ustaw tutaj','hq:place:'+item.id+':'+slot,'gold'):button('Wybierz miejsce','hq:places:'+item.id,'alt');
    const buy=affordable82(profile,item)?button(item.cost?'🪙 '+item.cost+' złotych':'🎁 Odbierz','base:buy:'+item.id,'gold'):`<button type="button" disabled>🪙 ${item.cost} złotych</button>`;
    const gemsBuy=gemPrice?(gems>=gemPrice?button('💎 '+gemPrice+' kryształów','hq:buy-gems:'+item.id,'alt'):`<button type="button" disabled>💎 ${gemPrice} kryształów</button>`):'';
-   return `<article>${photo}<h4>${escape(item.name)}</h4><div>${owned.has(item.id)?place:buy+gemsBuy}</div></article>`;
+   const locked=item.awardOnly?'<small>🏆 Nagroda w Language Master</small>':buy+gemsBuy;
+   return `<article>${photo}<h4>${escape(item.name)}</h4><div>${owned.has(item.id)?place:locked}</div></article>`;
   }).join('')}</div>`;
 }
 export function hqPetMarkup(profile,quiz,button){
@@ -157,5 +164,5 @@ export function hqPetMarkup(profile,quiz,button){
   return `<h3>🥣 Trening po karmę</h3><p>Pytanie ${quiz.index+1} z ${quiz.items.length}</p><h4>${escape(q)}</h4>${pl?`<p>${escape(pl)}</p>`:''}<div class="hq84-answers">${answers.map((answer,index)=>button(escape(answer),'hq:answer:'+index,'alt')).join('')}</div><p id="hq84-answer-status" role="status"></p>`;
  }
  return `<h3>${pet.species==='dog'?'🐶':'🐱'} ${escape(pet.name)}</h3><p>🥣 Porcje karmy: <b>${food}</b> · Nakarmienia: ${new Set(hqRead(profile).foodServed??[]).size}</p>
-  ${food?button('🥣 Nakarm zwierzaka','hq:feed','gold'):''}${button('📚 Zdobądź karmę · 5 pytań','hq:food','alt')}${button('🥚 Ściśnij gniotek','hq:egg','alt')}`;
+  ${food?button('🥣 Nakarm zwierzaka','hq:feed','gold'):''}${button('📚 Zdobądź karmę · 5 pytań','hq:food','alt')}`;
 }

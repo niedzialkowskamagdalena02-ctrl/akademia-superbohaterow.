@@ -1,4 +1,4 @@
-import {HQ_SPOTS,HQ_ART} from './headquarters84.js?v=84';
+import {HQ_SPOTS,HQ_ART} from './headquarters84.js?v=86';
 
 const rooms={
  entry:{at:[0,4.7],look:[0,-3],bounds:[-1.94,1.94,-6.87,5.6],color:'#394d71'},
@@ -186,7 +186,12 @@ export function mountBaseScene84(stage){
   }else if(id==='shield'){
    for(let i=0;i<12;i++){const a=i/12*Math.PI*2,b=(i+1)/12*Math.PI*2;face([[x,y+.42,z],[x+Math.cos(a)*.38,y+.42+Math.sin(a)*.38,z],[x+Math.cos(b)*.38,y+.42+Math.sin(b)*.38,z]],i%2?'#d45c68':'#e2b3b4');}
    box(x,y+.32,z+.03,.18,.19,.03,'#6fb9ee');
-  }else if(HQ_ART.has(id))sprite('item-'+id,x,y,z,.72);
+  }else if(id==='language-cup'){
+   drum(x,y,z,.22,.09,'#dc9d43');
+   drum(x,y+.09,z,.075,.18,'#edba52');
+   drum(x,y+.27,z,.26,.22,'#ffcc65');
+  }else if(id==='language-cape')sprite('item-cape',x,y,z,.72);
+  else if(HQ_ART.has(id))sprite('item-'+id,x,y,z,.72);
   else drum(x,y,z,.20,.52,'#e5b567',6);
  }
  function projectFrame(width,height,now){

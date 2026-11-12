@@ -1,7 +1,7 @@
 // V48_AI_RESPONSE_DIAGNOSTICS
 // V44_BULK_CHAPTERS
 // V42_CHAPTERS
-import {mountMissionGame} from './mission-game.js?v=84';
+import {mountMissionGame} from './mission-game.js?v=86';
 import { initHeadquarters3D } from './headquarters3d.js';
 import {initial,get,put,del,allRecords,replaceRecords,compress,uid,gradeName} from './data.js';
 import {speak,listen,stopVoice,getVoiceState,setVoiceState,spellEnglish77} from './voice.js?v=81';
@@ -9,9 +9,11 @@ import {vocabulary,readings,explanation} from './learning.js';
 import {syncAdapter} from './sync.js?v=81';
 import {BASE_ITEMS,baseMarkup,migrateBase} from './base.js?v=82';
 import {mountArcade,stopArcade} from './arcade.js?v=84';
-import {mountBaseScene84} from './base-scene84.js?v=84';
-import {baseWalkMarkup,mountBaseWalk,resetBaseWalk} from './base-walk85.js?v=85';
-import {HQ_SLOTS,hqRead,hqBalances,hqEarnToken,hqSpendToken,hqRecordCrystals,hqBuyWithGems,hqPlaced,hqPlace,hqAdopt,hqPaint,hqEarnFood,hqFeed,hqChoices,hqMarkup,hqWallet,hqShop,hqPetMarkup} from './headquarters84.js?v=84';
+import {mountBaseScene84} from './base-scene84.js?v=86';
+import {baseWalkMarkup,mountBaseWalk,resetBaseWalk} from './base-walk85.js?v=86';
+import {HQ_SLOTS,hqItems,hqRead,hqBalances,hqEarnToken,hqSpendToken,hqRecordCrystals,hqBuyWithGems,hqPlaced,hqPlace,hqAdopt,hqPaint,hqEarnFood,hqFeed,hqChoices,hqMarkup,hqWallet,hqShop,hqPetMarkup} from './headquarters84.js?v=86';
+import {petRoom86,petCareMarkup86,mountPetCare86,setPetCare86} from './pet-care86.js?v=86';
+import {MASTER_PRIZES86,MASTER_SCORE86,recordEnergy86,trainingRound86,trainingConsole86,unlockMaster86} from './base-training86.js?v=86';
 import {affordable82,purchase82,credit82} from './wallet82.js?v=82';
 import {REVEAL_OFFER82,consent82,requestedAnswer82,solutions82,leaks82,parseTutor82,promptTutor82} from './tutor82.js?v=82';
 let mentorHistory={tech:[],fun:[]};
@@ -65,7 +67,7 @@ const select=(id,label,options,value)=>`<label for="${id}">${label}</label><sele
 const grades=[['P','Przedszkole'],...Array.from({length:12},(_,i)=>[String(i+1),`Klasa ${i+1}`])];
 const people=[['pawel','Paweł'],['patryk','Patryk']];
 const note=t=>{const n=$('hq85-notice')||$('notice');if(!n){console.warn('Powiadomienie:',t);return}n.textContent=t;n.classList.add('visible');setTimeout(()=>{if(n.isConnected)n.classList.remove('visible')},4500)};
-const ACADEMY_RELEASE=85;
+const ACADEMY_RELEASE=86;
 async function checkAcademyUpdate(button){
  if(!button||button.disabled)return;
  const label=button.textContent,controller=new AbortController();
@@ -733,7 +735,7 @@ const grant=async(child,points,reason,key)=>{
  try{await syncAdapter.onLocalChange(data);}catch{note('Nagroda zapisana na telefonie. Ponów synchronizację, kiedy wróci połączenie.');}
  return true;
 };
-function layout(title,content,scene=''){if(typeof mountBaseScene84==='function')mountBaseScene84(null);if(typeof mountBaseWalk==='function')mountBaseWalk(null);cancelAIRequests();stopVoice();closeMicBubble();app.innerHTML=scene==='walk'?'<main class="hq85-main">'+content+'</main>':`<main class="wrap"><header class="head"><div><div class="brand">⚡ AKADEMIA SUPERBOHATERÓW <span style="display:inline-block;font-size:0.72em;border:1px solid currentColor;border-radius:8px;padding:2px 7px;vertical-align:middle">V${ACADEMY_RELEASE}</span></div><div class="sub">${e(title)}</div>${sync78StatusMarkup()}</div>${role==='child'&&scene!=='choice'?trainingSoundControl():''}${role?button(testMode?'← Zakończ test':'← Profile','exit','alt'):''}</header>${testMode?'<div class="test-banner">🧪 TRYB MAMY — BEZPŁATNY TEST • POSTĘPY NIE SĄ ZAPISYWANE</div>':''}${content}</main>${role==='child'&&scene!=='choice'?'<button class="mic" data-action="mic" aria-label="Sterowanie głosowe">🎙️</button>':''}`;document.querySelectorAll('[data-speak]').forEach(b=>b.addEventListener('click',()=>speak(b.dataset.speak,b.dataset.lang,role==='child'?profile().mentor:'tech',data.settings.rate||1)));hydrateImages();v76AfterRender();if(role==='child'&&(tab==='learn'||tab==='subjectmissions'))installMicDrag()}
+function layout(title,content,scene=''){if(typeof mountBaseScene84==='function')mountBaseScene84(null);if(typeof mountBaseWalk==='function')mountBaseWalk(null);cancelAIRequests();stopVoice();closeMicBubble();app.innerHTML=scene==='walk'?'<main class="hq86-main">'+content+'</main>':`<main class="wrap"><header class="head"><div><div class="brand">⚡ AKADEMIA SUPERBOHATERÓW <span style="display:inline-block;font-size:0.72em;border:1px solid currentColor;border-radius:8px;padding:2px 7px;vertical-align:middle">V${ACADEMY_RELEASE}</span></div><div class="sub">${e(title)}</div>${sync78StatusMarkup()}</div>${role==='child'&&scene!=='choice'?trainingSoundControl():''}${role?button(testMode?'← Zakończ test':'← Profile','exit','alt'):''}</header>${testMode?'<div class="test-banner">🧪 TRYB MAMY — BEZPŁATNY TEST • POSTĘPY NIE SĄ ZAPISYWANE</div>':''}${content}</main>${role==='child'&&scene!=='choice'?'<button class="mic" data-action="mic" aria-label="Sterowanie głosowe">🎙️</button>':''}`;document.querySelectorAll('[data-speak]').forEach(b=>b.addEventListener('click',()=>speak(b.dataset.speak,b.dataset.lang,role==='child'?profile().mentor:'tech',data.settings.rate||1)));hydrateImages();v76AfterRender();if(role==='child'&&(tab==='learn'||tab==='subjectmissions'))installMicDrag()}
 async function hydrateImages(){for(const el of document.querySelectorAll('[data-image]')){const src=await img(el.dataset.image);if(el.isConnected&&src){el.src=src;el.onload=()=>URL.revokeObjectURL(src)}}}
 function nav(){return role==='admin'?`<div class="tabs">${[['home','Przegląd'],['books','📚 Książki'],['missions','📋 Misje'],['settings','⚙️ Ustawienia'],['test','🧪 Testuj wszystko'],['sync','📱 Telefony'],['backup','💾 Kopia']].map(([k,n])=>button(n,'admin:'+k,adminTab===k?'gold':'alt')).join('')}</div>`:`<div class="tabs">${[['home','🎯 Misje'],['books','📚 Książki'],['learn','🧠 Trening'],['academy','📖 Sala odkrywców'],['mentor','🤖 Mentor'],['base','🏙️ Baza Avengersów i gry']].map(([k,n])=>button(n,'child:'+k,tab===k?'gold':'alt')).join('')}</div>`}
 function render(){if(tab!=='arcade')stopArcade();if(!role){layout('Wybierz swoją bazę',`<section class="card"><h1>Witaj w Akademii! 🛡️</h1><p>Każdy bohater ma własne misje i nagrody.</p></section><div class="grid">${people.filter(([id])=>!syncAdapter.device?.()||syncAdapter.device().role!=='child'||syncAdapter.device().child===id).map(([id,name])=>`<button class="tile" data-action="enter:${id}"><img class="profile-hero" src="assets/art/${data.profiles[id].hero||(id==='pawel'?'iron':'spider')}.svg" alt=""><h2>${name}</h2><small>${gradeName(data.profiles[id].grade)} · ${data.profiles[id].coins} złotych</small></button>`).join('')}</div><section class="card">${syncAdapter.device?.()?.role==='child'?'':button('🔐 Centrum dowodzenia mamy','enter:admin','gold')}<p class="muted">${syncAdapter.status()}</p></section>${!syncAdapter.device?.()?sync78Markup():''}${globalThis.AKADEMIA_TEST80?'':`<footer class="academy-update">${button('🔄 Aktualizuj Akademię','academy:update','line')}</footer>`}`);return}if(role==='admin')adminRender();else childRender()}
@@ -865,17 +867,20 @@ function avengersPanel(){
   <button data-action="av36:start">🚀 Rozpocznij misję</button>
  </section>`;
  const g=avengersRun;
+ const badge=g.kind86==='master'&&g.masterEarned86?'<p class="hq86-master-won">🏆 Puchar i peleryna mistrza są w Twojej kolekcji!</p>':
+  g.kind86==='master'?`<p>Do zdobycia pucharu potrzeba ${MASTER_SCORE86} samodzielnych odpowiedzi.</p>`:'';
  if(g.i>=g.items.length)return `<section class="avengers-v36">
   <h2>🏆 Misja ukończona!</h2>
   <p>Wynik: ${g.points} / ${g.items.length}</p><p>🪙 Dodano do portfela: <strong>${g.rewardCoins82||0}</strong> złotych.</p>
+  ${badge}
   <button data-action="av36:start">🔁 Zagraj ponownie</button>
-  <button data-action="av36:close">Wróć do treningu</button>
+  <button data-action="av36:close">${g.kind86?'Wróć do pomieszczenia':'Wróć do treningu'}</button>
  </section>`;
  const q=g.items[g.i];
  return `<section class="avengers-v36">
-  <div class="av36-top">⚡ MISJA AVENGERSÓW <span>⭐ ${g.points} pkt</span></div>
+  <div class="av36-top">⚡ ${g.name||'MISJA AVENGERSÓW'} <span>⭐ ${g.points} pkt</span></div>
   <div class="av36-progress"><div style="width:${g.i/g.items.length*100}%"></div></div>
-  <img class="av36-hero" src="assets/art/${q.hero}.svg" alt="Avenger">
+  ${g.kind86?trainingConsole86(q,g.points,g.done&&g.good):`<img class="av36-hero" src="assets/art/${q.hero}.svg" alt="Avenger">`}
   <p>Wyzwanie ${g.i+1} z ${g.items.length}</p>
   <h2><span lang="${q.qPl?'en':'pl'}">${e(q.q)}</span> ${v37Voice(q.q,q.qPl?'en-US':'pl-PL')}</h2>
   ${q.qPl?'<p class="av36-translation" lang="pl">🇵🇱 '+e(q.qPl)+' '+v37Voice(q.qPl,'pl-PL')+'</p>':''}
@@ -1040,9 +1045,12 @@ function smOpen(initialBookId='',launch=null){
   speak:(text,lang)=>speak(text,lang,profile().mentor,data.settings.rate||1),
   reward:async (n,runId,mode,result)=>{
    const key='v82-mission:'+missionChild82+':'+runId;
-   if(result?.perfect&&data.profiles[missionChild82])await hqToken84(missionChild82,key,result.subject,true);
-   const previous=data.history.find(h=>h.key===key&&h.child===missionChild82);if(previous)return Number(previous.points)||0;
+   const progressed=!testMode&&recordEnergy86(data.profiles[missionChild82],key,result?.independent);
+   const token=result?.perfect&&await hqToken84(missionChild82,key,result.subject,true);
+   const previous=data.history.find(h=>h.key===key&&h.child===missionChild82);
+   if(previous){if(progressed&&!token)await save();return Number(previous.points)||0;}
    const ok=await grant(missionChild82,n,mode==='test'?'Sprawdzian z podręcznika':'Trening z podręcznika',key);
+   if(!ok&&progressed&&!token)await save();
    if(ok)note('🏆 +'+n+' złotych do portfela!');return ok?n:0;
   }
  });
@@ -1192,6 +1200,7 @@ function trainingSelectionChange(el){
 }
 
 const hqViews84=new Map(),hqSessions84=new Set(),hqQuizzes84=new Map(),hqLessonAttempts84=new Set();
+const petRooms86=new Map(),petEffects86=new Map();
 let hqPanel84='',hqSlot84='',hqItem84='',hqReturn84=false,hqJoke84=0;
 const hqJokes84=['Co mówi książka do książki? Jesteśmy na tej samej stronie!','Dlaczego robot nosi kapcie? Żeby nie robić zwarcia!','Co robi kot przy komputerze? Pilnuje myszki!'];
 
@@ -1201,15 +1210,22 @@ function hqRoomPanel84(p){
  if(hqPanel84==='wallet')body=hqWallet(p,button);
  if(hqPanel84==='shop')body=hqShop(p,hqSlot84,button);
  if(hqPanel84==='places'){
-  const item=BASE_ITEMS.find(x=>x.id===hqItem84);
+  const item=hqItems().find(x=>x.id===hqItem84);
   body='<h3>Ustaw '+e(item?.name)+'</h3>'+HQ_SLOTS.map(([id,label])=>button(label,'hq:place:'+hqItem84+':'+id,'alt')).join('');
  }
  if(hqPanel84==='trophy'){
-  const item=BASE_ITEMS.find(x=>x.id===hqPlaced(p,hqSlot84));
+  const item=hqItems().find(x=>x.id===hqPlaced(p,hqSlot84));
   body='<h3>'+e(item?.name||'Gablota')+'</h3>'+button('✨ Uruchom efekt','hq:spark:'+hqSlot84,'gold')+button('Ustaw inne trofeum','hq:gallery:'+hqSlot84,'alt');
  }
  if(hqPanel84==='hero')body='<h3>🦸 Wybierz swojego bohatera</h3>'+heroPicker(who);
- if(hqPanel84==='pet')body=hqPetMarkup(p,hqQuizzes84.get(who),button);
+ if(hqPanel84==='pet')body=petCareMarkup86(p,petRooms86.get(who),petEffects86.get(who),button);
+ if(hqPanel84==='pet-quiz')body=hqPetMarkup(p,hqQuizzes84.get(who),button);
+ if(hqPanel84==='master'){
+  const won=MASTER_PRIZES86.every(id=>p.base?.owned?.includes(id));
+  body='<h3>🏆 Language Master</h3><p>Odpowiedz samodzielnie na '+MASTER_SCORE86+' z 10 pytań z polskiego i angielskiego. Wygraj puchar i pelerynę mistrza.</p>'+
+   (won?'<p class="hq86-master-won">✓ Puchar i peleryna w kolekcji.</p>'+button('Zobacz kolekcję','hq:shop','alt'):'')+
+   button(won?'Zagraj jeszcze raz':'Rozpocznij próbę','hq:exercise:master','gold');
+ }
  if(hqPanel84==='hangar'){
   const jet=p.base?.owned?.includes('quinjet');
   body='<h3>🛩️ Hangar</h3>'+(jet?'<p>Wybierz malowanie Quinjeta.</p>'+[['blue','Niebieskie'],['mint','Miętowe'],['gold','Złote']].map(([id,label])=>button(label,'hq:paint:'+id,hqRead(p).paint===id?'gold':'alt')).join(''):
@@ -1224,7 +1240,9 @@ function hqRoomPanel84(p){
     return `<div class="arcade-offer"><div><b>${g.icon} ${g.title}</b><small>${g.desc}</small></div>${open||energy?button(open?'▶ Graj':'⚡ Graj za 1 żeton','arcade:open:'+g.id,'gold'):'<button disabled>🔒 Potrzebny żeton</button>'}</div>`;
    }).join('')+'<div class="hq84-shortcuts">'+button('📚 Idź na trening','hq:training','alt')+button('🧩 Krzyżówka','game:crossword','alt')+button('🏆 Quiz','game:quiz','alt')+button('🧠 Zagadki','game:logic','alt')+'</div>';
  }
- return '<section class="card hq84-panel" id="hq84-panel" tabindex="-1">'+button('✕ Zamknij','hq:close','alt')+body+'</section>';
+ const care=hqPanel84==='pet'||hqPanel84==='pet-quiz';
+ return '<section class="card hq84-panel'+(care?' hq86-pet-panel':'')+'" id="hq84-panel" tabindex="-1">'+
+  button(care?'‹ Wróć':'✕ Zamknij','hq:close','alt')+body+'</section>';
 }
 function hqShow84(panel='',slot='',item='',focus=true){
  migrateBase(profile());
@@ -1265,6 +1283,20 @@ function hqFoodQuestions84(){
  }
  return list.slice(0,5);
 }
+function openBaseTraining86(step='subject',subject='Polski'){
+ hqReturn84=true;hqPanel84='';hqSessions84.delete(who);
+ tab='learn';v37Classic=false;avengersRun=null;
+ trainingStep=step;trainingSelectedSubject=subject;trainingSelectedPages=new Set();
+ v772RangeModes.clear();
+ render();window.scrollTo(0,0);
+}
+function openBaseRound86(id){
+ const run=trainingRound86(id);
+ if(!run)return;
+ hqReturn84=true;hqPanel84='';tab='learn';
+ v37Classic=false;trainingMode='game';trainingStep='hq-challenge';avengersRun=run;
+ render();window.scrollTo(0,0);
+}
 async function hqAction84(action,target){
  if(role!=='child')return;
  const [,what,id,extra]=action.split(':'),p=profile(),child=who;
@@ -1279,13 +1311,28 @@ async function hqAction84(action,target){
   hqReturn84=true;hqPanel84='';tab=id;render();window.scrollTo(0,0);return;
  }
  if(what==='back'){hqReturn84=false;return hqShow84();}
- if(what==='training'){
-  hqReturn84=true;hqSessions84.delete(child);tab='learn';
-  v37Classic=false;avengersRun=null;trainingStep='subject';trainingSelectedPages=new Set();
-  return render();
+ if(what==='training')return openBaseTraining86();
+ if(['subject','exercise','master'].includes(what)){
+  if(p.grade==='P')return openBaseTraining86();
+  if(what==='master')return hqShow84('master');
+  if(what==='exercise')return openBaseRound86(id);
+  if(id==='polish'||id==='english-training')return openBaseTraining86('source',id==='polish'?'Polski':'Angielski');
+  if(id==='english'){trainingMode='vocab';return openBaseTraining86('range','Angielski');}
  }
- if(what==='close')return hqShow84();
- if(['wallet','shop','arcade','pet','hangar','hero'].includes(what))return hqShow84(what);
+ if(what==='close')return hqShow84(hqPanel84==='pet-quiz'?'pet':'');
+ if(what==='pet'||what==='bowl'||what==='pet-room'){
+  petEffects86.delete(child);
+  if(what!=='pet')petRooms86.set(child,what==='bowl'?'kitchen':petRoom86(id));
+  return hqShow84('pet');
+ }
+ if(what==='care'){
+  if(hqPanel84!=='pet'||!setPetCare86(p,id,extra))return;
+  petEffects86.set(child,id);
+  await save();
+  if(who===child&&tab==='base'&&hqPanel84==='pet')hqShow84('pet');
+  return;
+ }
+ if(['wallet','shop','arcade','hangar','hero'].includes(what))return hqShow84(what);
  if(what==='joke'){if(hqPanel84==='joke')hqJoke84=(hqJoke84+1)%hqJokes84.length;return hqShow84('joke');}
  if(what==='egg'){hqTone84(210);hqEffect84('egg','',!target?.matches('[data-hq84-spot]'));return note('🥚 Puf!');}
  if(what==='slot')return hqShow84(hqPlaced(p,id)?'trophy':'shop',id);
@@ -1297,7 +1344,7 @@ async function hqAction84(action,target){
   else hqTone84(item==='thorhammer'?360:540);
   hqEffect84('spark',id,true);return;
  }
- if(what==='places'&&p.base?.owned?.includes(id))return hqShow84('places','',id);
+ if(what==='places'&&p.base?.owned?.includes(id)&&hqItems().some(item=>item.id===id))return hqShow84('places','',id);
  if(what==='place'){
   if(!hqPlace(p,id,extra))return;
   await save();
@@ -1314,17 +1361,19 @@ async function hqAction84(action,target){
   await save();if(who===child&&tab==='base')hqShow84('hangar');return;
  }
  if(what==='adopt'){
-  if(!hqAdopt(p,id,$('hq84-pet-name')?.value))return;
+  if(hqPanel84!=='pet'||!hqAdopt(p,id,$('hq84-pet-name')?.value))return;
   await save();if(who===child&&tab==='base')hqShow84('pet');return;
  }
  if(what==='food'){
+  if(hqPanel84!=='pet')return;
   if(!hqRead(p).pet)return hqShow84('pet');
+  petRooms86.set(child,'kitchen');petEffects86.delete(child);
   if(!hqQuizzes84.has(child))hqQuizzes84.set(child,{id:uid(),index:0,items:hqFoodQuestions84()});
-  return hqShow84('pet');
+  return hqShow84('pet-quiz');
  }
  if(what==='answer'){
   const quiz=hqQuizzes84.get(child),question=quiz?.items[quiz.index];
-  if(!question||hqPanel84!=='pet')return;
+  if(!question||hqPanel84!=='pet-quiz')return;
   if(Number(id)!==question[2]){
    const status=$('hq84-answer-status');if(status)status.textContent='Spróbuj jeszcze raz. Możesz poprawić odpowiedź.';
    return;
@@ -1332,15 +1381,18 @@ async function hqAction84(action,target){
   quiz.index++;
   if(quiz.index===quiz.items.length){
    hqQuizzes84.delete(child);hqEarnFood(p,quiz.id);
+   if(!testMode)recordEnergy86(p,'pet:'+quiz.id,quiz.items.length);
+   petEffects86.set(child,'food');
    await save();
-   if(who===child&&tab==='base'){hqShow84('pet');note('🥣 Zdobyta porcja karmy!');}
+   if(who===child&&tab==='base'&&hqPanel84==='pet-quiz')hqShow84('pet');
    return;
   }
-  return hqShow84('pet');
+  return hqShow84('pet-quiz');
  }
- if(what==='feed'&&hqFeed(p)){
+ if(what==='feed'&&hqPanel84==='pet'&&hqFeed(p)){
+  petRooms86.set(child,'kitchen');petEffects86.set(child,'feed');
   await save();
-  if(who===child&&tab==='base'){hqShow84('pet');hqTone84(520);hqEffect84('feed','',true);note('🐾 '+hqRead(p).pet.name+' macha ogonem!');}
+  if(who===child&&tab==='base'&&hqPanel84==='pet'){hqShow84('pet');hqTone84(520);}
  }
 }
 function hqMountArcade84(){
@@ -1357,10 +1409,11 @@ function childRender(){
  if(tab==='view-choice')return layout('Akademia '+p.name,hqChoices(button),'choice');
  if(tab==='base'&&walking){
   const panel=hqRoomPanel84(p);
+  const care=hqPanel84==='pet'||hqPanel84==='pet-quiz';
   const walk=baseWalkMarkup(p,who,hero(p.hero||(who==='pawel'?'iron':'spider'))[0],ACADEMY_RELEASE,
-   panel?'<dialog class="hq85-dialog" aria-label="Interakcja w bazie">'+panel+'<div id="hq85-notice" role="status"></div></dialog>':'');
+   panel?'<dialog class="hq85-dialog'+(care?' hq86-pet-dialog':'')+'" aria-label="'+(care?'Kącik zwierzaka':'Interakcja w bazie')+'">'+panel+'<div id="hq85-notice" role="status"></div></dialog>':'');
   layout('Spacer po bazie',walk,'walk');
-  mountBaseWalk(document.querySelector('[data-hq85-walk]'));return;
+  mountBaseWalk(document.querySelector('[data-hq86-walk]'));mountPetCare86(app);return;
  }
  let html=walking?'':`<section class="card"><div class="row between"><div><h2>${p.name} ${hero(p.hero||(who==='pawel'?'iron':'spider'))[2]}</h2><small>${gradeName(p.grade)} · Baza poziom ${1+Math.floor(p.xp/100)}</small></div><b class="xp" data-wallet82="${who}">🪙 ${p.coins} złotych</b></div><div class="progress"><div style="width:${p.xp%100}%"></div></div></section>`+nav();
 if(tab==='song'){const mission=data.missions.find(m=>m.id===missionId);const song=data.settings.songs.find(x=>x.id===mission?.songId);html+=song?songScreen(song,mission):'<section class="card">Nie znaleziono piosenki.</section>'}
@@ -1387,11 +1440,11 @@ if(tab==='learn'){
    html+=`<div class="v37-return">
     <button data-action="v37:hub">← Sala Wyzwań</button>
    </div>`;
-  }else{
+  }else if(trainingStep!=='hq-challenge'){
    html+=trainingFlowMarkup();
   }
   if(avengersRun)html+=avengersPanel();
- }layout('Akademia '+p.name,html);if(tab==='base')mountBaseScene84(document.querySelector('[data-hq84-scene]'));if(tab==='arcade')hqMountArcade84();if(tab==='learn'&&v37Classic)newExercise();if(tab==='trace')drawTrace()}
+ }layout('Akademia '+p.name,html);if(tab==='base'){mountBaseScene84(document.querySelector('[data-hq84-scene]'));mountPetCare86(app);}if(tab==='arcade')hqMountArcade84();if(tab==='learn'&&v37Classic)newExercise();if(tab==='trace')drawTrace()}
 const CROSSWORDS=[
  {word:'KOT',clue:'Miauczy i mruczy',r:0,c:2,dir:'v'},
  {word:'DOM',clue:'Mieszkamy w nim',r:1,c:1,dir:'h'},
@@ -1672,10 +1725,15 @@ if(action==='v37:hub'){
 }
 
 if(action==='av36:start'){
+ if(avengersRun?.kind86)return openBaseRound86(avengersRun.kind86);
  avengersRun={items:[...avengersQuiz].sort(()=>Math.random()-.5),i:0,points:0,done:false,good:false};
  return render();
 }
-if(action==='av36:close'){avengersRun=null;return render();}
+if(action==='av36:close'){
+ const fromBase=avengersRun?.kind86;avengersRun=null;
+ if(fromBase){hqReturn84=false;return hqShow84();}
+ return render();
+}
 if(action.startsWith('av36:answer:')&&avengersRun&&!avengersRun.done){
  const q=avengersRun.items[avengersRun.i];
  avengersRun.good=Number(action.split(':')[2])===q.ok;
@@ -1688,9 +1746,18 @@ if(action==='av36:next'&&avengersRun&&avengersRun.done){
  if(run.i>=run.items.length){
   const independent=run.items.filter(q=>q.correct82&&!q.v77Revealed).length;
   const amount=trainingMode==='test'?(independent?(run.points/run.items.length>=.7?Math.max(5,Math.min(20,independent*2)):Math.min(3,independent)):0):Math.min(12,independent);
-  run.rewardId82??=uid();const key='v82-outside:'+who+':'+run.rewardId82;
-  if(run.subject&&trainingMode!=='test')await hqToken84(who,key,run.subject,independent===run.items.length);
-  if(amount>0){const ok=await grant(who,amount,'Wyzwanie poza podręcznikiem',key);run.rewardCoins82=ok?amount:Number(data.history.find(h=>h.key===key)?.points)||0;}else run.rewardCoins82=0;
+  const child=who,p=profile();
+  run.rewardId82??=uid();const key='v82-outside:'+child+':'+run.rewardId82;
+  const progressed=!testMode&&recordEnergy86(p,key,independent);
+  const unlocked=!testMode&&run.kind86==='master'&&unlockMaster86(p,independent,run.items.length);
+  run.masterEarned86=run.kind86==='master'&&MASTER_PRIZES86.every(id=>p.base?.owned?.includes(id));
+  const token=run.subject&&trainingMode!=='test'&&await hqToken84(child,key,run.subject,independent===run.items.length);
+  if(amount>0){
+   const ok=await grant(child,amount,run.name||'Wyzwanie poza podręcznikiem',key);
+   if(!ok&&!token&&(progressed||unlocked))await save();
+   run.rewardCoins82=ok?amount:Number(data.history.find(h=>h.key===key)?.points)||0;
+  }else run.rewardCoins82=0;
+  if(who!==child||avengersRun!==run)return;
  }
  return render();
 }
