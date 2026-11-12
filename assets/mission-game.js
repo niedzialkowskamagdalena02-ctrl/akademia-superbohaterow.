@@ -3,7 +3,7 @@ import {subjectPool82,buildSubjectGames82} from './subject-games82.js?v=82';
 import {REVEAL_OFFER82,consent82,requestedAnswer82,solutions82,leaks82,parseTutor82,promptTutor82} from './tutor82.js?v=82';
 const v773PreviewDecks=new Map();
 import {ensurePairOrder80,meaningSpeech80,readingMeanings80,spreadListening80,interfaceQuestion80,interfaceHelp80} from './learning80.js?v=81';
-import {GAME_TITLES80,buildGames80,renderGame80,gameAction80,mountMotion80,stopGameAudio80} from './games80.js?v=82';
+import {GAME_TITLES80,buildGames80,renderGame80,gameAction80,mountMotion80,stopGameAudio80} from './games80.js?v=84';
 import {GAME_TITLES81,buildGames81,renderGame81,gameAction81,mountGame81,stopAudio81,helpGame81} from './games81.js?v=82';
 import {cardArt81} from './art81.js?v=81';
 const GAME_TITLES_ALL81={...GAME_TITLES80,...GAME_TITLES81};
@@ -306,7 +306,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,childG
    t.v76Transcript=transcript;t.v76SpeechTried=true;
    if(t.type==='vocab-reading'){const p=acceptReading79(t,candidates);remember();if(p.complete){answer(t.answer);return}if(p.advanced||advancedDuring79){t.v76Error='Dobrze! Teraz przeczytaj kolejne słowo.';audioCue(true);draw();return}}
    else if(spokenMatch76(t.answer,transcript)){answer(t.answer);return}
-   wrongAttempts++;t.correct=false;logDifficulty(t,'próba wymowy: '+transcript);audioCue(false);t.v76Error=t.type==='vocab-reading'?'Spróbuj przeczytać podświetlone słowo. Zaliczone słowa zostają zielone.':'Spróbuj jeszcze raz. Posłuchaj spokojnego wzoru i powtórz słowo.';draw();if(mode!=='test')v76WordModel(t);
+   wrongAttempts++;t.hqWrong84=true;t.correct=false;logDifficulty(t,'próba wymowy: '+transcript);audioCue(false);t.v76Error=t.type==='vocab-reading'?'Spróbuj przeczytać podświetlone słowo. Zaliczone słowa zostają zielone.':'Spróbuj jeszcze raz. Posłuchaj spokojnego wzoru i powtórz słowo.';draw();if(mode!=='test')v76WordModel(t);
   };
   try{setVoiceState('starting');r.start()}catch(err){readingRec=null;t.v76Recording=false;t.v76Error='Nie udało się uruchomić mikrofonu. Spróbuj ponownie.';setVoiceState('idle');draw()}
  }
@@ -1048,11 +1048,11 @@ Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj
     const raw=await ask(prompt);const text=String(raw).replace(/```(?:json)?/gi,'').replace(/```/g,'').trim();const obj=JSON.parse(text.slice(text.indexOf('{'),text.lastIndexOf('}')+1));
     if(typeof obj.correct!=='boolean'||typeof obj.feedback!=='string')throw Error('Niepełna ocena');
     if(obj.correct){t.correct=true;answered=true;t.done=true;points++;audioCue(true);sayFeedback('Dobra odpowiedź!');recordResult(t);remember()}
-    else{wrongAttempts++;audioCue(false);if(wrongAttempts>=2)logDifficulty(t,'odpowiedź otwarta');tutorMessages.push({who:'ai',text:mode==='test'?'Ta odpowiedź nie została zaliczona. Spróbuj samodzielnie.':(subject(t)==='angielski'&&!polishText774(obj.feedback)?'Spróbuj jeszcze raz. Przeczytaj polskie polecenie i sprawdź swój zapis.':obj.feedback.slice(0,500))})}
+    else{wrongAttempts++;t.hqWrong84=true;audioCue(false);if(wrongAttempts>=2)logDifficulty(t,'odpowiedź otwarta');tutorMessages.push({who:'ai',text:mode==='test'?'Ta odpowiedź nie została zaliczona. Spróbuj samodzielnie.':(subject(t)==='angielski'&&!polishText774(obj.feedback)?'Spróbuj jeszcze raz. Przeczytaj polskie polecenie i sprawdź swój zapis.':obj.feedback.slice(0,500))})}
    }catch(e){tutorMessages.push({who:'system',text:'🦸 Nie udało się teraz sprawdzić odpowiedzi. Spróbuj ponownie.'})}
    finally{busy=false;draw()}})();return;
   }
-  if(!t.correct){if(/spółgłoski|samogłoski/i.test(t.question)){const a=Array.from(lettersOnly(t.answer)).sort().join(''),b=Array.from(lettersOnly(choice)).sort().join('');t.orderHint=!!a&&a===b;}wrongAttempts++;audioCue(false);if(wrongAttempts>=2)logDifficulty(t,'błędne próby');hintLevel=Math.min(3,hintLevel+1);draw();return}
+  if(!t.correct){if(/spółgłoski|samogłoski/i.test(t.question)){const a=Array.from(lettersOnly(t.answer)).sort().join(''),b=Array.from(lettersOnly(choice)).sort().join('');t.orderHint=!!a&&a===b;}wrongAttempts++;t.hqWrong84=true;audioCue(false);if(wrongAttempts>=2)logDifficulty(t,'błędne próby');hintLevel=Math.min(3,hintLevel+1);remember();draw();return}
   answered=true;t.done=true;points++;audioCue(true);if(subject(t)==='angielski')celebrateReading();sayFeedback('Brawo! Dobra odpowiedź.'+(mode==='game'&&subject(t)==='angielski'&&t.explanation?' '+t.explanation:''));recordResult(t);remember();draw();
  }
  function hintText(t){
@@ -1302,7 +1302,7 @@ function stage(){
   const epoch=stageEpoch;
   if(coins>0){
    root.innerHTML='<section class="mg-panel"><h2>🪙 Zapisuję nagrodę w portfelu…</h2></section>';
-   try{const credited=await reward(coins,rewardRun82,mode);coins=Number.isFinite(credited)&&credited>=0?credited:0;}
+   try{const trainingSubject=subject();const perfect=mode!=='test'&&total>0&&independent===total&&tasks.every(t=>!t.hqWrong84&&subject(t)===trainingSubject);const credited=await reward(coins,rewardRun82,mode,{subject:trainingSubject,perfect});coins=Number.isFinite(credited)&&credited>=0?credited:0;}
    catch{award=false;remember();if(root.isConnected&&stageEpoch===epoch)root.innerHTML='<section class="mg-panel"><h2>Nie udało się zapisać nagrody</h2><p>Wynik pozostaje zapisany. Spróbuj ponownie.</p>'+btn('🪙 Ponów zapis nagrody','reward82-retry','mg-primary')+'</section>';return;}
   }
   if(!root.isConnected||stageEpoch!==epoch)return;
@@ -1369,7 +1369,7 @@ function stage(){
   if(act==='tutor-instruction')return speak('Zapytaj nauczyciela AI. Naciśnij czerwony mikrofon z boku ekranu i powiedz, czego nie rozumiesz.','pl-PL');
   if(act==='read-instruction'){if(t?.game80)return speakSequence([{text:t.question,lang:'en-GB',rate:.8},{text:t.questionPl,lang:'pl-PL',rate:.9}],{isCurrent:()=>task()===t&&root.isConnected});if(subject(t)==='angielski'){v75InstructionSpeech(t,mode);return;}return speak((mode==='test'?'Sprawdzian':'Misja')+'. '+(t?.type==='reading'?'Przeczytaj na głos cały tekst poniżej. Naciśnij rozpocznij czytanie. Kiedy będziesz potrzebował przerwy, naciśnij zakończ fragment. Możesz później kontynuować.':t?.question||'')+(t?.type==='wordsearch'?' Wybieraj litery kolejno.':''),'pl-PL');}
   if(act==='skip'){v774Normalize(t);logDifficulty(t,'uczeń poprosił o następne zadanie');sayFeedback('Nie szkodzi. '+(subject(t)==='angielski'&&t.explanation?'Wyjaśnienie: '+t.explanation+'. ':'')+'Zapisuję to do powtórki.');idx++;reset();remember();return draw()}
-  if(act==='cross-new'){if(crossStatus(t))return crossDone(t);wrongAttempts++;audioCue(false);const box=root.querySelector('#mg-cross-feedback');if(box)box.textContent='Nie wszystkie wyrazy są jeszcze poprawne. Wpisane litery pozostają w kratkach.';return}
+  if(act==='cross-new'){if(crossStatus(t))return crossDone(t);wrongAttempts++;t.hqWrong84=true;audioCue(false);const box=root.querySelector('#mg-cross-feedback');if(box)box.textContent='Nie wszystkie wyrazy są jeszcze poprawne. Wpisane litery pozostają w kratkach.';return}
   if(act==='read-aloud'){
    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
    if(!SR){t.readError='Ta przeglądarka nie obsługuje rozpoznawania głosu.';draw();return}
@@ -1426,7 +1426,7 @@ function stage(){
    const c=(t.type==='reading-mini'?miniCoverage:readingCoverage)(t.passage||pageText(t),t.readTranscript||'');
    t.readScore=c.score;t.readHits=c.hits;t.readTotal=c.total;t.readHeard=c.heard;t.readChecked=true;
    if(c.score>=70&&!t.correct){t.correct=true;t.done=true;answered=true;points++;recordResult(t);celebrateReading();sayFeedback('Brawo! Czytanie zaliczone!');}
-   else if(c.score<70){wrongAttempts++;audioCue(false);sayFeedback('Świetnie, że próbujesz! Poćwicz i spróbuj jeszcze raz.')}
+   else if(c.score<70){wrongAttempts++;t.hqWrong84=true;audioCue(false);sayFeedback('Świetnie, że próbujesz! Poćwicz i spróbuj jeszcze raz.')}
    remember();draw();return;
   }
   if(act.startsWith('grid:')){
@@ -1497,7 +1497,7 @@ function stage(){
   if(act==='v77-letter-undo'){t.picked.pop();return draw()}
   if(act==='v77-letter-check')return answer(t.picked.map(i=>t.letters[i]).join(''));
   if(act.startsWith('v77-pair-left:')){const i=Number(act.slice(14));if(Number.isInteger(i)&&t.pairs[i]&&!t.matched.includes(i)){t.left=i;t.miss=false;draw()}return}
-  if(act.startsWith('v77-pair-right:')){const i=Number(act.slice(15));if(t.left===null||!t.pairs[i]||t.matched.includes(i))return;if(t.left===i){t.matched.push(i);t.left=null;t.miss=false;audioCue(true);if(t.matched.length===t.pairs.length){t.pendingSpeech80=t.pairs[i].pl;return answer(t.answer)}}else{t.miss=true;t.left=null;wrongAttempts++;audioCue(false)}return draw()}
+  if(act.startsWith('v77-pair-right:')){const i=Number(act.slice(15));if(t.left===null||!t.pairs[i]||t.matched.includes(i))return;if(t.left===i){t.matched.push(i);t.left=null;t.miss=false;audioCue(true);if(t.matched.length===t.pairs.length){t.pendingSpeech80=t.pairs[i].pl;return answer(t.answer)}}else{t.miss=true;t.left=null;wrongAttempts++;t.hqWrong84=true;audioCue(false)}return draw()}
  }
 
  // V77: gry budowane wyłącznie z odczytanej, wybranej strony.
@@ -1558,7 +1558,7 @@ function stage(){
   return html+'</div>'+tutorPanel();
  }
  function v77VisualAction(act,t){if(!t?.visual77||answered)return;const pick=Number(act.slice(act.indexOf(':')+1));
-  const miss=()=>{t.miss=true;wrongAttempts++;audioCue(false);remember();draw()};
+  const miss=()=>{t.miss=true;wrongAttempts++;t.hqWrong84=true;audioCue(false);remember();draw()};
   const done=()=>{t.miss=false;answer(t.answer)};
   if(act==='a77-audio')return speakSequence([{text:t.audio,lang:subject(t)==='angielski'?'en-US':'pl-PL',rate:.76}],{isCurrent:()=>root.isConnected&&task()===t});
   if(act.startsWith('a77-left:')){if(t.items[pick]&&!t.matched.includes(pick)){t.left=pick;t.miss=false;draw()}return}

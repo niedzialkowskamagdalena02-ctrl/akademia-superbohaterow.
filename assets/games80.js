@@ -71,7 +71,7 @@ export function gameAction80(t,act,api){
  }
  if(answered)return true;
  if(a==='mic'){mic(t);return true}
- const miss=()=>{t.miss80=true;save();draw()};
+ const miss=()=>{t.miss80=true;t.hqWrong84=true;save();draw()};
  if(a.startsWith('item:')){const x=t.items80[Number(a.split(':')[1])];if(!x)return true;
   if(k==='spot'){word(x.en);if(t.targets80.includes(x.en)){if(!t.found80.includes(x.en))t.found80.push(x.en);t.miss80=false;if(t.found80.length===t.targets80.length){t.pendingSpeech80=x.en;answer(t.answer)}else{save();draw()}}else miss();}
   else if(x.en===t.wordEn){if(k==='kitchen'&&++t.progress80<t.amount80){word(x.en);t.miss80=false;save();draw()}else{t.pendingSpeech80=x.en;answer(t.answer)}}else{if(k!=='island'||mode!=='test')word(x.en);miss()}

@@ -1,14 +1,16 @@
 // V48_AI_RESPONSE_DIAGNOSTICS
 // V44_BULK_CHAPTERS
 // V42_CHAPTERS
-import {mountMissionGame} from './mission-game.js?v=82';
+import {mountMissionGame} from './mission-game.js?v=84';
 import { initHeadquarters3D } from './headquarters3d.js';
 import {initial,get,put,del,allRecords,replaceRecords,compress,uid,gradeName} from './data.js';
 import {speak,listen,stopVoice,getVoiceState,setVoiceState,spellEnglish77} from './voice.js?v=81';
 import {vocabulary,readings,explanation} from './learning.js';
 import {syncAdapter} from './sync.js?v=81';
 import {BASE_ITEMS,baseMarkup,migrateBase} from './base.js?v=82';
-import {mountArcade,stopArcade} from './arcade.js?v=83';
+import {mountArcade,stopArcade} from './arcade.js?v=84';
+import {mountBaseScene84} from './base-scene84.js?v=84';
+import {HQ_SLOTS,hqRead,hqBalances,hqEarnToken,hqSpendToken,hqRecordCrystals,hqBuyWithGems,hqPlaced,hqPlace,hqAdopt,hqPaint,hqEarnFood,hqFeed,hqChoices,hqMarkup,hqWallet,hqShop,hqPetMarkup} from './headquarters84.js?v=84';
 import {affordable82,purchase82,credit82} from './wallet82.js?v=82';
 import {REVEAL_OFFER82,consent82,requestedAnswer82,solutions82,leaks82,parseTutor82,promptTutor82} from './tutor82.js?v=82';
 let mentorHistory={tech:[],fun:[]};
@@ -62,7 +64,7 @@ const select=(id,label,options,value)=>`<label for="${id}">${label}</label><sele
 const grades=[['P','Przedszkole'],...Array.from({length:12},(_,i)=>[String(i+1),`Klasa ${i+1}`])];
 const people=[['pawel','Paweł'],['patryk','Patryk']];
 const note=t=>{const n=$('notice');if(!n){console.warn('Powiadomienie:',t);return}n.textContent=t;n.classList.add('visible');setTimeout(()=>{if(n.isConnected)n.classList.remove('visible')},4500)};
-const ACADEMY_RELEASE=83;
+const ACADEMY_RELEASE=84;
 async function checkAcademyUpdate(button){
  if(!button||button.disabled)return;
  const label=button.textContent,controller=new AbortController();
@@ -730,7 +732,7 @@ const grant=async(child,points,reason,key)=>{
  try{await syncAdapter.onLocalChange(data);}catch{note('Nagroda zapisana na telefonie. Ponów synchronizację, kiedy wróci połączenie.');}
  return true;
 };
-function layout(title,content){cancelAIRequests();stopVoice();closeMicBubble();app.innerHTML=`<main class="wrap"><header class="head"><div><div class="brand">⚡ AKADEMIA SUPERBOHATERÓW <span style="display:inline-block;font-size:0.72em;border:1px solid currentColor;border-radius:8px;padding:2px 7px;vertical-align:middle">V${ACADEMY_RELEASE}</span></div><div class="sub">${e(title)}</div>${sync78StatusMarkup()}</div>${role==='child'?trainingSoundControl():''}${role?button(testMode?'← Zakończ test':'← Profile','exit','alt'):''}</header>${testMode?'<div class="test-banner">🧪 TRYB MAMY — BEZPŁATNY TEST • POSTĘPY NIE SĄ ZAPISYWANE</div>':''}${content}</main>${role==='child'?'<button class="mic" data-action="mic" aria-label="Sterowanie głosowe">🎙️</button>':''}`;document.querySelectorAll('[data-speak]').forEach(b=>b.addEventListener('click',()=>speak(b.dataset.speak,b.dataset.lang,role==='child'?profile().mentor:'tech',data.settings.rate||1)));hydrateImages();v76AfterRender();if(role==='child'&&(tab==='learn'||tab==='subjectmissions'))installMicDrag()}
+function layout(title,content){if(typeof mountBaseScene84==='function')mountBaseScene84(null);cancelAIRequests();stopVoice();closeMicBubble();app.innerHTML=`<main class="wrap"><header class="head"><div><div class="brand">⚡ AKADEMIA SUPERBOHATERÓW <span style="display:inline-block;font-size:0.72em;border:1px solid currentColor;border-radius:8px;padding:2px 7px;vertical-align:middle">V${ACADEMY_RELEASE}</span></div><div class="sub">${e(title)}</div>${sync78StatusMarkup()}</div>${role==='child'?trainingSoundControl():''}${role?button(testMode?'← Zakończ test':'← Profile','exit','alt'):''}</header>${testMode?'<div class="test-banner">🧪 TRYB MAMY — BEZPŁATNY TEST • POSTĘPY NIE SĄ ZAPISYWANE</div>':''}${content}</main>${role==='child'?'<button class="mic" data-action="mic" aria-label="Sterowanie głosowe">🎙️</button>':''}`;document.querySelectorAll('[data-speak]').forEach(b=>b.addEventListener('click',()=>speak(b.dataset.speak,b.dataset.lang,role==='child'?profile().mentor:'tech',data.settings.rate||1)));hydrateImages();v76AfterRender();if(role==='child'&&(tab==='learn'||tab==='subjectmissions'))installMicDrag()}
 async function hydrateImages(){for(const el of document.querySelectorAll('[data-image]')){const src=await img(el.dataset.image);if(el.isConnected&&src){el.src=src;el.onload=()=>URL.revokeObjectURL(src)}}}
 function nav(){return role==='admin'?`<div class="tabs">${[['home','Przegląd'],['books','📚 Książki'],['missions','📋 Misje'],['settings','⚙️ Ustawienia'],['test','🧪 Testuj wszystko'],['sync','📱 Telefony'],['backup','💾 Kopia']].map(([k,n])=>button(n,'admin:'+k,adminTab===k?'gold':'alt')).join('')}</div>`:`<div class="tabs">${[['home','🎯 Misje'],['books','📚 Książki'],['learn','🧠 Trening'],['academy','📖 Sala odkrywców'],['mentor','🤖 Mentor'],['base','🏙️ Baza Avengersów i gry']].map(([k,n])=>button(n,'child:'+k,tab===k?'gold':'alt')).join('')}</div>`}
 function render(){if(tab!=='arcade')stopArcade();if(!role){layout('Wybierz swoją bazę',`<section class="card"><h1>Witaj w Akademii! 🛡️</h1><p>Każdy bohater ma własne misje i nagrody.</p></section><div class="grid">${people.filter(([id])=>!syncAdapter.device?.()||syncAdapter.device().role!=='child'||syncAdapter.device().child===id).map(([id,name])=>`<button class="tile" data-action="enter:${id}"><img class="profile-hero" src="assets/art/${data.profiles[id].hero||(id==='pawel'?'iron':'spider')}.svg" alt=""><h2>${name}</h2><small>${gradeName(data.profiles[id].grade)} · ${data.profiles[id].coins} złotych</small></button>`).join('')}</div><section class="card">${syncAdapter.device?.()?.role==='child'?'':button('🔐 Centrum dowodzenia mamy','enter:admin','gold')}<p class="muted">${syncAdapter.status()}</p></section>${!syncAdapter.device?.()?sync78Markup():''}${globalThis.AKADEMIA_TEST80?'':`<footer class="academy-update">${button('🔄 Aktualizuj Akademię','academy:update','line')}</footer>`}`);return}if(role==='admin')adminRender();else childRender()}
@@ -1035,8 +1037,9 @@ function smOpen(initialBookId='',launch=null){
    finally{if(timer!==null)clearTimeout(timer);finishAIRequest('mission',controller)}
   },
   speak:(text,lang)=>speak(text,lang,profile().mentor,data.settings.rate||1),
-  reward:async (n,runId,mode)=>{
+  reward:async (n,runId,mode,result)=>{
    const key='v82-mission:'+missionChild82+':'+runId;
+   if(result?.perfect&&data.profiles[missionChild82])await hqToken84(missionChild82,key,result.subject,true);
    const previous=data.history.find(h=>h.key===key&&h.child===missionChild82);if(previous)return Number(previous.points)||0;
    const ok=await grant(missionChild82,n,mode==='test'?'Sprawdzian z podręcznika':'Trening z podręcznika',key);
    if(ok)note('🏆 +'+n+' złotych do portfela!');return ok?n:0;
@@ -1187,6 +1190,161 @@ function trainingSelectionChange(el){
  trainingSelectionUpdate();
 }
 
+const hqViews84=new Map(),hqSessions84=new Set(),hqQuizzes84=new Map(),hqLessonAttempts84=new Set();
+let hqPanel84='',hqSlot84='',hqItem84='',hqReturn84=false,hqJoke84=0;
+const hqJokes84=['Co mówi książka do książki? Jesteśmy na tej samej stronie!','Dlaczego robot nosi kapcie? Żeby nie robić zwarcia!','Co robi kot przy komputerze? Pilnuje myszki!'];
+
+function hqRoomPanel84(p){
+ if(!hqPanel84)return '';
+ let body='';
+ if(hqPanel84==='wallet')body=hqWallet(p,button);
+ if(hqPanel84==='shop')body=hqShop(p,hqSlot84,button);
+ if(hqPanel84==='places'){
+  const item=BASE_ITEMS.find(x=>x.id===hqItem84);
+  body='<h3>Ustaw '+e(item?.name)+'</h3>'+HQ_SLOTS.map(([id,label])=>button(label,'hq:place:'+hqItem84+':'+id,'alt')).join('');
+ }
+ if(hqPanel84==='trophy'){
+  const item=BASE_ITEMS.find(x=>x.id===hqPlaced(p,hqSlot84));
+  body='<h3>'+e(item?.name||'Gablota')+'</h3>'+button('✨ Uruchom efekt','hq:spark:'+hqSlot84,'gold')+button('Ustaw inne trofeum','hq:gallery:'+hqSlot84,'alt');
+ }
+ if(hqPanel84==='pet')body=hqPetMarkup(p,hqQuizzes84.get(who),button);
+ if(hqPanel84==='hangar'){
+  const jet=p.base?.owned?.includes('quinjet');
+  body='<h3>🛩️ Hangar</h3>'+(jet?'<p>Wybierz malowanie Quinjeta.</p>'+[['blue','Niebieskie'],['mint','Miętowe'],['gold','Złote']].map(([id,label])=>button(label,'hq:paint:'+id,hqRead(p).paint===id?'gold':'alt')).join(''):
+   '<p>Na lądowisku jest miejsce na Quinjeta.</p>'+button('🛡️ Zobacz w sklepie','hq:shop','gold'));
+ }
+ if(hqPanel84==='joke')body='<h3>🔮 Kula sucharów</h3><p>'+hqJokes84[hqJoke84]+'</p>'+button('🔮 Następny suchar','hq:joke','alt');
+ if(hqPanel84==='arcade'){
+  const {energy}=hqBalances(p),pass=hqSessions84.has(who)||testMode;
+  body='<h3>🕹️ Centrum Rozrywki</h3><p>'+(pass?'Sesja gier jest otwarta.':'Bezbłędny trening z polskiego lub angielskiego daje żeton. Jeden żeton otwiera automaty na czas wizyty.')+'</p>'+
+   ARCADE_GAMES.map(g=>{
+    const open=pass||p.arcadeUnlocked?.includes(g.id);
+    return `<div class="arcade-offer"><div><b>${g.icon} ${g.title}</b><small>${g.desc}</small></div>${open||energy?button(open?'▶ Graj':'⚡ Graj za 1 żeton','arcade:open:'+g.id,'gold'):'<button disabled>🔒 Potrzebny żeton</button>'}</div>`;
+   }).join('')+'<div class="hq84-shortcuts">'+button('📚 Idź na trening','hq:training','alt')+button('🧩 Krzyżówka','game:crossword','alt')+button('🏆 Quiz','game:quiz','alt')+button('🧠 Zagadki','game:logic','alt')+'</div>';
+ }
+ return '<section class="card hq84-panel" id="hq84-panel" tabindex="-1">'+button('✕ Zamknij','hq:close','alt')+body+'</section>';
+}
+function hqShow84(panel='',slot='',item='',focus=true){
+ migrateBase(profile());
+ tab='base';hqPanel84=panel;hqSlot84=slot;hqItem84=item;
+ render();
+ if(focus)document.getElementById(panel?'hq84-panel':'hq84-title')?.scrollIntoView?.({block:'start'});
+}
+function hqTone84(freq){
+ if(localStorage.getItem('academy-v72-training-silent')==='1')return;
+ const Audio=window.AudioContext||window.webkitAudioContext;
+ if(!Audio)return;
+ try{
+  const ctx=new Audio(),osc=ctx.createOscillator(),gain=ctx.createGain(),t=ctx.currentTime;
+  osc.type='sine';osc.frequency.setValueAtTime(freq,t);osc.frequency.exponentialRampToValueAtTime(freq*.53,t+.19);
+  gain.gain.setValueAtTime(.11,t);gain.gain.exponentialRampToValueAtTime(.001,t+.22);
+  osc.connect(gain);gain.connect(ctx.destination);osc.onended=()=>ctx.close().catch(()=>{});
+  osc.start(t);osc.stop(t+.23);
+ }catch{/* Dźwięk jest dodatkiem do widocznej animacji. */}
+}
+function hqEffect84(kind,slot,focus=false){
+ const stage=document.querySelector('[data-hq84-scene]');
+ if(focus)stage?.scrollIntoView({block:'nearest'});
+ stage?.dispatchEvent(new CustomEvent('hq84:effect',{detail:{kind,slot,focus}}));
+}
+async function hqToken84(child,id,subject,perfect){
+ if(testMode||!hqEarnToken(data.profiles[child],id,subject,perfect))return false;
+ await save();
+ if(who===child)note('⚡ Zdobywasz żeton do automatów!');
+ return true;
+}
+function hqFoodQuestions84(){
+ const pool=profile().grade==='P'?v75PreschoolQuestions().map(x=>[x.q,x.a,x.ok]):
+  Object.values(v37Bank).flat();
+ const list=[...pool];
+ for(let i=list.length-1;i>0;i--){
+  const j=Math.floor(Math.random()*(i+1));[list[i],list[j]]=[list[j],list[i]];
+ }
+ return list.slice(0,5);
+}
+async function hqAction84(action,target){
+ if(role!=='child')return;
+ const [,what,id,extra]=action.split(':'),p=profile(),child=who;
+ if(what==='view'){
+  if(!['classic','walk'].includes(id))return;
+  hqReturn84=false;hqViews84.set(child,id);
+  if(id==='walk')return hqShow84();
+  hqSessions84.delete(child);tab='home';return render();
+ }
+ if(what==='back'){hqReturn84=false;return hqShow84();}
+ if(what==='training'){
+  hqReturn84=true;hqSessions84.delete(child);tab='learn';
+  v37Classic=false;avengersRun=null;trainingStep='subject';trainingSelectedPages=new Set();
+  return render();
+ }
+ if(what==='close')return hqShow84();
+ if(['wallet','shop','arcade','pet','hangar'].includes(what))return hqShow84(what);
+ if(what==='joke'){if(hqPanel84==='joke')hqJoke84=(hqJoke84+1)%hqJokes84.length;return hqShow84('joke');}
+ if(what==='egg'){hqTone84(210);hqEffect84('egg','',!target?.matches('[data-hq84-spot]'));return note('🥚 Puf!');}
+ if(what==='slot')return hqShow84(hqPlaced(p,id)?'trophy':'shop',id);
+ if(what==='gallery')return hqShow84('shop',id);
+ if(what==='spark'){
+  const item=hqPlaced(p,id);
+  if(!item)return;
+  if(item==='armor')speak('Czas na kolejną misję!','pl-PL',p.mentor);
+  else hqTone84(item==='thorhammer'?360:540);
+  hqEffect84('spark',id,true);return;
+ }
+ if(what==='places'&&p.base?.owned?.includes(id))return hqShow84('places','',id);
+ if(what==='place'){
+  if(!hqPlace(p,id,extra))return;
+  await save();
+  if(who===child&&tab==='base'){hqShow84('trophy',extra);note('✨ Trofeum jest już w bazie.');}
+  return;
+ }
+ if(what==='buy-gems'){
+  if(!hqBuyWithGems(p,id))return note('Za mało kryształów lub przedmiot jest już w kolekcji.');
+  await save();
+  if(who===child&&tab==='base'){hqShow84('shop',hqSlot84);note('💎 Nowe trofeum w kolekcji!');}
+  return;
+ }
+ if(what==='paint'&&hqPaint(p,id)){
+  await save();if(who===child&&tab==='base')hqShow84('hangar');return;
+ }
+ if(what==='adopt'){
+  if(!hqAdopt(p,id,$('hq84-pet-name')?.value))return;
+  await save();if(who===child&&tab==='base')hqShow84('pet');return;
+ }
+ if(what==='food'){
+  if(!hqRead(p).pet)return hqShow84('pet');
+  if(!hqQuizzes84.has(child))hqQuizzes84.set(child,{id:uid(),index:0,items:hqFoodQuestions84()});
+  return hqShow84('pet');
+ }
+ if(what==='answer'){
+  const quiz=hqQuizzes84.get(child),question=quiz?.items[quiz.index];
+  if(!question||hqPanel84!=='pet')return;
+  if(Number(id)!==question[2]){
+   const status=$('hq84-answer-status');if(status)status.textContent='Spróbuj jeszcze raz. Możesz poprawić odpowiedź.';
+   return;
+  }
+  quiz.index++;
+  if(quiz.index===quiz.items.length){
+   hqQuizzes84.delete(child);hqEarnFood(p,quiz.id);
+   await save();
+   if(who===child&&tab==='base'){hqShow84('pet');note('🥣 Zdobyta porcja karmy!');}
+   return;
+  }
+  return hqShow84('pet');
+ }
+ if(what==='feed'&&hqFeed(p)){
+  await save();
+  if(who===child&&tab==='base'){hqShow84('pet');hqTone84(520);hqEffect84('feed','',true);note('🐾 '+hqRead(p).pet.name+' macha ogonem!');}
+ }
+}
+function hqMountArcade84(){
+ const child=who,p=profile(),owner=data;
+ mountArcade(arcadeId,$('arcade-root'),(run,total)=>{
+  if(data!==owner||who!==child||data.profiles[child]!==p||!hqRecordCrystals(p,run,total))return;
+  const counter=$('hq84-arcade-gems');if(counter)counter.textContent=hqBalances(p).gems;
+  save().catch(error=>note('Nie udało się zapisać kryształów: '+error.message));
+ });
+}
+
 function childRender(){const p=profile();let html=`<section class="card"><div class="row between"><div><h2>${p.name} ${hero(p.hero||(who==='pawel'?'iron':'spider'))[2]}</h2><small>${gradeName(p.grade)} · Baza poziom ${1+Math.floor(p.xp/100)}</small></div><b class="xp" data-wallet82="${who}">🪙 ${p.coins} złotych</b></div><div class="progress"><div style="width:${p.xp%100}%"></div></div></section>`+nav();
 if(tab==='song'){const mission=data.missions.find(m=>m.id===missionId);const song=data.settings.songs.find(x=>x.id===mission?.songId);html+=song?songScreen(song,mission):'<section class="card">Nie znaleziono piosenki.</section>'}
 if(tab==='home')html+=sync81ChildConnectionMarkup()+`<section class="card"><h2>🎯 Twoje misje ${speakBtn('Twoje misje')}</h2>${missionBoard(who)}</section><section class="card"><h3>Ostatnie osiągnięcia</h3>${data.history.filter(h=>h.child===who).slice(0,5).map(h=>`<p>+${h.points} złotych · ${e(h.reason)}</p>`).join('')||'Jeszcze brak.'}</section>`;
@@ -1198,9 +1356,16 @@ if(tab==='learn'&&v37Classic)html+=`<section class="card"><h2>🎓 Akademia wied
 if(tab==='academy'){const subjects=[['polish','📖','Język polski','Gramatyka i ortografia'],['math','🧮','Matematyka','Liczby, działania i figury'],['english','🇬🇧','Język angielski','Słówka i podstawowe zwroty']];const belongs=(l,i)=>l.subject==='english'?'english':i<5?'polish':'math';const chosen=subjects.find(x=>x[0]===academySubject);html+=`<section class="card discovery-head"><h2>🚀 Sala Odkrywców</h2>${chosen?`${button('← Wybierz przedmiot','academy:subjects')}<h3>${chosen[1]} ${chosen[2]}</h3><p>${chosen[3]}. Wybierz zagadnienie, poznaj zasadę i rozwiąż miniwyzwanie.</p><div class="discovery-grid">${LESSONS.map((l,i)=>belongs(l,i)===academySubject?`<button class="discovery-tile" data-action="lesson:open:${i}"><span>${l.icon}</span><b>${l.title}</b><small>${l.subtitle}</small></button>`:'').join('')}</div>`:`<p>Wybierz przedmiot, a potem zagadnienie, którego chcesz się nauczyć.</p><div class="discovery-grid">${subjects.map(([id,icon,title,subtitle])=>`<button class="discovery-tile" data-action="academy:subject:${id}"><span>${icon}</span><b>${title}</b><small>${subtitle}</small></button>`).join('')}</div>`}</section>`;}
 if(tab==='lesson'){const l=LESSONS[lessonIndex]||LESSONS[0];html+=`<section class="card lesson-card">${button('← Zagadnienia','child:academy')}<div class="lesson-art">${l.icon}</div><h2>${l.title}</h2><p class="lesson-story">${e(l.story)}</p><div class="lesson-rule"><strong>Zapamiętaj!</strong><p>${e(l.rule)}</p></div><p><strong>Przykłady:</strong> ${e(l.examples)}</p>${speakBtn(l.story+' '+l.rule+' Przykłady: '+l.examples)}<h3>🎯 Miniwyzwanie</h3><p>${e(l.question)} ${speakBtn(l.question)}</p><div class="discovery-grid">${l.answers.map((x,i)=>button(e(x),'lesson:answer:'+i)).join('')}</div><p id="lesson-feedback" role="status"></p><div class="discovery-playground"><h3>🎮 Zagraj i utrwal wiedzę!</h3><p>Wybierz grę. Każda runda ma inne pytania i kolorowe odpowiedzi.</p><div class="discovery-actions">${button('🔗 Dopasuj pary','discovery:start:match','gold')}${button('⚡ Szybka misja','discovery:start:quick','gold')}</div><div id="discovery-game"></div></div>${button('🔄 Inny temat','child:academy')}</section>`}
 if(tab==='mentor')html+=`<section class="card mentor-room"><div class="mentor-header"><span class="mentor-tag">⚡ STREFA MENTORA</span><h2>Spotkaj swojego supermentora!</h2><p>Wybierz bohatera i zobacz jego supermoc.</p></div><div class="mentor-choices"><button type="button" class="mentor-choice ${p.mentor==='tech'?'selected':''}" data-action="mentor:choose:tech">🦾 Iron Man</button><button type="button" class="mentor-choice ${p.mentor==='fun'?'selected':''}" data-action="mentor:choose:fun">🕸️ Spider-Man</button></div><div class="mentor-stage ${p.mentor==='fun'?'stage-spider':'stage-iron'}" id="mentor-stage" aria-label="Animacja wybranego mentora"><div class="mentor-stars">✦ ✧ ✦</div><div class="mentor-flight-lines"></div><div class="mentor-web" aria-hidden="true"><svg viewBox="0 0 500 280" preserveAspectRatio="none"><path d="M230 170 L480 18 M230 170 L498 85 M230 170 L498 160 M230 170 L488 248 M230 170 L370 0 M230 170 L310 0 M230 170 L490 280 M230 170 L360 280" stroke="white" stroke-width="3" fill="none"/><path d="M332 108 Q370 123 390 80 M355 134 Q415 158 442 110 M350 170 Q420 190 470 175 M345 203 Q400 210 442 234 M285 140 Q315 160 330 95" stroke="white" stroke-width="2" fill="none"/></svg></div><img class="mentor-figure" src="assets/art/${p.mentor==='fun'?'spider':'iron'}.svg" alt="${p.mentor==='fun'?'Spider-Man':'Iron Man'}"><div class="mentor-floor"></div><div class="mentor-power-caption">${p.mentor==='fun'?'🕸️ Uwaga, leci sieć!':'🚀 Start silników! Iron Man leci!'}</div></div><div class="mentor-talk"><h3>${p.mentor==='fun'?'🕷️ Spider-Man mówi:':'🦾 Iron Man mówi:'}</h3><p>${p.mentor==='fun'?'Hej! Masz pytanie? Dawaj, zanim znowu zaplączę się w sieć!':'System gotowy. Zadaj pytanie, młody wynalazco.'}</p></div><p class="muted">Mentor korzysta z AI Gemini. Możesz pytać o naukę i superbohaterów.</p><label for="question">Twoje pytanie</label><input id="question" placeholder="Np. Co to rzeczownik? Jak mnożyć?"><div class="row">${button('💡 Wyjaśnij','mentor:answer','gold')}${button('🎙️ Zapytaj głosem','mic')}</div><p id="mentoranswer" class="guide">Zapytaj o rzeczowniki, czasowniki, sylaby, dodawanie, odejmowanie lub mnożenie.</p>${button('🔊 Odczytaj wyjaśnienie','mentor:speak')}</section>`;
-if(tab==='base'){html+=`<section class="card"><h3>🦸 Wybierz swojego bohatera</h3><p>Możesz zmienić bohatera w każdej chwili.</p>${heroPicker(who)}</section>`+baseMarkup(p,button)+`<section class="card"><h2>🎮 Salon gier Avengersów</h2><p>Gry są dostępne także bez wydawania złotych.</p>${button('🧩 Prawdziwa krzyżówka','game:crossword','gold')}${button('🏆 Quiz superbohatera','game:quiz')}${button('🧠 Zagadki logiczne','game:logic')}<div class="arcade-shop"><h3>🕹️ Sektor gier</h3><p>Odblokuj grę raz za złote zdobyte w misjach. Po zakupie możesz grać bez limitu.</p>${ARCADE_GAMES.map(g=>`<div class="arcade-offer"><div><b>${g.icon} ${g.title}</b><small>${g.desc}</small></div>${(p.arcadeUnlocked||[]).includes(g.id)?button('▶ Graj','arcade:open:'+g.id,'gold'):button('🔓 '+g.cost+' złotych','arcade:buy:'+g.id,affordable82(p,g)?'gold':'alt')}</div>`).join('')}</div></section>`}
+if(tab==='base'){
+ html+=hqMarkup(p,who,hqViews84.get(who)||'classic',button)+hqRoomPanel84(p);
+ html+=`<details class="card"><summary>🦸 Wybierz swojego bohatera</summary>${heroPicker(who)}</details>`;
+}
+if(tab==='home')html=hqChoices(button)+html;
+if(hqReturn84&&['learn','subjectmissions','books','reader'].includes(tab))html=button('← Wróć do bazy','hq:back','alt')+html;
 if(tab==='crossword'){html+=crosswordView()}
-if(tab==='arcade'){html+=`<section class="card">${button('← Baza Avengersów','child:base')}<h2>🕹️ ${e(ARCADE_GAMES.find(x=>x.id===arcadeId)?.title||'Gra')}</h2><div id="arcade-root"></div><p class="muted">Graj dla zabawy — bez automatycznego zarabiania złotych.</p></section>`}
+if(tab==='arcade'){
+ html+=`<section class="card">${button('← Centrum Rozrywki','hq:arcade','alt')}<h2>🕹️ ${e(ARCADE_GAMES.find(x=>x.id===arcadeId)?.title||'Gra')}</h2><p>💎 Portfel: <strong id="hq84-arcade-gems">${hqBalances(p).gems}</strong> kryształów</p><div id="arcade-root"></div></section>`;
+}
 if(tab==='learn'){
   if(v37Classic){
    html+=`<div class="v37-return">
@@ -1210,7 +1375,7 @@ if(tab==='learn'){
    html+=trainingFlowMarkup();
   }
   if(avengersRun)html+=avengersPanel();
- }layout('Akademia '+p.name,html);if(tab==='arcade')mountArcade(arcadeId,$('arcade-root'));if(tab==='learn'&&v37Classic)newExercise();if(tab==='trace')drawTrace()}
+ }layout('Akademia '+p.name,html);if(tab==='base')mountBaseScene84(document.querySelector('[data-hq84-scene]'));if(tab==='arcade')hqMountArcade84();if(tab==='learn'&&v37Classic)newExercise();if(tab==='trace')drawTrace()}
 const CROSSWORDS=[
  {word:'KOT',clue:'Miauczy i mruczy',r:0,c:2,dir:'v'},
  {word:'DOM',clue:'Mieszkamy w nim',r:1,c:1,dir:'h'},
@@ -1404,6 +1569,7 @@ async function exportBackup(){const records=(await allRecords()).filter(([k])=>!
 async function importBackup(){const f=$('backupfile').files[0];if(!f)return note('Wybierz plik kopii.');try{const raw=JSON.parse(await f.text());if(raw.format!=='academy-backup-1'||!Array.isArray(raw.records)||!raw.records.some(([k,v])=>k==='state'&&v.profiles?.pawel&&v.profiles?.patryk))throw Error('To nie jest poprawna kopia');if(!confirm('Zastąpić wszystkie lokalne dane tą kopią?'))return;const records=[];for(const [k,v] of raw.records){if(v?.__blob){const res=await fetch(v.__blob);records.push([k,await res.blob()])}else records.push([k,v])}await replaceRecords(records);data=await get('state');role='';render();note('Przywrócono pełną kopię.')}catch(err){note('Nie udało się przywrócić kopii: '+err.message)}}
 async function handle(action,target){
  if(action==='academy:update')return checkAcademyUpdate(target);
+ if(action.startsWith('hq:')){try{return await hqAction84(action,target);}catch(error){return note('Nie udało się zapisać zmiany: '+error.message);}}
  if(action.startsWith('sync78:'))return sync78Action(action,target);
  const linked=syncAdapter.device?.();if(linked?.role==='child'&&(action.startsWith('admin:')||action.startsWith('test:enter')||action.startsWith('enter:')&&action!=='enter:'+linked.child))return note('Ten telefon jest połączony z profilem dziecka.');
  if(action.startsWith('test:start:'))return sync78AssignedTest(action.slice(11));
@@ -1471,7 +1637,7 @@ if(action==='v37:play'){
  if(target?.isConnected===false||who!==child||trainingStep!==step||v37Subject!==subject)return;
  trainingStep='outside-quiz';
  avengersRun={
-  items,
+  items,subject,
   i:0,points:0,done:false,good:false
  };
  v37Classic=false;
@@ -1507,11 +1673,12 @@ if(action==='av36:next'&&avengersRun&&avengersRun.done){
   const independent=run.items.filter(q=>q.correct82&&!q.v77Revealed).length;
   const amount=trainingMode==='test'?(independent?(run.points/run.items.length>=.7?Math.max(5,Math.min(20,independent*2)):Math.min(3,independent)):0):Math.min(12,independent);
   run.rewardId82??=uid();const key='v82-outside:'+who+':'+run.rewardId82;
+  if(run.subject&&trainingMode!=='test')await hqToken84(who,key,run.subject,independent===run.items.length);
   if(amount>0){const ok=await grant(who,amount,'Wyzwanie poza podręcznikiem',key);run.rewardCoins82=ok?amount:Number(data.history.find(h=>h.key===key)?.points)||0;}else run.rewardCoins82=0;
  }
  return render();
 }
-const [a,b,c]=action.split(':');try{if(action==='exit'){if(testMode){data=testSnapshot;testSnapshot=null;testMode=false;role='admin';who='';tab='home';adminTab='test';return render()}role='';who='';tab='home';return render()}if(a==='enter'){if(b==='admin'){if(!data.parentPin){const pin=prompt('Ustaw PIN mamy (minimum 4 cyfry)');if(!/^\d{4,8}$/.test(pin||''))return note('Wymagany PIN od 4 do 8 cyfr');data.parentPin=pin;await save()}else if(prompt('PIN mamy')!==data.parentPin)return note('Nieprawidłowy PIN');role='admin';adminTab='home'}else{const p=data.profiles[b];if(p.pin&&prompt('PIN profilu '+p.name)!==p.pin)return note('Nieprawidłowy PIN');role='child';who=b;tab='home'}return render()}if(a==='test'&&b==='enter'){if(!['pawel','patryk'].includes(c))return;testSnapshot=data;data=structuredClone(data);testMode=true;for(const id of ['pawel','patryk']){const p=data.profiles[id];p.coins=99999;p.arcadeUnlocked=ARCADE_GAMES.map(g=>g.id);const base=migrateBase(p);base.owned=BASE_ITEMS.map(i=>i.id)}role='child';who=c;tab='base';return render()}if(a==='admin'){adminTab=b;return render()}if(a==='child'){tab=b;if(b==='learn'){v37Classic=false;avengersRun=null;trainingStep='subject';trainingSelectedPages=new Set()}return render()}if(action==='book:add')return runAdminAction(target,'Dodaje ksiazke…',async()=>{
+const [a,b,c]=action.split(':');try{if(action==='exit'){hqSessions84.delete(who);hqReturn84=false;hqPanel84='';if(testMode){data=testSnapshot;testSnapshot=null;testMode=false;role='admin';who='';tab='home';adminTab='test';return render()}role='';who='';tab='home';return render()}if(a==='enter'){if(b==='admin'){if(!data.parentPin){const pin=prompt('Ustaw PIN mamy (minimum 4 cyfry)');if(!/^\d{4,8}$/.test(pin||''))return note('Wymagany PIN od 4 do 8 cyfr');data.parentPin=pin;await save()}else if(prompt('PIN mamy')!==data.parentPin)return note('Nieprawidłowy PIN');role='admin';adminTab='home'}else{const p=data.profiles[b];if(p.pin&&prompt('PIN profilu '+p.name)!==p.pin)return note('Nieprawidłowy PIN');role='child';who=b;tab='home';hqPanel84='';hqReturn84=false;hqViews84.set(who,'classic')}return render()}if(a==='test'&&b==='enter'){if(!['pawel','patryk'].includes(c))return;testSnapshot=data;data=structuredClone(data);testMode=true;for(const id of ['pawel','patryk']){const p=data.profiles[id];p.coins=99999;p.arcadeUnlocked=ARCADE_GAMES.map(g=>g.id);const base=migrateBase(p);base.owned=BASE_ITEMS.map(i=>i.id)}role='child';who=c;tab='base';return render()}if(a==='admin'){adminTab=b;return render()}if(a==='child'){if(b==='base')return hqShow84();hqSessions84.delete(who);hqReturn84=false;tab=b;if(b==='learn'){v37Classic=false;avengersRun=null;trainingStep='subject';trainingSelectedPages=new Set()}return render()}if(action==='book:add')return runAdminAction(target,'Dodaje ksiazke…',async()=>{
  if(!$('bsubject')?.value)throw Error('Najpierw zaznacz przedmioty w profilu dziecka.');
  const chosenKind=$('btype')?.value||'Podręcznik';const chosenSubject=$('bsubject')?.value||'Materiał';const chosenPart=$('bpart')?.value||'1';const title=chosenKind==='Inne'?$('btitle')?.value.trim():chosenSubject+' — '+chosenKind+' — część '+chosenPart;if(!title)return note('Wpisz nazwę materiału.');
  const child=$('bchild').value,subject=$('bsubject').value,part=$('bpart').value;
@@ -1636,10 +1803,23 @@ if(action==='page:prev'||action==='page:next')return runAdminAction(target,'Zapi
  pageId=next.id;render();note('✅ Zapisano zmiany. Strona '+next.number+'.');
 });if(action==='page:delete'){if(!confirm('Usunąć tę stronę?'))return;const pages=sortedBookPages(bookId),pos=pages.findIndex(x=>x.id===pageId),p=pages[pos];if(!p)return;await del('image:'+p.imageId);data.bookPages=data.bookPages.filter(x=>x.id!==pageId);const next=pages[pos+1]||pages[pos-1];await save();if(next){pageId=next.id;adminTab='page'}else adminTab='book';return render()}if(action==='page:replace'||action==='page:replace-camera'){const f=$(action==='page:replace-camera'?'replacecamera':'replacefile')?.files?.[0];if(!f)return note('Wybierz zdjęcie');const p=data.bookPages.find(p=>p.id===pageId);await put('image:'+p.imageId,await compress(f));p.reviewed=false;await save();return render()}if(action==='page:ai'){const p=data.bookPages.find(p=>p.id===pageId);if(!p)return note('Nie znaleziono strony');try{const b=data.books.find(x=>x.id===p.bookId);if(!await ensureNumberLocation(b))return;await saveEditedPage();await recognizePageAI(p,$('ocrlang')?.value||languageOfBook(b),true);render();note('✅ Odczyt AI gotowy. Sprawdź tekst i numer strony.')}catch(err){note('❌ Nie udało się odczytać zdjęcia. Wcześniejszy tekst zachowano. '+err.message)}return}if(action==='page:ocr'){const p=data.bookPages.find(p=>p.id===pageId);if(!p)return note('Nie znaleziono strony');const lang=$('ocrlang')?.value||'pol';try{await recognizePage(p,lang);render();note('Tekst odczytany. Sprawdź go i zapisz poprawki.')}catch(err){note(err.message)}return}
 if(action.startsWith('profile:save:')){const p=data.profiles[c],pin=$('pin_'+c).value;if(pin&&!/^\d{4,8}$/.test(pin))return note('PIN musi mieć 4–8 cyfr');p.grade=$('grade_'+c).value;p.subjects=[...document.querySelectorAll('[data-subject-for="'+c+'"]:checked')].map(x=>x.value);const extra=$('newsubject_'+c).value.trim();if(extra&&!p.subjects.some(x=>x.toLowerCase()===extra.toLowerCase()))p.subjects.push(extra);p.pin=pin;await save();return note('Zapisano profil')}if(a==='hero'&&b==='set'){const id=c,selected=action.split(':')[3];if(!HEROES.some(h=>h[0]===selected))return;data.profiles[id].hero=selected;await save();return render()}if(action==='pin:change'){const pin=$('parentpin').value;if(!/^\d{4,8}$/.test(pin))return note('PIN musi mieć 4–8 cyfr');data.parentPin=pin;await save();return note('Zmieniono PIN')}if(action==='settings:save'){data.settings.xpPractice=Math.max(0,Math.min(30,Number($('xpPractice').value)));data.settings.dailyPracticeLimit=Math.max(0,Math.min(20,Number($('dailyLimit').value)));data.settings.rate=Math.max(.5,Math.min(1.5,Number($('rate').value)));await save();return note('Zapisano ustawienia')}if(action.startsWith('song:open:')){missionId=action.slice(10);tab='song';return render()}if(action.startsWith('song:line:')){const lines=[...document.querySelectorAll('.song-line')];lines.forEach((x,i)=>x.classList.toggle('active',i===Number(c)));return}if(action==='song:add'){const title=$('songtitle').value,url=$('songurl').value;if(!/^https:\/\/(www\.)?(youtube\.com|youtu\.be)\//.test(url))return note('Podaj prawidłowy link YouTube');const lyrics=$('songlyrics')?.value||'';const id=youtubeId(url);if(!id)return note('Podaj prawidłowy adres filmu YouTube');data.settings.songs.push({id:uid(),title,url,lyrics});const song=data.settings.songs.at(-1);data.missions.push({id:uid(),child:$('songchild').value,type:'song',songId:song.id,title:'🎵 Naucz się piosenki: '+title,subject:'Muzyka',status:'todo',points:20,requirePhoto:false,repeat:'none',created:date()});await save();return render()}if(action.startsWith('song:delete:')){data.settings.songs.splice(Number(c),1);await save();return render()}if(action==='backup:export')return exportBackup();if(action==='backup:import')return importBackup();if(action.startsWith('reader:')&&action!=='reader:ocr'){bookId=b;pageId='';tab='reader';return render()}if(action==='reader:ai'){const pg=data.bookPages.find(p=>p.id===($('readerpage')?.value||pageId));if(!pg)return note('Wybierz stronę');try{await recognizePageAI(pg,$('ocrlang')?.value||'pol');pageId=pg.id;render();note('Odczyt AI gotowy. Sprawdź tekst.')}catch(err){note(err.message)}return}if(action==='reader:ocr'){const pg=data.bookPages.find(p=>p.id===($('readerpage')?.value||pageId));if(!pg)return note('Wybierz stronę');try{await recognizePage(pg,$('ocrlang')?.value||'pol');pageId=pg.id;render();note('Tekst rozpoznany — możesz go teraz odsłuchać.')}catch(err){note(err.message)}return}
-if(action==='homework:create'){const p=data.bookPages.find(p=>p.id===$('readerpage').value),b=data.books.find(b=>b.id===bookId),tasks=$('tasks').value.trim();if(!p||!tasks)return note('Wybierz stronę i wpisz zadania');data.missions.push({id:uid(),child:who,type:'homework',title:'Zadania '+tasks,subject:b.subject,bookId:b.id,page:p.number,status:'todo',points:20,requirePhoto:true,repeat:'none',created:date()});await save();tab='home';return render()}if(action==='academy:subjects'){academySubject='';tab='academy';return render()}if(action.startsWith('academy:subject:')){academySubject=c;tab='academy';return render()}if(action.startsWith('lesson:open:')){lessonIndex=Number(c);tab='lesson';return render()}
-if(action.startsWith('discovery:start:'))return discoveryStart(c);if(action==='discovery:restart')return discoveryStart(discoveryGame?.mode||'match');if(action.startsWith('discovery:match:'))return discoveryAnswer(discoveryGame?.items[discoveryGame.index]?.[1]===discoveryGame?.items[Number(c)]?.[1]?discoveryGame.items[discoveryGame.index][1]:'');if(action==='discovery:quick')return discoveryAnswer(target.dataset.answer);if(action.startsWith('lesson:answer:')){const l=LESSONS[lessonIndex],ok=Number(c)===l.correct,el=$('lesson-feedback');if(!el)return;el.textContent=ok?'🎉 Świetnie! '+l.why:'💡 Spróbuj ponownie. '+l.rule;el.className=ok?'answer-ok':'answer-retry';speak(el.textContent,'pl-PL',profile().mentor);return}
+if(action==='homework:create'){const p=data.bookPages.find(p=>p.id===$('readerpage').value),b=data.books.find(b=>b.id===bookId),tasks=$('tasks').value.trim();if(!p||!tasks)return note('Wybierz stronę i wpisz zadania');data.missions.push({id:uid(),child:who,type:'homework',title:'Zadania '+tasks,subject:b.subject,bookId:b.id,page:p.number,status:'todo',points:20,requirePhoto:true,repeat:'none',created:date()});await save();tab='home';return render()}if(action==='academy:subjects'){academySubject='';tab='academy';return render()}if(action.startsWith('academy:subject:')){academySubject=c;tab='academy';return render()}if(action.startsWith('lesson:open:')){lessonIndex=Number(c);hqLessonAttempts84.delete(who+':'+lessonIndex);tab='lesson';return render()}
+if(action.startsWith('discovery:start:'))return discoveryStart(c);if(action==='discovery:restart')return discoveryStart(discoveryGame?.mode||'match');if(action.startsWith('discovery:match:'))return discoveryAnswer(discoveryGame?.items[discoveryGame.index]?.[1]===discoveryGame?.items[Number(c)]?.[1]?discoveryGame.items[discoveryGame.index][1]:'');if(action==='discovery:quick')return discoveryAnswer(target.dataset.answer);if(action.startsWith('lesson:answer:')){const l=LESSONS[lessonIndex],ok=Number(c)===l.correct,el=$('lesson-feedback');if(!el)return;el.textContent=ok?'🎉 Świetnie! '+l.why:'💡 Spróbuj ponownie. '+l.rule;el.className=ok?'answer-ok':'answer-retry';speak(el.textContent,'pl-PL',profile().mentor);
+ const id=who+':'+lessonIndex,subject=l.subject==='english'?'angielski':lessonIndex<5?'polski':'matematyka';
+ if(!ok)hqLessonAttempts84.add(id);
+ if(ok&&!hqLessonAttempts84.has(id))await hqToken84(who,'lesson:'+lessonIndex,subject,true);
+ return}
 if(action.startsWith('arcade:buy:')){const g=ARCADE_GAMES.find(x=>x.id===c),p=profile();p.arcadeUnlocked??=[];const result=purchase82(p,g,p.arcadeUnlocked);if(!result.ok)return note(result.message);await save();return render()}
-if(action.startsWith('arcade:open:')){if(!testMode&&!(profile().arcadeUnlocked||[]).includes(c))return note('Najpierw odblokuj grę');arcadeId=c;tab='arcade';return render()}
+if(action.startsWith('arcade:open:')){
+ const p=profile(),child=who;
+ if(!p||!ARCADE_GAMES.some(game=>game.id===c))return;
+ if(!testMode&&!p.arcadeUnlocked?.includes(c)&&!hqSessions84.has(child)){
+  if(!hqSpendToken(p))return note('Najpierw zdobądź żeton za bezbłędny trening.');
+  hqSessions84.add(child);await save();
+ }
+ if(who!==child)return;
+ arcadeId=c;tab='arcade';return render();
+}
 if(action==='game:crossword'){tab='crossword';return render()}if(action==='game:quiz'){tab='learn';render();trainingChooseKind('quiz');return}if(action==='game:logic'){tab='learn';render();trainingChooseKind('logic');return}if(action==='crossword:check')return checkCrossword();if(action==='exercise:new')return newExercise();if(action==='book:listen')return checkBookReading();if(action==='dictation:play')return speak(practice?.answer||'','pl-PL',profile().mentor,.8);if(action==='dictation:check'){const v=($('dictationanswer')?.value||'').trim().toLocaleLowerCase('pl-PL'),ok=v===practice.answer.toLocaleLowerCase('pl-PL');const fb=$('feedback');if(practiceAnswered)return;if(!ok){fb.textContent=mentorLine(profile(),false);speak(fb.textContent,'pl-PL',profile().mentor);return}practiceAnswered=true;fb.textContent=mentorLine(profile(),true);$('dictationanswer').disabled=true;const key='practice:'+who+':'+date(),count=data.history.filter(h=>h.child===who&&h.key.startsWith(key)).length;if(count<Number(data.settings.dailyPracticeLimit||3)&&!practice.v77Revealed){await grant(who,Number(data.settings.xpPractice)||5,'Trening: '+practice.kind,key+':'+count);fb.textContent+=' +'+data.settings.xpPractice+' złotych'}else fb.textContent+=practice.v77Revealed?' Zadanie z pomocą — bez pieniędzy.':' Dzienny limit nagród został wykorzystany.';speak(fb.textContent,'pl-PL',profile().mentor);return}if(action.startsWith('exercise:check:'))return checkExercise(Number(c));if(action==='exercise:pronounce')return practiceEnglishSpeech();if(action==='exercise:spell')return spellEnglish77(practice.word);if(action==='trace:clear')return drawTrace();if(action==='trace:submit')return traceSubmit();if(action==='mentor:answer'){
  const q=String($('question')?.value||'').trim();
  if(!q)return note('Najpierw wpisz pytanie.');
@@ -1661,7 +1841,7 @@ if(action==='game:crossword'){tab='crossword';return render()}if(action==='game:
   if(isCurrent()){console.warn('Mentor AI:',error);output.textContent=AI_FRIENDLY_MESSAGE}
  }finally{finishAIRequest('mentor',controller)}
  return;
-}if(action.startsWith('mentor:choose:')){const style=action.split(':')[2];if(!['tech','fun'].includes(style))return;profile().mentor=style;await save();render();return}if(action==='mentor:speak'){const out=$('mentoranswer');return out.dataset.spellWord?spellEnglish77(out.dataset.spellWord,{prefix:out.textContent}):speak(out.textContent,'pl-PL',profile().mentor);}if(a==='base'&&b==='buy'){const item=BASE_ITEMS.find(x=>x?.id===c),p=profile(),base=migrateBase(p),result=purchase82(p,item,base.owned);if(!result.ok)return note(result.message);await save();speak('Brawo! Odblokowano '+item.name,'pl-PL',p.mentor);return render()}if(action==='mic')return microphone();}catch(err){console.error(err);note('Nie udało się wykonać operacji: '+err.message)}}
+}if(action.startsWith('mentor:choose:')){const style=action.split(':')[2];if(!['tech','fun'].includes(style))return;profile().mentor=style;await save();render();return}if(action==='mentor:speak'){const out=$('mentoranswer');return out.dataset.spellWord?spellEnglish77(out.dataset.spellWord,{prefix:out.textContent}):speak(out.textContent,'pl-PL',profile().mentor);}if(a==='base'&&b==='buy'){const item=BASE_ITEMS.find(x=>x?.id===c),p=profile(),base=migrateBase(p),result=purchase82(p,item,base.owned);if(!result.ok)return note(result.message);await save();render();speak('Brawo! Odblokowano '+item.name,'pl-PL',p.mentor);return}if(action==='mic')return microphone();}catch(err){console.error(err);note('Nie udało się wykonać operacji: '+err.message)}}
 function helpForQuestion(question){
  const q=String(question||'').toLocaleLowerCase('pl-PL').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
  if(/(test|sprawdzian|kartkowk)/.test(q))return 'Aby zrobić test, wybierz zakładkę Trening, następnie przedmiot i ćwiczenie Test lub Quiz. Jeśli test jest zadany przez mamę, otwórz Misje i wybierz tę misję.';

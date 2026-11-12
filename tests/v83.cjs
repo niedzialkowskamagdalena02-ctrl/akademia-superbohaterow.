@@ -55,7 +55,8 @@ async function main(){
  console.log('PASS Przy braku tłumaczenia aplikacja używa gotowych pytań i zachowuje stary wpis');
 
  const e=fixture(),btn=e.element();btn.textContent='🔄 Aktualizuj Akademię';
- let navigated=null,remote=83;
+ const current=Number(fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8').match(/name="academy-release" content="(\d+)"/)[1]);
+ let navigated=null,remote=current;
  e.ctx.window.location={href:'https://academy.example/root/#profile',replace:url=>{navigated=url}};
  e.ctx.fetch=async(url,{cache})=>{
   assert.equal(cache,'no-store');
@@ -66,7 +67,7 @@ async function main(){
  };
  await e.ctx.outside83.check(btn);
  assert.equal(navigated,null);assert.match(e.ids.notice.textContent,/aktualną wersję/);
- remote=84;await e.ctx.outside83.check(btn);
+ remote=current+1;await e.ctx.outside83.check(btn);
  assert.match(navigated,/^https:\/\/academy\.example\/root\/\?academy-update=/);
  assert.equal(btn.disabled,false);
  e.ctx.fetch=async()=>{throw Error('offline')};navigated=null;

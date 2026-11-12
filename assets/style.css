@@ -957,3 +957,46 @@ button:not(:disabled):not(.tr72-subject-card):not(.mic):active,label.v73-file-co
 .subject82-cue{font-size:clamp(1rem,4.5vw,1.5rem);line-height:1.4;font-weight:750;color:#123e53;background:linear-gradient(135deg,#d6f1ff,#d7f4e2);border:2px solid #67bcb6;border-radius:18px;padding:14px;white-space:normal;overflow-wrap:anywhere;max-width:100%}.n81-match-column .subject82-cue{font-size:clamp(.9rem,3.3vw,1.2rem);padding:8px}.tutor82-consent{background:#fff4c7;color:#173449;border:2px solid #ddac38;border-radius:16px;padding:14px}.tutor82-consent button{display:block;width:100%;margin:8px 0}.base-item button:disabled{opacity:.65;cursor:default;box-shadow:none}
 
 .study82-card{text-align:center;padding:20px;background:linear-gradient(145deg,#d5eeff,#c4efec,#d7f4d4);color:#153f52;border:2px solid #63b5af;border-radius:22px}.study82-card svg,.study82-card img{width:120px;max-height:140px}.study82-card h3{font-size:2.5rem;margin:14px 0}.study82-card p{line-height:1.5}.study82-model{background:#fff3c4;color:#2b3c4b;border:2px solid #d7ae43;border-radius:14px;padding:14px;font-size:1.2rem}
+
+/* Baza Avengersów */
+.hq84,.hq84-panel{margin:18px 0;color:#e8f2ff;background:#101c36;border:1px solid #476391;border-radius:24px;padding:clamp(10px,3vw,22px)}
+.hq84-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.hq84 h2,.hq84-panel h3{margin:0 0 10px;color:#eaf7ff}
+.hq84 h2{font-size:clamp(1.45rem,5vw,2.1rem)}
+.hq84-balances,.hq84-rooms,.hq84-shortcuts,.hq84-answers{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.hq84-balances{margin:10px 0 12px}
+.hq84-balances span{border:1px solid #49658e;background:#1c3152;border-radius:999px;padding:5px 9px;font-size:13px}
+.hq84-stage{position:relative;isolation:isolate;overflow:hidden;border:1px solid #5a83bb;border-radius:17px;background:#243d72}
+.hq84-stage canvas{display:block;width:100%;height:clamp(280px,61vw,520px);touch-action:none}
+.hq84-stage[data-view=walk] canvas{height:clamp(330px,57vh,590px)}
+.hq84-hotspots{position:absolute;inset:0;pointer-events:none}
+.hq84 .hq84-hotspots button:not([hidden]){position:absolute;display:block;transform:translate(-50%,-50%);padding:6px 9px;min-height:33px;white-space:nowrap;color:#fff;background:#101a34ed;border:1px solid #8bdccf;border-radius:10px;font-size:12px;font-weight:750;pointer-events:auto;box-shadow:0 4px 14px #020d27ac}
+.hq84-hotspots button[hidden]{display:none!important}
+.hq84 .hq84-hotspots button[data-action="hq:wallet"]{color:#201c29;background:#ffde8e;border-color:#fff0c3}
+.hq84-drive{position:absolute;left:10px;bottom:10px;display:grid;grid-template-columns:repeat(3,44px);gap:3px;touch-action:none;user-select:none}
+.hq84 .hq84-drive button{min-height:44px;padding:0;background:#0c1c3cdd;border:1px solid #a0c5e8;color:#fff;font-size:17px;touch-action:none}
+.hq84-drive button:first-child{grid-column:2;grid-row:1}
+.hq84-drive button:nth-child(2){grid-column:1;grid-row:2}
+.hq84-drive button:nth-child(3){grid-column:2;grid-row:2}
+.hq84-drive button:nth-child(4){grid-column:3;grid-row:2}
+.hq84-hint{font-size:.84rem;color:#bed4f0;margin:8px 1px 12px}
+.hq84 .hq84-rooms button{background:#1b2e4e;color:#c9dcfa;border:1px solid #3d567c;min-height:37px;padding:7px 9px;font-size:12px}
+.hq84 .hq84-rooms button[aria-pressed=true]{background:#46628d;color:#fff;border-color:#a5c7ef}
+.hq84-shortcuts{padding-top:10px}
+.hq84 .hq84-shortcuts button,.hq84-panel .hq84-shortcuts button{min-height:41px;padding:7px 11px;font-size:.86rem}
+.hq84-panel{scroll-margin-top:12px}
+.hq84-panel > button:first-child{float:right;min-height:35px;font-size:.84rem}
+.hq84-wallet{display:grid;grid-template-columns:1fr auto;gap:10px;margin:18px 0}
+.hq84-wallet dd{margin:0;font-weight:800}
+.hq84-catalog{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(155px,100%),1fr));gap:10px;margin-top:14px}
+.hq84-catalog article{display:grid;grid-template-rows:64px 1fr auto;gap:5px;align-items:start;background:#233656;border:1px solid #506693;border-radius:14px;padding:10px;min-width:0}
+.hq84-catalog article img{width:100%;height:64px;object-fit:contain}
+.hq84-catalog article span{font-size:2.3rem;text-align:center}
+.hq84-catalog article h4{margin:3px 0 8px;color:#e9f2ff;font-size:1rem;overflow-wrap:anywhere}
+.hq84-catalog article button{width:100%;min-height:38px;padding:6px 4px;margin:2px 0;font-size:.82rem}
+.hq84-catalog article button:disabled,.hq84-panel .arcade-offer button:disabled{opacity:.62;cursor:default}
+.hq84-choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.hq84-choices button{min-height:clamp(76px,23vw,130px);align-content:end;box-shadow:inset 0 -35px 40px #081323d9,0 4px 14px #06112540;color:white;text-shadow:0 1px 3px #081123;border:1px solid #a1c5e5;font-weight:800}
+.hq84-choices button[data-action="hq:view:classic"]{background:linear-gradient(0deg,#10192bba,#121a4d25),url("hq/overview.webp") center 50% / cover}
+.hq84-choices button[data-action="hq:view:walk"]{background:linear-gradient(0deg,#10192bba,#121a4d25),url("hq/walk.webp") center 54% / cover}
+.hq84-answers button{flex:1 1 100px;min-height:44px}

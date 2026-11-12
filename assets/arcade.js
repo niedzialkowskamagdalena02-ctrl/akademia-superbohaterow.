@@ -1,7 +1,9 @@
 let timer=null,cleanup=()=>{};
 export function stopArcade(){if(timer!==null)clearInterval(timer);timer=null;cleanup();cleanup=()=>{}}
-export function mountArcade(kind,root){stopArcade();if(!root)return;const W=10,H=16,cell=24;root.innerHTML=`<p class="arcade-status" id="arcade-status">Wynik: 0</p><canvas class="arcade-screen" id="arcade-canvas" width="${W*cell}" height="${H*cell}" style="aspect-ratio:${W}/${H};max-width:260px" aria-label="Plansza gry"></canvas><div class="arcade-dpad" role="group" aria-label="Sterowanie kierunkami"><button class="dpad-up" data-dir="up" aria-label="W górę lub obrót">▲</button><button class="dpad-left" data-dir="left" aria-label="W lewo">◀</button><span class="dpad-center" aria-hidden="true">✦</span><button class="dpad-right" data-dir="right" aria-label="W prawo">▶</button><button class="dpad-down" data-dir="down" aria-label="W dół">▼</button></div><div class="arcade-controls"><button id="arcade-restart">↻ Nowa gra</button><button id="arcade-pause">⏸ Pauza</button></div><p class="muted">Sterowanie przyciskami na ekranie lub strzałkami klawiatury.</p>`;
-const canvas=root.querySelector('canvas'),ctx=canvas.getContext('2d'),status=root.querySelector('#arcade-status'),pauseButton=root.querySelector('#arcade-pause');let score=0,over=false,paused=false;
+export function mountArcade(kind,root,onCrystals=()=>{}){stopArcade();if(!root)return;const W=10,H=16,cell=24;root.innerHTML=`<p class="arcade-status" id="arcade-status">Wynik: 0</p><canvas class="arcade-screen" id="arcade-canvas" width="${W*cell}" height="${H*cell}" style="aspect-ratio:${W}/${H};max-width:260px" aria-label="Plansza gry"></canvas><div class="arcade-dpad" role="group" aria-label="Sterowanie kierunkami"><button class="dpad-up" data-dir="up" aria-label="W górę lub obrót">▲</button><button class="dpad-left" data-dir="left" aria-label="W lewo">◀</button><span class="dpad-center" aria-hidden="true">✦</span><button class="dpad-right" data-dir="right" aria-label="W prawo">▶</button><button class="dpad-down" data-dir="down" aria-label="W dół">▼</button></div><div class="arcade-controls"><button id="arcade-restart">↻ Nowa gra</button><button id="arcade-pause">⏸ Pauza</button></div><p class="muted">Sterowanie przyciskami na ekranie lub strzałkami klawiatury.</p>`;
+const canvas=root.querySelector('canvas'),ctx=canvas.getContext('2d'),status=root.querySelector('#arcade-status'),pauseButton=root.querySelector('#arcade-pause');let score=0,over=false,paused=false,runId,crystals=0;
+const startRun=()=>{runId=globalThis.crypto?.randomUUID?.()||Date.now().toString(36)+Math.random().toString(36).slice(2);crystals=0};
+const earn=n=>{crystals+=n;onCrystals(runId,crystals)};
 const paint=(x,y,color)=>{ctx.fillStyle=color;ctx.fillRect(x*cell+1,y*cell+1,cell-2,cell-2)};
 const bg=()=>{ctx.fillStyle='#0a1731';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.strokeStyle='#213454';for(let x=0;x<=W;x++){ctx.beginPath();ctx.moveTo(x*cell,0);ctx.lineTo(x*cell,H*cell);ctx.stroke()}for(let y=0;y<=H;y++){ctx.beginPath();ctx.moveTo(0,y*cell);ctx.lineTo(W*cell,y*cell);ctx.stroke()}};
 let move=()=>{},reset=()=>{},updatePause=()=>{};
@@ -16,7 +18,7 @@ const draw=()=>{const grd=ctx.createLinearGradient(0,0,canvas.width,canvas.heigh
 const hud=()=>{status.textContent=`🚀 Wynik: ${score} · 💎 Kryształy: ${stars} · ⭐ Poziom: ${level} · 🐍 Długość: ${snake.length}${paused?' · Pauza':timer===null?' · Naciśnij ↑, ↓ lub →, aby zacząć.':''}`};
 reset=()=>{
  if(timer!==null)clearInterval(timer);
- timer=null;score=0;stars=0;level=1;ticks=0;over=false;paused=false;
+ timer=null;startRun();score=0;stars=0;level=1;ticks=0;over=false;paused=false;
  snake=[{x:4,y:7},{x:3,y:7},{x:2,y:7}];dir={x:1,y:0};next=dir;
  obstacles=[];food=null;bonus=null;food=freeCell();
  pauseButton.textContent='⏸ Pauza';hud();draw();
@@ -41,9 +43,9 @@ const tick=()=>{
  snake.unshift(head);
  if(!grow)snake.pop();
  if(eat){
-  score+=10;stars++;food=freeCell();
+  score+=10;stars++;earn(1);food=freeCell();
   if(stars%4===0){level++;const spot=freeCell();if(spot)obstacles.push(spot)}
- }else if(superEat){score+=40;bonus=null}
+ }else if(superEat){score+=40;earn(2);bonus=null}
  if(ticks%35===0&&!bonus)bonus=freeCell();
  if(ticks%35===12)bonus=null;
  hud();draw();
@@ -55,8 +57,8 @@ const shapes=[[[1,1,1,1]],[[1,1],[1,1]],[[0,1,0],[1,1,1]],[[1,0,0],[1,1,1]],[[0,
 const newPiece=()=>{const a=shapes[Math.floor(Math.random()*shapes.length)];return {shape:a.map(r=>[...r]),x:Math.floor((W-a[0].length)/2),y:0,color:['#f4c34c','#42c7c1','#b986f5','#ff7c86'][Math.floor(Math.random()*4)]}};
 const fits=(p,dx=0,dy=0,shape=p.shape)=>shape.every((r,y)=>r.every((v,x)=>!v||(p.x+x+dx>=0&&p.x+x+dx<W&&p.y+y+dy<H&&(p.y+y+dy<0||!board[p.y+y+dy][p.x+x+dx]))));
 const draw=()=>{bg();board.forEach((r,y)=>r.forEach((v,x)=>{if(v)paint(x,y,v)}));piece.shape.forEach((r,y)=>r.forEach((v,x)=>{if(v)paint(piece.x+x,piece.y+y,piece.color)}))};
-const land=()=>{piece.shape.forEach((r,y)=>r.forEach((v,x)=>{if(v&&piece.y+y>=0)board[piece.y+y][piece.x+x]=piece.color}));let cleared=0;board=board.filter(r=>{if(r.every(Boolean)){cleared++;return false}return true});while(board.length<H)board.unshift(Array(W).fill(null));score+=cleared*100;status.textContent=`Wynik: ${score}`;piece=newPiece();if(!fits(piece)){over=true;status.textContent=`Koniec gry! Wynik: ${score}`}};
-reset=()=>{board=Array.from({length:H},()=>Array(W).fill(null));piece=newPiece();score=0;over=false;paused=false;status.textContent='Wynik: 0';draw()};
+const land=()=>{piece.shape.forEach((r,y)=>r.forEach((v,x)=>{if(v&&piece.y+y>=0)board[piece.y+y][piece.x+x]=piece.color}));let cleared=0;board=board.filter(r=>{if(r.every(Boolean)){cleared++;return false}return true});while(board.length<H)board.unshift(Array(W).fill(null));score+=cleared*100;if(cleared)earn(cleared);status.textContent=`Wynik: ${score}`;piece=newPiece();if(!fits(piece)){over=true;status.textContent=`Koniec gry! Wynik: ${score}`}};
+reset=()=>{startRun();board=Array.from({length:H},()=>Array(W).fill(null));piece=newPiece();score=0;over=false;paused=false;status.textContent='Wynik: 0';draw()};
 move=d=>{if(over||paused)return;if(d==='left'&&fits(piece,-1))piece.x--;if(d==='right'&&fits(piece,1))piece.x++;if(d==='down'){if(fits(piece,0,1))piece.y++;else land()}if(d==='up'){const rotated=piece.shape[0].map((_,i)=>piece.shape.map(row=>row[i]).reverse());if(fits(piece,0,0,rotated))piece.shape=rotated}draw()};
 const tick=()=>{if(over||paused)return;if(fits(piece,0,1))piece.y++;else land();draw()};reset();timer=setInterval(tick,500);
 }
