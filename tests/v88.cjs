@@ -11,7 +11,7 @@ const button=(label,action)=>`<button data-action="${action}">${label}</button>`
  const {baseWalkMarkup,openWalkRoom87,focusWalkCase88}=await import(url('base-walk85.js'));
  const {petPicker88,petCareMarkup86,servePet87}=await import(url('pet-care86.js'));
  const {petQuiz88}=await import(url('pet-quiz88.js'));
- const {flightGates88,flightHit88,flightMarkup88}=await import(url('noun-flight88.js'));
+ const {flightMarkup88}=await import(url('noun-flight88.js'));
  const {drawQuinjet88}=await import(url('quinjet88.js'));
 
  const profile={coins:200,base:{owned:hqItems().map(item=>item.id)}};
@@ -60,13 +60,6 @@ const button=(label,action)=>`<button data-action="${action}">${label}</button>`
  hqFoodQuiz88({items:senior,index:senior.findIndex(item=>item[3])},button,(q,lang)=>{calls.push(lang);return '<button>🔊</button>';});
  assert.deepEqual(calls,['en-US','pl-PL']);
 
- const gates=flightGates88(()=>.23),round={hearts:3,score:0};
- assert.equal(gates.length,12);
- assert.ok(gates.every(gate=>gate.length===3&&gate.filter(entry=>entry?.noun).length===1));
- assert.match(flightHit88(round,gates[0].find(entry=>entry?.noun)),/Rzeczownik/);
- assert.equal(round.score,1);
- assert.match(flightHit88(round,{word:'leci'}),/to nie rzeczownik/);
- assert.equal(round.hearts,2);
  assert.match(flightMarkup88(button,()=>''),/hq:flight:start/);
  let faces=0;
  drawQuinjet88({beginPath(){},moveTo(){},lineTo(){},closePath(){},fill(){faces++;},stroke(){}},

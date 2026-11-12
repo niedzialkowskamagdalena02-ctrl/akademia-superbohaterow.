@@ -13,7 +13,7 @@ import {mountBaseScene84} from './base-scene84.js?v=88';
 import {baseWalkMarkup,mountBaseWalk,resetBaseWalk,openWalkRoom87,focusWalkCase88} from './base-walk85.js?v=88';
 import {HQ_SLOTS,hqItems,hqRead,hqBalances,hqEarnToken,hqSpendToken,hqRecordCrystals,hqBuyWithGems,hqPlaced,hqPlace,hqDisplayPurchase88,hqPet,hqChoosePet88,hqPaint,hqEarnFood,hqChoices,hqMarkup,hqWallet,hqShop,hqFoodQuiz88} from './headquarters84.js?v=88';
 import {petRoom86,petCareMarkup86,petPicker88,mountPetCare86,setPetCare86,servePet87} from './pet-care86.js?v=88';
-import {flightMarkup88,mountNounFlight88} from './noun-flight88.js?v=88';
+import {flightMarkup88,mountNounFlight88} from './noun-flight88.js?v=89';
 import {petQuiz88} from './pet-quiz88.js?v=88';
 import {MASTER_PRIZES86,MASTER_SCORE86,recordEnergy86,trainingRound86,trainingConsole86,unlockMaster86} from './base-training86.js?v=87';
 import {affordable82,purchase82,credit82} from './wallet82.js?v=82';
@@ -69,7 +69,7 @@ const select=(id,label,options,value)=>`<label for="${id}">${label}</label><sele
 const grades=[['P','Przedszkole'],...Array.from({length:12},(_,i)=>[String(i+1),`Klasa ${i+1}`])];
 const people=[['pawel','Paweł'],['patryk','Patryk']];
 const note=t=>{const n=$('hq85-notice')||$('notice');if(!n){console.warn('Powiadomienie:',t);return}n.textContent=t;n.classList.add('visible');setTimeout(()=>{if(n.isConnected)n.classList.remove('visible')},4500)};
-const ACADEMY_RELEASE=88;
+const ACADEMY_RELEASE=89;
 async function checkAcademyUpdate(button){
  if(!button||button.disabled)return;
  const label=button.textContent,controller=new AbortController();
@@ -1229,10 +1229,10 @@ function hqRoomPanel84(p){
    (won?'<p class="hq86-master-won">✓ Puchar i peleryna w kolekcji.</p>'+button('Zobacz kolekcję','hq:gallery','alt'):'')+
    button(won?'Zagraj jeszcze raz':'Rozpocznij próbę','hq:exercise:master','gold');
  }
- if(hqPanel84==='flight')body=flightMarkup88(button,speakBtn);
+ if(hqPanel84==='flight')body=flightMarkup88(button,speakBtn,{child:who,preview:testMode});
  if(hqPanel84==='hangar'){
   const jet=p.base?.owned?.includes('quinjet');
-  body='<h3>🛩️ Hangar</h3>'+(jet?button('✈️ Lot po rzeczowniki','hq:flight','gold')+'<p>Wybierz malowanie Quinjeta.</p>'+[['blue','Niebieskie'],['mint','Miętowe'],['gold','Złote']].map(([id,label])=>button(label,'hq:paint:'+id,hqRead(p).paint===id?'gold':'alt')).join(''):
+  body='<h3>🛩️ Hangar</h3>'+(jet?button('✈️ Lot Quinjetem','hq:flight','gold')+'<p>Wybierz malowanie Quinjeta.</p>'+[['blue','Niebieskie'],['mint','Miętowe'],['gold','Złote']].map(([id,label])=>button(label,'hq:paint:'+id,hqRead(p).paint===id?'gold':'alt')).join(''):
    '<p>Na lądowisku jest miejsce na Quinjeta.</p>'+button('🛒 Idź do sklepu','hq:room:shop','gold'));
  }
  if(hqPanel84==='joke'){
@@ -1442,7 +1442,7 @@ function childRender(){
   const walk=baseWalkMarkup(p,who,hero(p.hero||(who==='pawel'?'iron':'spider'))[0],ACADEMY_RELEASE,dialog,mic);
   layout('Spacer po bazie',walk,'walk');
   mountBaseWalk(document.querySelector('[data-hq86-walk]'));mountPetCare86(app,careGesture);
-  if(hqPanel84==='flight')mountNounFlight88(app,hqRead(p).paint);
+  if(hqPanel84==='flight')mountNounFlight88(app,hqRead(p).paint,{child:who,preview:testMode});
   return;
  }
  let html=walking?'':`<section class="card"><div class="row between"><div><h2>${p.name} ${hero(p.hero||(who==='pawel'?'iron':'spider'))[2]}</h2><small>${gradeName(p.grade)} · Baza poziom ${1+Math.floor(p.xp/100)}</small></div><b class="xp" data-wallet82="${who}">🪙 ${p.coins} złotych</b></div><div class="progress"><div style="width:${p.xp%100}%"></div></div></section>`+nav();
@@ -1474,7 +1474,7 @@ if(tab==='learn'){
    html+=trainingFlowMarkup();
   }
   if(avengersRun)html+=avengersPanel();
- }layout('Akademia '+p.name,html);if(tab==='base'){mountBaseScene84(document.querySelector('[data-hq84-scene]'));mountPetCare86(app,careGesture);if(hqPanel84==='flight')mountNounFlight88(app,hqRead(p).paint);}if(tab==='arcade')hqMountArcade84();if(tab==='learn'&&v37Classic)newExercise();if(tab==='trace')drawTrace()}
+ }layout('Akademia '+p.name,html);if(tab==='base'){mountBaseScene84(document.querySelector('[data-hq84-scene]'));mountPetCare86(app,careGesture);if(hqPanel84==='flight')mountNounFlight88(app,hqRead(p).paint,{child:who,preview:testMode});}if(tab==='arcade')hqMountArcade84();if(tab==='learn'&&v37Classic)newExercise();if(tab==='trace')drawTrace()}
 const CROSSWORDS=[
  {word:'KOT',clue:'Miauczy i mruczy',r:0,c:2,dir:'v'},
  {word:'DOM',clue:'Mieszkamy w nim',r:1,c:1,dir:'h'},

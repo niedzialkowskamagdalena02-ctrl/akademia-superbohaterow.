@@ -1338,6 +1338,14 @@ button:not(:disabled):not(.tr72-subject-card):not(.mic):active,label.v73-file-co
 .hq88-flight-score{margin-bottom:5px;color:#dbf8ff;font-size:.85rem}
 .hq88-flight-gates{margin-bottom:6px}
 .hq88-flight-gates span{flex:1;min-width:0;overflow-wrap:anywhere;border-radius:8px;background:#163457;color:#e8f8ff;padding:5px 2px;text-align:center;font-size:.82rem}
+.hq89-flight-round{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:2px 8px;margin:5px 0;color:#aeeef7;font-size:.86rem}
+.hq89-flight-round b{color:#fff1b9}
+.hq88-flight-rules{display:flex;align-items:center;gap:6px}
+.hq88-flight-rules .listen{flex:none;margin:0}
+.hq88-flight-gates [data-current]{background:#24527b;box-shadow:inset 0 0 0 1px #a6efff;color:#fff}
+.hq89-flight-fire{margin-top:6px}
+.hq89-flight-fire:not([hidden]){display:flex;justify-content:center}
+.hq89-flight-fire button{min-width:120px}
 .hq88-flight-view{display:block;width:100%;height:clamp(180px,42dvh,380px);touch-action:none;outline-offset:3px;border-radius:14px;border:1px solid #85c8ec}
 .hq88-flight-controls{margin-top:8px}
 .hq88-flight-controls button{min-width:44px;min-height:44px}
