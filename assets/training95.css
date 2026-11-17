@@ -1,0 +1,7 @@
+.tr95-game-list{grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));align-items:stretch;gap:9px}
+.tr95-game-list>.tr71-choice{min-height:98px;display:grid;place-content:center;justify-items:center;text-align:center;gap:5px;padding:10px}
+.tr95-game-list>.tr71-choice>span{font-size:1.65rem;line-height:1}
+.tr95-current{margin:9px 0 3px;font-weight:800}
+#training95-game{margin-top:9px;min-width:0}
+#training95-game>.mg-panel{max-width:100%;min-width:0;overflow-wrap:anywhere}
+#training95-game .lg92-header,#training95-game .sq93-top{align-items:center}

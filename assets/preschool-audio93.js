@@ -68,7 +68,7 @@ export function mountPreschoolAudio93(root,speak=()=>{}){
   const {voice93}=speaker.dataset;
   if(voice93!=='screen'){speak(preschoolSpeech93(voice93));return;}
   const region=speaker.closest('.hq84-panel')??root;
-  const prompts=[...region.querySelectorAll('[data-game-prompt],[data-lg92-prompt],.hq88-quiz-question, .avengers-v36 h2, .hq86-help, .hq86-location,.v75-preschool h2,.discovery-head h2,.discovery-head h3,.lesson-card h2,.lesson-rule p,.lesson-story,.lg92-brief p,[data-trace-status],[data-task-instruction],.hq84-panel h3')];
+  const prompts=[...region.querySelectorAll('[data-game-prompt],[data-lg92-prompt],.hq88-quiz-question, .avengers-v36 h2, .hq86-help, .hq86-location,.v75-preschool h2,[data-v77-step] h2,[data-v77-step] h3,.discovery-head h2,.discovery-head h3,.lesson-card h2,.lesson-rule p,.lesson-story,.lg92-brief p,[data-trace-status],[data-task-instruction],.hq84-panel h3')];
   const content=prompts.filter(node=>!node.hidden&&node.getClientRects().length).map(node=>node.querySelector('[data-speak]')?.dataset.speak??text(node)).filter(Boolean);
   if(!content.length){
    const title=region.querySelector('h2,h3,.sub');

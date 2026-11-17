@@ -1,0 +1,233 @@
+[data-f95-sky="cabin"]{--flight-sky:url('flight95/cabin.webp')}
+[data-f95-sky="day"]{--flight-sky:url('flight95/day.webp')}
+[data-f95-sky="night"]{--flight-sky:url('flight95/night.webp')}
+[data-f95-sky="sunset"]{--flight-sky:url('flight95/sunset.webp')}
+[data-f95-sky="islands"]{--flight-sky:url('flight95/islands.webp')}
+[data-f95-sky="runway"]{--flight-sky:url('flight95/runway.webp')}
+[data-f95-sky="spring"]{--flight-sky:url('flight95/spring.webp')}
+[data-f95-sky="autumn"]{--flight-sky:url('flight95/autumn.webp')}
+[data-f95-sky="winter"]{--flight-sky:url('flight95/winter.webp')}
+[data-f95-sky="radar"]{--flight-sky:url('flight95/radar.webp')}
+[data-f95-sky="cargo"]{--flight-sky:url('flight95/cargo.webp')}
+[data-f95-sky="airport"]{--flight-sky:url('flight95/airport.webp')}
+[data-f95-sky="cockpit"]{--flight-sky:url('missions93/cockpit.webp')}
+.hq86-main .hq95-cockpit-dialog[open]{
+ width:min(100%,1050px);max-width:none;max-height:100dvh;height:100dvh;border:0;border-radius:0;
+ background:#102a4b;margin:auto;padding:0;box-shadow:0 0 100px #020815;
+}
+.hq95-cockpit-panel{min-height:0;overflow:auto;overscroll-behavior:contain;color:#e9f9ff;background:#102a4b}
+#missions93-cockpit{
+ max-width:100%;min-height:min(100dvh,700px);margin:0;padding:max(8px,env(safe-area-inset-top)) clamp(8px,2.4vw,24px) max(12px,env(safe-area-inset-bottom));
+ border:0;border-radius:0;display:flex;flex-direction:column;gap:10px;
+ background:radial-gradient(ellipse at top,#2a6082,#102a4b 65%,#0d2040);
+ --flight-ink:#103258;--flight-bright:#c1efff;--flight-gold:#ffd044;
+}
+#missions93-cockpit *,#missions93-cockpit *::before,#missions93-cockpit *::after{box-sizing:border-box}
+#missions93-cockpit button{
+ min-height:42px;margin:0;padding:6px 11px;border:1px solid #80c2e9;border-radius:12px;
+ color:#fff;background:linear-gradient(#327ab4,#15446f);font-family:inherit;font-size:.94rem;line-height:1.18;font-weight:750;
+ box-shadow:inset 0 2px 2px #fff3,0 3px 0 #0b2445;touch-action:manipulation;
+}
+#missions93-cockpit button:active:not(:disabled){translate:0 2px;box-shadow:inset 0 2px 5px #0f284c}
+#missions93-cockpit button:focus-visible,#missions93-cockpit [tabindex="0"]:focus-visible{outline:3px solid #ffe178;outline-offset:2px}
+#missions93-cockpit button[aria-pressed="true"]{outline:3px solid #ffe178}
+#missions93-cockpit button.flight95-voice{min-height:42px;min-width:42px;padding:3px;border-radius:10px;background:linear-gradient(#318abc,#15618e);font-size:1.06rem;flex:none}
+#missions93-cockpit button.flight95-primary{
+ padding:8px 15px;min-height:44px;background:linear-gradient(#fff0a3,#ffc139);border-color:#fff3b5;color:#352618;
+ box-shadow:inset 0 2px 2px #fffa,0 3px 0 #9e5a12;
+}
+#missions93-cockpit .flight95-top{display:grid;grid-template-columns:auto 1fr auto;gap:7px;align-items:center}
+#missions93-cockpit .flight95-top h2{font-size:clamp(.98rem,3.75vw,1.44rem);line-height:1.12;margin:0;text-align:center;color:#f4fbff;overflow-wrap:normal}
+#missions93-cockpit[data-fl95-mode="menu"] .flight95-top{grid-template-columns:1fr auto}
+#missions93-cockpit[data-fl95-mode="menu"] .flight95-top h2{text-align:left;font-size:clamp(1.36rem,5vw,2.3rem)}
+#missions93-cockpit .flight95-exit,#missions93-cockpit .flight95-back{font-size:.83rem;padding:6px 8px}
+.flight95-menu{display:grid;gap:10px}
+.flight95-hero{
+ display:flex;align-items:end;min-height:clamp(112px,25dvh,230px);padding:10px;
+ background:linear-gradient(0deg,#061d3ccb,transparent 65%),url('missions93/cockpit.webp') center 65%/cover;
+ border:1px solid #9bdcf7;border-radius:16px;
+}
+.flight95-hero>div,.flight95-task,.flight95-brief{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%}
+.flight95-hero h3{font-size:clamp(1.02rem,4vw,1.7rem);margin:0;color:#fff}
+.flight95-missions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.flight95-card{display:grid;grid-template-columns:minmax(0,1fr);position:relative}
+#missions93-cockpit .flight95-card>button:first-child{
+ width:100%;height:100%;padding:0 0 5px;overflow:hidden;border-radius:14px;background:#d5f4fa;color:#143657;text-align:left
+}
+.flight95-card strong{display:block;padding:6px 8px;min-height:3.3em;font-size:clamp(.78rem,2.9vw,1rem);overflow-wrap:anywhere}
+.flight95-card-image{position:relative;display:grid;place-items:center;background:var(--flight-sky) center/cover;width:100%;height:clamp(65px,14vw,130px);isolation:isolate}
+.flight95-card-image::after{content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,#12325226,transparent)}
+.flight95-card-image>i{position:absolute;top:5px;left:5px;display:grid;place-items:center;background:#12386f;color:#fff;border-radius:50%;width:24px;height:24px;font-style:normal;font-size:.78rem}
+.flight95-card-image>span{font-size:clamp(1.65rem,5vw,3.2rem);text-shadow:0 2px 4px #1e254c;line-height:1;color:white}
+.flight95-card-image>.flight95-plane-art{max-width:67%}
+#missions93-cockpit .flight95-card>.flight95-voice{position:absolute;right:4px;top:4px;min-width:38px;min-height:37px}
+.flight95-surface{
+ position:relative;overflow:hidden;isolation:isolate;background:#5aa9e6 var(--flight-sky) center/cover no-repeat;
+ border-radius:18px;border:1px solid #94d1f5;min-height:clamp(300px,62dvh,660px);
+}
+.flight95-task{min-height:48px;padding:6px 9px;background:#0c2b49;border-radius:12px;border:1px solid #63add266}
+.flight95-task p{margin:0;line-height:1.19;font-size:clamp(.99rem,3.65vw,1.37rem);font-weight:750;color:white}
+.flight95-task small{color:#c7e7fa;font-size:.73rem}
+.flight95-bottom{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;padding-bottom:4px}
+.flight95-bottom p{margin:0;font-size:.94rem;color:#fff2af}
+.flight95-bottom p:empty{display:none}
+.flight95-intro-body,.flight95-complete{
+ min-height:inherit;padding:16px;display:flex;flex-direction:column;align-items:center;justify-content:end;gap:14px;
+ background:linear-gradient(0deg,#051e3fd9,transparent 72%);
+}
+.flight95-intro-body>.flight95-plane-art{width:min(54%,340px);margin:auto}
+.flight95-brief{background:#f5fbff;color:#113455;border-radius:12px;padding:11px;line-height:1.25}
+.flight95-brief p,.flight95-complete p,.flight95-complete h3{margin:3px 0 0}
+.flight95-brief strong{color:#146196}
+.flight95-complete{justify-content:center;text-align:center;color:#fff;text-shadow:0 2px 5px #193557;font-weight:700;font-size:1.16rem}
+.flight95-complete>span{font-size:4.5rem}
+.flight95-plane-art{display:block;width:100%;height:auto;filter:drop-shadow(1px 6px 4px #051f515e);user-select:none}
+.flight95-paired{display:flex;align-items:stretch;justify-content:center;gap:4px}
+.flight95-paired>button:first-child{flex:1}
+.flight95-air{display:grid;grid-template-rows:1fr auto}
+.flight95-viewport{position:relative;min-height:clamp(265px,53dvh,570px);touch-action:none;isolation:isolate}
+.flight95-drift{position:absolute;inset:0;z-index:-1;background:var(--flight-sky) center/110% auto;animation:f95-drift 28s linear infinite alternate}
+@keyframes f95-drift{from{background-position:0 45%}to{background-position:100% 57%}}
+.flight95-player{position:absolute;pointer-events:none;left:19%;top:var(--pilot-y,49%);width:clamp(90px,29%,250px);transform:translate(-50%,-50%) rotate(var(--bank,0deg));z-index:2}
+.flight95-banner{position:absolute;right:66%;top:84%;z-index:1;padding:3px 9px;background:#fff2bd;color:#3b241e;clip-path:polygon(0 0,100% 0,94% 50%,100% 100%,0 100%,6% 50%);font-weight:950;white-space:nowrap}
+.flight95-bird{position:absolute;left:20%;bottom:83%;font-size:clamp(1.6rem,6vw,3rem);filter:drop-shadow(1px 2px 2px #10223c88);animation:f95-flap 1.1s ease-in-out infinite alternate}
+@keyframes f95-flap{from{translate:0 -3px;rotate:-6deg}to{translate:2px 6px;rotate:5deg}}
+.flight95-object{
+ position:absolute;left:var(--object-x,83%);top:var(--alt);translate:-50% -50%;scale:var(--object-scale,1);
+ display:flex;align-items:center;gap:2px;z-index:3;--target-a:#72d4ff;--target-b:#2376e7;
+}
+.flight95-object:nth-of-type(3){--target-a:#ffd850;--target-b:#f28713}
+.flight95-object:nth-of-type(4){--target-a:#ff89b9;--target-b:#ca2878}
+#missions93-cockpit .flight95-target{
+ position:relative;display:grid;place-items:center;min-width:64px;min-height:60px;line-height:1.05;padding:4px 8px;
+ background:linear-gradient(150deg,var(--target-a),var(--target-b));border:2px solid #e9f8ff;box-shadow:inset 0 3px 3px #ffffff66,0 4px 9px #0c347580;
+ color:#fff;font-size:clamp(1.24rem,5vw,2rem);text-shadow:0 2px 4px #06306a
+}
+#missions93-cockpit .flight95-object .flight95-voice{min-width:42px;min-height:42px;padding:1px}
+#missions93-cockpit [data-f95-type=balloon] .flight95-target{
+ min-width:52px;min-height:66px;border-radius:50% 50% 48% 48%;
+ background:radial-gradient(circle at 28% 22%,#fff9 0 8%,transparent 10%),linear-gradient(145deg,var(--target-a),var(--target-b))
+}
+[data-f95-type=balloon] .flight95-target::after{content:'';position:absolute;left:50%;top:100%;width:1px;height:19px;background:#f5e8c8;rotate:12deg;transform-origin:top}
+#missions93-cockpit [data-f95-type=ring] .flight95-target{width:clamp(64px,14vw,129px);height:clamp(58px,12vw,110px);border-radius:50%;background:#c5edff40;border:7px double #effdff;box-shadow:0 0 13px #47b0f6,inset 0 0 12px #0a6acc}
+#missions93-cockpit [data-f95-type=cloud] .flight95-target{border-radius:42% 48% 39% 45%;background:linear-gradient(white,#d7f4ff);color:#10385d;text-shadow:none;border-color:#fff}
+#missions93-cockpit [data-f95-type=storm] .flight95-target{border-radius:35%;background:linear-gradient(#49617e,#162439);font-size:2rem}
+#missions93-cockpit [data-f95-type=runway] .flight95-target{background:repeating-linear-gradient(90deg,#333d44 0 49%,white 50% 51%,#333d44 52%);border:3px solid #fff;perspective:250px}
+[data-f95-type=runway] .sq93-shape{transform:rotateX(14deg);width:36px;height:31px}
+#missions93-cockpit [data-f95-type=season] .flight95-target{border-radius:50% 50% 12px 12px;background:#284872db;font-size:1.6rem;min-width:90px}
+[data-f95-type=season] b{font-size:.66rem}
+#missions93-cockpit [data-f95-type=tanker] .flight95-target{background:#edf8ffeb;color:#132a4b;text-shadow:none;border-radius:12px}
+[data-f95-type=tanker] .flight95-plane-art{width:clamp(66px,20vw,132px);filter:hue-rotate(145deg) drop-shadow(0 3px 2px #06558a)}
+[data-f95-type=tanker] b{font-size:1.15rem}
+.flight95-fuel,.flight95-next-number{
+ position:absolute;z-index:4;top:6px;left:6px;display:flex;gap:5px;align-items:center;padding:5px 7px;border-radius:10px;
+ background:#092342ee;color:white;font-size:.75rem;pointer-events:none
+}
+.flight95-next-number b{color:#ffee9c;font-size:1.05rem}
+.flight95-fuel progress{width:clamp(62px,23vw,140px);height:10px;accent-color:#68ec95}
+.flight95-steering{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;padding:5px;background:#112e50}
+#missions93-cockpit .flight95-steering button{padding:4px 3px;font-size:clamp(.67rem,2.3vw,.9rem);min-height:39px}
+#missions93-cockpit .flight95-steering .flight95-voice{min-width:30px;font-size:.8rem;padding:1px}
+.flight95-hose{display:none;position:absolute;left:80%;top:50%;width:66%;height:23px;border:4px solid #183659;border-top-color:transparent;border-left-color:transparent;border-radius:50%;rotate:-12deg}
+[data-f95-win=fuel] .flight95-hose{display:block;animation:f95-hose .42s ease-out}
+@keyframes f95-hose{from{scale:0 1;transform-origin:left}}
+[data-f95-win=landing] .flight95-player{animation:f95-land .65s forwards}
+@keyframes f95-land{to{translate:29% 20%;scale:.89}}
+[data-f95-win=feeder] .flight95-bird{animation:f95-flap .24s alternate 5}
+.flight95-sr{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.flight95-console,.flight95-engine,.flight95-radio-controls{position:absolute;bottom:8px;left:50%;translate:-50% 0;width:min(94%,470px);display:grid;justify-items:center;gap:8px}
+.flight95-lever{display:flex;align-items:flex-end;gap:4px;touch-action:none}
+#missions93-cockpit .flight95-lever>button:first-child{position:relative;display:grid;justify-items:center;gap:8px;background:#103f68ee}
+.flight95-lever i{width:22px;height:53px;border-radius:8px;background:linear-gradient(90deg,#355576,#a7c7da,#355576);position:relative;translate:0 clamp(0px,var(--drag-y,0px),22px)}
+.flight95-lever i::before{content:'';position:absolute;left:50%;translate:-50% 0;width:57px;height:24px;top:-3px;background:linear-gradient(#ff785e,#c72842);border:2px solid #ffaf8b;border-radius:50%;box-shadow:0 3px 4px #1c0d23}
+.flight95-starter-keys{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;width:100%;padding:7px;background:#102948df;border:1px solid #a7d8f5;border-radius:12px}
+#missions93-cockpit .flight95-starter-keys button:first-child{font-size:1.18rem}
+#missions93-cockpit [data-f95-lit]{background:linear-gradient(#71eab2,#157552);opacity:1}
+.flight95-load-board,.flight95-loading-board{min-height:inherit;display:flex;flex-direction:column;justify-content:end;gap:9px;padding:8px;background:linear-gradient(0deg,#10284fe0,transparent 80%)}
+.flight95-seats,.flight95-loading-items,.flight95-crates{display:flex;align-items:stretch;justify-content:center;flex-wrap:wrap;gap:5px}
+.flight95-seats>div{flex:1 1 54px;max-width:112px}
+.flight95-seats,.flight95-loading-items{padding:5px;background:#071b36bd;border-radius:12px}
+#missions93-cockpit .flight95-seats button:first-child{min-height:58px;background:linear-gradient(#b0e94d,#468947);border:2px solid #c5f294}
+#missions93-cockpit .flight95-seats[data-f95-seats=hold] button:first-child{background:linear-gradient(#376b98,#153959);border:2px dashed #97e4ff}
+#missions93-cockpit .flight95-seats [data-f95-filled]{background:#ffd36f!important;color:#622419;opacity:1;font-size:1.4rem}
+#missions93-cockpit .flight95-loading-items button:first-child{background:linear-gradient(#ffdc82,#f0892d);color:#3b240f;min-height:43px;display:flex;align-items:center;gap:3px}
+#missions93-cockpit [data-f95-drag],#missions93-cockpit [data-f95-lever] button,#missions93-cockpit [data-f95-stick] button{touch-action:none}
+#missions93-cockpit [data-f95-loaded]{opacity:.35}
+[data-f95-drag][data-f95-dragging]{position:relative;z-index:9;transform:translate(var(--drag-x),var(--drag-y));pointer-events:none}
+.flight95-map{height:clamp(246px,50dvh,480px);position:relative;overflow:hidden;background:#2683ae}
+.flight95-map canvas{width:100%;height:100%;display:block}
+.flight95-pin{position:absolute;left:var(--pin-x);top:var(--pin-y);translate:-50% -50%;z-index:3}
+#missions93-cockpit .flight95-pin button:first-child{font-size:clamp(.63rem,2.5vw,.86rem);padding:4px 6px;min-height:40px}
+.flight95-map-plane,.flight95-cargo-plane{position:absolute;left:var(--map-x);top:var(--map-y);width:23%;translate:-50% -128%;transition:left .55s,top .55s;pointer-events:none;z-index:2}
+.flight95-map-plane i{display:none;position:absolute;left:40%;top:95%;font-style:normal}
+[data-f95-win=parcel] .flight95-map-plane i{display:block;animation:f95-drop .72s both}
+@keyframes f95-drop{from{translate:0 -16px;opacity:.2}to{translate:0 15px;opacity:1}}
+.flight95-map-recipient{position:absolute;left:5px;bottom:8px;font-size:2.7rem}
+.flight95-map-bottom{padding:7px;background:#153b5d;display:flex;justify-content:center}
+.flight95-engine{background:#152943f5;padding:8px;border:2px solid #88aebe;border-radius:18px;max-width:320px;box-shadow:0 0 15px #020d2b88}
+.flight95-instruments{display:flex;align-items:center;gap:12px}
+.flight95-instruments i{width:15px;height:15px;border-radius:50%;background:#f49138;box-shadow:0 0 6px #ffc057}
+[data-f95-win=engine] .flight95-instruments i{background:#64f291;box-shadow:0 0 11px #8dffc1}
+.flight95-instruments output{min-width:104px;text-align:center;background:#12372f;color:#9cfff5;border:1px solid #45b9ab;border-radius:7px;font:900 1.8rem/1.1 monospace;padding:5px}
+.flight95-keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;width:100%}
+#missions93-cockpit .flight95-keypad button:last-child{background:linear-gradient(#52bf8c,#156549);font-size:.78rem}
+.flight95-radar{position:relative;width:min(88%,420px);aspect-ratio:1;margin:auto;top:0;border-radius:50%;border:4px solid #6fe180aa;background:repeating-radial-gradient(circle,#032a32d9 0 18%,#3ba55999 19%,#032a327d 20%,#032a3299 24%);box-shadow:inset 0 0 19px #d7ff947d;overflow:hidden}
+.flight95-radar-scene{display:grid;place-items:center}
+.flight95-radar-sweep{position:absolute;inset:0;border-radius:50%;background:conic-gradient(#4dda674f,transparent 23%);animation:f95-sweep 5s linear infinite;pointer-events:none}
+@keyframes f95-sweep{to{rotate:360deg}}
+#missions93-cockpit .flight95-radar button{position:absolute;left:var(--radar-x);top:var(--radar-y);translate:-50% -50%;min-width:53px;background:#0d432f;border-color:#78dc83;box-shadow:0 0 12px #b3ffae66}
+#missions93-cockpit .flight95-radar button:active{translate:-50% -48%}
+.flight95-radar .sq93-shape{--tile:#c4fdab;width:33px;height:31px}
+#missions93-cockpit .flight95-hold{background:#0e243eeb;border:2px dashed #f6df8b;font-size:1.12rem;min-height:72px}
+.flight95-crate,.flight95-hangars button{word-break:normal;overflow-wrap:anywhere}
+#missions93-cockpit .flight95-crate,.flight95-cargo-plane b{
+ padding:12px 5px;background:repeating-linear-gradient(#c28e54 0 7px,#9b5b29 8px 10px);
+ color:#2d1c16;border:3px solid #eabb7b;font-size:clamp(.8rem,3vw,1.1rem);text-align:center;border-radius:7px
+}
+.flight95-cargo-flight{min-height:inherit;display:grid;align-content:end;gap:10px;padding:10px;background:linear-gradient(0deg,#12395de0,transparent 85%)}
+.flight95-cargo-plane{--map-x:50%;--map-y:54%;scale:1.15}
+.flight95-cargo-plane[data-f95-heading="0"]{--map-x:19%}
+.flight95-cargo-plane[data-f95-heading="1"]{--map-x:50%}
+.flight95-cargo-plane[data-f95-heading="2"]{--map-x:81%}
+.flight95-cargo-plane b{position:absolute;top:88%;left:22%;width:max-content}
+[data-f95-win=cargo] .flight95-cargo-plane b{animation:f95-drop .7s both}
+.flight95-hangars{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+#missions93-cockpit .flight95-hangars button{font-size:clamp(.66rem,2.8vw,1rem);padding:4px 2px;border:2px solid #f8d76f;border-radius:32% 32% 6px 6px;min-height:60px;background:linear-gradient(#497682,#152b42)}
+.flight95-radio-window{position:absolute;inset:7% 7% 35%;border-radius:28px;background:url('flight95/islands.webp') center 37%/cover;box-shadow:0 0 0 5px #13334e99;transition:background-position .55s,rotate .55s}
+.flight95-radio-window[data-f95-heading=up]{background-position:center top}
+.flight95-radio-window[data-f95-heading=down]{background-position:center bottom}
+.flight95-radio-window[data-f95-heading=left]{rotate:-5deg;background-position:left 38%}
+.flight95-radio-window[data-f95-heading=right]{rotate:5deg;background-position:right 38%}
+.flight95-radio-controls{display:flex;justify-content:center;align-items:center;padding:5px;border-radius:18px;background:#12283de8}
+.flight95-stick{display:grid;grid-template-areas:". up ." "left knob right" ". down .";gap:3px;touch-action:none}
+.flight95-stick [data-f95-action="dir:up"]{grid-area:up}
+.flight95-stick [data-f95-action="dir:down"]{grid-area:down}
+.flight95-stick [data-f95-action="dir:left"]{grid-area:left}
+.flight95-stick [data-f95-action="dir:right"]{grid-area:right}
+.flight95-stick i{grid-area:knob;border-radius:50%;border:3px solid #ba362f;background:radial-gradient(circle at 25% 15%,#ffd8a5,#f06041 44%,#75254b);translate:clamp(-18px,var(--drag-x,0px),18px) clamp(-18px,var(--drag-y,0px),18px)}
+#missions93-cockpit .flight95-island{position:absolute;left:var(--island-x);top:var(--island-y);translate:-50% -50%;font-size:clamp(.66rem,2.6vw,.95rem)}
+#missions93-cockpit [data-f95-color=red]{--island-x:17%;--island-y:67%;background:linear-gradient(#e46c61,#9d2435)}
+#missions93-cockpit [data-f95-color=blue]{--island-x:79%;--island-y:67%;background:linear-gradient(#4e8ad5,#224a9a)}
+#missions93-cockpit [data-f95-color=green]{--island-x:48%;--island-y:31%;background:linear-gradient(#4a9b60,#1e653b)}
+.flight95-arrival,.flight95-dialogue{min-height:inherit;padding:10px;display:grid;align-content:end;gap:8px}
+.flight95-arrival .flight95-plane-art{width:47%;margin:auto;transition:translate .7s,scale .7s}
+.flight95-arrival.is-landing .flight95-plane-art{translate:52% 18%;scale:.72}
+.flight95-dialogue{background:linear-gradient(0deg,#0c2234d9,transparent 80%);align-content:end}
+.flight95-radio-call{display:flex;align-items:center;gap:6px;margin-left:26%;padding:8px;background:#fbfff5;color:#10283f;border:2px solid #a9d7e1;border-radius:17px 17px 17px 2px}
+.flight95-radio-call b{flex:1}
+.flight95-radio-call>span{font-size:1.17rem}
+.flight95-bubbles{display:grid;gap:5px;margin-left:13%}
+#missions93-cockpit .flight95-bubbles .flight95-paired>button:first-child{border-radius:16px 16px 4px 16px;background:#dbfaee;color:#113254;text-align:left}
+.hq86-point[data-action="hq:board"]{border-color:#ffd267!important;background:#102f54f0!important}
+@media(max-width:650px){
+ .flight95-missions{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .flight95-card strong{min-height:3em}
+ .flight95-surface{border-radius:13px}
+}
+@media(max-width:360px){
+ #missions93-cockpit .flight95-top h2{font-size:.87rem}
+ #missions93-cockpit .flight95-exit span{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+ #missions93-cockpit *{animation:none!important;transition:none!important}
+}

@@ -70,7 +70,8 @@ function board(){
  openWalkRoom87('test','hangar');
  const walk=baseWalkMarkup(spider,'test','spider',93,'');
  assert.ok(walk.includes('data-action="hq:board"'));
- assert.ok(walk.includes('hq88-aircraft'));
+ assert.doesNotMatch(walk,/hq88-aircraft/);
+ assert.ok(fs.existsSync(url('hq/hd93/hangar95.webp')));
  assert.ok(walk.includes('data-walk-web'));
  assert.ok(!walk.includes('id="missions93-cockpit"'));
  assert.ok(!baseWalkMarkup(spider,'test','iron',93,'').includes('data-walk-web'));

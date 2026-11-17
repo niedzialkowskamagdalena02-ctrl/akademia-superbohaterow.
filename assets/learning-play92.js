@@ -2,7 +2,7 @@ import {
  awardNames92,gameGroup92,masterLevels92,mathRound92,
  preschoolGames92,preschoolRound92,schoolGames92,table92
 } from './learning-games92.js?v=92';
-import {mountTrace92} from './learning-trace92.js?v=93';
+import {mountTrace92} from './learning-trace92.js?v=95';
 
 const spriteRoot='assets/games80/pictures/';
 const puzzles=[
@@ -20,7 +20,7 @@ const control=(label,action,extra='')=>`<button type="button" data-lg92="${actio
 const picture=(file,alt='')=>`<img src="${spriteRoot+file}.svg" alt="${htmlEscape(alt)}" draggable="false">`;
 
 let dispose=()=>{};
-export function mountLearningGames92(root,{grade,catalogExtra='',speak=()=>{},tap=()=>{},awards=()=>({}),onAward=()=>{}}={}){
+export function mountLearningGames92(root,{grade,catalogExtra='',speak=()=>{},tap=()=>{},awards=()=>({}),onAward=()=>{},initialGame='',oneRound=false,onFinish=()=>{},onBack=null}={}){
  dispose();dispose=()=>{};
  if(!root)return;
  const group=gameGroup92(grade);
@@ -55,10 +55,10 @@ export function mountLearningGames92(root,{grade,catalogExtra='',speak=()=>{},ta
   clearTimers();game=id;state=null;root.dataset.game=id;
   if(game==='trace'){
    render('<div data-lg92-trace></div>');
-   mountTrace92(root.querySelector('[data-lg92-trace]'),{speak,tap});
+   mountTrace92(root.querySelector('[data-lg92-trace]'),{speak,tap,onFinish});
    focus('h2');return;
   }
-  briefing();
+  if(oneRound)start();else briefing();
  }
  function briefing(){
   const description=games.find(([id])=>id===game)[3];
@@ -87,6 +87,7 @@ export function mountLearningGames92(root,{grade,catalogExtra='',speak=()=>{},ta
  }
  function loadTasks(){
   state.tasks=mathGames.has(game)?mathRound92(game,grade,{factor,level:state.level}):preschoolRound92(game,{lower});
+  if(oneRound)state.tasks=state.tasks.slice(0,1);
   state.index=0;state.gate=[];state.phase=game==='treasure'?'map':'answer';
  }
  function start(){
@@ -276,6 +277,7 @@ export function mountLearningGames92(root,{grade,catalogExtra='',speak=()=>{},ta
  function advance(){
   clearTimers();
   if(state?.phase!=='solved')return;
+  if(oneRound){state.phase='done';onFinish();return;}
   if(state.index+1<state.tasks.length){
    state.index++;state.gate=[];state.phase=game==='treasure'?'map':'answer';showTurn(true);return;
   }
@@ -318,7 +320,7 @@ export function mountLearningGames92(root,{grade,catalogExtra='',speak=()=>{},ta
   const action=button.dataset.lg92;
   tap();
   if(action.startsWith('open-'))return open(action.slice(5));
-  if(action==='catalog')return catalog();
+  if(action==='catalog')return onBack?onBack():catalog();
   if(action==='start')return start();
   if(action==='listen'&&state)return speak(activeTask().speech);
   if(action==='upper'||action==='lower'){lower=action==='lower';return briefing();}
@@ -336,5 +338,5 @@ export function mountLearningGames92(root,{grade,catalogExtra='',speak=()=>{},ta
   const input=event.target.querySelector('input');
   tap();submit(Number(input.value),input);
  },{signal});
- catalog();
+ if(initialGame)open(initialGame);else catalog();
 }

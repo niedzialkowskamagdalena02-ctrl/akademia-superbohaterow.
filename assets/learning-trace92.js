@@ -92,7 +92,7 @@ export function traceStep92(points,index,position){
  return best;
 }
 
-export function mountTrace92(root,{speak=()=>{},tap=()=>{},snail=false}={}){
+export function mountTrace92(root,{speak=()=>{},tap=()=>{},snail=false,onFinish=()=>{}}={}){
  let group='upper',symbol='A',step=0,next=0,active=null;
  let paths,points;
  root.classList.toggle('lg93-snail',snail);
@@ -181,7 +181,7 @@ export function mountTrace92(root,{speak=()=>{},tap=()=>{},snail=false}={}){
    step++;next=0;active=null;
    if(step===points.length){
     root.classList.add('lg92-trace-done');status.textContent='⭐ Brawo! Ślad ukończony.';
-    speak('Brawo! Udało się narysować cały znak.');
+    speak('Brawo! Udało się narysować cały znak.');onFinish();
    }else status.textContent='Teraz zacznij od kolejnej kropki.';
   }else status.textContent='Prowadź palec dalej po przerywanej linii.';
   moveDot();

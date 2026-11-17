@@ -1,5 +1,5 @@
 import {gameGroup92,shuffle92} from './learning-games92.js?v=92';
-import {mountTrace92} from './learning-trace92.js?v=93';
+import {mountTrace92} from './learning-trace92.js?v=95';
 import {schoolMissions93,preschoolMissions93,captainMissions93,aceMissions93,missionDeck93} from './missions93-data.js?v=93';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -23,7 +23,7 @@ const continents=[
  [[.02,.89],[.16,.90],[.22,.88],[.43,.91],[.52,.87],[.62,.90],[.81,.89],[.98,.91],[.98,.98],[.02,.98]]
 ];
 
-function paintWorld(canvas){
+export function paintWorld(canvas){
  const ctx=canvas?.getContext('2d');if(!ctx)return;
  const w=canvas.width,h=canvas.height;
  ctx.fillStyle='#287fa1';ctx.fillRect(0,0,w,h);
@@ -60,7 +60,7 @@ export function missionNote93(index){
  }catch{}
 }
 
-export function mountMissions93(root,{grade,flight=false,speak=()=>{},tap=()=>{},tone=()=>{},legacy=false}={}){
+export function mountMissions93(root,{grade,flight=false,speak=()=>{},tap=()=>{},tone=()=>{},legacy=false,initialGame='',oneRound=false,onFinish=()=>{},onBack=null,subject='all'}={}){
  dispose();dispose=()=>{};
  if(!root)return;
  const group=gameGroup92(grade);
@@ -101,14 +101,18 @@ export function mountMissions93(root,{grade,flight=false,speak=()=>{},tap=()=>{}
   shell(`<section class="sq93-brief sq93-scene">${preschool?sound(desc):''}<p data-game-prompt>${desc}</p>
    ${button(id==='snail'?'Wejdź do ogrodu':'Zaczynamy','start','class="sq93-primary"')}${preschool?sound('Zaczynamy'):''}</section>`);
   if(preschool)say(desc);
+  if(oneRound)start();
  }
  function start(){
   if(!id)return;
   if(id==='snail'){
    shell('<div class="sq93-snail" data-sq93-trace></div>');
-   mountTrace92(root.querySelector('[data-sq93-trace]'),{speak,tap,snail:true});say('Poprowadź ślimaka od zielonej kropki do czerwonej. Zbieraj liście.');return;
+   mountTrace92(root.querySelector('[data-sq93-trace]'),{speak,tap,snail:true,onFinish});say('Poprowadź ślimaka od zielonej kropki do czerwonej. Zbieraj liście.');return;
   }
-  deck=missionDeck93(id,grade);turn=0;finishCount=0;misses=0;fresh();
+  deck=missionDeck93(id,grade);
+  if(id==='camera'&&subject!=='all')deck=deck.filter((_,i)=>i%2===Number(subject==='matematyka'));
+  if(oneRound)deck=shuffle92(deck).slice(0,1);
+  turn=0;finishCount=0;misses=0;fresh();
  }
  function makeFlightOptions(){
   const wanted=task().needed[state.done.length],options=[
@@ -186,7 +190,8 @@ export function mountMissions93(root,{grade,flight=false,speak=()=>{},tap=()=>{}
    }
   };
   const hud=`<p class="sq93-progress">⭐ ${turn+1} / ${deck.length}${t.time?` <span><progress max="${t.time}" value="${Math.ceil(state.gateTime)}" data-sq93-progress></progress> <b data-sq93-time>${Math.ceil(state.gateTime)} s</b></span>`:''}</p>`;
-  const next=state.finished?`<div class="sq93-next">${button(turn+1<deck.length?'Dalej →':'Podsumowanie','next','class="sq93-primary"')}${preschool?sound(turn+1<deck.length?'Dalej':'Podsumowanie'):''}</div>`:'';
+  const nextLabel=oneRound||turn+1<deck.length?'Następne zadanie':'Podsumowanie';
+  const next=state.finished?`<div class="sq93-next">${button(nextLabel,'next','class="sq93-primary"')}${preschool?sound(nextLabel):''}</div>`:'';
   shell(hud+prompt()+`<div class="sq93-scene sq93-kind-${t.kind}" ${state.finished?'data-win':''}>${scene()}</div>`+next,feedback);
   if(t.kind==='map')paintWorld(root.querySelector('.sq93-world-map'));
  }
@@ -382,10 +387,11 @@ export function mountMissions93(root,{grade,flight=false,speak=()=>{},tap=()=>{}
  }
  function handle(action){
   if(action.startsWith('play-'))return preview(action.slice(5));
-  if(action==='catalog')return catalog();
+  if(action==='catalog')return onBack?onBack():catalog();
   if(action==='start')return start();
   if(!state)return;
   if(action==='next'&&state.finished){
+   if(oneRound){onFinish();return;}
    if(++turn<deck.length){fresh();return;}
    const note=id==='duel'?'Twoje punkty: '+finishCount+' · Punkty pirata: '+misses:'Ukończone rundy: '+finishCount+' / '+deck.length;
    shell(`<div class="sq93-summary"><b aria-hidden="true">🏆</b><h3>Misja ukończona</h3><p>${note}</p>${button('Zagraj ponownie','start','class="sq93-primary"')}${preschool?sound('Zagraj ponownie'):''}</div>`);
@@ -523,5 +529,5 @@ export function mountMissions93(root,{grade,flight=false,speak=()=>{},tap=()=>{}
  }
  on('pointerup',event=>endGesture(event,false));
  on('pointercancel',event=>endGesture(event,true));
- catalog();
+ if(initialGame)preview(initialGame);else catalog();
 }

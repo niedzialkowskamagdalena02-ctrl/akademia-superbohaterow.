@@ -1,15 +1,14 @@
 import {hqPet,hqPlaced,hqRead} from './headquarters84.js?v=91';
 import {baseArt88} from './base-art88.js?v=91';
 import {drawHeroHands,loadHeroHands88} from './hero-hands85.js?v=93';
-import {walkRooms,FLOOR_DEPTH,FULL_TURN,PHOTO_FOV,VERTICAL_SCALE,advance86,cameraBasis86,clamp86,roomAnchor86,wrapAngle} from './base-map86.js?v=93';
+import {walkRooms,FLOOR_DEPTH,FULL_TURN,PHOTO_FOV,VERTICAL_SCALE,advance86,cameraBasis86,clamp86,roomAnchor86,wrapAngle} from './base-map86.js?v=95';
 import {energy86} from './base-training86.js?v=87';
 import {petSprite86} from './pet-care86.js?v=90';
 import {mentorMarkup87,drawMentor87,MENTOR_GREETING_MS} from './base-mentor87.js?v=91';
-import {drawQuinjet88} from './quinjet88.js?v=94';
 import {gameGroup92} from './learning-games92.js?v=92';
 
 const routes=new Map(),images=new Map();
-const skyHD=['training86','polish86','english86','explorer87','annex86','hall88','workshop91','armory','arcade','nook86','hangar','shop87','vault87'];
+const skyHD=['training86','polish86','english86','explorer87','annex86','hall88','workshop91','armory','arcade','nook86','hangar','hangar95','shop87','vault87'];
 const roomImage93=file=>(skyHD.includes(file.replace('.webp',''))?'hd93/':'')+file;
 const pose=room=>({room,x:0,z:0,yaw:((walkRooms[room].heading??.5)-.5)*FULL_TURN,pitch:0});
 const current=child=>routes.get(child)?.at(-1)??pose('hall');
@@ -35,7 +34,7 @@ export function baseWalkMarkup(profile,child,hero,release,panel,mic=''){
  return `<section class="hq86-walk" data-hq84-scene data-hq86-walk data-child="${child}" data-hero="${hero}" data-jet="${jet?paint:school?'blue':''}">
   <div class="hq86-stage" tabindex="0" aria-label="Przesuń palcem, aby się rozejrzeć. Przytrzymaj ekran, żeby iść. Na klawiaturze użyj strzałek i spacji.">
    <div class="hq86-fallback" aria-hidden="true"></div>
-   <canvas class="hq86-world" aria-hidden="true"></canvas>${jet||school?'<canvas class="hq88-aircraft" aria-hidden="true" hidden></canvas>':''}<canvas class="hq86-hands" aria-hidden="true"></canvas>
+   <canvas class="hq86-world" aria-hidden="true"></canvas><canvas class="hq86-hands" aria-hidden="true"></canvas>
    ${Object.entries(walkRooms).flatMap(([room,value])=>value.points.map((p,i)=>{
     if(profile.grade==='P'&&(p.action?.startsWith('hq:exercise:')||p.action==='hq:master'))return '';
     if(p.action==='hq:board'&&!jet&&!school)return '';
@@ -197,7 +196,6 @@ export function mountBaseWalk(root){
  if(!root)return;
  const stage=root.querySelector('.hq86-stage'),canvas=root.querySelector('.hq86-world');
  const fallback=root.querySelector('.hq86-fallback'),hands=root.querySelector('.hq86-hands');
- const aircraft=root.querySelector('.hq88-aircraft'),jetContext=aircraft?.getContext('2d');
  const location=root.querySelector('.hq86-location'),dialog=root.querySelector('dialog');
  const back=stage.querySelector('[data-walk-back]'),menu=stage.querySelector('[data-action="hq:view:menu"]');
  const markers=[...stage.querySelectorAll('.hq86-point,.hq86-prop')];
@@ -231,7 +229,7 @@ export function mountBaseWalk(root){
   width=rect.width;height=rect.height;
   if(!width||!height)return;
   const density=Math.min(window.devicePixelRatio||1,2.45,Math.sqrt(2_500_000/(width*height)));
-  for(const surface of [canvas,hands,aircraft].filter(Boolean)){
+  for(const surface of [canvas,hands]){
    surface.width=Math.round(width*density);surface.height=Math.round(height*density);
   }
   renderSoon();
@@ -251,7 +249,6 @@ export function mountBaseWalk(root){
   busy=true;
   location.textContent=selected.name;stage.dataset.room=state().room;
   back.hidden=stack.length===1;menu.hidden=stack.length!==1;
-  if(aircraft)aircraft.hidden=state().room!=='hangar';
   greeting=null;sceneMarkers=[];markers.forEach(marker=>marker.hidden=true);
   jetBounds=null;
   fallback.style.backgroundImage=`url("assets/hq/${roomImage93(selected.portrait??selected.art)}")`;
@@ -361,19 +358,10 @@ export function mountBaseWalk(root){
   const webAge=webShot?now-webShot.at:Infinity;
  if(webAge>460)webShot=null;
  if(ctx)drawHeroHands(ctx,hands,root.dataset.hero,reduced?0:step,moving,handArt,webShot?{...webShot,age:webAge}:null);
-  if(jetContext&&live.room==='hangar'){
-   const density=aircraft.width/width;
-   jetContext.setTransform(density,0,0,density,0,0);
-   jetContext.clearRect(0,0,width,height);
-   const [x,y,z]=roomAnchor86(selected,{u:.5,v:.625,front:true},portraitRatio);
-   const shadow=project(basis,fx,fy,[x,y,z]);
-   if(shadow){
-    jetContext.fillStyle='#071b35a0';jetContext.beginPath();
-    jetContext.ellipse(shadow[0],shadow[1],width*.33,Math.min(26,height*.033),0,0,Math.PI*2);jetContext.fill();
-   }
-   jetBounds=drawQuinjet88(jetContext,point=>project(basis,fx,fy,point),{
-    x,y:y+.03,z,yaw:-2.40,scale:.88,paint:root.dataset.jet
-   });
+  if(flightButton&&live.room==='hangar'){
+   const projectPhoto=(u,v)=>project(basis,fx,fy,roomAnchor86(selected,{u,v,front:true},portraitRatio));
+   const a=projectPhoto(.09,.44),b=projectPhoto(.92,.69);
+   jetBounds=a&&b?{left:Math.min(a[0],b[0]),right:Math.max(a[0],b[0]),top:Math.min(a[1],b[1]),bottom:Math.max(a[1],b[1])}:null;
   }
   paintMarkers(basis,fx,fy,now);
   if(greeting?.open&&now-greeting.at>=MENTOR_GREETING_MS){

@@ -1,7 +1,7 @@
 // V48_AI_RESPONSE_DIAGNOSTICS
 // V44_BULK_CHAPTERS
 // V42_CHAPTERS
-import {mountMissionGame} from './mission-game.js?v=86';
+import {mountMissionGame} from './mission-game.js?v=95';
 import { initHeadquarters3D } from './headquarters3d.js';
 import {initial,get,put,del,allRecords,replaceRecords,compress,uid,gradeName} from './data.js';
 import {speak,listen,stopVoice,getVoiceState,setVoiceState,spellEnglish77} from './voice.js?v=81';
@@ -10,19 +10,22 @@ import {syncAdapter} from './sync.js?v=81';
 import {BASE_ITEMS,baseMarkup,migrateBase} from './base.js?v=82';
 import {mountArcade,stopArcade} from './arcade.js?v=93';
 import {mountBaseScene84} from './base-scene84.js?v=88';
-import {baseWalkMarkup,mountBaseWalk,resetBaseWalk,openWalkRoom87,focusWalkCase88,walkRoomId93} from './base-walk85.js?v=94';
+import {baseWalkMarkup,mountBaseWalk,resetBaseWalk,openWalkRoom87,focusWalkCase88,walkRoomId93} from './base-walk85.js?v=95';
 import {HQ_SLOTS,hqItems,hqRead,hqBalances,hqEarnToken,hqSpendToken,hqRecordCrystals,hqBuyWithGems,hqPlaced,hqPlace,hqDisplayPurchase88,hqPet,hqChoosePet88,hqPaint,hqEarnFood,hqChoices,hqMarkup,hqWallet,hqShop,hqFoodQuiz88} from './headquarters84.js?v=91';
 import {petRoom86,petCareMarkup86,petPicker88,mountPetCare86,setPetCare86,servePet87} from './pet-care86.js?v=90';
 import {flightMarkup88,mountNounFlight88} from './noun-flight88.js?v=90';
 import {petQuiz88} from './pet-quiz88.js?v=88';
 import {gameGroup92,recordGameAward92} from './learning-games92.js?v=92';
-import {mountLearningGames92} from './learning-play92.js?v=93';
-import {mountMissions93,missionNote93} from './missions93.js?v=93';
-import {mountPreschoolAudio93} from './preschool-audio93.js?v=93';
+import {mountLearningGames92} from './learning-play92.js?v=95';
+import {mountMissions93,missionNote93} from './missions93.js?v=95';
+import {mountHangar95} from './hangar95.js?v=95';
+import {trainingCatalog95,trainingSubject95,trainingGroupName95,trainingSequence95,outsideDeck95} from './training95.js?v=95';
+import {mountPreschoolAudio93} from './preschool-audio93.js?v=95';
 import {MASTER_PRIZES86,MASTER_SCORE86,recordEnergy86,trainingRound86,trainingConsole86,unlockMaster86} from './base-training86.js?v=87';
 import {affordable82,purchase82,credit82} from './wallet82.js?v=82';
 import {REVEAL_OFFER82,consent82,requestedAnswer82,solutions82,leaks82,parseTutor82,promptTutor82} from './tutor82.js?v=82';
 let mentorHistory={tech:[],fun:[]};
+let stopMission95=()=>{};
 // V53_AI_RETRY_ONLY — prawdziwe odpowiedzi AI, anulowanie starych zapytań
 const AI_MENTOR_URL='https://akademia-ai.niedzialkowskamagdalena02.workers.dev/mentor-ai';
 const AI_FRIENDLY_MESSAGE='🦸 Mentor chwilowo nie może odpowiedzieć. Spróbuj jeszcze raz za moment.';
@@ -73,7 +76,7 @@ const select=(id,label,options,value)=>`<label for="${id}">${label}</label><sele
 const grades=[['P','Przedszkole'],...Array.from({length:12},(_,i)=>[String(i+1),`Klasa ${i+1}`])];
 const people=[['pawel','Paweł'],['patryk','Patryk']];
 const note=t=>{const n=$('hq85-notice')||$('notice');if(!n){console.warn('Powiadomienie:',t);return}n.textContent=t;n.classList.add('visible');setTimeout(()=>{if(n.isConnected)n.classList.remove('visible')},4500)};
-const ACADEMY_RELEASE=94;
+const ACADEMY_RELEASE=95;
 async function checkAcademyUpdate(button){
  if(!button||button.disabled)return;
  const label=button.textContent,controller=new AbortController();
@@ -741,7 +744,7 @@ const grant=async(child,points,reason,key)=>{
  try{await syncAdapter.onLocalChange(data);}catch{note('Nagroda zapisana na telefonie. Ponów synchronizację, kiedy wróci połączenie.');}
  return true;
 };
-function layout(title,content,scene=''){mountLearningGames92(null);mountMissions93(null);mountPreschoolAudio93(null);if(typeof mountNounFlight88==='function')mountNounFlight88(null);if(typeof mountBaseScene84==='function')mountBaseScene84(null);if(typeof mountBaseWalk==='function')mountBaseWalk(null);cancelAIRequests();stopVoice();closeMicBubble();app.innerHTML=scene==='walk'?'<main class="hq86-main">'+content+'</main>':`<main class="wrap${role==='child'&&(tab==='base'||hqViews84.get(who)==='walk')?' hq88-base-page':''}"><header class="head"><div><div class="brand">⚡ AKADEMIA SUPERBOHATERÓW <span style="display:inline-block;font-size:0.72em;border:1px solid currentColor;border-radius:8px;padding:2px 7px;vertical-align:middle">V${ACADEMY_RELEASE}</span></div><div class="sub">${e(title)}</div>${sync78StatusMarkup()}</div>${role==='child'&&scene!=='choice'?trainingSoundControl():''}${role?button(testMode?'← Zakończ test':'← Profile','exit','alt'):''}</header>${testMode?'<div class="test-banner">🧪 TRYB MAMY — BEZPŁATNY TEST • POSTĘPY NIE SĄ ZAPISYWANE</div>':''}${content}</main>${role==='child'&&scene!=='choice'?'<button class="mic" data-action="mic" aria-label="Sterowanie głosowe">🎙️</button>':''}`;document.querySelectorAll('[data-speak]').forEach(b=>b.addEventListener('click',()=>speak(b.dataset.speak,b.dataset.lang,role==='child'?profile().mentor:'tech',data.settings.rate||1)));hydrateImages();v76AfterRender();if(role==='child'&&profile().grade==='P')mountPreschoolAudio93(app,text=>speak(text,'pl-PL',profile().mentor,data.settings.rate||1));if(role==='child'&&(tab==='learn'||tab==='subjectmissions'))installMicDrag()}
+function layout(title,content,scene=''){stopMission95();stopMission95=()=>{};mountLearningGames92(null);mountMissions93(null);mountHangar95(null);mountPreschoolAudio93(null);if(typeof mountNounFlight88==='function')mountNounFlight88(null);if(typeof mountBaseScene84==='function')mountBaseScene84(null);if(typeof mountBaseWalk==='function')mountBaseWalk(null);cancelAIRequests();stopVoice();closeMicBubble();app.innerHTML=scene==='walk'?'<main class="hq86-main">'+content+'</main>':`<main class="wrap${role==='child'&&(tab==='base'||hqViews84.get(who)==='walk')?' hq88-base-page':''}"><header class="head"><div><div class="brand">⚡ AKADEMIA SUPERBOHATERÓW <span style="display:inline-block;font-size:0.72em;border:1px solid currentColor;border-radius:8px;padding:2px 7px;vertical-align:middle">V${ACADEMY_RELEASE}</span></div><div class="sub">${e(title)}</div>${sync78StatusMarkup()}</div>${role==='child'&&scene!=='choice'?trainingSoundControl():''}${role?button(testMode?'← Zakończ test':'← Profile','exit','alt'):''}</header>${testMode?'<div class="test-banner">🧪 TRYB MAMY — BEZPŁATNY TEST • POSTĘPY NIE SĄ ZAPISYWANE</div>':''}${content}</main>${role==='child'&&scene!=='choice'?'<button class="mic" data-action="mic" aria-label="Sterowanie głosowe">🎙️</button>':''}`;document.querySelectorAll('[data-speak]').forEach(b=>b.addEventListener('click',()=>speak(b.dataset.speak,b.dataset.lang,role==='child'?profile().mentor:'tech',data.settings.rate||1)));hydrateImages();v76AfterRender();if(role==='child'&&profile().grade==='P')mountPreschoolAudio93(app,text=>speak(text,'pl-PL',profile().mentor,data.settings.rate||1));if(role==='child'&&(tab==='learn'||tab==='subjectmissions'))installMicDrag()}
 async function hydrateImages(){for(const el of document.querySelectorAll('[data-image]')){const src=await img(el.dataset.image);if(el.isConnected&&src){el.src=src;el.onload=()=>URL.revokeObjectURL(src)}}}
 function nav(){return role==='admin'?`<div class="tabs">${[['home','Przegląd'],['books','📚 Książki'],['missions','📋 Misje'],['settings','⚙️ Ustawienia'],['test','🧪 Testuj wszystko'],['sync','📱 Telefony'],['backup','💾 Kopia']].map(([k,n])=>button(n,'admin:'+k,adminTab===k?'gold':'alt')).join('')}</div>`:`<div class="tabs">${[['home','🎯 Misje'],['books','📚 Książki'],['learn','🧠 Trening'],['academy','📖 Sala odkrywców'],['mentor','🤖 Mentor'],['base','🏙️ Baza Avengersów i gry']].map(([k,n])=>button(n,'child:'+k,tab===k?'gold':'alt')).join('')}</div>`}
 function render(){if(tab!=='arcade')stopArcade();if(!role){layout('Wybierz swoją bazę',`<section class="card"><h1>Witaj w Akademii! 🛡️</h1><p>Każdy bohater ma własne misje i nagrody.</p></section><div class="grid">${people.filter(([id])=>!syncAdapter.device?.()||syncAdapter.device().role!=='child'||syncAdapter.device().child===id).map(([id,name])=>`<button class="tile" data-action="enter:${id}"><img class="profile-hero" src="assets/art/${data.profiles[id].hero||(id==='pawel'?'iron':'spider')}.svg" alt=""><h2>${name}</h2><small>${gradeName(data.profiles[id].grade)} · ${data.profiles[id].coins} złotych</small></button>`).join('')}</div><section class="card">${syncAdapter.device?.()?.role==='child'?'':button('🔐 Centrum dowodzenia mamy','enter:admin','gold')}<p class="muted">${syncAdapter.status()}</p></section>${!syncAdapter.device?.()?sync78Markup():''}${globalThis.AKADEMIA_TEST80?'':`<footer class="academy-update">${button('🔄 Aktualizuj Akademię','academy:update','line')}</footer>`}`);return}if(role==='admin')adminRender();else childRender()}
@@ -1033,15 +1036,18 @@ function v37Voice(text,lang='pl-PL'){
 
 // V41_INTERACTIVE_AI_MISSIONS
 function smOpen(initialBookId='',launch=null){
- const missionChild82=who;
  tab='subjectmissions';
  avengersRun=null;
  render();
  const root=document.getElementById('subject-missions-root');
  if(!root)return;
- mountMissionGame(root,{
+ return smMount95(root,initialBookId,launch,()=>{tab='learn';trainingStep='range';render()});
+}
+function smMount95(root,initialBookId,launch,onBack){
+ const missionChild82=who;
+ const mission=mountMissionGame(root,{
   books:books().filter(b=>!b.archived),pages:data.bookPages,
-  child:who,transient:testMode,childGrade:profile().grade,initialBookId,launch,onBack:()=>{tab='learn';trainingStep='range';render()},
+  child:who,transient:testMode,childGrade:profile().grade,initialBookId,launch,onBack,
   ask:async (question,timeoutMs=0)=>{
    const controller=beginAIRequest('mission');const ms=Number(timeoutMs);
    const timer=Number.isFinite(ms)&&ms>0?setTimeout(()=>controller.abort(),ms):null;
@@ -1055,11 +1061,13 @@ function smOpen(initialBookId='',launch=null){
    const token=result?.perfect&&await hqToken84(missionChild82,key,result.subject,true);
    const previous=data.history.find(h=>h.key===key&&h.child===missionChild82);
    if(previous){if(progressed&&!token)await save();return Number(previous.points)||0;}
-   const ok=await grant(missionChild82,n,mode==='test'?'Sprawdzian z podręcznika':'Trening z podręcznika',key);
+   const ok=await grant(missionChild82,n,mode==='test'?'Sprawdzian z podręcznika':launch?.tasks?'Trening spoza książki':'Trening z podręcznika',key);
    if(!ok&&progressed&&!token)await save();
    if(ok)note('🏆 +'+n+' złotych do portfela!');return ok?n:0;
   }
  });
+ stopMission95=mission?.dispose??(()=>{});
+ return mission;
 }
 
 function v37Hub(){
@@ -1121,7 +1129,7 @@ function v37Hub(){
 }
 
 let trainingStep='subject',trainingSelectedSubject='Polski',trainingMode='game',trainingSelectedPages=new Set();
-function trainingBookItems(){return books().filter(b=>!b.archived&&(/wiedza og[oó]lna/i.test(trainingSelectedSubject)||String(b.subject||'').trim().toLocaleLowerCase('pl-PL')===trainingSelectedSubject.toLocaleLowerCase('pl-PL')))}
+function trainingBookItems(){return books().filter(b=>!b.archived&&(/wiedza og[oó]lna/i.test(trainingSelectedSubject)||(trainingSubject95(trainingSelectedSubject)!=='other'?trainingSubject95(b.subject)===trainingSubject95(trainingSelectedSubject):String(b.subject||'').trim().toLocaleLowerCase('pl-PL')===trainingSelectedSubject.toLocaleLowerCase('pl-PL'))))}
 function trainingPageItems(){const ids=new Set(trainingBookItems().map(b=>b.id));return data.bookPages.filter(p=>ids.has(p.bookId)&&p.text?.trim()).sort((a,b)=>a.number-b.number)}
 function trainingSubjectsList(){return [...new Set(['Polski','Matematyka','Angielski','Przyroda','Wiedza ogólna',...((profile().subjects)||[]),...books().map(b=>b.subject)].filter(Boolean))]}
 function trainingVoice(text){return speakBtn(text)}
@@ -1152,23 +1160,40 @@ function trainingTapSound(whileSpeaking=false){
 function trainingSoundControl(){const muted=localStorage.getItem('academy-v72-training-silent')==='1';return `<button type="button" class="tr72-sound-toggle" data-action="training:toggle-sound" aria-pressed="${!muted}">${muted?'🎵':'🎶'}</button>`}
 
 let learningReturn92='learn';
-function learningGamesLink92(grade){
- const group=gameGroup92(grade);
- if(!group)return '';
- const label=group==='school'?'🏎️ Gry mnożeniowe':'🔤 Gry z literami i liczbami';
- return button(label,'learning-games:open','gold lg92-entry');
+let trainingRun95=null,trainingGame95=null;
+function trainingList95(){
+ const items=trainingCatalog95(profile().grade,trainingSelectedSubject);
+ const groups=trainingSubject95(trainingSelectedSubject)==='all'?[...new Set(items.map(item=>item.subject))]:[items[0]?.subject];
+ return groups.map(group=>`${groups.length>1?`<h4>${e(trainingGroupName95(group))}</h4>`:''}
+  <div class="tr71-grid tr95-game-list">${items.filter(item=>item.subject===group).map(item=>
+   `<button type="button" class="tr71-choice" data-action="training:play:${encodeURIComponent(item.id)}"><span aria-hidden="true">${item.icon}</span><strong>${e(item.name)}</strong></button>`).join('')}</div>`).join('');
 }
-
 function trainingFlowMarkup(){
- if(profile().grade==='P'&&trainingStep!=='outside-quiz')return v75PreschoolView();
- let content='<section class="tr71 v73-training" data-v77-step="'+e(trainingStep)+'"><header>'+(trainingStep==='subject'?'':v77TrainingArt())+'<small>⚡ AKADEMIA AVENGERSÓW</small><h2>Gotowy na supermisję?</h2></header>';
- if(trainingStep==='subject'){
-  content+=learningGamesLink92(profile().grade)+`<h3>Wybierz supermoc ${trainingVoice('Wybierz przedmiot, którego chcesz się uczyć.')}</h3><div class="v73-knowledge">${trainingSubjectCard('Wiedza ogólna')}</div><div class="tr71-grid tr72-subject-grid">`+
+ const subject=trainingStep==='subject';
+ let content='<section class="tr71 v73-training" data-v77-step="'+e(trainingStep)+'"><header><h2>'+e(subject?'Trening':trainingSelectedSubject)+'</h2></header>';
+ if(subject){
+  content+=`<h3>Wybierz przedmiot ${trainingVoice('Wybierz przedmiot. Wiedza ogólna łączy wszystkie przedmioty.')}</h3><div class="v73-knowledge">${trainingSubjectCard('Wiedza ogólna')}</div><div class="tr71-grid tr72-subject-grid">`+
    trainingSubjectsList().filter(s=>s!=='Wiedza ogólna').map(s=>trainingSubjectCard(s)).join('')+'</div>';
  }else if(trainingStep==='source'){
-  content+=`${trainingCard('← Wróć do przedmiotów','training:back:subject')}${trainingSelectedSubject==='Matematyka'?learningGamesLink92(profile().grade):''}<h3>2. Wybierz źródło zadań ${trainingVoice('Wybierz Bibliotekę bohatera albo Misje poza podręcznikiem.')}</h3><div class="tr71-grid">`+
-   trainingCard('📚 Tajna biblioteka Avengersów','training:source:books')+
-   trainingCard('⚡ Wyzwania poza książką','training:source:outside')+'</div>';
+  content+=`${trainingCard('← Przedmioty','training:back:subject')}<div class="tr71-grid">`+
+   trainingCard('🎮 Trening','training:mode:train','Ćwicz w grach i zadaniach')+
+   trainingCard('🏆 Sprawdzian','training:mode:test','Przećwicz materiał z książki')+'</div>';
+ }else if(trainingStep==='train-options'){
+  content+=`${trainingCard('← Wybór trybu','training:back:source')}<div class="tr71-grid">`+
+   trainingCard('🎲 Trenuj','training:mixed:start',trainingPageItems().length?'Różne zadania z książki i spoza niej':'Losowe zadania spoza książki')+
+   trainingCard('🎮 Wybierz grę','training:back:catalog','Jedna gra, nowe przykłady')+
+   trainingCard('📚 Tylko z książki','training:mode:game','Cały materiał albo wybrane strony')+
+   (/angiel|english/i.test(trainingSelectedSubject)?trainingCard('🃏 Słówka z książki','training:mode:vocab'):'')+'</div>';
+ }else if(trainingStep==='catalog'){
+  content+=trainingCard('← Trening','training:back:train-options')+'<h3>Wybierz grę</h3>'+trainingList95();
+ }else if(trainingStep==='mixed'||trainingStep==='chosen'){
+  const mixed=trainingStep==='mixed',item=mixed?trainingRun95?.items[trainingRun95.index]:{game:trainingGame95};
+  const back=trainingCard(mixed?'← Trening':'← Wybierz grę',mixed?'training:back:train-options':'training:back:catalog');
+  if(!item)content+=back+'<h3>🏆 Trening ukończony</h3>'+trainingCard('Zagraj ponownie','training:mixed:start');
+  else content+=back+(mixed?`<p class="tr95-current">Zadanie ${trainingRun95.index+1} z ${trainingRun95.items.length} · ${e(trainingGroupName95(item.key))}</p>`:'')+
+   (item.page?`<p>Z książki · strona ${item.page.number}</p>`:`<p>Spoza książki · ${e(item.game.name)}</p>`)+
+   '<div id="training95-game"></div><p data-lg92-save role="status"></p>'+
+   (mixed?trainingCard('Pomiń zadanie','training:mixed:next'):'');
  }else if(trainingStep==='outside'){
   content+=`${trainingCard('← Wybór źródła','training:back:source')}<div class="v73-portal"><img src="assets/art/${who==='patryk'?'spider':'iron'}.svg" alt="Superbohater"><h3>⚡ Podejmij wyzwanie Avengersów!</h3><p>${e(trainingSelectedSubject)} · 10 wyzwań</p><button class="tr71-start" data-action="v37:play">🚀 START MISJI</button></div><div class="v73-side-games"><h3>🎮 Szybkie gry</h3>${trainingCard('🔗 Dopasuj pary','training:mini:match')}${trainingCard('⚡ Szybka misja','training:mini:quick')}</div>${trainingCard('📚 Klasyczne ćwiczenia','v37:classic')}`;
  }else if(trainingStep==='outside-quiz'){
@@ -1180,9 +1205,9 @@ function trainingFlowMarkup(){
    trainingCard('🎮 Sala treningowa','training:mode:game')+
    trainingCard('🏆 Próba superbohatera','training:mode:test')+(/angiel|english/i.test(trainingSelectedSubject)?trainingCard('🃏 Słówka','training:mode:vocab','Piszę · słucham · mówię'):'')+'</div>';
  }else if(trainingStep==='range'){
-  content+=`${trainingCard('← Wybór trybu','training:back:mode')}<h3>4. Wybierz zakres ${trainingVoice('Wybierz cały materiał albo konkretne książki, działy i strony.')}</h3><div class="tr71-grid">`+
-   trainingCard('🌍 Cały arsenał wiedzy','training:range:all')+
-   trainingCard('📚 Wybieram misję','training:range:pick')+'</div>';
+  content+=`${trainingCard('← Wybór trybu',trainingMode==='test'?'training:back:source':'training:back:train-options')}<h3>Wybierz zakres ${trainingVoice('Wybierz cały materiał albo konkretne książki, działy i strony.')}</h3><div class="tr71-grid">`+
+   trainingCard('📚 Cały materiał z książek','training:range:all')+
+   trainingCard('📄 Wybierz książkę, dział lub strony','training:range:pick')+'</div>';
  }else if(trainingStep==='pick'){
   const bs=trainingBookItems(),ps=trainingPageItems();
   content+=`${trainingCard('← Wybór zakresu','training:back:range')}<h3>5. Zaznacz książki, działy lub strony ${trainingVoice('Możesz zaznaczyć wiele książek i stron. Naciśnij Rozpocznij misję.')}</h3>`+
@@ -1246,7 +1271,7 @@ function hqRoomPanel84(p){
    (won?'<p class="hq86-master-won">✓ Puchar i peleryna w kolekcji.</p>'+button('Zobacz kolekcję','hq:gallery','alt'):'')+
    button(won?'Zagraj jeszcze raz':'Rozpocznij próbę','hq:exercise:master','gold');
  }
- if(hqPanel84==='cockpit')body='<section class="sq93" id="missions93-cockpit"></section>';
+ if(hqPanel84==='cockpit')return '<section class="hq95-cockpit-panel" id="hq84-panel"><section class="sq93" id="missions93-cockpit"></section></section>';
  if(hqPanel84==='flight')body=flightMarkup88(button,speakBtn,{child:who,preview:testMode});
  if(hqPanel84==='hangar'){
   const jet=p.base?.owned?.includes('quinjet');
@@ -1484,11 +1509,45 @@ function hqMountArcade84(){
 function mountMissionsView93(p,flight=false){
  const region=$(flight?'missions93-cockpit':'missions93-training');
  if(!region)return;
- mountMissions93(region,{
-  grade:p.grade,flight,legacy:flight&&p.base?.owned?.includes('quinjet'),
+ (flight?mountHangar95:mountMissions93)(region,{
+  grade:p.grade,legacy:flight&&p.base?.owned?.includes('quinjet'),
   speak:(text,lang='pl-PL')=>speak(text,lang,p.mentor,data.settings.rate||1),
   tap:()=>trainingTapSound(true),tone:missionNote93
  });
+}
+
+function awardLearning95(p,id){
+ if(!recordGameAward92(p,id))return;
+ return save().catch(error=>{delete p.base.headquarters.learningAwards92[id];throw error;});
+}
+function mountTraining95(p){
+ const root=$('training95-game');
+ if(!root)return;
+ const mixed=trainingStep==='mixed', item=mixed?trainingRun95?.items[trainingRun95.index]:{game:trainingGame95};
+ if(!item)return;
+ const advance=()=>{if(mixed&&root.isConnected)void handle('training:mixed:next');};
+ const onBack=()=>handle(mixed?'training:back:train-options':'training:back:catalog');
+ if(item.page){
+  return smMount95(root,item.page.bookId,{pageIds:[item.page.id],mode:'game',single:true,onFinish:advance},onBack);
+ }
+ const g=item.game,grade=p.grade;
+ const say=(text,lang='pl-PL')=>speak(text,lang,p.mentor,data.settings.rate||1);
+ if(g.engine==='arcade'||g.engine==='scene'){
+  root.className=g.engine==='arcade'?'lg92-games':'sq93';root.dataset.group=gameGroup92(grade);
+  return (g.engine==='arcade'?mountLearningGames92:mountMissions93)(root,{
+   grade,initialGame:g.kind,subject:g.subject,oneRound:mixed,onFinish:advance,onBack,speak:say,
+   tap:()=>trainingTapSound(true),tone:missionNote93,
+   awards:()=>p.base?.headquarters?.learningAwards92??{},onAward:id=>awardLearning95(p,id)
+  });
+ }
+ const makeTasks=()=>{
+  const custom=v75OutsideBank(who,g.subject).filter(item=>typeof item?.q==='string'&&Array.isArray(item.a));
+  const stock=g.kind==='bank'&&Number(grade)>=2?(v37Bank[g.subject]||[]).map(([q,a,ok,qPl])=>({q,a,ok,qPl})):[];
+  const questions=[...custom.map(item=>outsideQuestion(item,g.subject)),...stock].filter(item=>item.q);
+  return outsideDeck95(g,grade,questions,mixed);
+ };
+ const launch={subject:trainingSelectedSubject,label:g.name,pageIds:[],mode:'game',tasks:makeTasks(),repeat:makeTasks,onFinish:mixed?advance:null};
+ return smMount95(root,'',launch,onBack);
 }
 
 function childRender(){
@@ -1514,12 +1573,23 @@ function childRender(){
   });
   return;
  }
+ if(tab==='base'&&!walking&&hqPanel84==='cockpit'){
+  layout('Kokpit samolotu','<dialog class="hq85-dialog hq95-cockpit-dialog" aria-label="Kokpit samolotu">'+hqRoomPanel84(p)+'</dialog>','walk');
+  const dialog=app.querySelector('.hq95-cockpit-dialog');
+  if(dialog){
+   if(dialog.showModal)dialog.showModal();else dialog.setAttribute('open','');
+   dialog.addEventListener('cancel',event=>{event.preventDefault();void handle('hq:close');});
+  }
+  mountMissionsView93(p,true);
+  return;
+ }
  if(tab==='base'&&walking){
   const panel=hqRoomPanel84(p);
   const care=['pet','pet-select','pet-quiz'].includes(hqPanel84);
   const mic='<button type="button" class="mic hq87-mic" data-action="mic" aria-label="Zadaj pytanie">🎙️</button>';
-  const dialog=panel?'<dialog class="hq85-dialog'+(care?' hq86-pet-dialog':'')+'" aria-label="'+(care?'Kącik zwierzaka':'Interakcja w bazie')+'">'+panel+
-   '<div id="hq85-notice" role="status"></div><div class="hq87-dialog-mic">'+mic+'</div></dialog>':'';
+  const cockpit=hqPanel84==='cockpit';
+  const dialog=panel?'<dialog class="hq85-dialog'+(cockpit?' hq95-cockpit-dialog':care?' hq86-pet-dialog':'')+'" aria-label="'+(cockpit?'Kokpit samolotu':care?'Kącik zwierzaka':'Interakcja w bazie')+'">'+panel+
+   (cockpit?'':'<div id="hq85-notice" role="status"></div><div class="hq87-dialog-mic">'+mic+'</div>')+'</dialog>':'';
   const walk=baseWalkMarkup(p,who,hero(p.hero||(who==='pawel'?'iron':'spider'))[0],ACADEMY_RELEASE,dialog,mic);
   layout('Spacer po bazie',walk,'walk');
   mountBaseWalk(document.querySelector('[data-hq86-walk]'));mountPetCare86(app,careGesture);
@@ -1536,7 +1606,7 @@ if(tab==='reader'){let b=data.books.find(b=>b.id===bookId),ps=data.bookPages.fil
 if(tab==='submission'){let m=data.missions.find(m=>m.id===missionId);html+=`<section class="card">${button('← Misje','child:home')}<h2>${e(m?.title)}</h2><p>Prześlij zdjęcie pracy. Mama sprawdzi ją przed przyznaniem punktów.</p><label>Galeria</label><input type="file" accept="image/*" id="workfile"><label>Aparat</label><input type="file" accept="image/*" capture="environment" id="workcamera"><label>Wiadomość do mamy</label><textarea id="workcomment"></textarea>${button('📤 Zgłoś wykonanie','mission:send','gold')}</section>`}
 if(tab==='learn'&&v37Classic)html+=`<section class="card"><h2>🎓 Akademia wiedzy ${speakBtn('Trening bohatera')}</h2><div class="learning-banner"><span>📚</span><div><strong>Ucz się jak superbohater!</strong><small>Obrazki • słuchanie • quizy • sprawdziany</small></div><span>⭐</span></div><p>Ucz się także bez pracy domowej. Za poprawne zadania zdobywasz złote. Dzienny limit nagród chroni przed powtarzaniem najłatwiejszych ćwiczeń.</p>${speakBtn('Wybierz rodzaj treningu. Możesz ćwiczyć matematykę, czytanie, angielski, quizy, dyktanda i krzyżówki.')} ${select('trainingSubject','Wybierz przedmiot',trainingSubjects(), 'polski')}<div id="trainingKinds">${trainingKindSelect('polski')}</div><div class="learning-exercise" id="exercise"></div>${button('🔄 Nowe ćwiczenie','exercise:new')}</section><section class="card"><h3>🎵 Muzyczne nagrody</h3><p class="muted">Lista zaakceptowana przez mamę. Linki otwierają YouTube — rodzic powinien nadzorować korzystanie.</p>${data.settings.songs.map(s=>`<p><a href="${e(s.url)}" target="_blank" rel="noopener noreferrer">🎶 ${e(s.title)}</a></p>`).join('')}</section>`;
 if(tab==='academy'){const subjects=[['polish','📖','Język polski','Gramatyka i ortografia'],['math','🧮','Matematyka','Liczby, działania i figury'],['english','🇬🇧','Język angielski','Słówka i podstawowe zwroty']];const belongs=(l,i)=>l.subject==='english'?'english':i<5?'polish':'math';const chosen=subjects.find(x=>x[0]===academySubject);html+=`<section class="card discovery-head"><h2>🚀 Sala Odkrywców</h2>${chosen?`${button('← Wybierz przedmiot','academy:subjects')}<h3>${chosen[1]} ${chosen[2]}</h3><p>${chosen[3]}. Wybierz zagadnienie, poznaj zasadę i rozwiąż miniwyzwanie.</p><div class="discovery-grid">${LESSONS.map((l,i)=>belongs(l,i)===academySubject?`<button class="discovery-tile" data-action="lesson:open:${i}"><span>${l.icon}</span><b>${l.title}</b><small>${l.subtitle}</small></button>`:'').join('')}</div>`:`<p>Wybierz przedmiot, a potem zagadnienie, którego chcesz się nauczyć.</p><div class="discovery-grid">${subjects.map(([id,icon,title,subtitle])=>`<button class="discovery-tile" data-action="academy:subject:${id}"><span>${icon}</span><b>${title}</b><small>${subtitle}</small></button>`).join('')}</div>`}</section>`;}
-if(tab==='academy'&&(!academySubject||academySubject==='math'))html+=learningGamesLink92(p.grade);
+
 if(tab==='lesson'){const l=LESSONS[lessonIndex]||LESSONS[0];html+=`<section class="card lesson-card">${button('← Zagadnienia','child:academy')}<div class="lesson-art">${l.icon}</div><h2>${l.title}</h2><p class="lesson-story">${e(l.story)}</p><div class="lesson-rule"><strong>Zapamiętaj!</strong><p>${e(l.rule)}</p></div><p><strong>Przykłady:</strong> ${e(l.examples)}</p>${speakBtn(l.story+' '+l.rule+' Przykłady: '+l.examples)}<h3>🎯 Miniwyzwanie</h3><p>${e(l.question)} ${speakBtn(l.question)}</p><div class="discovery-grid">${l.answers.map((x,i)=>button(e(x),'lesson:answer:'+i)).join('')}</div><p id="lesson-feedback" role="status"></p><div class="discovery-playground"><h3>🎮 Zagraj i utrwal wiedzę!</h3><p>Wybierz grę. Każda runda ma inne pytania i kolorowe odpowiedzi.</p><div class="discovery-actions">${button('🔗 Dopasuj pary','discovery:start:match','gold')}${button('⚡ Szybka misja','discovery:start:quick','gold')}</div><div id="discovery-game"></div></div>${button('🔄 Inny temat','child:academy')}</section>`}
 if(tab==='mentor')html+=`<section class="card mentor-room"><div class="mentor-header"><span class="mentor-tag">⚡ STREFA MENTORA</span><h2>Spotkaj swojego supermentora!</h2><p>Wybierz bohatera i zobacz jego supermoc.</p></div><div class="mentor-choices"><button type="button" class="mentor-choice ${p.mentor==='tech'?'selected':''}" data-action="mentor:choose:tech">🦾 Iron Man</button><button type="button" class="mentor-choice ${p.mentor==='fun'?'selected':''}" data-action="mentor:choose:fun">🕸️ Spider-Man</button></div><div class="mentor-stage ${p.mentor==='fun'?'stage-spider':'stage-iron'}" id="mentor-stage" aria-label="Animacja wybranego mentora"><div class="mentor-stars">✦ ✧ ✦</div><div class="mentor-flight-lines"></div><div class="mentor-web" aria-hidden="true"><svg viewBox="0 0 500 280" preserveAspectRatio="none"><path d="M230 170 L480 18 M230 170 L498 85 M230 170 L498 160 M230 170 L488 248 M230 170 L370 0 M230 170 L310 0 M230 170 L490 280 M230 170 L360 280" stroke="white" stroke-width="3" fill="none"/><path d="M332 108 Q370 123 390 80 M355 134 Q415 158 442 110 M350 170 Q420 190 470 175 M345 203 Q400 210 442 234 M285 140 Q315 160 330 95" stroke="white" stroke-width="2" fill="none"/></svg></div><img class="mentor-figure" src="assets/art/${p.mentor==='fun'?'spider':'iron'}.svg" alt="${p.mentor==='fun'?'Spider-Man':'Iron Man'}"><div class="mentor-floor"></div><div class="mentor-power-caption">${p.mentor==='fun'?'🕸️ Uwaga, leci sieć!':'🚀 Start silników! Iron Man leci!'}</div></div><div class="mentor-talk"><h3>${p.mentor==='fun'?'🕷️ Spider-Man mówi:':'🦾 Iron Man mówi:'}</h3><p>${p.mentor==='fun'?'Hej! Masz pytanie? Dawaj, zanim znowu zaplączę się w sieć!':'System gotowy. Zadaj pytanie, młody wynalazco.'}</p></div><p class="muted">Mentor korzysta z AI Gemini. Możesz pytać o naukę i superbohaterów.</p><label for="question">Twoje pytanie</label><input id="question" placeholder="Np. Co to rzeczownik? Jak mnożyć?"><div class="row">${button('💡 Wyjaśnij','mentor:answer','gold')}${button('🎙️ Zapytaj głosem','mic')}</div><p id="mentoranswer" class="guide">Zapytaj o rzeczowniki, czasowniki, sylaby, dodawanie, odejmowanie lub mnożenie.</p>${button('🔊 Odczytaj wyjaśnienie','mentor:speak')}</section>`;
 if(tab==='base'){
@@ -1557,7 +1627,7 @@ if(tab==='learn'){
    html+=trainingFlowMarkup();
   }
   if(avengersRun)html+=avengersPanel();
- }layout('Akademia '+p.name,html);if(tab==='base'){mountBaseScene84(document.querySelector('[data-hq84-scene]'));mountPetCare86(app,careGesture);if(hqPanel84==='cockpit')mountMissionsView93(p,true);if(hqPanel84==='flight')mountNounFlight88(app,hqRead(p).paint,{child:who,preview:testMode});}if(tab==='arcade')hqMountArcade84();if(tab==='learn'&&v37Classic)newExercise();if(tab==='trace')drawTrace()}
+ }layout('Akademia '+p.name,html);if(tab==='base'){mountBaseScene84(document.querySelector('[data-hq84-scene]'));mountPetCare86(app,careGesture);if(hqPanel84==='cockpit')mountMissionsView93(p,true);if(hqPanel84==='flight')mountNounFlight88(app,hqRead(p).paint,{child:who,preview:testMode});}if(tab==='arcade')hqMountArcade84();if(tab==='learn'&&v37Classic)newExercise();if(tab==='learn'&&['mixed','chosen'].includes(trainingStep))mountTraining95(p);if(tab==='trace')drawTrace()}
 const CROSSWORDS=[
  {word:'KOT',clue:'Miauczy i mruczy',r:0,c:2,dir:'v'},
  {word:'DOM',clue:'Mieszkamy w nim',r:1,c:1,dir:'h'},
@@ -1780,9 +1850,30 @@ if(action==='training:toggle-sound'){const old=localStorage.getItem('academy-v72
 if(action.startsWith('training:')){
  const parts=action.split(':'),what=parts[1],value=decodeURIComponent(parts.slice(2).join(':'));
  if(what==='mini'){const lessonBySubject={Polski:0,Matematyka:5,Angielski:9};lessonIndex=lessonBySubject[trainingSelectedSubject]??0;avengersRun=null;trainingStep='outside-mini';render();discoveryStart(value==='quick'?'quick':'match');return}
- if(what==='subject'){v772RangeModes.clear();trainingSelectedSubject=value;trainingSelectedPages=new Set();trainingStep='source';return render()}
+ if(what==='subject'){v772RangeModes.clear();trainingSelectedSubject=value;trainingSelectedPages=new Set();avengersRun=null;trainingStep='source';return render()}
  if(what==='source'){trainingStep=value==='outside'?'outside':'mode';if(value==='outside'){const map={Polski:'polski',Matematyka:'matematyka',Angielski:'angielski',Przyroda:'przyroda'};v37Subject=map[trainingSelectedSubject]||'all'}return render()}
+ if(what==='mode'&&value==='train'){trainingStep='train-options';return render()}
  if(what==='mode'){trainingMode=value==='test'?'test':value==='vocab'&&/angiel|english/i.test(trainingSelectedSubject)?'vocab':'game';trainingStep='range';return render()}
+ if(what==='play'&&role==='child'){
+  const selected=trainingCatalog95(profile().grade,trainingSelectedSubject).find(item=>item.id===value);
+  if(!selected)return;
+  trainingGame95=selected;avengersRun=null;v37Classic=false;trainingStep='chosen';return render();
+ }
+ if(what==='mixed'&&role==='child'){
+  if(value==='start'){
+   const p=profile(),catalog=trainingCatalog95(p.grade,trainingSelectedSubject),key=trainingSubject95(trainingSelectedSubject);
+   const rotationKey='academy-v95-training-'+who+'-'+key;
+   let rotation=Math.floor(Math.random()*999);
+   if(!testMode){
+    const stored=localStorage.getItem(rotationKey);
+    if(stored!==null)rotation=Number(stored)||0;
+    localStorage.setItem(rotationKey,String(rotation+5));
+   }
+   trainingRun95={index:0,items:trainingSequence95(catalog,trainingPageItems(),trainingBookItems(),rotation,key)};
+   avengersRun=null;v37Classic=false;trainingStep='mixed';
+  }else if(value==='next'&&trainingStep==='mixed'&&trainingRun95)trainingRun95.index++;
+  return render();
+ }
  if(what==='back'){trainingStep=value;return render()}
  if(what==='range'){
   v772RangeModes.clear();
@@ -2197,7 +2288,7 @@ document.addEventListener('pointerdown',event=>{
 },true);
 document.addEventListener('click',event=>{
  const control=event.target.closest?.('button,summary');
- if(!control||control.disabled||control.dataset.hqForwarded||control.dataset.petTool&&event.detail||
+ if(!control||control.disabled||control.dataset.hqForwarded||control.closest('#missions93-cockpit')&&!control.dataset.action||control.dataset.petTool&&event.detail||
     !control.closest('.hq86-main,.hq88-base-page,.hq84-choices'))return;
  const action=control.dataset.action;
  if(control.classList.contains('tr72-subject-card')||
