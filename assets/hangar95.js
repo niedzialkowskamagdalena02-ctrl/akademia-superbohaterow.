@@ -1,7 +1,8 @@
-import {captainMissions93, aceMissions93, missionDeck93} from './missions93-data.js?v=93';
+import {captainMissions93, aceMissions93, missionDeck93} from './missions93-data.js?v=96';
 import {gameGroup92, shuffle92} from './learning-games92.js?v=92';
 import {paintWorld} from './missions93.js?v=95';
-import {airMarkup95, flightStyles95, mountAir95, plane95, shape95, surface95, voice95} from './hangar-flight95.js?v=95';
+import {airMarkup95, flightStyles95, mountAir95, plane95, shape95, surface95, voice95} from './hangar-flight95.js?v=96';
+import {baggageScene96, digitWord96, picture96, takeoffStarter96} from './hangar-art96.js?v=96';
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -13,6 +14,7 @@ const scenes = {
   fuel: ['day',''], radar: ['radar','📡'], cargo: ['cargo','📦'],
   radio: ['islands','🎧'], airport: ['airport','💬']
 };
+const previews = {baggage:'baggage-preview', takeoff:'takeoff-preview', feeder:'feeder-preview'};
 const directions = {left:['◀','W lewo'], up:['▲','W górę'], down:['▼','W dół'], right:['▶','W prawo']};
 const islands = [['red','Czerwona'],['blue','Niebieska'],['green','Zielona']];
 const mapLocations = [[48,13],[50,55],[85,70],[59,90]];
@@ -28,7 +30,20 @@ const obj = (label, value = label, icon = '') => ({label,value,icon,words:String
 const icon = value => `<span aria-hidden="true">${value}</span>`;
 
 export function hangarDeck95(id, grade, random = Math.random) {
+  if (id === 'baggage') {
+    const words = {K:'kot',A:'arbuz',M:'motyl',O:'oko'};
+    const suitcase = letter => ({...obj(letter),words:letter+' jak '+words[letter]});
+    return [
+      {kind:'load', prompt:'Włóż trzy walizki z literą K do luku.', speech:'Włóż trzy walizki z literą K, jak kot, do luku.',
+        count:3, seat:false, answer:'K', options:shuffle92(['K','K','K','A','M','O'].map(suitcase),random)},
+      {kind:'load', prompt:'Posadź cztery misie na fotelach.', speech:'Posadź cztery misie na fotelach.',
+        count:4, seat:true, answer:'bear', options:shuffle92([
+          ...Array.from({length:4},()=>obj('Miś','bear','🧸')),obj('Piłka','ball','⚽'),obj('Królik','rabbit','🐰')
+        ],random)}
+    ];
+  }
   const deck = missionDeck93(id, grade, random);
+  if (id === 'feeder') return deck.slice(0,3);
   if (id !== 'seasons') return deck;
   return deck.flatMap((task, index) => {
     const level = {...task, theme:seasonScenes[index]};
@@ -38,10 +53,13 @@ export function hangarDeck95(id, grade, random = Math.random) {
 }
 
 export function nextAirObjects95(id, number, random = Math.random) {
+  if (id === 'takeoff') {
+    const lanes = [[2,1,3], [2,3,1], [4,2,3], [2,4,3]];
+    return lanes[number-1].map(value=>obj(value));
+  }
   const alternative = number === 1 ? 3 : number - 1;
   return shuffle92([
-    obj(number), obj(alternative),
-    id === 'airballs' ? obj('Chmura burzowa','storm','⛈') : obj(number+1)
+    obj(number), obj(alternative), obj('Chmura burzowa','storm')
   ], random);
 }
 
@@ -85,24 +103,38 @@ export function mountHangar95(root,{grade,legacy=false,speak=()=>{},tap=()=>{},t
   function catalog(focus = false) {
     stop(); id = ''; state = null; gesture = null;
     const title = preschool ? 'Mały Kapitan' : 'As Przestworzy';
+    const classicTitle = 'Klasyczny lot Quinjetem';
     setContent(top(title)+`<section class="flight95-menu">
       <div class="flight95-hero">
-        <div><h3>Wybierz misję w kokpicie</h3>${forChild('Jesteś w kokpicie. Wybierz misję lotniczą.', 'Odsłuchaj instrukcję kokpitu')}</div>
+        <h3><span>Wybierz</span> <span>misję</span> <span>w kokpicie</span></h3>
+        ${forChild('Wybierz misję w kokpicie.', 'Odsłuchaj instrukcję kokpitu')}
       </div>
-      <div class="flight95-missions">${games.map(([key,,name,desc],i) => `<div class="flight95-card">
-        ${buttons('mission:'+key,`<span class="flight95-card-image" data-f95-sky="${scenes[key][0]}"><i>${i+1}</i>
-          ${key === 'fuel' ? plane95() : icon(scenes[key][1])}</span><strong>${esc(name)}</strong>`)}
-        ${forChild(name+'. '+desc,'Odsłuchaj: '+name)}</div>`).join('')}</div>
-      ${legacy?'<button type="button" class="flight95-classic" data-action="hq:flight">✈ Klasyczny lot Quinjetem</button>':''}
+      <div class="flight95-missions">${games.map(([key,,name,desc],i) => {
+        const title = key === 'takeoff' ? 'Lot przez obręcze' : name;
+        const art = previews[key] ? picture96(previews[key],'flight96-card-art')
+          : key === 'fuel' ? plane95() : key === 'airballs' ? '<span class="flight96-slalom-tile" aria-hidden="true"><i></i><i></i><i></i></span>' : icon(scenes[key][1]);
+        return `<div class="flight95-card">
+          ${buttons('mission:'+key,`<span class="flight95-card-image" data-f95-sky="${scenes[key][0]}"><i aria-hidden="true">${i+1}</i>
+          ${art}</span><strong>${esc(title)}</strong>`)}
+          ${forChild(title+'. '+desc,'Odsłuchaj: '+title)}</div>`;
+      }).join('')}
+      <div class="flight95-card">
+        <button type="button" data-action="hq:flight" ${legacy?'':'disabled'}>
+          <span class="flight95-card-image" data-f95-sky="cockpit"><i aria-hidden="true">8</i></span>
+          <strong>${classicTitle}${legacy?'':'<small>🔒 Dostępny po zakupie Quinjeta</small>'}</strong>
+        </button>
+        ${forChild(classicTitle+(legacy?'.':'. Dostępny po zakupie Quinjeta.'),'Odsłuchaj: '+classicTitle)}
+      </div></div>
     </section>`, 'menu');
     if (focus) focusHeading();
   }
   function open(key) {
     if (!games.some(item => item[0] === key)) return;
     id = key;
-    const intro = game()[3];
-    setContent(top(game()[2], buttons('catalog','‹ Kokpit','class="flight95-back"'))+
-      surface95(scenes[id][0],`<div class="flight95-intro-body">${plane95()}
+    const intro = id === 'baggage' ? 'Spakuj trzy walizki, a potem posadź cztery misie w kabinie.' : game()[3];
+    setContent(top(id === 'takeoff' ? 'Lot przez obręcze' : game()[2], buttons('catalog','‹ Kokpit','class="flight95-back"'))+
+      surface95(scenes[id][0],`<div class="flight95-intro-body ${previews[id]?'flight96-intro-art':''}">
+        ${previews[id]?picture96(previews[id],'flight96-brief-art'):plane95()}
         <div class="flight95-brief"><div><strong>Misja ${games.indexOf(game())+1}</strong><p>${esc(intro)}</p></div>
         ${audio(intro,'pl-PL','Odsłuchaj polecenie')}</div>
         ${paired(buttons('start', 'Rozpocznij misję', 'class="flight95-primary"'),'Rozpocznij misję')}</div>`,'flight95-intro'), 'brief');
@@ -127,24 +159,41 @@ export function mountHangar95(root,{grade,legacy=false,speak=()=>{},tap=()=>{},t
   }
   function readTask() {
     const t = task();
-    if (id === 'takeoff' && state.phase === 'code') return say('Naciśnij po kolei: jeden, dwa, trzy, cztery.');
-    if (id === 'takeoff' && state.phase === 'air') return say('Przeleć przez obręcz z liczbą '+t.needed[state.step]+'.');
+    if (id === 'takeoff') {
+      if (state.complete) return say('Wszystkie cyfry zaliczone!');
+      if (state.phase === 'lever') return say('Pociągnij czerwoną dźwignię, aby ruszyć.');
+      return say('Leć przez obręcz z cyfrą '+digitWord96(t.needed[state.step])+'.');
+    }
+    if (id === 'airballs') return say(state.complete ? 'Wszystkie balony złapane!' :
+      'Następna cyfra '+digitWord96(t.needed[state.step])+'. Złap balon i omiń burzową chmurę.');
+    if (id === 'baggage' && state.complete) return say(t.seat?'Bagaże i pasażerowie na pokładzie. Czas na start!':'Walizki są w luku. Czas na pasażerów.');
+    if (id === 'feeder' && state.complete) return say('Tak! '+t.sound+' jak '+t.word+'.');
     if (id === 'airport' && state.phase === 'arrival') return say('Wyląduj i połącz się z kontrolą lotniska.');
     say(t.speech,t.lang);
   }
   function draw(message = '') {
     stop();
     const t = task();
-    const count = id === 'takeoff' || id === 'airballs' ? t.needed.length : deck.length;
-    const current = t.kind === 'flightSequence' ? state.step + 1 : round + 1;
-    const prompt = id === 'takeoff' && state.phase === 'code' ? 'Włącz przełączniki w kolejności 1 → 2 → 3 → 4.'
+    const sequence = t.kind === 'flightSequence';
+    const count = sequence ? t.needed.length : id === 'baggage' ? t.count : deck.length;
+    const progress = sequence ? state.step : id === 'baggage' ? state.done.length
+      : id === 'feeder' ? round + Number(state.complete) : round + 1;
+    const nextDigit = sequence ? digitWord96(t.needed[state.step]) : '';
+    const prompt = id === 'takeoff' ? state.complete ? 'Lot ukończony!'
+      : state.phase === 'lever' ? 'Pociągnij czerwoną dźwignię, aby ruszyć.' : 'Przeleć przez obręcz z cyfrą '+nextDigit+'.'
+      : id === 'airballs' ? state.complete ? 'Wszystkie balony złapane!' : 'Następna cyfra '+nextDigit
+      : id === 'feeder' ? state.complete ? 'Ptaszek dostał jedzenie.' : 'Ćwir, ćwir! Co słyszysz na początku słowa „'+t.word+'”?'
       : id === 'airport' && state.phase === 'arrival' ? 'Podejdź do odprawy po wylądowaniu.' : t.prompt;
     const lang = t.lang ?? 'pl-PL';
-    const taskLine = `<div class="flight95-task"><div><small>${Math.min(current,count)} / ${count}</small>
-      <p data-game-prompt lang="${lang}">${esc(prompt)}</p></div>${buttons('read','🔊','class="flight95-voice" aria-label="Odsłuchaj polecenie"')}</div>`;
-    const nextLabel = round + 1 === deck.length ? 'Zobacz wynik' : 'Następna runda';
+    const promptMarkup = id === 'airballs' && !state.complete ? 'Następna cyfra <strong>'+nextDigit+'</strong>' : esc(prompt);
+    const voiceLabel = id === 'airballs' ? 'Odsłuchaj: '+prompt : 'Odsłuchaj polecenie';
+    const taskLine = `<div class="flight95-task"><div><small>${Math.min(progress,count)} / ${count}</small>
+      <p data-game-prompt lang="${lang}">${promptMarkup}</p></div>
+      ${buttons('read','🔊',`class="flight95-voice" aria-label="${esc(voiceLabel)}"`)}</div>`;
+    const nextLabel = round + 1 === deck.length ? 'Zobacz wynik'
+      : id === 'baggage' ? 'Teraz czas na pasażerów' : id === 'feeder' ? 'Nakarm ptaszka dalej' : 'Następna runda';
     const next = state.complete ? paired(buttons('next',nextLabel+' →','class="flight95-primary"'),nextLabel) : '';
-    setContent(top(game()[2], buttons('catalog','‹ Kokpit','class="flight95-back"'))+taskLine+
+    setContent(top(id === 'takeoff' ? 'Lot przez obręcze' : game()[2], buttons('catalog','‹ Kokpit','class="flight95-back"'))+taskLine+
       scene(t)+`<div class="flight95-bottom"><p data-f95-report role="status">${esc(message)}</p>${next}</div>`, id);
     if (id === 'parcels') paintWorld(get('canvas'));
     if (isFlying() && !state.complete) {
@@ -164,6 +213,12 @@ export function mountHangar95(root,{grade,legacy=false,speak=()=>{},tap=()=>{},t
     stop();
     state.complete = true;
     tone(6);
+    if (['baggage','takeoff','airballs','feeder'].includes(id)) {
+      draw(id === 'baggage' ? message : '');
+      get('.flight95-surface').dataset.f95Win = id;
+      if (preschool) say(message);
+      return;
+    }
     const sceneNode = get('.flight95-surface');
     sceneNode.dataset.f95Win = extra ?? 'yes';
     if (id === 'fuel') {
@@ -193,33 +248,36 @@ export function mountHangar95(root,{grade,legacy=false,speak=()=>{},tap=()=>{},t
     if (t.kind === 'flightSequence') {
       const expected = t.needed[state.step];
       if (item.value !== expected) {
-        const message = item.value === 'storm' ? 'Omiń burzową chmurę. Szukamy liczby '+expected+'.' : 'Teraz potrzebna jest liczba '+expected+'.';
+        const number = digitWord96(expected);
+        const message = item.value === 'storm' ? 'Omiń burzową chmurę. Szukamy cyfry '+number+'.' : 'Skieruj się na cyfrę '+number+'.';
         draw(message); return say(message);
       }
-      if (++state.step === t.needed.length) return result(id==='takeoff'?'Wszystkie obręcze zaliczone!':'Wszystkie balony złapane!');
+      if (++state.step === t.needed.length) return result(id==='takeoff'?'Wszystkie cyfry zaliczone!':'Wszystkie balony złapane!');
       tone(state.step);
       const next = t.needed[state.step];
       state.options = nextAirObjects95(id, next);
-      draw('Dobrze! Teraz '+next+'.'); say('Teraz '+next+'.');
+      draw('Brawo!'); readTask();
       return;
     }
     if (item.value !== t.answer) {
       if (id === 'fuel') state.fuel = Math.max(0,state.fuel-12.5);
-      const message = id === 'fuel' ? 'Zła cysterna. Ubyły 3 sekundy paliwa.' : 'Spróbuj jeszcze raz. Cele wracają.';
+      const message = id === 'fuel' ? 'Zła cysterna. Ubyły 3 sekundy paliwa.'
+        : id === 'feeder' ? 'Posłuchaj początku słowa i spróbuj jeszcze raz.' : 'Spróbuj jeszcze raz. Cele wracają.';
       draw(message);
       if (preschool) say(message);
       return;
     }
-    const messages = {landing:'Udało się wylądować!',feeder:'Ptaszek dostał jedzenie!',seasons:'Ten przedmiot pasuje!',fuel:'Podłączono przewód. Bak pełny!'};
+    if (id === 'feeder') return result('Tak! '+t.sound+' jak '+t.word+'.');
+    const messages = {landing:'Udało się wylądować!',seasons:'Ten przedmiot pasuje!',fuel:'Podłączono przewód. Bak pełny!'};
     result(t.explain ?? messages[id],id);
   }
   function scene(t) {
     if (isFlying()) {
-      return airMarkup95(id,t,state.options??t.options,{turn:round,preschool,nextNumber:t.needed?.[state.step]});
+      return airMarkup95(id,t,state.options??t.options,{turn:round,preschool,complete:state.complete,lastRound:round+1===deck.length});
     }
     switch (id) {
-      case 'takeoff': return starter();
-      case 'baggage': return baggage(t);
+      case 'takeoff': return takeoffStarter96(buttons);
+      case 'baggage': return baggageScene96(t,state,buttons,forChild);
       case 'parcels': return map(t);
       case 'engine': return engine();
       case 'radar': return radar(t);
@@ -227,30 +285,6 @@ export function mountHangar95(root,{grade,legacy=false,speak=()=>{},tap=()=>{},t
       case 'radio': return radio(t);
       case 'airport': return airport(t);
     }
-  }
-  function starter() {
-    const lever = `<div class="flight95-lever" data-f95-lever>
-      ${buttons('lever','<i></i><span>Pociągnij dźwignię ↓</span>','aria-label="Pociągnij dźwignię w dół"')}
-      ${forChild('Pociągnij dźwignię w dół.','Odsłuchaj dźwignię')}</div>`;
-    const order = `<div class="flight95-starter-keys">${[3,1,4,2].map(value => paired(
-      buttons('ignite:'+value,`<b>${value}</b>`,state.done.includes(value)?'disabled data-f95-lit':''),String(value))).join('')}</div>`;
-    return surface95('cockpit',`<div class="flight95-console">${state.phase === 'lever' ? lever : order}</div>`,'flight95-starter');
-  }
-  function baggage(t) {
-    const label = t.seat ? 'Fotel' : 'Miejsce w luku';
-    const seats = Array.from({length:t.count},(_,i) => {
-      const filled = state.done.find(entry=>entry.slot===i);
-      return paired(buttons('seat:'+i, filled ? icon(t.seat?'🧸':'🧳') : `<b>${i+1}</b>`,
-        `data-f95-seat="${i}" aria-label="${label} ${i+1}" ${filled?'disabled data-f95-filled':''}`),label+' '+(i+1));
-    }).join('');
-    const items = t.options.map((item,i) => {
-      const loaded = state.done.some(entry=>entry.index===i);
-      return paired(buttons('bag:'+i,icon(item.icon)+`<b>${esc(item.label)}</b>`,
-        `data-f95-drag="bag:${i}" ${loaded?'disabled data-f95-loaded':''} aria-pressed="${state.pick===i}"`), item.words);
-    }).join('');
-    return surface95(t.seat?'cabin':'cargo',`<div class="flight95-load-board">
-      <div class="flight95-seats" data-f95-seats="${t.seat?'seats':'hold'}">${seats}</div>
-      <div class="flight95-loading-items">${items}</div></div>`,'flight95-baggage');
   }
   function map(t) {
     const [x,y] = mapLocations[state.location] ?? [17,29];
@@ -321,12 +355,12 @@ export function mountHangar95(root,{grade,legacy=false,speak=()=>{},tap=()=>{},t
     const t = task(), already = state.done.some(entry => entry.slot === slot || entry.index === index);
     if (index === null || slot < 0 || already) return report('Wybierz przedmiot i wolne miejsce.');
     if (t.options[index]?.value !== t.answer) {
-      const message=t.seat?'Dziś tym fotelem jedzie miś.':'Do luku włóż walizki z właściwą literą.';
+      const message=t.seat?'Na tym fotelu ma usiąść miś.':'Do luku włóż walizki z właściwą literą.';
       report(message); say(message); return;
     }
     state.done.push({index,slot}); state.pick=null; tone(state.done.length);
+    if (state.done.length === t.count) return result(t.seat?'Czas na start!':'Świetnie! Teraz czas na pasażerów.');
     draw();
-    if (state.done.length === t.count) result(t.seat?'Wszystkie misie siedzą na fotelach!':'Wszystkie walizki są w luku!');
   }
   function crateLoad(index) {
     if (index === null || state.crates.includes(index)) return report('Najpierw wybierz skrzynię.');
@@ -383,13 +417,7 @@ export function mountHangar95(root,{grade,legacy=false,speak=()=>{},tap=()=>{},t
       case 'move': return air?.steer(arg);
       case 'lever':
         if (state.phase !== 'lever') return;
-        state.phase='code'; draw('Dźwignia na dole. Czas na sekwencję.'); readTask(); return;
-      case 'ignite':
-        if (i !== state.done.length+1) return report('Znajdź najpierw '+(state.done.length+1)+'.');
-        state.done.push(i); tone(i);
-        if (i === 4) {state.phase='air';draw('Silnik uruchomiony!');readTask();}
-        else draw('Przełącznik '+i+' włączony.');
-        return;
+        state.phase='air'; tone(1); draw('Silnik uruchomiony!'); readTask(); return;
       case 'bag': state.pick=i;draw('Wskaż wolne miejsce.');return;
       case 'seat': return bagPlace(state.pick,i);
       case 'zone': return chooseZone(i);
@@ -459,7 +487,9 @@ export function mountHangar95(root,{grade,legacy=false,speak=()=>{},tap=()=>{},t
     if (!gesture.dragged) {gesture.dragged=true;root.setPointerCapture?.(event.pointerId);}
     if (target.hasAttribute('data-f95-viewport')) {
       const rect=target.getBoundingClientRect();
-      air?.steerTo((event.clientY-rect.top)*100/rect.height);
+      const atY = (event.clientY-rect.top)*100/rect.height;
+      const onYoke = id === 'takeoff' && (gesture.y-rect.top)/rect.height > .7;
+      air?.steerTo(onYoke ? 49 + y*1.4 : atY);
     } else {
       target.style.setProperty('--drag-x',x+'px');
       target.style.setProperty('--drag-y',y+'px');

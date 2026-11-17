@@ -18,7 +18,7 @@ import {petQuiz88} from './pet-quiz88.js?v=88';
 import {gameGroup92,recordGameAward92} from './learning-games92.js?v=92';
 import {mountLearningGames92} from './learning-play92.js?v=95';
 import {mountMissions93,missionNote93} from './missions93.js?v=95';
-import {mountHangar95} from './hangar95.js?v=95';
+import {mountHangar95} from './hangar95.js?v=96';
 import {trainingCatalog95,trainingSubject95,trainingGroupName95,trainingSequence95,outsideDeck95} from './training95.js?v=95';
 import {mountPreschoolAudio93} from './preschool-audio93.js?v=95';
 import {MASTER_PRIZES86,MASTER_SCORE86,recordEnergy86,trainingRound86,trainingConsole86,unlockMaster86} from './base-training86.js?v=87';
@@ -76,7 +76,7 @@ const select=(id,label,options,value)=>`<label for="${id}">${label}</label><sele
 const grades=[['P','Przedszkole'],...Array.from({length:12},(_,i)=>[String(i+1),`Klasa ${i+1}`])];
 const people=[['pawel','Paweł'],['patryk','Patryk']];
 const note=t=>{const n=$('hq85-notice')||$('notice');if(!n){console.warn('Powiadomienie:',t);return}n.textContent=t;n.classList.add('visible');setTimeout(()=>{if(n.isConnected)n.classList.remove('visible')},4500)};
-const ACADEMY_RELEASE=95;
+const ACADEMY_RELEASE=96;
 async function checkAcademyUpdate(button){
  if(!button||button.disabled)return;
  const label=button.textContent,controller=new AbortController();
@@ -1276,8 +1276,16 @@ function hqRoomPanel84(p){
  if(hqPanel84==='hangar'){
   const jet=p.base?.owned?.includes('quinjet');
   const board=gameGroup92(p.grade)?button('✈️ Wsiądź do samolotu','hq:board','gold'):'';
-  body='<h3>🛩️ Hangar</h3>'+(board|| (jet?button('✈️ Lot Quinjetem','hq:flight','gold'):''))+(jet?'<p>Wybierz malowanie Quinjeta.</p>'+[['blue','Niebieskie'],['mint','Miętowe'],['gold','Złote']].map(([id,label])=>button(label,'hq:paint:'+id,hqRead(p).paint===id?'gold':'alt')).join(''):
-   '<p>W sklepie możesz kupić własnego Quinjeta.</p>'+button('🛒 Idź do sklepu','hq:room:shop','alt'));
+  const audio=label=>p.grade==='P'?speakBtn(label):'';
+  const entry=board?board+audio('Wsiądź do samolotu.'):jet?button('✈️ Lot Quinjetem','hq:flight','gold')+audio('Lot Quinjetem.'):'';
+  const paint=[['blue','Niebieskie'],['mint','Miętowe'],['gold','Złote']].map(([id,label])=>
+   `<div>${button(label,'hq:paint:'+id,hqRead(p).paint===id?'gold':'alt')}${audio(label+' malowanie.')}</div>`).join('');
+  body='<div class="flight96-hangar"><h3>🛩️ Hangar</h3>'+
+   (entry?`<div class="flight96-hangar-entry">${entry}</div>`:'')+
+   (jet?'<div class="flight96-hangar-help"><p data-game-prompt>Wybierz malowanie Quinjeta.</p>'+
+     audio('Wybierz malowanie Quinjeta.')+'</div><div class="flight96-paints">'+paint+'</div>':
+     '<p>W sklepie możesz kupić własnego Quinjeta.</p><div class="flight96-hangar-entry">'+
+     button('🛒 Idź do sklepu','hq:room:shop','alt')+audio('Idź do sklepu.')+'</div>')+'</div>';
  }
  if(hqPanel84==='joke'){
   const joke=hqJokes84[hqJoke84];

@@ -167,7 +167,7 @@ export function missionDeck93(id,grade,random=Math.random){
    }
    case 'feeder':{
     const options=letterOptions();
-    return {kind:'flight',prompt:'Złap chmurę z pierwszą literą.',speech:'Ćwir, ćwir! Szukam czegoś, co zaczyna się tak: '+sound+'… '+word+'.',icon:'🐦 '+icon,
+    return {kind:'flight',prompt:'Złap chmurę z pierwszą literą.',speech:'Ćwir, ćwir! Szukam czegoś, co zaczyna się tak: '+sound+'… '+word+'.',icon:'🐦 '+icon,word,sound,
      options:shuffle92([options.find(c=>c.value===letter),...options.filter(c=>c.value!==letter).slice(0,2)],random),answer:letter};
    }
    case 'parcels':{

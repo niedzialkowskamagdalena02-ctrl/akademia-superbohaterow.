@@ -56,7 +56,7 @@ function fixture(){
   }
  }
 
- const root=fixture();
+ const root=fixture(), spoken=[];
  const pass=label=>{
   const choices=[...root.innerHTML.matchAll(/data-f95-action="aim:(\d+)" class="flight95-target" aria-label="([^"]+)"/g)];
   const target=choices.find(item=>item[2]===String(label));
@@ -68,8 +68,11 @@ function fixture(){
 
  try{
   for(const [grade,missions] of [['P',captainMissions93],['2',aceMissions93]]){
-   mountHangar95(root,{grade});
+   mountHangar95(root,{grade,legacy:grade==='P',speak:message=>spoken.push(message)});
    assert.equal((root.innerHTML.match(/data-f95-action="mission:/g)||[]).length,7);
+   assert.equal((root.innerHTML.match(/class="flight95-card"/g)||[]).length,8);
+   assert.match(root.innerHTML,/data-action="hq:flight"[^>]*>[\s\S]*?<i aria-hidden="true">8<\/i>/);
+   assert.equal(/data-action="hq:flight" disabled/.test(root.innerHTML),grade!=='P');
    for(const [id] of missions){
     root.click('mission:'+id);
     assert.match(root.innerHTML,/Rozpocznij misję/);
@@ -77,19 +80,64 @@ function fixture(){
     const t=hangarDeck95(id,grade)[0];
     assert.ok(t.prompt,id);
     if(id==='baggage'){
-     let seat=0;
-     t.options.forEach((item,i)=>{
-      if(item.value!==t.answer)return;
-      root.click('bag:'+i);root.click('seat:'+seat++);
-     });
+     function load(task){
+      let seat=0;
+      const wrong=task.options.findIndex(item=>item.value!==task.answer);
+      root.click('bag:'+wrong);root.click('seat:0');
+      assert.doesNotMatch(root.innerHTML,/data-f95-filled/);
+      task.options.forEach((item,i)=>{
+       if(item.value!==task.answer)return;
+       root.click('bag:'+i);root.click('seat:'+seat++);
+      });
+      assert.equal((root.innerHTML.match(/data-f95-filled/g)||[]).length,task.count);
+     }
+     assert.match(root.innerHTML,/0 \/ 3/);
+     assert.match(root.innerHTML,/aircraft-nose.webp/);
+     load(t);
+     assert.match(root.innerHTML,/Teraz czas na pasażerów/);
+     root.click('next');
+     assert.match(root.innerHTML,/0 \/ 4/);
+     load(hangarDeck95(id,grade)[1]);
+     assert.match(root.innerHTML,/Bagaże i pasażerowie na pokładzie/);
     }
     if(id==='takeoff'){
+     assert.match(root.innerHTML,/Pociągnij dźwignię/);
      root.click('lever');
-     root.click('ignite:2');assert.doesNotMatch(root.innerHTML,/disabled data-f95-lit/);
-     for(const i of [1,2,3,4])root.click('ignite:'+i);
+     assert.match(root.innerHTML,/cyfrą jeden/);
+     pass(2);
+     assert.match(root.innerHTML,/0 \/ 4/);
+     for(const value of t.needed)pass(value);
+     assert.match(root.innerHTML,/4 \/ 4/);
+     assert.match(root.innerHTML,/flight96-ring-win/);
     }
-    if(id==='takeoff'||id==='airballs')for(const value of t.needed)pass(value);
-    if(['feeder','landing','seasons','spelling','fuel'].includes(id))pass(t.options.find(item=>item.value===t.answer).label);
+    if(id==='airballs'){
+     assert.doesNotMatch(root.innerHTML,/Odsłuchaj: Chmura burzowa|Odsłuchaj: [0-9]/);
+     pass('Chmura burzowa');
+     assert.match(root.innerHTML,/0 \/ 6/);
+     for(const value of t.needed){
+      if(value===5){
+       assert.match(root.innerHTML,/Następna cyfra <strong>pięć<\/strong>/);
+       root.click('read');
+       assert.match(spoken.at(-1),/^Następna cyfra pięć\./);
+      }
+      pass(value);
+     }
+    }
+    if(id==='feeder'){
+     const rounds=hangarDeck95(id,grade);
+     assert.equal(rounds.length,3);
+     pass(t.options.find(item=>item.value!==t.answer).label);
+     assert.match(root.innerHTML,/0 \/ 3/);
+     rounds.forEach((round,index)=>{
+      assert.match(root.innerHTML,/chick.webp/);
+      pass(round.answer);
+      assert.match(root.innerHTML,new RegExp((index+1)+' / 3'));
+      assert.match(root.innerHTML,/flight96-grain/);
+      if(index<rounds.length-1)root.click('next');
+     });
+     assert.match(root.innerHTML,/Ptaszek nakarmiony!/);
+    }
+    if(['landing','seasons','spelling','fuel'].includes(id))pass(t.options.find(item=>item.value===t.answer).label);
     if(id==='fuel')assert.equal(root.querySelector('[data-f95-fuel]').value,100);
     if(id==='parcels'){root.click('zone:'+t.options.findIndex(item=>item.value===t.answer));root.click('drop');}
     if(id==='engine'){for(const digit of String(t.answer))root.click('key:'+digit);root.click('key:✓');}
@@ -123,7 +171,7 @@ function fixture(){
  assert.ok(scope.some(turn=>turn.page?.number===12&&turn.key==='matematyka'));
  assert.deepEqual([...new Set(scope.map(turn=>turn.key))].sort(),['angielski','matematyka','polski','przyroda']);
  const manifest=vm.runInNewContext(fs.readFileSync(path.join(dir,'sw.js'),'utf8')+'\n({CACHE,ASSETS})',{self:{addEventListener(){}}});
- assert.equal(manifest.CACHE,'academy-v95');
+ assert.equal(manifest.CACHE,'academy-v96');
  for(const resource of manifest.ASSETS)assert.ok(fs.existsSync(path.resolve(dir,resource.split('?')[0])),resource);
- console.log('PASS V95 – 14 misji kokpitu, kolizje i animacje, katalog 1–3 i P, rotacja, materiał z książki i cache.');
+ console.log('PASS V96 – 14 misji, odprawa i kabina, obręcze, slalom, karmnik, katalog, trening i cache.');
 })().catch(error=>{console.error(error);process.exitCode=1;});
