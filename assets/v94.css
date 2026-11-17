@@ -1,0 +1,47 @@
+
+/* V94: czytelny, pełnoekranowy kokpit lotniczy na telefonach */
+.hq86-walk:has(#missions93-cockpit) .hq93-web,.hq86-walk:has(#missions93-cockpit) .hq86-help{visibility:hidden!important}
+.hq85-dialog:has(#missions93-cockpit){width:min(96vw,760px)!important;max-height:86dvh!important;overflow:hidden!important;display:flex!important;flex-direction:column;padding:10px!important}
+.hq85-dialog:has(#missions93-cockpit) .hq84-panel{min-height:0;overflow:auto!important;overscroll-behavior:contain}
+.hq85-dialog:has(#missions93-cockpit) .hq84-panel>.sq93{border:0;background:none;margin:0;padding:0}
+#missions93-cockpit{width:100%;max-width:100%;--ink:#f7fbff;--accent:#ffe2a1;color:var(--ink);box-shadow:none}
+#missions93-cockpit .sq93-top{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;align-items:center}
+#missions93-cockpit .sq93-top>h2{font-size:clamp(1.05rem,4.1vw,1.5rem);line-height:1.18}
+#missions93-cockpit .sq93-top>button.sq93-voice{display:none}
+#missions93-cockpit .sq93-top>button:first-child{white-space:nowrap;background:#17436a;border:1px solid #83cbeb}
+#missions93-cockpit .sq93-catalog{border-radius:20px;background:linear-gradient(#081d3de8,#081b36ef),url('missions93/cockpit.webp') center/cover;padding:clamp(10px,3vw,20px);border:1px solid #8dd0ff70}
+#missions93-cockpit .sq93-catalog h2{text-shadow:0 2px 5px #00132d}
+#missions93-cockpit .sq93-menu{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#missions93-cockpit .sq93-game-card{position:relative;min-width:0}
+#missions93-cockpit .sq93-game-card>button:first-child{min-height:123px;display:grid;grid-template-columns:1fr;grid-template-rows:auto auto 1fr;justify-items:center;align-content:center;gap:6px;text-align:center;border-radius:17px;padding:12px 7px;background:linear-gradient(155deg,#386e9bee,#101e4af0);border:2px solid #96d6f7;box-shadow:inset 0 2px 4px #fff5,0 5px 0 #06152b}
+#missions93-cockpit .sq93-game-card:nth-child(even)>button:first-child{background:linear-gradient(155deg,#565b9bef,#28274eea);border-color:#c3b3ff}
+#missions93-cockpit .sq93-game-card>button:first-child span{grid-row:auto;font-size:clamp(2.2rem,10vw,3.2rem);filter:drop-shadow(0 5px 5px #03132a)}
+#missions93-cockpit .sq93-game-card strong{font-size:clamp(.9rem,3.1vw,1.1rem)}
+#missions93-cockpit .sq93-game-card small{color:#e3f1ff}
+#missions93-cockpit .sq93-game-card>button.sq93-voice{position:absolute;bottom:5px;right:5px;min-height:36px;min-width:36px;padding:3px;background:#0e2b4adc}
+#missions93-cockpit .sq93-scene{border:1px solid #76c8ecb8;background-color:#112a49;overflow:hidden}
+#missions93-cockpit .sq93-brief{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:16px;background:linear-gradient(150deg,#0c2c50d9,#173d5dc6),url('missions93/cockpit.webp') center/cover;min-height:195px}
+#missions93-cockpit .sq93-brief p{grid-column:1/-1;font-size:clamp(1.07rem,4vw,1.32rem);text-shadow:0 2px 4px #001e3c}
+#missions93-cockpit .sq93-brief>.sq93-primary{grid-column:1/-1;justify-self:stretch;font-size:1.15rem}
+#missions93-cockpit .sq93-air{position:relative;isolation:isolate;overflow:hidden;background:linear-gradient(#113b60bb,#09214bd5),url('missions93/cockpit.webp') center/cover;min-height:270px;padding:14px 8px;border:2px solid #8ad3f7;border-radius:19px;box-shadow:inset 0 0 29px #031529}
+#missions93-cockpit .sq93-air::before{content:'';position:absolute;inset:8%;z-index:-1;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 26px,#f2ffff20 27px 28px);mask-image:linear-gradient(transparent,#000 30% 70%,transparent)}
+#missions93-cockpit .sq93-gates{gap:9px;min-height:110px;align-items:center}
+#missions93-cockpit .sq93-gates .sq93-option>button:first-child{min-height:75px;font-size:clamp(1.2rem,5vw,1.6rem);border:3px solid #6ce8ff;border-radius:50%;background:radial-gradient(ellipse at 30% 24%,#627be5,#17195c 84%);box-shadow:0 0 12px #58dfff88,inset 0 0 14px #68edff5e,0 5px 10px #061430}
+#missions93-cockpit .sq93-gates .sq93-option.is-selected>button:first-child{border-color:#ffe38e;box-shadow:0 0 0 3px #ffd67b66,0 0 22px #ffd37988,inset 0 0 16px #f9db6b77}
+#missions93-cockpit .sq93-plane{font-size:clamp(3rem,13vw,4.2rem);filter:drop-shadow(0 8px 5px #06152b);text-shadow:none}
+#missions93-cockpit .sq93-plane-slot{min-height:90px}
+#missions93-cockpit .sq93-flight-actions{gap:9px;align-items:stretch}
+#missions93-cockpit .sq93-flight-actions button{min-height:58px}
+#missions93-cockpit .sq93-flight-actions .sq93-primary{flex:1 1 auto;min-width:0;font-size:clamp(.95rem,3.6vw,1.14rem)}
+#missions93-cockpit .sq93-feedback{background:#081b35c7;padding:8px 10px;border-radius:12px;margin-top:10px}
+#missions93-cockpit .sq93-option>button:first-child{min-height:58px}
+#missions93-cockpit .sq93-voice{min-width:42px;min-height:42px;padding:5px;font-size:1rem}
+@media(max-width:450px){
+ .hq85-dialog:has(#missions93-cockpit){width:94vw!important;max-height:82dvh!important}
+ #missions93-cockpit .sq93-menu{gap:7px}
+ #missions93-cockpit .sq93-game-card>button:first-child{min-height:108px}
+ #missions93-cockpit .sq93-air{padding:8px 6px}
+ #missions93-cockpit .sq93-gates{gap:4px}
+ #missions93-cockpit .sq93-gates .sq93-option>button:first-child{min-height:63px}
+}
+@media(prefers-reduced-motion:reduce){#missions93-cockpit *{animation:none!important;transition:none!important}}

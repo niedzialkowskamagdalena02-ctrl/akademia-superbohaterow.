@@ -5,7 +5,7 @@ import {walkRooms,FLOOR_DEPTH,FULL_TURN,PHOTO_FOV,VERTICAL_SCALE,advance86,camer
 import {energy86} from './base-training86.js?v=87';
 import {petSprite86} from './pet-care86.js?v=90';
 import {mentorMarkup87,drawMentor87,MENTOR_GREETING_MS} from './base-mentor87.js?v=91';
-import {drawQuinjet88} from './quinjet88.js?v=88';
+import {drawQuinjet88} from './quinjet88.js?v=94';
 import {gameGroup92} from './learning-games92.js?v=92';
 
 const routes=new Map(),images=new Map();
