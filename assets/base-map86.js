@@ -83,7 +83,7 @@ export const walkRooms={
  hangar:{
   name:'Hangar',art:'annex86.webp',portrait:'hangar.webp',tint:[.87,1,1.12],bounds:[4.6,2.8,5.1],points:[
    photo('Lądowisko',.5,.65,'hq:hangar'),
-   photo('Wsiądź do Quinjeta',.5,.491,'hq:flight')
+   photo('Wsiądź do samolotu',.5,.491,'hq:board')
   ]
  },
  pet:{

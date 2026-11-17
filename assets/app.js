@@ -8,15 +8,17 @@ import {speak,listen,stopVoice,getVoiceState,setVoiceState,spellEnglish77} from 
 import {vocabulary,readings,explanation} from './learning.js';
 import {syncAdapter} from './sync.js?v=81';
 import {BASE_ITEMS,baseMarkup,migrateBase} from './base.js?v=82';
-import {mountArcade,stopArcade} from './arcade.js?v=84';
+import {mountArcade,stopArcade} from './arcade.js?v=93';
 import {mountBaseScene84} from './base-scene84.js?v=88';
-import {baseWalkMarkup,mountBaseWalk,resetBaseWalk,openWalkRoom87,focusWalkCase88} from './base-walk85.js?v=91';
+import {baseWalkMarkup,mountBaseWalk,resetBaseWalk,openWalkRoom87,focusWalkCase88,walkRoomId93} from './base-walk85.js?v=93';
 import {HQ_SLOTS,hqItems,hqRead,hqBalances,hqEarnToken,hqSpendToken,hqRecordCrystals,hqBuyWithGems,hqPlaced,hqPlace,hqDisplayPurchase88,hqPet,hqChoosePet88,hqPaint,hqEarnFood,hqChoices,hqMarkup,hqWallet,hqShop,hqFoodQuiz88} from './headquarters84.js?v=91';
 import {petRoom86,petCareMarkup86,petPicker88,mountPetCare86,setPetCare86,servePet87} from './pet-care86.js?v=90';
 import {flightMarkup88,mountNounFlight88} from './noun-flight88.js?v=90';
 import {petQuiz88} from './pet-quiz88.js?v=88';
 import {gameGroup92,recordGameAward92} from './learning-games92.js?v=92';
-import {mountLearningGames92} from './learning-play92.js?v=92';
+import {mountLearningGames92} from './learning-play92.js?v=93';
+import {mountMissions93,missionNote93} from './missions93.js?v=93';
+import {mountPreschoolAudio93} from './preschool-audio93.js?v=93';
 import {MASTER_PRIZES86,MASTER_SCORE86,recordEnergy86,trainingRound86,trainingConsole86,unlockMaster86} from './base-training86.js?v=87';
 import {affordable82,purchase82,credit82} from './wallet82.js?v=82';
 import {REVEAL_OFFER82,consent82,requestedAnswer82,solutions82,leaks82,parseTutor82,promptTutor82} from './tutor82.js?v=82';
@@ -71,7 +73,7 @@ const select=(id,label,options,value)=>`<label for="${id}">${label}</label><sele
 const grades=[['P','Przedszkole'],...Array.from({length:12},(_,i)=>[String(i+1),`Klasa ${i+1}`])];
 const people=[['pawel','Paweł'],['patryk','Patryk']];
 const note=t=>{const n=$('hq85-notice')||$('notice');if(!n){console.warn('Powiadomienie:',t);return}n.textContent=t;n.classList.add('visible');setTimeout(()=>{if(n.isConnected)n.classList.remove('visible')},4500)};
-const ACADEMY_RELEASE=92;
+const ACADEMY_RELEASE=93;
 async function checkAcademyUpdate(button){
  if(!button||button.disabled)return;
  const label=button.textContent,controller=new AbortController();
@@ -739,7 +741,7 @@ const grant=async(child,points,reason,key)=>{
  try{await syncAdapter.onLocalChange(data);}catch{note('Nagroda zapisana na telefonie. Ponów synchronizację, kiedy wróci połączenie.');}
  return true;
 };
-function layout(title,content,scene=''){mountLearningGames92(null);if(typeof mountNounFlight88==='function')mountNounFlight88(null);if(typeof mountBaseScene84==='function')mountBaseScene84(null);if(typeof mountBaseWalk==='function')mountBaseWalk(null);cancelAIRequests();stopVoice();closeMicBubble();app.innerHTML=scene==='walk'?'<main class="hq86-main">'+content+'</main>':`<main class="wrap${role==='child'&&(tab==='base'||hqViews84.get(who)==='walk')?' hq88-base-page':''}"><header class="head"><div><div class="brand">⚡ AKADEMIA SUPERBOHATERÓW <span style="display:inline-block;font-size:0.72em;border:1px solid currentColor;border-radius:8px;padding:2px 7px;vertical-align:middle">V${ACADEMY_RELEASE}</span></div><div class="sub">${e(title)}</div>${sync78StatusMarkup()}</div>${role==='child'&&scene!=='choice'?trainingSoundControl():''}${role?button(testMode?'← Zakończ test':'← Profile','exit','alt'):''}</header>${testMode?'<div class="test-banner">🧪 TRYB MAMY — BEZPŁATNY TEST • POSTĘPY NIE SĄ ZAPISYWANE</div>':''}${content}</main>${role==='child'&&scene!=='choice'?'<button class="mic" data-action="mic" aria-label="Sterowanie głosowe">🎙️</button>':''}`;document.querySelectorAll('[data-speak]').forEach(b=>b.addEventListener('click',()=>speak(b.dataset.speak,b.dataset.lang,role==='child'?profile().mentor:'tech',data.settings.rate||1)));hydrateImages();v76AfterRender();if(role==='child'&&(tab==='learn'||tab==='subjectmissions'))installMicDrag()}
+function layout(title,content,scene=''){mountLearningGames92(null);mountMissions93(null);mountPreschoolAudio93(null);if(typeof mountNounFlight88==='function')mountNounFlight88(null);if(typeof mountBaseScene84==='function')mountBaseScene84(null);if(typeof mountBaseWalk==='function')mountBaseWalk(null);cancelAIRequests();stopVoice();closeMicBubble();app.innerHTML=scene==='walk'?'<main class="hq86-main">'+content+'</main>':`<main class="wrap${role==='child'&&(tab==='base'||hqViews84.get(who)==='walk')?' hq88-base-page':''}"><header class="head"><div><div class="brand">⚡ AKADEMIA SUPERBOHATERÓW <span style="display:inline-block;font-size:0.72em;border:1px solid currentColor;border-radius:8px;padding:2px 7px;vertical-align:middle">V${ACADEMY_RELEASE}</span></div><div class="sub">${e(title)}</div>${sync78StatusMarkup()}</div>${role==='child'&&scene!=='choice'?trainingSoundControl():''}${role?button(testMode?'← Zakończ test':'← Profile','exit','alt'):''}</header>${testMode?'<div class="test-banner">🧪 TRYB MAMY — BEZPŁATNY TEST • POSTĘPY NIE SĄ ZAPISYWANE</div>':''}${content}</main>${role==='child'&&scene!=='choice'?'<button class="mic" data-action="mic" aria-label="Sterowanie głosowe">🎙️</button>':''}`;document.querySelectorAll('[data-speak]').forEach(b=>b.addEventListener('click',()=>speak(b.dataset.speak,b.dataset.lang,role==='child'?profile().mentor:'tech',data.settings.rate||1)));hydrateImages();v76AfterRender();if(role==='child'&&profile().grade==='P')mountPreschoolAudio93(app,text=>speak(text,'pl-PL',profile().mentor,data.settings.rate||1));if(role==='child'&&(tab==='learn'||tab==='subjectmissions'))installMicDrag()}
 async function hydrateImages(){for(const el of document.querySelectorAll('[data-image]')){const src=await img(el.dataset.image);if(el.isConnected&&src){el.src=src;el.onload=()=>URL.revokeObjectURL(src)}}}
 function nav(){return role==='admin'?`<div class="tabs">${[['home','Przegląd'],['books','📚 Książki'],['missions','📋 Misje'],['settings','⚙️ Ustawienia'],['test','🧪 Testuj wszystko'],['sync','📱 Telefony'],['backup','💾 Kopia']].map(([k,n])=>button(n,'admin:'+k,adminTab===k?'gold':'alt')).join('')}</div>`:`<div class="tabs">${[['home','🎯 Misje'],['books','📚 Książki'],['learn','🧠 Trening'],['academy','📖 Sala odkrywców'],['mentor','🤖 Mentor'],['base','🏙️ Baza Avengersów i gry']].map(([k,n])=>button(n,'child:'+k,tab===k?'gold':'alt')).join('')}</div>`}
 function render(){if(tab!=='arcade')stopArcade();if(!role){layout('Wybierz swoją bazę',`<section class="card"><h1>Witaj w Akademii! 🛡️</h1><p>Każdy bohater ma własne misje i nagrody.</p></section><div class="grid">${people.filter(([id])=>!syncAdapter.device?.()||syncAdapter.device().role!=='child'||syncAdapter.device().child===id).map(([id,name])=>`<button class="tile" data-action="enter:${id}"><img class="profile-hero" src="assets/art/${data.profiles[id].hero||(id==='pawel'?'iron':'spider')}.svg" alt=""><h2>${name}</h2><small>${gradeName(data.profiles[id].grade)} · ${data.profiles[id].coins} złotych</small></button>`).join('')}</div><section class="card">${syncAdapter.device?.()?.role==='child'?'':button('🔐 Centrum dowodzenia mamy','enter:admin','gold')}<p class="muted">${syncAdapter.status()}</p></section>${!syncAdapter.device?.()?sync78Markup():''}${globalThis.AKADEMIA_TEST80?'':`<footer class="academy-update">${button('🔄 Aktualizuj Akademię','academy:update','line')}</footer>`}`);return}if(role==='admin')adminRender();else childRender()}
@@ -1244,11 +1246,13 @@ function hqRoomPanel84(p){
    (won?'<p class="hq86-master-won">✓ Puchar i peleryna w kolekcji.</p>'+button('Zobacz kolekcję','hq:gallery','alt'):'')+
    button(won?'Zagraj jeszcze raz':'Rozpocznij próbę','hq:exercise:master','gold');
  }
+ if(hqPanel84==='cockpit')body='<section class="sq93" id="missions93-cockpit"></section>';
  if(hqPanel84==='flight')body=flightMarkup88(button,speakBtn,{child:who,preview:testMode});
  if(hqPanel84==='hangar'){
   const jet=p.base?.owned?.includes('quinjet');
-  body='<h3>🛩️ Hangar</h3>'+(jet?button('✈️ Lot Quinjetem','hq:flight','gold')+'<p>Wybierz malowanie Quinjeta.</p>'+[['blue','Niebieskie'],['mint','Miętowe'],['gold','Złote']].map(([id,label])=>button(label,'hq:paint:'+id,hqRead(p).paint===id?'gold':'alt')).join(''):
-   '<p>Na lądowisku jest miejsce na Quinjeta.</p>'+button('🛒 Idź do sklepu','hq:room:shop','gold'));
+  const board=gameGroup92(p.grade)?button('✈️ Wsiądź do samolotu','hq:board','gold'):'';
+  body='<h3>🛩️ Hangar</h3>'+(board|| (jet?button('✈️ Lot Quinjetem','hq:flight','gold'):''))+(jet?'<p>Wybierz malowanie Quinjeta.</p>'+[['blue','Niebieskie'],['mint','Miętowe'],['gold','Złote']].map(([id,label])=>button(label,'hq:paint:'+id,hqRead(p).paint===id?'gold':'alt')).join(''):
+   '<p>W sklepie możesz kupić własnego Quinjeta.</p>'+button('🛒 Idź do sklepu','hq:room:shop','alt'));
  }
  if(hqPanel84==='joke'){
   const joke=hqJokes84[hqJoke84];
@@ -1329,6 +1333,11 @@ async function hqAction84(action,target){
   hqReturn84=true;hqPanel84='';tab=id;render();window.scrollTo(0,0);return;
  }
  if(what==='back'){hqReturn84=false;return hqShow84();}
+ if(what==='board'){
+  const hangar=hqPanel84==='hangar'||hqViews84.get(child)==='walk'&&walkRoomId93(child)==='hangar';
+  if(tab==='base'&&hangar&&gameGroup92(p.grade))return hqShow84('cockpit');
+  return;
+ }
  if(what==='flight'){
   if(!id&&p.base?.owned?.includes('quinjet'))return hqShow84('flight');
   return;
@@ -1472,16 +1481,31 @@ function hqMountArcade84(){
  });
 }
 
+function mountMissionsView93(p,flight=false){
+ const region=$(flight?'missions93-cockpit':'missions93-training');
+ if(!region)return;
+ mountMissions93(region,{
+  grade:p.grade,flight,legacy:flight&&p.base?.owned?.includes('quinjet'),
+  speak:(text,lang='pl-PL')=>speak(text,lang,p.mentor,data.settings.rate||1),
+  tap:()=>trainingTapSound(true),tone:missionNote93
+ });
+}
+
 function childRender(){
  const p=profile(),walking=hqViews84.get(who)==='walk';
  if(tab==='view-choice')return layout('Akademia '+p.name,hqChoices(button),'choice');
+ if(tab==='missions93'){
+  layout('Akademia '+p.name,`<section class="sq93-shell">${button('‹ Gry edukacyjne','learning-games:more-back','alt')}
+   <section class="sq93" id="missions93-training"></section></section>`);
+  mountMissionsView93(p);return;
+ }
  if(tab==='learning-games'){
   const back=learningReturn92==='academy'?'‹ Sala Odkrywców':'‹ Trening';
   layout('Akademia '+p.name,`<section class="lg92-shell">${button(back,'learning-games:back','alt lg92-back')}
    <section class="lg92-games" data-group="${gameGroup92(p.grade)}" id="learning-games92"></section>
    <p data-lg92-save role="status"></p></section>`);
   mountLearningGames92($('learning-games92'),{
-   grade:p.grade,speak:text=>speak(text,'pl-PL',p.mentor,data.settings.rate||1),
+   grade:p.grade,catalogExtra:button('🎮 Więcej gier','learning-games:more','gold lg92-more'),speak:text=>speak(text,'pl-PL',p.mentor,data.settings.rate||1),
    tap:()=>trainingTapSound(true),awards:()=>p.base?.headquarters?.learningAwards92??{},
    onAward:async id=>{
     if(!recordGameAward92(p,id))return;
@@ -1499,6 +1523,7 @@ function childRender(){
   const walk=baseWalkMarkup(p,who,hero(p.hero||(who==='pawel'?'iron':'spider'))[0],ACADEMY_RELEASE,dialog,mic);
   layout('Spacer po bazie',walk,'walk');
   mountBaseWalk(document.querySelector('[data-hq86-walk]'));mountPetCare86(app,careGesture);
+  if(hqPanel84==='cockpit')mountMissionsView93(p,true);
   if(hqPanel84==='flight')mountNounFlight88(app,hqRead(p).paint,{child:who,preview:testMode});
   return;
  }
@@ -1532,7 +1557,7 @@ if(tab==='learn'){
    html+=trainingFlowMarkup();
   }
   if(avengersRun)html+=avengersPanel();
- }layout('Akademia '+p.name,html);if(tab==='base'){mountBaseScene84(document.querySelector('[data-hq84-scene]'));mountPetCare86(app,careGesture);if(hqPanel84==='flight')mountNounFlight88(app,hqRead(p).paint,{child:who,preview:testMode});}if(tab==='arcade')hqMountArcade84();if(tab==='learn'&&v37Classic)newExercise();if(tab==='trace')drawTrace()}
+ }layout('Akademia '+p.name,html);if(tab==='base'){mountBaseScene84(document.querySelector('[data-hq84-scene]'));mountPetCare86(app,careGesture);if(hqPanel84==='cockpit')mountMissionsView93(p,true);if(hqPanel84==='flight')mountNounFlight88(app,hqRead(p).paint,{child:who,preview:testMode});}if(tab==='arcade')hqMountArcade84();if(tab==='learn'&&v37Classic)newExercise();if(tab==='trace')drawTrace()}
 const CROSSWORDS=[
  {word:'KOT',clue:'Miauczy i mruczy',r:0,c:2,dir:'v'},
  {word:'DOM',clue:'Mieszkamy w nim',r:1,c:1,dir:'h'},
@@ -1728,6 +1753,12 @@ async function handle(action,target){
  if(action==='academy:update')return checkAcademyUpdate(target);
  if(action==='learning-games:open'&&role==='child'&&gameGroup92(profile().grade)&&['learn','academy'].includes(tab)){
   learningReturn92=tab;tab='learning-games';render();window.scrollTo(0,0);return;
+ }
+ if(action==='learning-games:more'&&role==='child'&&tab==='learning-games'&&gameGroup92(profile().grade)){
+  tab='missions93';render();window.scrollTo(0,0);return;
+ }
+ if(action==='learning-games:more-back'&&role==='child'&&tab==='missions93'){
+  tab='learning-games';render();window.scrollTo(0,0);return;
  }
  if(action==='learning-games:back'&&role==='child'&&tab==='learning-games'){
   tab=learningReturn92;render();window.scrollTo(0,0);return;

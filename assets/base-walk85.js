@@ -1,13 +1,16 @@
 import {hqPet,hqPlaced,hqRead} from './headquarters84.js?v=91';
 import {baseArt88} from './base-art88.js?v=91';
-import {drawHeroHands,loadHeroHands88} from './hero-hands85.js?v=90';
-import {walkRooms,FLOOR_DEPTH,FULL_TURN,PHOTO_FOV,VERTICAL_SCALE,advance86,cameraBasis86,clamp86,roomAnchor86,wrapAngle} from './base-map86.js?v=91';
+import {drawHeroHands,loadHeroHands88} from './hero-hands85.js?v=93';
+import {walkRooms,FLOOR_DEPTH,FULL_TURN,PHOTO_FOV,VERTICAL_SCALE,advance86,cameraBasis86,clamp86,roomAnchor86,wrapAngle} from './base-map86.js?v=93';
 import {energy86} from './base-training86.js?v=87';
 import {petSprite86} from './pet-care86.js?v=90';
 import {mentorMarkup87,drawMentor87,MENTOR_GREETING_MS} from './base-mentor87.js?v=91';
 import {drawQuinjet88} from './quinjet88.js?v=88';
+import {gameGroup92} from './learning-games92.js?v=92';
 
 const routes=new Map(),images=new Map();
+const skyHD=['training86','polish86','english86','explorer87','annex86','hall88','workshop91','armory','arcade','nook86','hangar','shop87','vault87'];
+const roomImage93=file=>(skyHD.includes(file.replace('.webp',''))?'hd93/':'')+file;
 const pose=room=>({room,x:0,z:0,yaw:((walkRooms[room].heading??.5)-.5)*FULL_TURN,pitch:0});
 const current=child=>routes.get(child)?.at(-1)??pose('hall');
 const casePositions={a:[.194,.567],b:[.81,.567],c:[.5,.574]};
@@ -24,18 +27,18 @@ export function baseWalkMarkup(profile,child,hero,release,panel,mic=''){
  };
  const pet=animal?`<span class="hq86-prop hq86-nook-pet" data-room="pet" data-u=".499" data-v=".516" data-front="1" data-prop="pet" hidden>${petSprite86(animal.species,animal.care?.outfit,animal.care?.asleep,false,true)}</span>`:'';
  const paint=['mint','gold'].includes(state.paint)?state.paint:'blue';
- const jet=profile.base?.owned?.includes('quinjet');
+ const jet=profile.base?.owned?.includes('quinjet'),school=!!gameGroup92(profile.grade);
  const shop=prop('shop',.085,.425,true,baseArt88('shield'),'shop-shield','','hq88-shop-display')+
   prop('shop',.905,.391,true,baseArt88('thorhammer'),'shop-hammer','','hq88-shop-display')+
   prop('shop',.892,.507,true,baseArt88('boots'),'shop-boots','','hq88-shop-display');
  const {crystals,charged,capacity,level}=energy86(profile);
- return `<section class="hq86-walk" data-hq84-scene data-hq86-walk data-child="${child}" data-hero="${hero}" data-jet="${jet?paint:''}">
+ return `<section class="hq86-walk" data-hq84-scene data-hq86-walk data-child="${child}" data-hero="${hero}" data-jet="${jet?paint:school?'blue':''}">
   <div class="hq86-stage" tabindex="0" aria-label="Przesuń palcem, aby się rozejrzeć. Przytrzymaj ekran, żeby iść. Na klawiaturze użyj strzałek i spacji.">
    <div class="hq86-fallback" aria-hidden="true"></div>
-   <canvas class="hq86-world" aria-hidden="true"></canvas>${jet?'<canvas class="hq88-aircraft" aria-hidden="true" hidden></canvas>':''}<canvas class="hq86-hands" aria-hidden="true"></canvas>
+   <canvas class="hq86-world" aria-hidden="true"></canvas>${jet||school?'<canvas class="hq88-aircraft" aria-hidden="true" hidden></canvas>':''}<canvas class="hq86-hands" aria-hidden="true"></canvas>
    ${Object.entries(walkRooms).flatMap(([room,value])=>value.points.map((p,i)=>{
     if(profile.grade==='P'&&(p.action?.startsWith('hq:exercise:')||p.action==='hq:master'))return '';
-    if(p.action==='hq:flight'&&!jet)return '';
+    if(p.action==='hq:board'&&!jet&&!school)return '';
     const mentor=p.action==='hq:area:mentor',orb=p.action==='hq:joke',explorer=p.room==='explorer';
     const locked=p.room==='workshop'&&!profile.base?.owned?.includes('workshop');
     const style=mentor?' hq87-mentor-actor':orb?' hq87-orb':explorer?' hq87-discovery-door':p.room==='shop'?' hq88-shop-door':
@@ -43,7 +46,7 @@ export function baseWalkMarkup(profile,child,hero,release,panel,mic=''){
     const label=p.action==='hq:pet'&&animal?escapeText(animal.name):p.label;
     const art=p.fixture?`<img src="assets/hq/${p.fixture}91.webp" alt="" draggable="false">`:p.icon?`<span aria-hidden="true">${p.icon}</span>`:'';
     const content=mentor?mentorMarkup87(profile.mentor):`${art}<b>${label}</b>`;
-    const action=locked?'data-action="hq:room:workshop"':p.room?`data-walk-door="${p.room}"`:`data-action="${p.action}"`;
+    const action=locked?'data-action="hq:room:workshop"':p.room?`data-walk-door="${p.room}"` :`data-action="${p.action==='hq:board'&&!school?'hq:flight':p.action}"`;
     return `<button type="button" class="hq86-point${style}" data-room="${room}" data-index="${i}" ${action} hidden>${content}</button>`;
    })).join('')}
    ${Object.entries(casePositions).map(([slot,[u,v]])=>trophy(slot,'armory',u,v)).join('')+trophy('lab','polish',labShelf.u,labShelf.v-.041,false)+pet+shop}
@@ -56,6 +59,7 @@ export function baseWalkMarkup(profile,child,hero,release,panel,mic=''){
      <span class="hq86-energy-gems" aria-hidden="true">${Array.from({length:capacity},(_,i)=>`<i class="${i<charged?'lit':''}"></i>`).join('')}</span>
     </div>
    </header>
+   ${hero==='spider'?'<button type="button" data-walk-web class="hq93-web" aria-label="Wystrzel pajęczynę">🕸️ Sieć</button>':''}
    <div class="hq86-location" role="status">${scene.name}</div><small class="hq86-release">V${release}</small>
    <p class="hq86-help">Przesuń palcem, żeby się rozejrzeć. Przytrzymaj, żeby iść.</p>
    ${panel?'':'<div class="hq86-notice" id="hq85-notice" role="status"></div>'}
@@ -63,6 +67,7 @@ export function baseWalkMarkup(profile,child,hero,release,panel,mic=''){
 }
 
 export function resetBaseWalk(child){routes.delete(child);}
+export function walkRoomId93(child){return current(child).room;}
 export function openWalkRoom87(child,name){
  if(!Object.hasOwn(walkRooms,name))return false;
  const stack=routes.get(child)??[pose('hall')];
@@ -196,7 +201,7 @@ export function mountBaseWalk(root){
  const location=root.querySelector('.hq86-location'),dialog=root.querySelector('dialog');
  const back=stage.querySelector('[data-walk-back]'),menu=stage.querySelector('[data-action="hq:view:menu"]');
  const markers=[...stage.querySelectorAll('.hq86-point,.hq86-prop')];
- const flightButton=stage.querySelector('[data-action="hq:flight"]');
+ const flightButton=stage.querySelector('[data-action="hq:board"],[data-action="hq:flight"]');
  const ctx=hands.getContext('2d'),controller=new AbortController(),{signal}=controller;
  const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
  const child=root.dataset.child,stack=routes.get(child)??[pose('hall')];
@@ -204,7 +209,7 @@ export function mountBaseWalk(root){
  let world=panoramaWorld(canvas),width=0,height=0,frame=0,last=0,step=0;
  let pointer=null,transition=null,busy=false,effect=null,ignoreClickUntil=0,forwarding=false;
  let portraitRatio=.73,sceneMarkers=[],greeting=null;
- let handArt=null,ironArt=null,jetBounds=null;
+ let handArt=null,ironArt=null,jetBounds=null,webShot=null;
  const on=(target,name,listener,options={})=>target.addEventListener(name,listener,{...options,signal});
  const state=()=>stack.at(-1);
  const room=()=>walkRooms[state().room];
@@ -225,7 +230,7 @@ export function mountBaseWalk(root){
   const rect=stage.getBoundingClientRect();
   width=rect.width;height=rect.height;
   if(!width||!height)return;
-  const density=Math.min(window.devicePixelRatio||1,1.55);
+  const density=Math.min(window.devicePixelRatio||1,2.45,Math.sqrt(2_500_000/(width*height)));
   for(const surface of [canvas,hands,aircraft].filter(Boolean)){
    surface.width=Math.round(width*density);surface.height=Math.round(height*density);
   }
@@ -249,10 +254,10 @@ export function mountBaseWalk(root){
   if(aircraft)aircraft.hidden=state().room!=='hangar';
   greeting=null;sceneMarkers=[];markers.forEach(marker=>marker.hidden=true);
   jetBounds=null;
-  fallback.style.backgroundImage=`url("assets/hq/${selected.portrait??selected.art}")`;
+  fallback.style.backgroundImage=`url("assets/hq/${roomImage93(selected.portrait??selected.art)}")`;
   fallback.classList.toggle('has-portrait',!!selected.portrait);
   try{
-   const [image,front]=await Promise.all([image86(selected.art),selected.portrait?image86(selected.portrait):null]);
+   const [image,front]=await Promise.all([image86(roomImage93(selected.art)),selected.portrait?image86(roomImage93(selected.portrait)):null]);
    if(signal.aborted)return;
    portraitRatio=front?front.naturalWidth/front.naturalHeight:.73;
    world?.load(image,front,selected);
@@ -353,7 +358,9 @@ export function mountBaseWalk(root){
    fallback.style.backgroundPosition=`calc(50% - ${yaw/FULL_TURN*height*2.56}px) ${50-live.pitch*34}%`;
    fallback.style.transform=`scale(${1+Math.min(.16,Math.hypot(live.x,live.z)*.025)})`;
   }
-  if(ctx)drawHeroHands(ctx,hands,root.dataset.hero,reduced?0:step,moving,handArt);
+  const webAge=webShot?now-webShot.at:Infinity;
+ if(webAge>460)webShot=null;
+ if(ctx)drawHeroHands(ctx,hands,root.dataset.hero,reduced?0:step,moving,handArt,webShot?{...webShot,age:webAge}:null);
   if(jetContext&&live.room==='hangar'){
    const density=aircraft.width/width;
    jetContext.setTransform(density,0,0,density,0,0);
@@ -373,7 +380,7 @@ export function mountBaseWalk(root){
    greeting.open=false;forwardPoint(greeting.marker);
    if(signal.aborted)return;
   }
-  if(pointer||transition||effect||greeting&&now-greeting.at<MENTOR_GREETING_MS)renderSoon();else last=0;
+  if(pointer||transition||effect||webShot||greeting&&now-greeting.at<MENTOR_GREETING_MS)renderSoon();else last=0;
  }
  function forwardPoint(marker){
   forwarding=true;marker.dataset.hqForwarded='1';
@@ -398,7 +405,7 @@ export function mountBaseWalk(root){
  }
  on(stage,'pointerdown',event=>{
   ignoreClickUntil=0;
-  if(event.button!==0||pointer||busy||transition||dialog||event.target.closest('.hq86-top'))return;
+  if(event.button!==0||pointer||busy||transition||dialog||event.target.closest('.hq86-top,[data-walk-web],.pres93-speaker'))return;
   const point=event.target.closest('.hq86-point')||jetTarget(event);
   pointer={id:event.pointerId,time:performance.now(),x:event.clientX,y:event.clientY,drag:false,walk:false,point};
   if(!point)stage.setPointerCapture(event.pointerId);
@@ -450,10 +457,17 @@ export function mountBaseWalk(root){
    forwardPoint(marker);
   });
  },{capture:true});
+ function shoot(){
+  if(root.dataset.hero!=='spider'||dialog||busy||transition)return;
+  webShot={at:performance.now(),side:webShot?.side===1?-1:1};
+  renderSoon();
+ }
+ stage.querySelector('[data-walk-web]')?.addEventListener('click',shoot,{signal});
  on(stage,'keydown',event=>{
   if(event.target!==stage||dialog||busy||transition)return;
   const view=state();
-  if(event.code==='Space'){
+  if(event.code==='KeyF'&&root.dataset.hero==='spider'){shoot();}
+  else if(event.code==='Space'){
    if(!pointer)pointer={id:'keyboard',time:performance.now(),drag:false,walk:false};
   }else if(['ArrowLeft','ArrowRight'].includes(event.code)){
    view.yaw=wrapAngle(view.yaw+(event.code==='ArrowLeft'?-.22:.22));

@@ -2,7 +2,7 @@ import {
  awardNames92,gameGroup92,masterLevels92,mathRound92,
  preschoolGames92,preschoolRound92,schoolGames92,table92
 } from './learning-games92.js?v=92';
-import {mountTrace92} from './learning-trace92.js?v=92';
+import {mountTrace92} from './learning-trace92.js?v=93';
 
 const spriteRoot='assets/games80/pictures/';
 const puzzles=[
@@ -20,7 +20,7 @@ const control=(label,action,extra='')=>`<button type="button" data-lg92="${actio
 const picture=(file,alt='')=>`<img src="${spriteRoot+file}.svg" alt="${htmlEscape(alt)}" draggable="false">`;
 
 let dispose=()=>{};
-export function mountLearningGames92(root,{grade,speak=()=>{},tap=()=>{},awards=()=>({}),onAward=()=>{}}={}){
+export function mountLearningGames92(root,{grade,catalogExtra='',speak=()=>{},tap=()=>{},awards=()=>({}),onAward=()=>{}}={}){
  dispose();dispose=()=>{};
  if(!root)return;
  const group=gameGroup92(grade);
@@ -42,7 +42,7 @@ export function mountLearningGames92(root,{grade,speak=()=>{},tap=()=>{},awards=
  function catalog(){
   game='';clearTimers();root.dataset.game='';
   root.innerHTML=`<h2 tabindex="-1">${group==='school'?'Gry mnożeniowe':'Gry z literami i liczbami'}</h2>
-   <div class="lg92-catalog">${games.map(([id,icon,name,desc])=>{
+   ${catalogExtra}<div class="lg92-catalog">${games.map(([id,icon,name,desc])=>{
     const award=awards()[id]&&awardNames92[id];
     return `<button type="button" class="lg92-card" data-lg92="open-${id}">
      <span aria-hidden="true">${icon}</span><strong>${name}</strong><small>${desc}</small>

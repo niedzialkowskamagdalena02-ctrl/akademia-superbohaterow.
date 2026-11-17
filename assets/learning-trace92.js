@@ -92,9 +92,10 @@ export function traceStep92(points,index,position){
  return best;
 }
 
-export function mountTrace92(root,{speak=()=>{},tap=()=>{}}={}){
+export function mountTrace92(root,{speak=()=>{},tap=()=>{},snail=false}={}){
  let group='upper',symbol='A',step=0,next=0,active=null;
  let paths,points;
+ root.classList.toggle('lg93-snail',snail);
  root.innerHTML=`<div class="lg92-mode" aria-label="Rodzaj śladu">
   <button type="button" data-trace-set="upper">Wielkie litery</button>
   <button type="button" data-trace-set="lower">Małe litery</button>
@@ -104,7 +105,9 @@ export function mountTrace92(root,{speak=()=>{},tap=()=>{}}={}){
  <div class="lg92-trace-board">
   <svg viewBox="0 0 200 195" role="img" aria-label="Pola pisania po śladzie">
    <g data-trace-guides><path d="M8 42 H192 M8 75 H192 M8 149 H192 M8 182 H192"></path></g>
-   <g data-trace-lines></g><circle data-trace-start r="4.7"></circle>
+   <g data-trace-lines></g>
+   ${snail?'<g data-snail-leaves aria-hidden="true"></g><circle data-snail-finish r="4.2"></circle><text data-trace-snail font-size="15" text-anchor="middle" dy="-6">🐌</text>':''}
+   <circle data-trace-start r="4.7"></circle>
   </svg>
  </div><p class="lg92-feedback" data-trace-status role="status"></p>
  <div class="lg92-controls"><button type="button" data-trace-act="clear">Wyczyść</button>
@@ -112,10 +115,11 @@ export function mountTrace92(root,{speak=()=>{},tap=()=>{}}={}){
  const select=root.querySelector('select'),svg=root.querySelector('svg');
  const status=root.querySelector('[data-trace-status]'),layer=root.querySelector('[data-trace-lines]');
  const start=root.querySelector('[data-trace-start]');
+ const snailSprite=root.querySelector('[data-trace-snail]'),finish=root.querySelector('[data-snail-finish]'),leafLayer=root.querySelector('[data-snail-leaves]');
  const symbols=()=>group==='number'?numbers92.map(String):alphabet92.map(l=>group==='lower'?l.toLowerCase():l);
  const say=()=>{
   const name=group==='number'?'liczbę '+symbol:'literę '+letterName92(symbol.toUpperCase());
-  speak('Poprowadź palec po śladzie. Rysujemy '+name+'. Zacznij od kolorowej kropki.');
+  speak((snail?'Poprowadź ślimaka zieloną ścieżką do czerwonej kropki. Rysujemy ':'Poprowadź palec po śladzie. Rysujemy ')+name+'. Zacznij od kolorowej kropki.');
  };
  function selectMode(){
   select.replaceChildren(...symbols().map(key=>new Option(key,key)));
@@ -125,7 +129,16 @@ export function mountTrace92(root,{speak=()=>{},tap=()=>{}}={}){
  function moveDot(){
   const point=points[step]?.[next];
   start.toggleAttribute('hidden',!point);
-  if(point){start.setAttribute('cx',point.x);start.setAttribute('cy',point.y);}
+  if(point){
+   start.setAttribute('cx',point.x);start.setAttribute('cy',point.y);
+   if(snail){
+    snailSprite.setAttribute('x',point.x);snailSprite.setAttribute('y',point.y);
+    const line=points[step],end=line.at(-1);
+    finish.setAttribute('cx',end.x);finish.setAttribute('cy',end.y);
+    leafLayer.innerHTML=[.28,.52,.75].map(part=>Math.floor((line.length-1)*part)).filter((i,n,arr)=>i>next&&arr.indexOf(i)===n)
+     .map(i=>`<text x="${line[i].x}" y="${line[i].y}" dy="-4" font-size="10" text-anchor="middle">🍃</text>`).join('');
+   }
+  }else if(snail){leafLayer.textContent='';snailSprite.setAttribute('x',points.at(-1).at(-1).x);snailSprite.setAttribute('y',points.at(-1).at(-1).y);}
  }
  function reset(){
   step=0;next=0;active=null;
@@ -143,7 +156,7 @@ export function mountTrace92(root,{speak=()=>{},tap=()=>{}}={}){
     return {x:p.x*scale+x,y:p.y*scale+y};
    });
   });
-  status.textContent='Zacznij od świecącej kropki.';
+  status.textContent=snail?'Zacznij od zielonej kropki i poprowadź ślimaka do czerwonej.':'Zacznij od świecącej kropki.';
   moveDot();
  }
  function point(event){
@@ -152,7 +165,15 @@ export function mountTrace92(root,{speak=()=>{},tap=()=>{}}={}){
  function update(position){
   const line=points[step];
   const closest=traceStep92(line,next,position);
-  if(closest<0)return;
+  if(closest<0){
+   if(snail){
+    const checkpoint=Math.max(0,...[.28,.52,.75].map(part=>Math.floor((line.length-1)*part)).filter(i=>i<=next));
+    next=checkpoint;active=null;
+    paths[step].setAttribute('points',line.slice(0,next+1).map(p=>p.x+','+p.y).join(' '));
+    status.textContent='Ślimak wrócił na ścieżkę. Zacznij od jego nowego miejsca.';moveDot();
+   }
+   return;
+  }
   next=closest;
   const drawn=line.slice(0,next+1);
   paths[step].setAttribute('points',drawn.map(p=>p.x+','+p.y).join(' '));

@@ -18,8 +18,12 @@ export function loadHeroHands88(hero){
   handImages.set(hero,new Promise(resolve=>{
    const image=new Image();
    image.onload=()=>resolve(image);
-   image.onerror=()=>{handImages.delete(hero);resolve(null);};
-   image.src='assets/hq/hands90-'+hero+'.webp';
+   const original='assets/hq/hands90-'+hero+'.webp';
+   image.onerror=()=>{
+    if(image.src.endsWith(original)){handImages.delete(hero);resolve(null);}
+    else image.src=original;
+   };
+   image.src='assets/hq/hd93/hands-'+hero+'.webp';
   }));
  }
  return handImages.get(hero);
@@ -45,20 +49,25 @@ function geometry(){
  return paths;
 }
 
-export function drawHeroHands(ctx,canvas,hero,step,moving,image=null){
+export function drawHeroHands(ctx,canvas,hero,step,moving,image=null,web=null){
  const {width,height}=canvas;
  ctx.clearRect(0,0,width,height);
  if(image){
-  const scale=Math.min(width*.34/image.naturalWidth,height*.22/image.naturalHeight)*(hero==='hulk'?1.11:1);
+  const scale=Math.min(width*.35/image.naturalWidth,height*.25/image.naturalHeight)*(hero==='hulk'?1.1:1);
   const w=image.naturalWidth*scale,h=image.naturalHeight*scale;
+  let origin;
   for(const side of [-1,1]){
    const sway=moving?Math.sin(step+side*Math.PI/2):0;
    ctx.save();
-   ctx.translate(width*(side<0?.067:.933),height+h*(.04+sway*.037));
+   const reach=web?.side===side?Math.max(0,1-web.age/330):0;
+   const x=width*(side<0?.022:.978)-side*reach*w*.19,y=height+h*(.035+sway*.037-reach*.25);
+   ctx.translate(x,y);
+   if(web?.side===side)origin={startX:x-side*w*.52,startY:y-h*.51};
    ctx.scale(-side,1);ctx.rotate(sway*.04);
    ctx.drawImage(image,0,-h,w,h);
    ctx.restore();
   }
+  if(web)paintWeb93(ctx,width,height,{...web,...origin});
   return;
  }
  const [base,light,shade,cuff,accent,kind]=costumes[hero]??costumes.iron;
@@ -104,4 +113,27 @@ export function drawHeroHands(ctx,canvas,hero,step,moving,image=null){
   }
   ctx.restore();
  }
+ if(web)paintWeb93(ctx,width,height,web);
+}
+
+function paintWeb93(ctx,width,height,{side,age,startX=width*(side<0?.27:.73),startY=height*.83}){
+ const reach=Math.min(1,age/125),alpha=Math.min(1,(460-age)/220);
+ const aimX=width*(.5-side*.035),aimY=height*.41;
+ const endX=startX+(aimX-startX)*reach,endY=startY+(aimY-startY)*reach;
+ const line=(x,y,w)=>{
+  ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(startX,startY);
+  ctx.quadraticCurveTo((startX+x)/2-side*width*.08,(startY+y)/2+height*.015,x,y);ctx.stroke();
+ };
+ ctx.save();
+ ctx.globalAlpha=Math.max(0,alpha);ctx.strokeStyle='#f0fbff';ctx.shadowColor='#62cff7';ctx.shadowBlur=height*.009;
+ line(endX,endY,Math.max(2,height*.0032));line(endX+width*.012,endY+height*.016,Math.max(1,height*.0018));
+ if(reach===1){
+  ctx.beginPath();
+  for(let arm=0;arm<8;arm++){
+   const angle=Math.PI*arm/4;
+   ctx.moveTo(endX,endY);ctx.lineTo(endX+Math.cos(angle)*width*.048,endY+Math.sin(angle)*width*.048);
+  }
+  ctx.stroke();
+ }
+ ctx.restore();
 }

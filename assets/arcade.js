@@ -1,6 +1,15 @@
+export function rotateBlock93(piece,fits){
+ const rotated=piece.shape[0].map((_,i)=>piece.shape.map(row=>row[i]).reverse());
+ for(const [dx,dy] of [[0,0],[-1,0],[1,0],[-2,0],[2,0],[0,-1],[-1,-1],[1,-1],[0,-2]]){
+  if(!fits(piece,dx,dy,rotated))continue;
+  piece.x+=dx;piece.y+=dy;piece.shape=rotated;
+  return true;
+ }
+ return false;
+}
 let timer=null,cleanup=()=>{};
 export function stopArcade(){if(timer!==null)clearInterval(timer);timer=null;cleanup();cleanup=()=>{}}
-export function mountArcade(kind,root,onCrystals=()=>{}){stopArcade();if(!root)return;const W=10,H=16,cell=24;root.innerHTML=`<p class="arcade-status" id="arcade-status">Wynik: 0</p><canvas class="arcade-screen" id="arcade-canvas" width="${W*cell}" height="${H*cell}" style="aspect-ratio:${W}/${H};max-width:260px" aria-label="Plansza gry"></canvas><div class="arcade-dpad" role="group" aria-label="Sterowanie kierunkami"><button class="dpad-up" data-dir="up" aria-label="W górę lub obrót">▲</button><button class="dpad-left" data-dir="left" aria-label="W lewo">◀</button><span class="dpad-center" aria-hidden="true">✦</span><button class="dpad-right" data-dir="right" aria-label="W prawo">▶</button><button class="dpad-down" data-dir="down" aria-label="W dół">▼</button></div><div class="arcade-controls"><button id="arcade-restart">↻ Nowa gra</button><button id="arcade-pause">⏸ Pauza</button></div><p class="muted">Sterowanie przyciskami na ekranie lub strzałkami klawiatury.</p>`;
+export function mountArcade(kind,root,onCrystals=()=>{}){stopArcade();if(!root)return;const W=10,H=16,cell=24,blocks=kind!=='snake';root.innerHTML=`<div class="arc93-hud"><p class="arcade-status" id="arcade-status">Wynik: 0</p>${blocks?'<button type="button" class="arc93-rotate" data-dir="up">⟳ Obróć klocek</button>':''}</div><canvas class="arcade-screen" id="arcade-canvas" width="${W*cell}" height="${H*cell}" style="aspect-ratio:${W}/${H};max-width:260px" aria-label="Plansza gry"></canvas><div class="arcade-dpad" role="group" aria-label="Sterowanie kierunkami"><button class="dpad-up" data-dir="up" aria-label="${blocks?'Obróć klocek':'W górę'}">${blocks?'⟳':'▲'}</button><button class="dpad-left" data-dir="left" aria-label="W lewo">◀</button><span class="dpad-center" aria-hidden="true">✦</span><button class="dpad-right" data-dir="right" aria-label="W prawo">▶</button><button class="dpad-down" data-dir="down" aria-label="W dół">▼</button></div><div class="arcade-controls"><button id="arcade-restart">↻ Nowa gra</button><button id="arcade-pause">⏸ Pauza</button></div><p class="muted">Sterowanie przyciskami na ekranie lub strzałkami klawiatury.</p>`;
 const canvas=root.querySelector('canvas'),ctx=canvas.getContext('2d'),status=root.querySelector('#arcade-status'),pauseButton=root.querySelector('#arcade-pause');let score=0,over=false,paused=false,runId,crystals=0;
 const startRun=()=>{runId=globalThis.crypto?.randomUUID?.()||Date.now().toString(36)+Math.random().toString(36).slice(2);crystals=0};
 const earn=n=>{crystals+=n;onCrystals(runId,crystals)};
@@ -58,12 +67,12 @@ const newPiece=()=>{const a=shapes[Math.floor(Math.random()*shapes.length)];retu
 const fits=(p,dx=0,dy=0,shape=p.shape)=>shape.every((r,y)=>r.every((v,x)=>!v||(p.x+x+dx>=0&&p.x+x+dx<W&&p.y+y+dy<H&&(p.y+y+dy<0||!board[p.y+y+dy][p.x+x+dx]))));
 const draw=()=>{bg();board.forEach((r,y)=>r.forEach((v,x)=>{if(v)paint(x,y,v)}));piece.shape.forEach((r,y)=>r.forEach((v,x)=>{if(v)paint(piece.x+x,piece.y+y,piece.color)}))};
 const land=()=>{piece.shape.forEach((r,y)=>r.forEach((v,x)=>{if(v&&piece.y+y>=0)board[piece.y+y][piece.x+x]=piece.color}));let cleared=0;board=board.filter(r=>{if(r.every(Boolean)){cleared++;return false}return true});while(board.length<H)board.unshift(Array(W).fill(null));score+=cleared*100;if(cleared)earn(cleared);status.textContent=`Wynik: ${score}`;piece=newPiece();if(!fits(piece)){over=true;status.textContent=`Koniec gry! Wynik: ${score}`}};
-reset=()=>{startRun();board=Array.from({length:H},()=>Array(W).fill(null));piece=newPiece();score=0;over=false;paused=false;status.textContent='Wynik: 0';draw()};
-move=d=>{if(over||paused)return;if(d==='left'&&fits(piece,-1))piece.x--;if(d==='right'&&fits(piece,1))piece.x++;if(d==='down'){if(fits(piece,0,1))piece.y++;else land()}if(d==='up'){const rotated=piece.shape[0].map((_,i)=>piece.shape.map(row=>row[i]).reverse());if(fits(piece,0,0,rotated))piece.shape=rotated}draw()};
+reset=()=>{startRun();board=Array.from({length:H},()=>Array(W).fill(null));piece=newPiece();score=0;over=false;paused=false;pauseButton.textContent='⏸ Pauza';status.textContent='Wynik: 0';draw()};
+move=d=>{if(over||paused)return;if(d==='left'&&fits(piece,-1))piece.x--;if(d==='right'&&fits(piece,1))piece.x++;if(d==='down'){if(fits(piece,0,1))piece.y++;else land()}if(d==='up')rotateBlock93(piece,fits);draw()};
 const tick=()=>{if(over||paused)return;if(fits(piece,0,1))piece.y++;else land();draw()};reset();timer=setInterval(tick,500);
 }
 const controls=root.querySelectorAll('[data-dir]');controls.forEach(b=>b.addEventListener('click',()=>move(b.dataset.dir)));
-const onKey=ev=>{const d={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down'}[ev.key];if(d){ev.preventDefault();move(d)}};window.addEventListener('keydown',onKey);
+const onKey=ev=>{const d={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down',...(blocks?{x:'up',X:'up'}:{})}[ev.key];if(d){ev.preventDefault();move(d)}};window.addEventListener('keydown',onKey);
 root.querySelector('#arcade-restart').addEventListener('click',reset);pauseButton.addEventListener('click',()=>{if(over)return;paused=!paused;pauseButton.textContent=paused?'▶ Wznów':'⏸ Pauza';updatePause()});
 cleanup=()=>window.removeEventListener('keydown',onKey);
 }
