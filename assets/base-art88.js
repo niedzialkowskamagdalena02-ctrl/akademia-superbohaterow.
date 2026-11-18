@@ -1,4 +1,4 @@
-import {heroPortrait} from './interface102.js?v=116';
+import {heroPortrait} from './interface102.js?v=117';
 
 const displayItems=new Set([
  'armor','helmet','boots','cape','shield','thorhammer','spidermask','gauntlet',

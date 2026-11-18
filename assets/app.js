@@ -1,20 +1,20 @@
 import {gamePreview99, hangarPaint99} from './game-art99.js?v=99';
-import {academy102Shell,academy102Choices,academy102Player,academy102DashboardNav,academy102DashboardVoice,academy102FamilyHeading,academy115TrainingPanel,academy102MissionsHeader,academy102MissionZone,academy107Entry,academy107PinScreen,heroPortrait,academy111Training} from './interface102.js?v=116';
+import {academy102Shell,academy102Choices,academy102Player,academy102DashboardNav,academy102DashboardVoice,academy102FamilyHeading,academy115TrainingPanel,academy102MissionsHeader,academy102MissionZone,academy107Entry,academy107PinScreen,heroPortrait,academy111Training} from './interface102.js?v=117';
 // V48_AI_RESPONSE_DIAGNOSTICS
 // V44_BULK_CHAPTERS
 // V42_CHAPTERS
 import {mountMissionGame} from './mission-game.js?v=116';
-import { initHeadquarters3D } from './headquarters3d.js?v=116';
+import { initHeadquarters3D } from './headquarters3d.js?v=117';
 import {initial,get,put,del,allRecords,replaceRecords,compress,uid,gradeName} from './data.js';
 import {speak,listen,stopVoice,getVoiceState,setVoiceState,spellEnglish77} from './voice.js?v=81';
 import {vocabulary,readings,explanation} from './learning.js';
 import {syncAdapter} from './sync.js?v=81';
-import {BASE_ITEMS,baseMarkup,migrateBase} from './base.js?v=116';
+import {BASE_ITEMS,baseMarkup,migrateBase} from './base.js?v=117';
 import {mountArcade,stopArcade} from './arcade.js?v=93';
-import {mountBaseScene84} from './base-scene84.js?v=116';
-import {baseWalkMarkup,mountBaseWalk,resetBaseWalk,openWalkRoom87,focusWalkCase88,walkRoomId93} from './base-walk85.js?v=116';
-import {HQ_SLOTS,hqItems,hqRead,hqBalances,hqEarnToken,hqSpendToken,hqRecordCrystals,hqBuyWithGems,hqPlaced,hqPlace,hqDisplayPurchase88,hqPet,hqChoosePet88,hqPaint,hqEarnFood,hqMarkup,hqWallet,hqShop,hqFoodQuiz88} from './headquarters84.js?v=116';
-import {petRoom86,petCareMarkup86,petPicker88,mountPetCare86,setPetCare86,servePet87} from './pet-care86.js?v=116';
+import {mountBaseScene84} from './base-scene84.js?v=117';
+import {baseWalkMarkup,mountBaseWalk,resetBaseWalk,openWalkRoom87,focusWalkCase88,walkRoomId93} from './base-walk85.js?v=117';
+import {HQ_SLOTS,hqItems,hqRead,hqBalances,hqEarnToken,hqSpendToken,hqRecordCrystals,hqBuyWithGems,hqPlaced,hqPlace,hqDisplayPurchase88,hqPet,hqChoosePet88,hqPaint,hqEarnFood,hqMarkup,hqWallet,hqShop,hqFoodQuiz88} from './headquarters84.js?v=117';
+import {petRoom86,petCareMarkup86,petPicker88,mountPetCare86,setPetCare86,servePet87} from './pet-care86.js?v=117';
 import {flightMarkup88,mountNounFlight88} from './noun-flight88.js?v=103';
 import {petQuiz88} from './pet-quiz88.js?v=88';
 import {gameGroup92,recordGameAward92} from './learning-games92.js?v=92';
@@ -23,7 +23,7 @@ import {mountMissions93,missionNote93} from './missions93.js?v=103';
 import {mountHangar95} from './hangar95.js?v=104';
 import {trainingCatalog95,trainingSubject95,trainingGroupName95,outsideDeck95,trainingAssessment115,outsideMix115} from './training95.js?v=115';
 import {mountPreschoolAudio93} from './preschool-audio93.js?v=116';
-import {MASTER_PRIZES86,MASTER_SCORE86,recordEnergy86,trainingRound86,trainingConsole86,unlockMaster86} from './base-training86.js?v=116';
+import {MASTER_PRIZES86,MASTER_SCORE86,recordEnergy86,trainingRound86,trainingConsole86,unlockMaster86} from './base-training86.js?v=117';
 import {affordable82,purchase82,credit82} from './wallet82.js?v=82';
 import {REVEAL_OFFER82,consent82,requestedAnswer82,solutions82,leaks82,parseTutor82,promptTutor82} from './tutor82.js?v=82';
 let mentorHistory={tech:[],fun:[]};
@@ -79,7 +79,7 @@ const select=(id,label,options,value)=>`<label for="${id}">${label}</label><sele
 const grades=[['P','Przedszkole'],...Array.from({length:12},(_,i)=>[String(i+1),`Klasa ${i+1}`])];
 const people=[['pawel','Paweł'],['patryk','Patryk']];
 const note=t=>{const n=$('hq85-notice')||$('notice');if(!n){console.warn('Powiadomienie:',t);return}n.textContent=t;n.classList.add('visible');setTimeout(()=>{if(n.isConnected)n.classList.remove('visible')},4500)};
-const ACADEMY_RELEASE=116;
+const ACADEMY_RELEASE=117;
 async function checkAcademyUpdate(button){
  if(!button||button.disabled)return;
  const label=button.textContent,controller=new AbortController();
@@ -818,7 +818,7 @@ const DEFAULT_SUBJECTS=['Polski','Matematyka','Angielski','Przyroda','Plastyka',
 function subjectChecks(id){const current=data.profiles[id].subjects||[],items=[...new Set([...DEFAULT_SUBJECTS,...current])];return `<label>Przedmioty — zaznacz właściwe</label><div class="subject-list">${items.map(x=>`<label class="subject-chip"><input type="checkbox" data-subject-for="${id}" value="${e(x)}" ${current.includes(x)?'checked':''}> ${e(x)}</label>`).join('')}</div>`}
 const VOCAB_ASSETS={apple:'apple',cat:'cat',dog:'dog',house:'house',book:'book',sun:'sun',tree:'tree',car:'car',bird:'bird',fish:'fish',ball:'ball',milk:'milk',school:'school',water:'water',flower:'flower'};
 function vocabArt(word){const k=VOCAB_ASSETS[String(word||'').toLowerCase()];return k?`<img src="assets/art/vocab-${k}.svg" alt="Ilustracja: ${e(word)}">`:`<div class="vocab-fallback">${e(word)}</div>`}
-const HEROES=[['iron','Iron Man','🦾','tech'],['spider','Spider-Man','🕷️','fun'],['hulk','Hulk','💚','fun'],['captain','Kapitan Ameryka','🛡️','tech'],['thor','Thor','⚡','fun'],['hood','Bohater w kapturze','🦸','tech'],['widow','Czarna Wdowa','🥷','tech'],['panther','Czarna Pantera','🐈‍⬛','tech'],['hawkeye','Hawkeye','🏹','tech'],['groot','Groot','🌳','fun'],['groot-lady','Pani Groot','🌸','fun'],['gamora','Gamora','⚔️','tech']];
+const HEROES=[['iron','Iron Man','🦾','tech'],['spider','Spider-Man','🕷️','fun'],['hulk','Hulk','💚','fun'],['captain','Kapitan Ameryka','🛡️','tech'],['thor','Thor','⚡','fun'],['hood','Bohater w kapturze','🦸','tech'],['widow','Czarna Wdowa','🥷','tech'],['wanda','Wanda','✨','tech'],['panther','Czarna Pantera','🐈‍⬛','tech'],['hawkeye','Hawkeye','🏹','tech'],['groot','Groot','🌳','fun'],['groot-lady','Pani Groot','🌸','fun'],['gamora','Gamora','⚔️','tech']];
 function hero(id){return HEROES.find(x=>x[0]===id)||HEROES[0]}
 function heroPicker(id){const current=data.profiles[id].hero||(id==='pawel'?'iron':'spider');return `<div class="hero-picker">${HEROES.map(([key,name])=>`<button class="hero-choice ${key===current?'chosen':''}" data-action="hero:set:${id}:${key}"><img class="hero-thumb" src="${heroPortrait(key)}" alt=""><b>${name}</b>${key===current?'<small>✓ Wybrany</small>':''}</button>`).join('')}</div>`}
 const MENTOR_LINES={fun:{yes:['Spider-Man: Brawo! Pajęczy zmysł aż zatańczył!','Spider-Man: Oho! Mamy geniusza. Czy ktoś widział moje skarpetki?','Spider-Man: Świetnie! Nawet wisząc głową w dół, nie zrobiłbym tego lepiej!'],no:['Spider-Man: Ups! Sieć się trochę poplątała. Jeszcze raz!','Spider-Man: Mała wpadka! Nawet superbohater czasem ląduje w koszu na pranie.']},tech:{yes:['Iron Man: Analiza zakończona. Wynik: imponujący.','Iron Man: JARVIS, zapisz: młody geniusz na pokładzie.','Iron Man: Precyzja godna mojego laboratorium. Zatwierdzam!'],no:['Iron Man: Wykryto drobną usterkę w obliczeniach. Poprawiamy.','Iron Man: Prototyp odpowiedzi wymaga aktualizacji. Spróbuj ponownie.']}};

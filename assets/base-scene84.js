@@ -1,5 +1,5 @@
-import {HQ_SPOTS} from './headquarters84.js?v=116';
-import {baseArt88} from './base-art88.js?v=116';
+import {HQ_SPOTS} from './headquarters84.js?v=117';
+import {baseArt88} from './base-art88.js?v=117';
 
 const rooms={
  entry:{at:[0,4.7],look:[0,-3],bounds:[-1.94,1.94,-6.87,5.6],color:'#394d71'},

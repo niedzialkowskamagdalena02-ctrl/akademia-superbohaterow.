@@ -1,6 +1,6 @@
 import {BASE_ITEMS} from './base.js?v=82';
 import {affordable82,balance82} from './wallet82.js?v=82';
-import {baseArt88} from './base-art88.js?v=116';
+import {baseArt88} from './base-art88.js?v=117';
 
 export const HQ_ROOMS = [
  ['entry','Wejście','🧭'], ['lab','Laboratorium','🔬'], ['arcade','Rozrywka','🕹️'],

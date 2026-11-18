@@ -2,12 +2,12 @@ const art = (name, className = '') =>
   `<img class="academy102-art ${className}" src="assets/interface102/${name}.webp" alt="" draggable="false">`;
 const dashboardArt = (name) =>
   `<img class="academy102-art" src="assets/interface106/${name}.webp" alt="" draggable="false">`;
-const detailArt = (name) =>
-  `<img class="academy102-art" src="assets/interface107/${name}.webp" alt="" draggable="false">`;
 const refinedArt = (name) =>
   `<img class="academy102-art" src="assets/interface108/${name}.webp" alt="" draggable="false">`;
 const activityArt = (name, className = '') =>
   `<img class="academy102-art ${className}" src="assets/interface113/${name}.webp" alt="" draggable="false">`;
+const referenceArt = (name, className = '') =>
+  `<img class="academy102-art ${className}" src="assets/interface117/${name}.webp" alt="" draggable="false">`;
 
 const heroPortraits = new Map([
   ['iron','assets/interface108/hero-pawel.webp'],
@@ -16,7 +16,9 @@ const heroPortraits = new Map([
   ['captain','assets/art/captain.webp'],
   ['thor','assets/art/thor.webp'],
   ['hood','assets/art/hood.webp'],
-  ...['panther','hawkeye','gamora','groot','groot-lady'].map(key=>[key,`assets/interface116/${key}.webp`])
+  ...['panther','hawkeye','gamora','groot','groot-lady'].map(key=>[key,`assets/interface116/${key}.webp`]),
+  ['widow','assets/interface117/widow.webp'],
+  ['wanda','assets/interface117/wanda.webp']
 ]);
 
 export function heroPortrait(key) {
@@ -162,10 +164,7 @@ const destinations = [
 
 export function academy102DashboardNav(preschool, speak, current) {
   return `<nav class="academy102-destinations${preschool?' academy102-preschool':''}" aria-label="Menu Akademii">${destinations.map(([picture,label,tab])=>{
-    const icon='icon-'+picture;
-    const artwork=picture==='missions'?activityArt('target'):picture==='training'?
-      '<img class="academy102-art" src="assets/interface115/brain.webp" alt="" draggable="false">':
-      ['mentor','headquarters'].includes(picture)?detailArt(icon):art(icon);
+    const artwork=referenceArt('nav-'+picture);
     const link = `<button type="button" class="academy104-destination" data-action="child:${tab}"${tab===current?' aria-current="page"':''} aria-label="${label}">
       <span class="academy107-wide-face">${artwork}<span>${label}</span></span></button>`;
     return `<div class="academy102-voiced" data-destination="${picture}">${link}${speak(label)}</div>`;
@@ -238,13 +237,13 @@ export function academy102DashboardVoice(name, speak) {
 
 export function academy102MissionsHeader({audio}) {
   return `<header class="academy102-mission-header">
-    <h2>${activityArt('target')}Twoje misje</h2>${audio}
+    <h2>${referenceArt('nav-missions')}Twoje misje</h2>${audio}
   </header>`;
 }
 
 export function academy102MissionZone({key, icon, title, desc, count, cards, voice}) {
   return `<section class="mission-zone zone-${key} academy102-zone">
-    <div class="academy102-zone-top">${detailArt(icon)}<div>
+    <div class="academy102-zone-top">${referenceArt(icon)}<div>
     <h2>${title} <span class="mission-count">${count}</span></h2><p>${desc}</p>
     ${count?'':'<p class="mission-empty">✨ Wszystko zrobione!</p>'}</div>${voice}</div>${cards}
   </section>`;
@@ -261,7 +260,7 @@ export function academy115TrainingPanel({subject, source, count}) {
     <span class="academy113-hand academy113-hand-left"></span>
     <span class="academy113-hand academy113-hand-right"></span>
   </span>`;
-  const shelfBooks = `<span class="academy115-shelf" aria-hidden="true"><span class="academy113-shelf-books">
+  const shelfBooks = `<span class="academy115-shelf" aria-hidden="true">${referenceArt('shelf')}<span class="academy113-shelf-books">
     ${activityArt('book-1')}${activityArt('book-2')}${activityArt('book-3')}
   </span></span>`;
   const makeTile = (kind,title,action,description,artwork) =>
@@ -273,7 +272,7 @@ export function academy115TrainingPanel({subject, source, count}) {
     makeTile('choose','Wybierz grę','training:catalog','Wybrana gra, losowe zadania',gamepad)+
     makeTile('assessment','Sprawdzian','training:assessment','Różne zadania bez podpowiedzi','<span class="academy115-symbol">🏆</span>') :
     makeTile('books','Materiał z książek','training:source:books','Cała książka, dział lub strony',shelfBooks)+
-    makeTile('outside','Inne materiały','training:source:outside','Zadania spoza książek','<span class="academy115-symbol">🪐</span>');
+    makeTile('outside','Inne materiały','training:source:outside','Zadania spoza książek',referenceArt('planet','academy117-planet'));
   return `<section class="academy102-knowledge-panel academy115-flow" aria-labelledby="academy115-title" data-v77-step="${source?'train-options':'source'}">
     <h2 id="academy115-title">${subject}</h2>
     <p>${source==='books'?'Materiał z książek · '+count+(count===1?' strona':[2,3,4].includes(count%10)&&![12,13,14].includes(count%100)?' strony':' stron'):source==='outside'?'Inne materiały':'Wybierz materiał'}</p>

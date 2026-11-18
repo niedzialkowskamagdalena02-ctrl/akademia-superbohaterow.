@@ -160,8 +160,9 @@ body:has(.academy102-screen) { background:#080f2b }
 }
 .academy107-wide-face {
   display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.3cqi;
-  border:.5cqi solid var(--destination-edge,#66e0f5); padding:.8cqi 1.4cqi 2.9cqi;
-  background:linear-gradient(165deg,var(--destination-start,#2b649f),var(--destination-middle,#163e72) 55%,var(--destination-end,#0c2859));
+  border:.5cqi solid var(--destination-edge,#66e0f5); padding:.55cqi 1.4cqi 2.25cqi;
+  background:radial-gradient(ellipse at 50% 2%,#fff2 0%,transparent 66%),
+    linear-gradient(165deg,var(--destination-start,#2b649f),var(--destination-middle,#163e72) 55%,var(--destination-end,#0c2859));
   box-shadow:inset 0 0 0 .57cqi var(--destination-inset,#2d8bab),inset 0 .65cqi 1.7cqi #ffffff42,
     0 0 1.55cqi var(--destination-glow,#16d8ffa0),0 .73cqi 0 #071733;
   color:#fff; font-size:clamp(.82rem,4.15cqi,1.85rem); font-weight:850; line-height:1.03;
@@ -176,7 +177,7 @@ body:has(.academy102-screen) { background:#080f2b }
   --destination-end:#103c36; --destination-inset:#359c62; --destination-glow:#6ef79688;
 }
 [data-destination="training"] {
-  --destination-edge:#daff94; --destination-start:#678b2b; --destination-middle:#466519;
+  --destination-edge:#daff94; --destination-start:#7da62a; --destination-middle:#4f7419;
   --destination-end:#263d18; --destination-inset:#99bd43; --destination-glow:#b9f36199;
 }
 [data-destination="explorers"] {
@@ -187,11 +188,10 @@ body:has(.academy102-screen) { background:#080f2b }
   --destination-edge:#ffe889; --destination-start:#8c6d27; --destination-middle:#655016;
   --destination-end:#443307; --destination-inset:#b89039; --destination-glow:#ffe66b90;
 }
-.academy102-screen .academy107-wide-face .academy102-art { width:14cqi; height:13.3cqi; min-height:0; object-fit:contain }
+.academy102-screen .academy107-wide-face .academy102-art { width:26cqi; height:17.8cqi; min-height:0; object-fit:contain }
 .academy107-wide-face > span {
   max-width:calc(100% - 2 * clamp(30px,7.6cqi,52px)); text-wrap:balance;
 }
-[data-destination="training"] .academy107-wide-face .academy102-art { width:17cqi; }
 [data-destination="headquarters"] .academy107-wide-face { font-size:clamp(.77rem,3.85cqi,1.7rem); }
 .academy104-destination[aria-current="page"]::after {
   content:""; position:absolute; inset:3%; border:2px solid #ffe7a3; border-radius:inherit; pointer-events:none;
@@ -216,6 +216,9 @@ body:has(.academy102-screen) { background:#080f2b }
 }
 .academy116-top button.academy116-back {
   margin:0; min-height:44px; display:inline-flex; align-items:center; gap:.6em;
+  border:1px solid #82cee8; color:#f4fcff;
+  background:linear-gradient(#397aab,#154268 50%,#122b56);
+  box-shadow:inset 0 1px 2px #ccefff70,0 2px 0 #07152f,0 0 10px #44b8ff55;
 }
 .academy116-back > span { font-size:1.25em; line-height:1; }
 .academy116-top .academy116-back:is(:active,[data-academy-pressed]) { translate:0 3px; filter:brightness(.84); }
@@ -248,11 +251,11 @@ body:has(.academy102-screen) { background:#080f2b }
   margin:0 2.65% max(24cqi,92px); padding:3cqi 3.2cqi 5cqi;
   border:1px solid #83c9e988; border-radius:4.7cqi;
   background:linear-gradient(160deg,#0b2442cc,#1b18485e),url(interface113/knowledge-background.webp) center bottom / 100% 185% no-repeat,#16264d;
-  box-shadow:inset 0 0 3cqi #75bdde25,0 1cqi 2cqi #080f2b5e;
+  box-shadow:inset 0 0 4cqi #75bdde28,0 1cqi 2cqi #080f2b5e;
 }
 .academy115-flow h2 {
   margin:2.5cqi 0 .65cqi; text-align:center; font-size:clamp(1.45rem,6.4cqi,2.75rem);
-  color:#ffe092; text-shadow:0 .5cqi .6cqi #101225;
+  color:#ffe092; text-shadow:0 .24cqi 0 #755320,0 .7cqi .8cqi #07112a,0 0 2cqi #e6aa5670;
 }
 .academy115-flow > p { margin:0 0 3cqi; text-align:center; color:#bfdcff; }
 .academy115-cards { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:3cqi; padding:1.8cqi 0 0; }
@@ -261,7 +264,7 @@ body:has(.academy102-screen) { background:#080f2b }
   display:flex; flex-direction:column; align-items:center; gap:1.3cqi;
   min-height:46cqi; padding:1.6cqi 2cqi 3.2cqi; overflow:visible; isolation:isolate;
   border:2px solid var(--kind-edge)!important; border-radius:4.4cqi;
-  background:linear-gradient(155deg,var(--kind-top),var(--kind-base))!important;
+  background:radial-gradient(ellipse at 49% 2%,#ffffff21,transparent 57%),linear-gradient(155deg,var(--kind-top),var(--kind-base))!important;
   color:#fff; text-align:center; text-shadow:0 2px 3px #07152b;
   transition:translate 90ms,scale 90ms,filter 90ms; touch-action:manipulation;
 }
@@ -271,11 +274,12 @@ body:has(.academy102-screen) { background:#080f2b }
   border-radius:2.6cqi 2.6cqi 0 0; z-index:-1;
 }
 .academy102-screen button.academy115-card:not(:disabled):not(.mic) {
-  box-shadow:inset 0 2px 2px #fff4,0 .65cqi 0 #11203f,0 0 2cqi color-mix(in srgb,var(--kind-edge) 38%,transparent)!important;
+  box-shadow:inset 0 .3cqi .7cqi #fff6,inset 0 -.4cqi 1cqi #060d3840,
+    0 .65cqi 0 #11203f,0 0 2.3cqi color-mix(in srgb,var(--kind-edge) 58%,transparent)!important;
 }
 .academy102-screen .academy115-card[data-academy-pressed] { translate:0 4px; scale:.97; filter:brightness(.88); z-index:1; }
-.academy102-screen .academy115-books { --kind-top:#a9662d; --kind-base:#672f24; --kind-edge:#ffda91; }
-.academy102-screen .academy115-outside { --kind-top:#405bad; --kind-base:#3a2d78; --kind-edge:#c2a8ff; }
+.academy102-screen .academy115-books { --kind-top:#a76021; --kind-base:#73351f; --kind-edge:#ffcd7a; min-height:50cqi; }
+.academy102-screen .academy115-outside { --kind-top:#405bad; --kind-base:#412f91; --kind-edge:#b3a8ff; min-height:50cqi; }
 .academy102-screen .academy115-choose { --kind-top:#228273; --kind-base:#11545d; --kind-edge:#adffe1; }
 .academy102-screen .academy115-assessment { --kind-top:#9d5350; --kind-base:#663055; --kind-edge:#ffc8a6; grid-column:1 / -1; min-height:0; flex-direction:row; justify-content:center; flex-wrap:wrap; padding:2.2cqi; margin-top:2cqi; }
 .academy115-card strong { font-size:clamp(1rem,4.65cqi,2rem); line-height:1.1; }
@@ -288,12 +292,14 @@ body:has(.academy102-screen) { background:#080f2b }
 .academy115-illustration .academy113-dice { inset:7% 30% auto; width:40%; height:auto; }
 .academy115-illustration .academy113-controller { inset:21% 21% auto; width:58%; height:auto; }
 .academy115-shelf {
-  position:relative; width:22cqi; aspect-ratio:1; pointer-events:none;
-  background:url(interface115/shelf.webp) center / contain no-repeat;
+  position:relative; width:92%; pointer-events:none;
 }
-.academy115-shelf .academy113-shelf-books > img:nth-child(1) { left:14.62%; top:21.54%; width:10.77%; height:25.38%; }
-.academy115-shelf .academy113-shelf-books > img:nth-child(2) { left:31.54%; top:15.38%; width:10.77%; height:31.54%; }
-.academy115-shelf .academy113-shelf-books > img:nth-child(3) { left:60.77%; top:15.38%; width:9.23%; height:30.77%; }
+.academy115-shelf > img,.academy115-illustration .academy117-planet { max-height:24cqi; object-fit:contain; }
+.academy115-shelf .academy113-shelf-books { opacity:0; }
+[data-academy-pressed] .academy115-shelf .academy113-shelf-books { opacity:1; }
+.academy115-shelf .academy113-shelf-books > img:nth-child(1) { left:25%; top:48%; width:6%; height:25%; }
+.academy115-shelf .academy113-shelf-books > img:nth-child(2) { left:38%; top:44%; width:6%; height:30%; }
+.academy115-shelf .academy113-shelf-books > img:nth-child(3) { left:66%; top:48%; width:6%; height:26%; }
 
 .academy113-dice, .academy113-controller, .academy113-shelf-books { position:absolute; pointer-events:none; }
 .academy113-dice { left:25.08%; top:10.97%; width:42.11%; height:34.16%; }
@@ -441,7 +447,7 @@ body:has(.academy102-screen) { background:#080f2b }
   display:flex; align-items:center; gap:1.7cqi; margin:0 auto 0 0;
   font-size:5.55cqi;
 }
-.academy102-mission-header h2 .academy102-art { width:15cqi; flex:none }
+.academy102-mission-header h2 .academy102-art { width:18cqi; flex:none }
 .academy102-mission-header > .alt { min-width:38px; min-height:38px; padding:4px }
 .academy102-mission-header .listen {
   margin:0; padding:3px 6px; min-width:0; min-height:30px; color:#fff;
@@ -452,25 +458,27 @@ body:has(.academy102-screen) { background:#080f2b }
 .academy102-mission-screen .academy102-zone {
   --edge:#ed8f85; --zone-a:#651e21; --zone-b:#261747;
   border:.47cqi solid var(--edge); border-radius:5cqi;
-  padding:2.3cqi; margin:0; color:#fff; background:linear-gradient(120deg,var(--zone-a),var(--zone-b));
-  box-shadow:0 0 1.1cqi var(--edge),inset 0 0 0 .35cqi #ffffff26;
+  padding:2.55cqi; margin:0; color:#fff;
+  background:radial-gradient(ellipse at left,#fff1,transparent 49%),linear-gradient(120deg,var(--zone-a),var(--zone-b));
+  box-shadow:0 0 1.45cqi var(--edge),inset 0 0 0 .35cqi #ffffff26;
 }
 .academy102-mission-screen .zone-school { --edge:#56cdfc; --zone-a:#00486f; --zone-b:#092b68 }
 .academy102-mission-screen .zone-home { --edge:#71dd95; --zone-a:#064820; --zone-b:#082d43 }
 .academy102-zone-top {
-  position:relative; display:grid; grid-template-columns:18cqi minmax(0,1fr);
+  position:relative; display:grid; grid-template-columns:20cqi minmax(0,1fr);
   gap:3cqi; align-items:center;
 }
-.academy102-zone-top > img { mask-image:radial-gradient(ellipse,#000 56%,transparent 78%) }
+.academy102-zone-top > img { height:20cqi; object-fit:contain }
 .academy102-zone-top h2,.academy102-zone-top p { margin:0; text-shadow:0 .45cqi .6cqi #04091d }
-.academy102-zone-top h2 { font-size:4.95cqi; color:white; line-height:1.17 }
+.academy102-zone-top h2 { font-size:4.95cqi; color:white; line-height:1.17; text-transform:uppercase; }
 .academy102-zone-top .mission-count {
   min-width:0; min-height:0; padding:0; margin-left:.9cqi; color:#b9e4ff;
   background:none; border:none; box-shadow:none; font-size:inherit;
 }
 .academy102-zone-top p { color:#bed6ec; font-size:3.9cqi; line-height:1.26 }
 .academy102-zone-top p.mission-empty {
-  color:#ffdb82; font-size:4.75cqi; font-weight:850; margin-top:.7cqi; padding:0;
+  color:#ffdb82; font-size:4.35cqi; font-weight:850; margin-top:.7cqi;
+  padding:.32cqi 1.3cqi; border-radius:1.8cqi; background:#ffffff12;
 }
 .academy102-zone-top:has(.listen) > div { padding-right:6cqi }
 .academy102-screen .academy102-zone-top > .listen { position:absolute; bottom:0; right:0 }

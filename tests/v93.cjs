@@ -130,8 +130,11 @@ function board(){
  await view.api.handle('child:home');
  assert.equal((view.root.innerHTML.match(/class="academy104-destination"/g)||[]).length,6);
  assert.equal((view.root.innerHTML.match(/data-action="child:academy"/g)||[]).length,1);
- assert.match(view.root.innerHTML,/data-destination="books"[\s\S]*?aria-label="Książki">\s*<span[^>]*>\s*<img[^>]*interface102\/icon-books\.webp/);
+ assert.match(view.root.innerHTML,/data-destination="books"[\s\S]*?aria-label="Książki">\s*<span[^>]*>\s*<img[^>]*interface117\/nav-books\.webp/);
  assert.match(view.root.innerHTML,/data-speak="Książki"/);
+ for(const icon of ['missions','books','training','explorers','mentor','headquarters']){
+  assert.ok(view.root.innerHTML.includes('assets/interface117/nav-'+icon+'.webp'),icon);
+ }
  const header=markup=>markup.match(/<header class="academy102-header">[\s\S]*?<\/header>/)?.[0];
  const dashboardHeader=header(view.root.innerHTML);
  assert.match(dashboardHeader,/Akademia Patryk/);
@@ -189,7 +192,7 @@ function board(){
  const schoolView=app();
  schoolView.api.set(account,{role:'child',who:'pawel'});
  await schoolView.api.handle('child:home');
- assert.match(schoolView.root.innerHTML,/aria-label="Trening">\s*<span[^>]*>\s*<img[^>]*interface115\/brain\.webp/);
+ assert.match(schoolView.root.innerHTML,/aria-label="Trening">\s*<span[^>]*>\s*<img[^>]*interface117\/nav-training\.webp/);
  assert.match(schoolView.root.innerHTML,/data-speak="Książki"/);
  assert.equal((schoolView.root.innerHTML.match(/academy107-wide-face/g)||[]).length,6);
  await schoolView.api.handle('child:learn');
@@ -216,6 +219,8 @@ function board(){
   assert.match(schoolView.root.innerHTML,/data-action="training:source:books"/);
   assert.match(schoolView.root.innerHTML,/data-action="training:source:outside"/);
   assert.doesNotMatch(schoolView.root.innerHTML,/data-action="training:(mixed:start|catalog|assessment)"/);
+  assert.match(schoolView.root.innerHTML,/interface117\/shelf\.webp/);
+  assert.match(schoolView.root.innerHTML,/interface117\/planet\.webp/);
  }
  await schoolView.api.handle('training:source:outside');
  assert.match(schoolView.root.innerHTML,/data-v77-step="train-options"/);
@@ -249,9 +254,9 @@ function board(){
  await schoolView.api.handle('training:back:subject');
  assert.match(schoolView.root.innerHTML,/class="academy111-board"/);
  await schoolView.api.handle('child:missions-board');
- assert.match(schoolView.root.innerHTML,/interface113\/target\.webp/);
+ assert.match(schoolView.root.innerHTML,/interface117\/nav-missions\.webp/);
  for(const icon of ['alert','school','home']){
-  assert.ok(schoolView.root.innerHTML.includes('interface107/'+icon+'.webp'),icon);
+  assert.ok(schoolView.root.innerHTML.includes('interface117/'+icon+'.webp'),icon);
  }
 
  await schoolView.api.handle('child:home');
@@ -302,6 +307,11 @@ function board(){
   assert.ok(schoolView.root.innerHTML.includes('assets/interface116/'+key+'.webp'));
   assert.ok(fs.existsSync(url('interface116/'+key+'.webp')));
  }
+ for(const key of ['widow','wanda']){
+  assert.ok(schoolView.root.innerHTML.includes('data-action="hero:set:pawel:'+key+'"'));
+  assert.ok(schoolView.root.innerHTML.includes('assets/interface117/'+key+'.webp'));
+  assert.ok(fs.existsSync(url('interface117/'+key+'.webp')));
+ }
  const heroProfiles=app(),updatedProfiles=data();
  updatedProfiles.profiles.pawel.hero='groot-lady';
  updatedProfiles.profiles.patryk.hero='hawkeye';
@@ -309,6 +319,12 @@ function board(){
  heroProfiles.api.render();
  assert.match(heroProfiles.root.innerHTML,/data-action="enter:pawel">\s*<img[^>]*interface116\/groot-lady\.webp/);
  assert.match(heroProfiles.root.innerHTML,/data-action="enter:patryk">\s*<img[^>]*interface116\/hawkeye\.webp/);
+ updatedProfiles.profiles.pawel.hero='wanda';
+ updatedProfiles.profiles.patryk.hero='widow';
+ heroProfiles.api.set(updatedProfiles,{role:''});
+ heroProfiles.api.render();
+ assert.match(heroProfiles.root.innerHTML,/data-action="enter:pawel">\s*<img[^>]*interface117\/wanda\.webp/);
+ assert.match(heroProfiles.root.innerHTML,/data-action="enter:patryk">\s*<img[^>]*interface117\/widow\.webp/);
  await schoolView.api.handle('hq:wallet');
  assert.match(schoolView.root.innerHTML,/class="academy116-back alt" data-action="hq:close"/);
  assert.doesNotMatch(schoolView.root.innerHTML,/id="hq84-title"/);
