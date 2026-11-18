@@ -132,7 +132,7 @@ function board(){
   }
   if(page==='learn'){
    assert.match(view.root.innerHTML,/class="academy111-board"/);
-   assert.match(view.root.innerHTML,/class="academy111-mic-slot"/);
+   assert.match(view.root.innerHTML,/class="mic academy102-mic" data-action="mic"/);
    assert.equal((view.root.innerHTML.match(/data-action="mic"/g)||[]).length,1);
    for(const subject of ['Chemia','Fizyka']){
     assert.ok(view.root.innerHTML.includes(`class="academy111-subject" disabled aria-label="${subject} — w przygotowaniu"`));
@@ -167,7 +167,7 @@ function board(){
  const schoolView=app();
  schoolView.api.set(account,{role:'child',who:'pawel'});
  await schoolView.api.handle('child:home');
- assert.match(schoolView.root.innerHTML,/aria-label="Trening">\s*<span[^>]*>\s*<img[^>]*interface102\/icon-training\.webp/);
+ assert.match(schoolView.root.innerHTML,/aria-label="Trening">\s*<span[^>]*>\s*<img[^>]*interface113\/training-lime\.webp/);
  assert.match(schoolView.root.innerHTML,/data-speak="Książki"/);
  assert.equal((schoolView.root.innerHTML.match(/academy107-wide-face/g)||[]).length,6);
  await schoolView.api.handle('child:learn');
@@ -189,8 +189,32 @@ function board(){
  [...schoolView.timers.values()].find(timer=>timer.ms===1150).fn();
  assert.match(schoolView.root.innerHTML,/data-v77-step="source"/);
  assert.match(schoolView.root.innerHTML,/data-action="training:mode:train"/);
+ await schoolView.api.handle('training:subject:Wiedza%20og%C3%B3lna');
+ assert.match(schoolView.root.innerHTML,/class="academy102-knowledge-panel/);
+ assert.equal((schoolView.root.innerHTML.match(/data-action="mic"/g)||[]).length,1);
+ for(const illustration of ['dice','controller','book-1','book-2','book-3'])
+  assert.ok(schoolView.root.innerHTML.includes('interface113/'+illustration+'.webp'),illustration);
+ schoolView.ctx.window.matchMedia=()=>({matches:false});
+ const gameTile={
+  dataset:{action:'training:back:catalog'},isConnected:true,
+  closest(selector){return ['button,summary','[data-action]','.academy102-knowledge-panel'].includes(selector)?this:null;},
+  matches(selector){return selector.includes('.academy102-knowledge-panel .academy102-tile');}
+ };
+ for(const listener of schoolView.listeners.click)listener({target:gameTile,detail:1,isTrusted:true});
+ assert.equal(clicks,3);
+ assert.equal(gameTile.dataset.academyPressed,'true');
+ assert.match(schoolView.root.innerHTML,/class="academy102-knowledge-panel/);
+ [...schoolView.timers.values()].find(timer=>timer.ms===840).fn();
+ assert.match(schoolView.root.innerHTML,/data-v77-step="catalog"/);
+ await schoolView.api.handle('training:back:train-options');
+ await schoolView.api.handle('training:mode:game');
+ assert.match(schoolView.root.innerHTML,/data-v77-step="range"/);
+ await schoolView.api.handle('training:back:subject');
+ assert.match(schoolView.root.innerHTML,/class="academy111-board"/);
  await schoolView.api.handle('child:missions-board');
- for(const icon of ['shield','icon-missions','alert','school','home']){
+ for(const icon of ['target','shield'])
+  assert.ok(schoolView.root.innerHTML.includes('interface113/'+icon+'.webp'),icon);
+ for(const icon of ['alert','school','home']){
   assert.ok(schoolView.root.innerHTML.includes('interface107/'+icon+'.webp'),icon);
  }
 

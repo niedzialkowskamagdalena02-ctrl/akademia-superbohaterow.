@@ -6,6 +6,8 @@ const detailArt = (name) =>
   `<img class="academy102-art" src="assets/interface107/${name}.webp" alt="" draggable="false">`;
 const refinedArt = (name) =>
   `<img class="academy102-art" src="assets/interface108/${name}.webp" alt="" draggable="false">`;
+const activityArt = (name, className = '') =>
+  `<img class="academy102-art ${className}" src="assets/interface113/${name}.webp" alt="" draggable="false">`;
 
 const heroPortraits = new Map([
   ['iron','assets/interface108/hero-pawel.webp'],
@@ -87,18 +89,18 @@ function tile(name, label, action, {content='',description='',artwork=art(name)}
     ${artwork}${content}</button>`;
 }
 
-function microphone(className = '') {
-  return `<button type="button" class="mic academy102-mic ${className}" data-action="mic" aria-label="Zadaj pytanie"></button>`;
+function microphone() {
+  return `<button type="button" class="mic academy102-mic" data-action="mic" aria-label="Zadaj pytanie"></button>`;
 }
 
 const testBanner = () => `<div class="academy102-test" role="note" aria-label="Tryb mamy — bezpłatny test. Postępy nie są zapisywane.">${art('test')}</div>`;
 
-export function academy102Shell(scene, {title, content, menu='', voice='', release, test, status, sound, exit, base, inlineMicrophone=false}) {
+export function academy102Shell(scene, {title, content, menu='', voice='', release, test, status, sound, exit, base, skipScreenReader=false}) {
   const profiles = test ? exit : `<button type="button" class="academy102-profiles" data-action="exit" aria-label="Profile">
     ${dashboardArt('profiles')}</button>`;
   const regular = scene==='section';
   const screen = scene==='missions'?'mission-screen':scene;
-  return `<main class="academy102-screen academy102-${screen}${base?' hq88-base-page':''}" ${regular&&!inlineMicrophone?'':'data-preschool-screen-skip'}>
+  return `<main class="academy102-screen academy102-${screen}${base?' hq88-base-page':''}" ${regular&&!skipScreenReader?'':'data-preschool-screen-skip'}>
     <header class="academy102-header">
       <div class="academy102-masthead">
         ${dashboardArt('masthead')}<span class="academy102-sr">Akademia Superbohaterów</span>
@@ -111,7 +113,7 @@ export function academy102Shell(scene, {title, content, menu='', voice='', relea
     </header>
     ${voice}${test ? testBanner() : ''}${menu}
     ${regular||scene==='missions'?`<div class="academy104-section-body">${content}</div>`:content}
-    ${scene==='knowledge'||inlineMicrophone?'':microphone()}
+    ${microphone()}
   </main>`;
 }
 
@@ -131,7 +133,7 @@ export function academy102Choices() {
 export function academy102Player({name, child, coins, grade, level, progress}) {
   return `<section class="academy102-player" aria-label="Profil bohatera">
     <div class="academy102-player-row">
-      <h2>${name}${child==='patryk'?dashboardArt('patryk-spider'):detailArt('shield')}</h2>
+      <h2>${name}${child==='patryk'?dashboardArt('patryk-spider'):activityArt('shield')}</h2>
       <b class="academy102-wallet">${dashboardArt('coin')}<span class="academy102-wallet-value" data-wallet82="${child}">${coins} złotych</span></b>
     </div>
     <p>${grade} · Baza poziom ${level}</p>
@@ -153,22 +155,24 @@ const destinations = [
 export function academy102DashboardNav(preschool, speak, current) {
   return `<nav class="academy102-destinations${preschool?' academy102-preschool':''}" aria-label="Menu Akademii">${destinations.map(([picture,label,tab])=>{
     const icon='icon-'+picture;
-    const artwork=['missions','mentor','headquarters'].includes(picture)?detailArt(icon):art(icon);
+    const artwork=picture==='missions'?activityArt('target'):picture==='training'?activityArt('training-lime'):
+      ['mentor','headquarters'].includes(picture)?detailArt(icon):art(icon);
     const link = `<button type="button" class="academy104-destination" data-action="child:${tab}"${tab===current?' aria-current="page"':''} aria-label="${label}">
-      <span class="academy107-wide-face">${artwork}<span>${picture==='headquarters'?'Baza Avengersów<br>i gry':label}</span></span></button>`;
+      <span class="academy107-wide-face">${artwork}<span>${label}</span></span></button>`;
     return `<div class="academy102-voiced" data-destination="${picture}">${link}${speak(label)}</div>`;
   }).join('')}</nav>`;
 }
 
 const trainingArtBounds=[0,0,1422,1536];
+const trainingBoardBounds=[0,0,1422,1720];
 const subjectTiles=[
-  {key:'wiedza', label:'Wiedza ogólna', rect:[142,339,1091,479], motion:'knowledge'},
-  {key:'polski', label:'Polski', rect:[91,832,389,350], illustration:[161,897,267,180]},
-  {key:'matematyka', label:'Matematyka', rect:[490,832,388,350], illustration:[548,874,268,217], effect:'<span class="academy111-numbers">1 + 2 × 3</span>'},
-  {key:'angielski', label:'Angielski', rect:[890,832,389,350], illustration:[952,874,270,216]},
-  {key:'przyroda', label:'Przyroda', rect:[91,1190,302,333], illustration:[137,1218,199,180], effect:'<span class="academy111-butterfly">🦋</span>'},
-  {label:'Chemia', rect:[397,1190,288,333]},
-  {label:'Fizyka', rect:[694,1190,289,333]}
+  {key:'wiedza', label:'Wiedza ogólna', rect:[142,339,1091,479], placement:[142,339,1091,532], motion:'knowledge'},
+  {key:'polski', label:'Polski', rect:[91,832,389,350], placement:[91,883,389,393], illustration:[161,897,267,180]},
+  {key:'matematyka', label:'Matematyka', rect:[490,832,388,350], placement:[490,883,388,393], illustration:[548,874,268,217], effect:'<span class="academy111-numbers">1 + 2 × 3</span>'},
+  {key:'angielski', label:'Angielski', rect:[890,832,389,350], placement:[890,883,389,393], illustration:[952,874,270,216]},
+  {key:'przyroda', label:'Przyroda', rect:[91,1190,302,333], placement:[91,1290,389,393], illustration:[137,1218,199,180], effect:'<span class="academy111-butterfly">🦋</span>'},
+  {label:'Chemia', rect:[397,1190,288,333], placement:[490,1290,388,393]},
+  {label:'Fizyka', rect:[694,1190,289,333], placement:[890,1290,389,393]}
 ];
 const knowledgePieces=[
   ['globe',[587,408,226,222]],
@@ -181,13 +185,15 @@ const knowledgePieces=[
   ['leaf',[248,400,120,145]]
 ];
 
-function trainingArtPlacement([x,y,width,height],[left,top,parentWidth,parentHeight]=trainingArtBounds) {
+function trainingArtPlacement(rect,[left,top,parentWidth,parentHeight]=trainingBoardBounds,crop=rect) {
+  const [x,y,width,height]=rect;
+  const [cropX,cropY,cropWidth,cropHeight]=crop;
   const [, ,artWidth,artHeight]=trainingArtBounds;
   const percent=(part,whole)=>(part/whole*100).toFixed(4)+'%';
   return `--left:${percent(x-left,parentWidth)};--top:${percent(y-top,parentHeight)};
     --width:${percent(width,parentWidth)};--height:${percent(height,parentHeight)};
-    --crop-position:${percent(x,artWidth-width)} ${percent(y,artHeight-height)};
-    --crop-size:${percent(artWidth,width)} ${percent(artHeight,height)}`;
+    --crop-position:${percent(cropX,artWidth-cropWidth)} ${percent(cropY,artHeight-cropHeight)};
+    --crop-size:${percent(artWidth,cropWidth)} ${percent(artHeight,cropHeight)}`;
 }
 
 function trainingArtPiece(kind,rect,parent) {
@@ -201,18 +207,17 @@ export function academy111Training(voice,extraSubjects='') {
       <p class="academy102-sr">Wybierz przedmiot</p>
       ${trainingArtPiece('rocket',[491,75,123,126])}
       <span class="academy111-voice-slot" style="${trainingArtPlacement([395,222,112,109])}">${voice}</span>
-      ${subjectTiles.map(({key,label,rect,motion,illustration,effect=''})=>{
-        const placement=trainingArtPlacement(rect);
-        if(!key)return `<button type="button" class="academy111-subject" disabled aria-label="${label} — w przygotowaniu" style="${placement}"></button>`;
+      ${subjectTiles.map(({key,label,rect,placement,motion,illustration,effect=''})=>{
+        const style=trainingArtPlacement(placement,trainingBoardBounds,rect);
+        if(!key)return `<button type="button" class="academy111-subject" disabled aria-label="${label} — w przygotowaniu" style="${style}"></button>`;
         const motionName=motion||key;
         const pieces=motion?knowledgePieces.map(([kind,area])=>trainingArtPiece(kind,area,rect)).join('') :
           trainingArtPiece('illustration',illustration,rect);
         return `<button type="button" class="tr72-subject-card academy111-subject" data-theme="${key}" data-action="training:subject:${encodeURIComponent(label)}"
-          aria-label="Wybierz przedmiot ${label}" style="${placement};--motion-art:url(assets/interface111/${motionName}-motion.webp)">
+          aria-label="Wybierz przedmiot ${label}" style="${style};--motion-art:url(assets/interface111/${motionName}-motion.webp)">
           <span class="academy111-motion" aria-hidden="true">${pieces}${effect}</span>
         </button>`;
       }).join('')}
-      <span class="academy111-mic-slot" style="${trainingArtPlacement([987,1190,324,333])}">${microphone('academy111-mic')}</span>
     </div>
     ${extraSubjects?`<div class="tr71 tr72-subject-grid academy111-extra-subjects">${extraSubjects}</div>`:''}
   </section>`;
@@ -224,7 +229,7 @@ export function academy102DashboardVoice(name, speak) {
 
 export function academy102MissionsHeader({back, audio}) {
   return `<header class="academy102-mission-header">
-    <h2>${detailArt('icon-missions')}Twoje misje</h2>${audio}${back}
+    <h2>${activityArt('target')}Twoje misje</h2>${audio}${back}
   </header>`;
 }
 
@@ -242,12 +247,20 @@ export function academy102FamilyHeading(title) {
 
 export function academy102Knowledge(hasBookItems, back) {
   const mixed = hasBookItems ? 'Różne zadania z książki i spoza niej' : 'Losowe zadania spoza książki';
+  const rollingDice = `<span class="academy113-dice" aria-hidden="true">${activityArt('dice')}</span>`;
+  const gamepad = `<span class="academy113-controller" aria-hidden="true">
+    ${activityArt('controller')}
+    <span class="academy113-hand academy113-hand-left"></span>
+    <span class="academy113-hand academy113-hand-right"></span>
+  </span>`;
+  const shelfBooks = `<span class="academy113-shelf-books" aria-hidden="true">
+    ${activityArt('book-1')}${activityArt('book-2')}${activityArt('book-3')}
+  </span>`;
   return `<section class="academy102-knowledge-panel${hasBookItems ? '' : ' academy102-outside'}" aria-labelledby="academy102-knowledge-title">
     <h2 id="academy102-knowledge-title" class="academy102-sr">Wiedza ogólna</h2>
-    ${art('knowledge-backdrop','academy102-knowledge-backdrop')}
-    ${tile('train','Trenuj','training:mixed:start',{content:`<span class="academy102-mixed-label" aria-hidden="true">${mixed}</span>`,description:mixed})}
-    ${tile('game','Wybierz grę','training:back:catalog')}
-    ${tile('library','Tylko z książki','training:mode:game',{description:'Cały materiał albo wybrane strony'})}
-    ${microphone('academy102-mic--knowledge')}
+    ${activityArt('knowledge-background','academy102-knowledge-backdrop')}
+    ${tile('train','Trenuj','training:mixed:start',{artwork:activityArt('train'),content:rollingDice+`<span class="academy102-mixed-label" aria-hidden="true">${mixed}</span>`,description:mixed})}
+    ${tile('game','Wybierz grę','training:back:catalog',{artwork:activityArt('game'),content:gamepad})}
+    ${tile('library','Tylko z książki','training:mode:game',{artwork:activityArt('library'),content:shelfBooks,description:'Cały materiał albo wybrane strony'})}
   </section><nav class="academy102-return" aria-label="Powrót">${back}</nav>`;
 }

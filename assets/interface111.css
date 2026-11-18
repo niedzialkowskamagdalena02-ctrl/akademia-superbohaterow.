@@ -1,12 +1,12 @@
 .academy111-board {
   --training-art:url(interface111/training-art.webp);
   position:relative;
-  aspect-ratio:1422 / 1536;
-  background:#101b42 url(interface111/training-frame.webp) center / 100% 100% no-repeat;
+  aspect-ratio:1422 / 1720;
+  background:#101b42 url(interface113/training-frame.webp) center / 100% 100% no-repeat;
   border-radius:clamp(10px,4cqi,25px);
   overflow:hidden;
 }
-.academy111-board :is(.academy111-subject,.academy111-piece,.academy111-voice-slot,.academy111-mic-slot) {
+.academy111-board :is(.academy111-subject,.academy111-piece,.academy111-voice-slot) {
   position:absolute;
   inset:var(--top) auto auto var(--left);
   width:var(--width);
@@ -37,7 +37,7 @@
   filter:brightness(1.1);
   z-index:2;
 }
-.academy111-board :is(.academy111-voice-slot > button,.academy111-mic-slot > button) {
+.academy111-board .academy111-voice-slot > button {
   width:100%!important;
   height:100%!important;
 }
@@ -48,16 +48,6 @@
 .academy111-board .academy111-voice-slot > button.listen:is(:active,[data-academy-pressed]) {
   transform:translateY(3px) scale(.95);
   filter:brightness(.86);
-}
-.academy102-screen .academy111-mic-slot .mic.academy111-mic {
-  position:static;
-  border-radius:50%;
-  background:var(--training-art) var(--crop-position) / var(--crop-size) no-repeat!important;
-  mask-image:none;
-}
-.academy111-mic .v76-mic-label {
-  overflow-wrap:anywhere;
-  max-width:94%;
 }
 .academy111-motion {
   position:absolute;
