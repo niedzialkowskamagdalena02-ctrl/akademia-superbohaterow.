@@ -1,10 +1,11 @@
+import {heroPortrait} from './interface102.js?v=116';
 // V25: self-contained 3D scene. Geometry is in world coordinates and rendered with
 // perspective projection, face depth sorting and an orbiting camera; no CDN required.
 const ROOM_NAMES={lab:'Laboratorium',armory:'Zbrojownia',hangar:'Hangar',team:'Sala drużyny'};
 const ROOM_COORDS={lab:[-3.35,-2.35],armory:[3.35,-2.35],hangar:[-3.35,2.35],team:[3.35,2.35]};
 const ASSETS={guardian:'iron',inventor:'spider',shadow:'hulk',cosmo:'thor',blackwidow:'widow',panther:'panther',captain:'captain',hawkeye:'hawkeye',groot:'groot',gamora:'gamora'};
 const imgCache=new Map();
-function imageFor(id){let key=ASSETS[id]||('item-'+id);if(!imgCache.has(key)){let im=new Image();im.src='assets/art/'+key+'.svg';imgCache.set(key,im)}return imgCache.get(key)}
+function imageFor(id){let key=ASSETS[id]||('item-'+id);if(!imgCache.has(key)){let im=new Image();im.src=ASSETS[id]?heroPortrait(key):'assets/art/'+key+'.svg';imgCache.set(key,im)}return imgCache.get(key)}
 function init(root){if(root.dataset.hqReady)return;root.dataset.hqReady='1';
  const canvas=root.querySelector('[data-hq-canvas]'),ctx=canvas.getContext('2d');if(!ctx)return;
  const owned=new Set((root.dataset.owned||'').split(',').filter(Boolean));

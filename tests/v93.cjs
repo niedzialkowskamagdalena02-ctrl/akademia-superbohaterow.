@@ -138,10 +138,12 @@ function board(){
  assert.match(dashboardHeader,/interface106\/masthead\.webp/);
  for(const page of ['missions-board','books','academy','mentor','learn','base']){
   await view.api.handle('child:'+page);
+  assert.match(view.root.innerHTML,/<header class="academy116-top">[\s\S]*?data-action="child:home"[\s\S]*?>←<\/span> Wróć<\/button>/,page);
+  assert.doesNotMatch(view.root.innerHTML,/class="academy102-header"|class="academy102-destinations|class="academy102-player"/,page);
+  await view.api.handle('child:home');
   assert.equal(header(view.root.innerHTML),dashboardHeader,page);
   assert.equal((view.root.innerHTML.match(/class="academy104-destination"/g)||[]).length,6,page);
-  assert.equal((view.root.innerHTML.match(/class="academy102-player"/g)||[]).length,1,page);
-  assert.match(view.root.innerHTML,new RegExp(`data-action="child:${page}" aria-current="page"`));
+  await view.api.handle('child:'+page);
   if(page==='mentor'){
    for(const portrait of ['hero-pawel','hero-patryk'])assert.match(view.root.innerHTML,new RegExp(`class="mentor-choice-portrait" src="assets/interface108/${portrait}\\.webp"`));
    const current=account.profiles.patryk.mentor==='fun'?'hero-patryk':'hero-pawel';
@@ -161,6 +163,7 @@ function board(){
  }
  let clicks=0;
  const audioParam={setValueAtTime(){},exponentialRampToValueAtTime(){}};
+ await view.api.handle('child:home');
  view.ctx.window.AudioContext=class {
   state='running';currentTime=0;
   createOscillator(){return {frequency:audioParam,connect(){},start(){clicks++;},stop(){}};}
@@ -209,7 +212,7 @@ function board(){
  assert.match(schoolView.root.innerHTML,/data-v77-step="source"/);
  for(const subject of ['Matematyka','Wiedza ogólna']){
   await schoolView.api.handle('training:subject:'+encodeURIComponent(subject));
-  assert.match(schoolView.root.innerHTML,/data-action="training:back:subject"[^>]*>← Wróć/);
+  assert.match(schoolView.root.innerHTML,/data-action="training:back:subject"[^>]*><span aria-hidden="true">←<\/span> Wróć/);
   assert.match(schoolView.root.innerHTML,/data-action="training:source:books"/);
   assert.match(schoolView.root.innerHTML,/data-action="training:source:outside"/);
   assert.doesNotMatch(schoolView.root.innerHTML,/data-action="training:(mixed:start|catalog|assessment)"/);
@@ -246,11 +249,13 @@ function board(){
  await schoolView.api.handle('training:back:subject');
  assert.match(schoolView.root.innerHTML,/class="academy111-board"/);
  await schoolView.api.handle('child:missions-board');
- for(const icon of ['target','shield'])
-  assert.ok(schoolView.root.innerHTML.includes('interface113/'+icon+'.webp'),icon);
+ assert.match(schoolView.root.innerHTML,/interface113\/target\.webp/);
  for(const icon of ['alert','school','home']){
   assert.ok(schoolView.root.innerHTML.includes('interface107/'+icon+'.webp'),icon);
  }
+
+ await schoolView.api.handle('child:home');
+ assert.match(schoolView.root.innerHTML,/interface113\/shield\.webp/);
 
  const selectedPage={id:'p1',bookId:'math',number:4,text:'3 + 5 = 8. 2 + 4 = 6. 7 - 4 = 3.'};
  const excludedPage={id:'p2',bookId:'math',number:5,text:'50 + 30 = 80.'};
@@ -290,6 +295,25 @@ function board(){
  outside.api.answer('5');
  assert.equal(outside.api.score(),1);
  assert.doesNotMatch(outside.root.innerHTML,/mg-tutor|Podpowiedź|Brawo/);
+
+ await schoolView.api.handle('child:base');
+ for(const key of ['panther','hawkeye','gamora','groot','groot-lady']){
+  assert.ok(schoolView.root.innerHTML.includes('data-action="hero:set:pawel:'+key+'"'));
+  assert.ok(schoolView.root.innerHTML.includes('assets/interface116/'+key+'.webp'));
+  assert.ok(fs.existsSync(url('interface116/'+key+'.webp')));
+ }
+ const heroProfiles=app(),updatedProfiles=data();
+ updatedProfiles.profiles.pawel.hero='groot-lady';
+ updatedProfiles.profiles.patryk.hero='hawkeye';
+ heroProfiles.api.set(updatedProfiles,{role:''});
+ heroProfiles.api.render();
+ assert.match(heroProfiles.root.innerHTML,/data-action="enter:pawel">\s*<img[^>]*interface116\/groot-lady\.webp/);
+ assert.match(heroProfiles.root.innerHTML,/data-action="enter:patryk">\s*<img[^>]*interface116\/hawkeye\.webp/);
+ await schoolView.api.handle('hq:wallet');
+ assert.match(schoolView.root.innerHTML,/class="academy116-back alt" data-action="hq:close"/);
+ assert.doesNotMatch(schoolView.root.innerHTML,/id="hq84-title"/);
+ await schoolView.api.handle('hq:close');
+ assert.match(schoolView.root.innerHTML,/id="hq84-title"/);
 
  const pinView=app(),pinAccount=data();
  pinAccount.parentPin='1111';

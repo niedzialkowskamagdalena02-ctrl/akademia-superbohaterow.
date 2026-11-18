@@ -15,7 +15,8 @@ const heroPortraits = new Map([
   ['hulk','assets/art/hulk.webp'],
   ['captain','assets/art/captain.webp'],
   ['thor','assets/art/thor.webp'],
-  ['hood','assets/art/hood.webp']
+  ['hood','assets/art/hood.webp'],
+  ...['panther','hawkeye','gamora','groot','groot-lady'].map(key=>[key,`assets/interface116/${key}.webp`])
 ]);
 
 export function heroPortrait(key) {
@@ -95,12 +96,19 @@ function microphone() {
 
 const testBanner = () => `<div class="academy102-test" role="note" aria-label="Tryb mamy — bezpłatny test. Postępy nie są zapisywane.">${art('test')}</div>`;
 
-export function academy102Shell(scene, {title, content, menu='', voice='', release, test, status, sound, exit, base, skipScreenReader=false}) {
+export function academy102Shell(scene, {title, content, menu='', voice='', release, test, status, sound, exit, base, back, skipScreenReader=false}) {
+  const screen = scene==='missions'?'mission-screen':scene;
+  if(back)return `<main class="academy102-screen academy102-${screen} academy116-section${base?' hq88-base-page':''}" ${skipScreenReader?'data-preschool-screen-skip':''}>
+    <header class="academy116-top">
+      <button type="button" class="academy116-back alt" data-action="${back}"><span aria-hidden="true">←</span> Wróć</button>
+    </header>
+    ${test?`<div class="academy116-test" role="note">Tryb mamy · postępy nie są zapisywane ${exit}</div>`:''}
+    <div class="academy104-section-body">${content}</div>
+    ${microphone()}
+  </main>`;
   const profiles = test ? exit : `<button type="button" class="academy102-profiles" data-action="exit" aria-label="Profile">
     ${dashboardArt('profiles')}</button>`;
-  const regular = scene==='section';
-  const screen = scene==='missions'?'mission-screen':scene;
-  return `<main class="academy102-screen academy102-${screen}${base?' hq88-base-page':''}" ${regular&&!skipScreenReader?'':'data-preschool-screen-skip'}>
+  return `<main class="academy102-screen academy102-${screen}${base?' hq88-base-page':''}" data-preschool-screen-skip>
     <header class="academy102-header">
       <div class="academy102-masthead">
         ${dashboardArt('masthead')}<span class="academy102-sr">Akademia Superbohaterów</span>
@@ -112,7 +120,7 @@ export function academy102Shell(scene, {title, content, menu='', voice='', relea
       </div>
     </header>
     ${voice}${test ? testBanner() : ''}${menu}
-    ${regular||scene==='missions'?`<div class="academy104-section-body">${content}</div>`:content}
+    ${content}
     ${microphone()}
   </main>`;
 }
@@ -228,9 +236,9 @@ export function academy102DashboardVoice(name, speak) {
   return `<div class="academy102-screen-voice">${speak('Akademia '+name+'. Wybierz: Misje, Książki, Trening, Sala odkrywców, Mentor albo Baza Avengersów i gry.', 'Odsłuchaj ekran')}</div>`;
 }
 
-export function academy102MissionsHeader({back, audio}) {
+export function academy102MissionsHeader({audio}) {
   return `<header class="academy102-mission-header">
-    <h2>${activityArt('target')}Twoje misje</h2>${audio}${back}
+    <h2>${activityArt('target')}Twoje misje</h2>${audio}
   </header>`;
 }
 
@@ -246,7 +254,7 @@ export function academy102FamilyHeading(title) {
   return `<h2>${dashboardArt('family')}${title}</h2>`;
 }
 
-export function academy115TrainingPanel({subject, source, count, back}) {
+export function academy115TrainingPanel({subject, source, count}) {
   const rollingDice = `<span class="academy113-dice" aria-hidden="true">${activityArt('dice')}</span>`;
   const gamepad = `<span class="academy113-controller" aria-hidden="true">
     ${activityArt('controller')}
@@ -267,7 +275,6 @@ export function academy115TrainingPanel({subject, source, count, back}) {
     makeTile('books','Materiał z książek','training:source:books','Cała książka, dział lub strony',shelfBooks)+
     makeTile('outside','Inne materiały','training:source:outside','Zadania spoza książek','<span class="academy115-symbol">🪐</span>');
   return `<section class="academy102-knowledge-panel academy115-flow" aria-labelledby="academy115-title" data-v77-step="${source?'train-options':'source'}">
-    <div class="academy115-back">${back}</div>
     <h2 id="academy115-title">${subject}</h2>
     <p>${source==='books'?'Materiał z książek · '+count+(count===1?' strona':[2,3,4].includes(count%10)&&![12,13,14].includes(count%100)?' strony':' stron'):source==='outside'?'Inne materiały':'Wybierz materiał'}</p>
     <div class="academy115-cards">${cards}</div>

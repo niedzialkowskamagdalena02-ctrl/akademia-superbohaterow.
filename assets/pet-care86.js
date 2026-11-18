@@ -1,4 +1,4 @@
-import {hqRead,hqFood,hqFeed,hqPet,hqPetName} from './headquarters84.js?v=88';
+import {hqRead,hqFood,hqFeed,hqPet,hqPetName} from './headquarters84.js?v=116';
 import {petTools87,mountPetGestures87} from './pet-gestures87.js?v=90';
 
 const ROOMS=[

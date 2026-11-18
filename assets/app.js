@@ -1,20 +1,20 @@
 import {gamePreview99, hangarPaint99} from './game-art99.js?v=99';
-import {academy102Shell,academy102Choices,academy102Player,academy102DashboardNav,academy102DashboardVoice,academy102FamilyHeading,academy115TrainingPanel,academy102MissionsHeader,academy102MissionZone,academy107Entry,academy107PinScreen,heroPortrait,academy111Training} from './interface102.js?v=115';
+import {academy102Shell,academy102Choices,academy102Player,academy102DashboardNav,academy102DashboardVoice,academy102FamilyHeading,academy115TrainingPanel,academy102MissionsHeader,academy102MissionZone,academy107Entry,academy107PinScreen,heroPortrait,academy111Training} from './interface102.js?v=116';
 // V48_AI_RESPONSE_DIAGNOSTICS
 // V44_BULK_CHAPTERS
 // V42_CHAPTERS
-import {mountMissionGame} from './mission-game.js?v=115';
-import { initHeadquarters3D } from './headquarters3d.js';
+import {mountMissionGame} from './mission-game.js?v=116';
+import { initHeadquarters3D } from './headquarters3d.js?v=116';
 import {initial,get,put,del,allRecords,replaceRecords,compress,uid,gradeName} from './data.js';
 import {speak,listen,stopVoice,getVoiceState,setVoiceState,spellEnglish77} from './voice.js?v=81';
 import {vocabulary,readings,explanation} from './learning.js';
 import {syncAdapter} from './sync.js?v=81';
-import {BASE_ITEMS,baseMarkup,migrateBase} from './base.js?v=115';
+import {BASE_ITEMS,baseMarkup,migrateBase} from './base.js?v=116';
 import {mountArcade,stopArcade} from './arcade.js?v=93';
-import {mountBaseScene84} from './base-scene84.js?v=88';
-import {baseWalkMarkup,mountBaseWalk,resetBaseWalk,openWalkRoom87,focusWalkCase88,walkRoomId93} from './base-walk85.js?v=114';
-import {HQ_SLOTS,hqItems,hqRead,hqBalances,hqEarnToken,hqSpendToken,hqRecordCrystals,hqBuyWithGems,hqPlaced,hqPlace,hqDisplayPurchase88,hqPet,hqChoosePet88,hqPaint,hqEarnFood,hqMarkup,hqWallet,hqShop,hqFoodQuiz88} from './headquarters84.js?v=91';
-import {petRoom86,petCareMarkup86,petPicker88,mountPetCare86,setPetCare86,servePet87} from './pet-care86.js?v=90';
+import {mountBaseScene84} from './base-scene84.js?v=116';
+import {baseWalkMarkup,mountBaseWalk,resetBaseWalk,openWalkRoom87,focusWalkCase88,walkRoomId93} from './base-walk85.js?v=116';
+import {HQ_SLOTS,hqItems,hqRead,hqBalances,hqEarnToken,hqSpendToken,hqRecordCrystals,hqBuyWithGems,hqPlaced,hqPlace,hqDisplayPurchase88,hqPet,hqChoosePet88,hqPaint,hqEarnFood,hqMarkup,hqWallet,hqShop,hqFoodQuiz88} from './headquarters84.js?v=116';
+import {petRoom86,petCareMarkup86,petPicker88,mountPetCare86,setPetCare86,servePet87} from './pet-care86.js?v=116';
 import {flightMarkup88,mountNounFlight88} from './noun-flight88.js?v=103';
 import {petQuiz88} from './pet-quiz88.js?v=88';
 import {gameGroup92,recordGameAward92} from './learning-games92.js?v=92';
@@ -22,8 +22,8 @@ import {mountLearningGames92} from './learning-play92.js?v=95';
 import {mountMissions93,missionNote93} from './missions93.js?v=103';
 import {mountHangar95} from './hangar95.js?v=104';
 import {trainingCatalog95,trainingSubject95,trainingGroupName95,outsideDeck95,trainingAssessment115,outsideMix115} from './training95.js?v=115';
-import {mountPreschoolAudio93} from './preschool-audio93.js?v=104';
-import {MASTER_PRIZES86,MASTER_SCORE86,recordEnergy86,trainingRound86,trainingConsole86,unlockMaster86} from './base-training86.js?v=87';
+import {mountPreschoolAudio93} from './preschool-audio93.js?v=116';
+import {MASTER_PRIZES86,MASTER_SCORE86,recordEnergy86,trainingRound86,trainingConsole86,unlockMaster86} from './base-training86.js?v=116';
 import {affordable82,purchase82,credit82} from './wallet82.js?v=82';
 import {REVEAL_OFFER82,consent82,requestedAnswer82,solutions82,leaks82,parseTutor82,promptTutor82} from './tutor82.js?v=82';
 let mentorHistory={tech:[],fun:[]};
@@ -79,7 +79,7 @@ const select=(id,label,options,value)=>`<label for="${id}">${label}</label><sele
 const grades=[['P','Przedszkole'],...Array.from({length:12},(_,i)=>[String(i+1),`Klasa ${i+1}`])];
 const people=[['pawel','Paweł'],['patryk','Patryk']];
 const note=t=>{const n=$('hq85-notice')||$('notice');if(!n){console.warn('Powiadomienie:',t);return}n.textContent=t;n.classList.add('visible');setTimeout(()=>{if(n.isConnected)n.classList.remove('visible')},4500)};
-const ACADEMY_RELEASE=115;
+const ACADEMY_RELEASE=116;
 async function checkAcademyUpdate(button){
  if(!button||button.disabled)return;
  const label=button.textContent,controller=new AbortController();
@@ -747,25 +747,45 @@ const grant=async(child,points,reason,key)=>{
  try{await syncAdapter.onLocalChange(data);}catch{note('Nagroda zapisana na telefonie. Ponów synchronizację, kiedy wróci połączenie.');}
  return true;
 };
-const academyMenuTabs = {
- 'missions-board':'missions-board',submission:'missions-board',song:'missions-board',
- books:'books',reader:'books',learn:'learn',subjectmissions:'learn',
- academy:'academy',lesson:'academy',mentor:'mentor',base:'base',arcade:'base'
-};
-function childMenu(p,scene){
- const current=academyMenuTabs[tab];
- if(scene!=='dashboard'&&(hqViews84.get(who)==='walk'||scene&&scene!=='missions'||['missions93','learning-games'].includes(tab)))return '';
+function childMenu(p){
  return academy102Player({name:e(p.name),child:who,coins:e(p.coins),grade:e(gradeName(p.grade)),
-  level:1+Math.floor(p.xp/100),progress:p.xp%100})+academy102DashboardNav(p.grade==='P',interfaceVoice,current);
+  level:1+Math.floor(p.xp/100),progress:p.xp%100})+academy102DashboardNav(p.grade==='P',interfaceVoice);
 }
+const childSectionParents116={
+ reader:'child:books',submission:'child:missions-board',song:'child:missions-board',
+ lesson:'child:academy','learning-games':'learning-games:back','missions93':'learning-games:more-back',
+ arcade:'hq:arcade',crossword:'hq:arcade',subjectmissions:'training:mission-back',
+};
+function childSectionBack116(scene){
+ if(scene==='dashboard'||scene==='choice')return '';
+ const fromBase=hqReturn84||hqViews84.get(who)==='walk';
+ if(tab==='learn'){
+  if(v37Classic||trainingStep==='outside-quiz')return 'v37:hub';
+  if(trainingStep==='range'&&fromBase&&trainingSource115!=='books')return 'hq:back';
+  const previous={
+   source:'subject','train-options':trainingSource115==='books'?'range':'source',
+   catalog:'train-options',mixed:'train-options',chosen:'catalog',outside:'source','outside-mini':'outside',
+   mode:'source',range:trainingSource115==='books'?'source':'mode',pick:'range',ready:'range',
+  }[trainingStep];
+  if(previous)return 'training:back:'+previous;
+ }
+ if(tab==='academy'&&academySubject)return 'academy:subjects';
+ if(tab==='base'&&hqPanel84)return 'hq:close';
+ return childSectionParents116[tab]||(fromBase?'hq:back':'child:home');
+}
+let childView116='';
 function resetScreen(){stopMission95();stopMission95=()=>{};mountLearningGames92(null);mountMissions93(null);mountHangar95(null);mountPreschoolAudio93(null);if(typeof mountNounFlight88==='function')mountNounFlight88(null);if(typeof mountBaseScene84==='function')mountBaseScene84(null);if(typeof mountBaseWalk==='function')mountBaseWalk(null);cancelAIRequests();stopVoice();closeMicBubble();}
 function layout(title,content,scene='',voice=''){resetScreen();
  const illustrated=role==='child'&&scene!=='walk';
- const skipScreenReader=illustrated&&!scene&&tab==='learn'&&!v37Classic&&trainingStep==='subject';
+ const view=role==='child'?who+'/'+tab:'';
+ const entersView=illustrated&&view!==childView116;
+ childView116=view;
+ const skipScreenReader=scene==='knowledge'||scene==='missions'||tab==='learn'&&!v37Classic&&trainingStep==='subject';
  app.innerHTML=illustrated?academy102Shell(scene||'section',{
-  title:e('Akademia '+profile().name),content,voice,skipScreenReader,menu:childMenu(profile(),scene),release:ACADEMY_RELEASE,test:testMode,status:sync78StatusMarkup(true),
+  title:e('Akademia '+profile().name),content,voice,skipScreenReader,back:childSectionBack116(scene),
+  menu:scene==='dashboard'?childMenu(profile()):'',release:ACADEMY_RELEASE,test:testMode,status:scene==='dashboard'||scene==='choice'?sync78StatusMarkup(true):'',
   sound:trainingSoundControl(),exit:button('← Zakończ test','exit','gold'),base:tab==='base'||hqViews84.get(who)==='walk'
- }):scene==='walk'?'<main class="hq86-main">'+content+'</main>':`<main class="wrap${role==='child'&&(tab==='base'||hqViews84.get(who)==='walk')?' hq88-base-page':''}"><header class="head"><div><div class="brand">⚡ AKADEMIA SUPERBOHATERÓW <span style="display:inline-block;font-size:0.72em;border:1px solid currentColor;border-radius:8px;padding:2px 7px;vertical-align:middle">V${ACADEMY_RELEASE}</span></div><div class="sub">${e(title)}</div>${sync78StatusMarkup()}</div>${role==='child'&&scene!=='choice'?trainingSoundControl():''}${role?button(testMode?'← Zakończ test':'← Profile','exit','alt'):''}</header>${testMode?'<div class="test-banner">🧪 TRYB MAMY — BEZPŁATNY TEST • POSTĘPY NIE SĄ ZAPISYWANE</div>':''}${content}</main>${role==='child'&&scene!=='choice'?'<button class="mic" data-action="mic" aria-label="Sterowanie głosowe">🎙️</button>':''}`;bindInterfaceSpeech();hydrateImages();v76AfterRender();if(role==='child'&&profile().grade==='P')mountPreschoolAudio93(app,text=>speak(text,'pl-PL',profile().mentor,data.settings.rate||1));if(illustrated&&(tab==='learn'||tab==='subjectmissions'))installMicDrag()}
+ }):scene==='walk'?'<main class="hq86-main">'+content+'</main>':`<main class="wrap${role==='child'&&(tab==='base'||hqViews84.get(who)==='walk')?' hq88-base-page':''}"><header class="head"><div><div class="brand">⚡ AKADEMIA SUPERBOHATERÓW <span style="display:inline-block;font-size:0.72em;border:1px solid currentColor;border-radius:8px;padding:2px 7px;vertical-align:middle">V${ACADEMY_RELEASE}</span></div><div class="sub">${e(title)}</div>${sync78StatusMarkup()}</div>${role==='child'&&scene!=='choice'?trainingSoundControl():''}${role?button(testMode?'← Zakończ test':'← Profile','exit','alt'):''}</header>${testMode?'<div class="test-banner">🧪 TRYB MAMY — BEZPŁATNY TEST • POSTĘPY NIE SĄ ZAPISYWANE</div>':''}${content}</main>${role==='child'&&scene!=='choice'?'<button class="mic" data-action="mic" aria-label="Sterowanie głosowe">🎙️</button>':''}`;bindInterfaceSpeech();hydrateImages();v76AfterRender();if(role==='child'&&profile().grade==='P')mountPreschoolAudio93(app,text=>speak(text,'pl-PL',profile().mentor,data.settings.rate||1));if(illustrated&&(tab==='learn'||tab==='subjectmissions'))installMicDrag();if(entersView)window.scrollTo(0,0)}
 function bindInterfaceSpeech(){
  document.querySelectorAll('[data-speak]').forEach(b=>b.addEventListener('click',()=>{
  const read=()=>speak(b.dataset.speak,b.dataset.lang,role==='child'?profile().mentor:'tech',data.settings.rate||1);
@@ -798,7 +818,7 @@ const DEFAULT_SUBJECTS=['Polski','Matematyka','Angielski','Przyroda','Plastyka',
 function subjectChecks(id){const current=data.profiles[id].subjects||[],items=[...new Set([...DEFAULT_SUBJECTS,...current])];return `<label>Przedmioty — zaznacz właściwe</label><div class="subject-list">${items.map(x=>`<label class="subject-chip"><input type="checkbox" data-subject-for="${id}" value="${e(x)}" ${current.includes(x)?'checked':''}> ${e(x)}</label>`).join('')}</div>`}
 const VOCAB_ASSETS={apple:'apple',cat:'cat',dog:'dog',house:'house',book:'book',sun:'sun',tree:'tree',car:'car',bird:'bird',fish:'fish',ball:'ball',milk:'milk',school:'school',water:'water',flower:'flower'};
 function vocabArt(word){const k=VOCAB_ASSETS[String(word||'').toLowerCase()];return k?`<img src="assets/art/vocab-${k}.svg" alt="Ilustracja: ${e(word)}">`:`<div class="vocab-fallback">${e(word)}</div>`}
-const HEROES=[['iron','Iron Man','🦾','tech'],['spider','Spider-Man','🕷️','fun'],['hulk','Hulk','💚','fun'],['captain','Kapitan Ameryka','🛡️','tech'],['thor','Thor','⚡','fun'],['hood','Bohater w kapturze','🦸','tech'],['widow','Czarna Wdowa','🥷','tech'],['panther','Czarna Pantera','🐈‍⬛','tech'],['hawkeye','Hawkeye','🏹','tech'],['groot','Groot','🌳','fun'],['gamora','Gamora','⚔️','tech']];
+const HEROES=[['iron','Iron Man','🦾','tech'],['spider','Spider-Man','🕷️','fun'],['hulk','Hulk','💚','fun'],['captain','Kapitan Ameryka','🛡️','tech'],['thor','Thor','⚡','fun'],['hood','Bohater w kapturze','🦸','tech'],['widow','Czarna Wdowa','🥷','tech'],['panther','Czarna Pantera','🐈‍⬛','tech'],['hawkeye','Hawkeye','🏹','tech'],['groot','Groot','🌳','fun'],['groot-lady','Pani Groot','🌸','fun'],['gamora','Gamora','⚔️','tech']];
 function hero(id){return HEROES.find(x=>x[0]===id)||HEROES[0]}
 function heroPicker(id){const current=data.profiles[id].hero||(id==='pawel'?'iron':'spider');return `<div class="hero-picker">${HEROES.map(([key,name])=>`<button class="hero-choice ${key===current?'chosen':''}" data-action="hero:set:${id}:${key}"><img class="hero-thumb" src="${heroPortrait(key)}" alt=""><b>${name}</b>${key===current?'<small>✓ Wybrany</small>':''}</button>`).join('')}</div>`}
 const MENTOR_LINES={fun:{yes:['Spider-Man: Brawo! Pajęczy zmysł aż zatańczył!','Spider-Man: Oho! Mamy geniusza. Czy ktoś widział moje skarpetki?','Spider-Man: Świetnie! Nawet wisząc głową w dół, nie zrobiłbym tego lepiej!'],no:['Spider-Man: Ups! Sieć się trochę poplątała. Jeszcze raz!','Spider-Man: Mała wpadka! Nawet superbohater czasem ląduje w koszu na pranie.']},tech:{yes:['Iron Man: Analiza zakończona. Wynik: imponujący.','Iron Man: JARVIS, zapisz: młody geniusz na pokładzie.','Iron Man: Precyzja godna mojego laboratorium. Zatwierdzam!'],no:['Iron Man: Wykryto drobną usterkę w obliczeniach. Poprawiamy.','Iron Man: Prototyp odpowiedzi wymaga aktualizacji. Spróbuj ponownie.']}};
@@ -827,7 +847,7 @@ function youtubeId(url){
 function songScreen(song,mission){
  const id=youtubeId(song.url);
  const lyrics=String(song.lyrics||'').split(/\r?\n/).filter(x=>x.trim());
- return `<section class="card song-stage">${button('← Wróć do misji','child:missions-board')}<h2>🎵 ${e(song.title)}</h2><p>Posłuchaj i śpiewaj razem z tekstem!</p>
+ return `<section class="card song-stage"><h2>🎵 ${e(song.title)}</h2><p>Posłuchaj i śpiewaj razem z tekstem!</p>
  ${id?`<div class="song-video"><iframe title="Piosenka ${e(song.title)}" src="https://www.youtube-nocookie.com/embed/${id}" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>`:'<p>Nieprawidłowy adres YouTube.</p>'}
  <h3>🎤 Tekst piosenki</h3><div class="song-lyrics">${lyrics.map((line,i)=>`<button class="song-line" data-action="song:line:${i}">${e(line)}</button>`).join('')||'<p>Mama nie dodała jeszcze tekstu piosenki.</p>'}</div>
  <p class="muted">Dotknij wersu, aby go wyróżnić. Tekst nie przewija się automatycznie w rytm filmu.</p>
@@ -1099,13 +1119,18 @@ function v37Voice(text,lang='pl-PL'){
 
 
 // V41_INTERACTIVE_AI_MISSIONS
+let returnFromMission116=null;
 function smOpen(initialBookId='',launch=null,backStep='range'){
  tab='subjectmissions';
  avengersRun=null;
+ const goBack=()=>{tab='learn';openTrainingStep115(backStep)};
+ returnFromMission116=goBack;
  render();
  const root=document.getElementById('subject-missions-root');
  if(!root)return;
- return smMount95(root,initialBookId,launch,()=>{tab='learn';openTrainingStep115(backStep)});
+ const mission=smMount95(root,initialBookId,launch?{...launch,sectionBack:true}:launch,goBack);
+ if(mission?.back)returnFromMission116=mission.back;
+ return mission;
 }
 function smMount95(root,initialBookId,launch,onBack){
  const missionChild82=who;
@@ -1197,14 +1222,13 @@ let trainingSource115=null;
 function openTrainingStep115(step,scroll=true){
  trainingStep=step;
  render();
- if(scroll)app.querySelector('[data-v77-step], #subject-missions-root')?.scrollIntoView({block:'start'});
+ if(scroll)window.scrollTo(0,0);
 }
 function trainingScopePages115(){return trainingPageItems().filter(p=>trainingSelectedPages.has(p.id))}
 function trainingBookMission115(options){
  const pages=trainingScopePages115();
  if(!pages.length){note('Wybierz co najmniej jedną stronę z odczytanym tekstem.');return openTrainingStep115('range');}
  const mission=smOpen(pages[0].bookId,{subject:trainingSelectedSubject,pageIds:pages.map(p=>p.id),strictMaterial:true,audioTap:()=>trainingTapSound(true,true),...options},'train-options');
- app.querySelector('#subject-missions-root')?.scrollIntoView({block:'start'});
  return mission;
 }
 function trainingBookItems(){return books().filter(b=>!b.archived&&(/wiedza og[oó]lna/i.test(trainingSelectedSubject)||(trainingSubject95(trainingSelectedSubject)!=='other'?trainingSubject95(b.subject)===trainingSubject95(trainingSelectedSubject):String(b.subject||'').trim().toLocaleLowerCase('pl-PL')===trainingSelectedSubject.toLocaleLowerCase('pl-PL'))))}
@@ -1259,41 +1283,39 @@ function trainingFlowMarkup(){
  }
  let content='<section class="tr71 v73-training" data-v77-step="'+e(trainingStep)+'"><header><h2>'+e(trainingSelectedSubject)+'</h2></header>';
  if(trainingStep==='catalog'){
-  content+=trainingCard('← Wróć','training:back:train-options')+'<h3>Wybierz grę</h3>'+trainingList95();
+  content+='<h3>Wybierz grę</h3>'+trainingList95();
  }else if(trainingStep==='mixed'||trainingStep==='chosen'){
   const mixed=trainingStep==='mixed',item=mixed?trainingRun95?.items[trainingRun95.index]:trainingGame95&&{game:trainingGame95};
-  const back=trainingCard('← Wróć',mixed?'training:back:train-options':'training:back:catalog');
-  if(!item)content+=back+'<h3>🏆 Trening ukończony</h3>'+trainingCard('Zagraj ponownie','training:mixed:start');
-  else content+=back+(mixed?`<p class="tr95-current">Zadanie ${trainingRun95.index+1} z ${trainingRun95.items.length} · ${e(trainingGroupName95(item.key))}</p>`:'')+
+  if(!item)content+='<h3>🏆 Trening ukończony</h3>'+trainingCard('Zagraj ponownie','training:mixed:start');
+  else content+=(mixed?`<p class="tr95-current">Zadanie ${trainingRun95.index+1} z ${trainingRun95.items.length} · ${e(trainingGroupName95(item.key))}</p>`:'')+
    `<p>Spoza książki · ${e(item.game.name)}</p>`+
    '<div id="training95-game"></div><p data-lg92-save role="status"></p>'+
    (mixed?trainingCard('Pomiń zadanie','training:mixed:next'):'');
  }else if(trainingStep==='outside'){
-  content+=`${trainingCard('← Wybór źródła','training:back:source')}<div class="v73-portal"><img src="assets/art/${who==='patryk'?'spider':'iron'}.svg" alt="Superbohater"><h3>⚡ Podejmij wyzwanie Avengersów!</h3><p>${e(trainingSelectedSubject)} · 10 wyzwań</p><button class="tr71-start" data-action="v37:play">🚀 START MISJI</button></div><div class="v73-side-games"><h3>🎮 Szybkie gry</h3>${trainingCard('🔗 Dopasuj pary','training:mini:match')}${trainingCard('⚡ Szybka misja','training:mini:quick')}</div>${trainingCard('📚 Klasyczne ćwiczenia','v37:classic')}`;
+  content+=`<div class="v73-portal"><img src="assets/art/${who==='patryk'?'spider':'iron'}.svg" alt="Superbohater"><h3>⚡ Podejmij wyzwanie Avengersów!</h3><p>${e(trainingSelectedSubject)} · 10 wyzwań</p><button class="tr71-start" data-action="v37:play">🚀 START MISJI</button></div><div class="v73-side-games"><h3>🎮 Szybkie gry</h3>${trainingCard('🔗 Dopasuj pary','training:mini:match')}${trainingCard('⚡ Szybka misja','training:mini:quick')}</div>${trainingCard('📚 Klasyczne ćwiczenia','v37:classic')}`;
  }else if(trainingStep==='outside-quiz'){
-  content+=`${trainingCard('← Wybierz wyzwanie','v37:hub')}<h3>⚡ Misja: ${e(trainingSelectedSubject)}</h3>`;
+  content+=`<h3>⚡ Misja: ${e(trainingSelectedSubject)}</h3>`;
  }else if(trainingStep==='outside-mini'){
-  content+=`${trainingCard('← Wyzwania Avengersów','training:back:outside')}<h3>🔗 Dopasuj i odkryj!</h3><div id="discovery-game"></div>`;
+  content+=`<h3>🔗 Dopasuj i odkryj!</h3><div id="discovery-game"></div>`;
  }else if(trainingStep==='mode'){
-  content+=`${trainingCard('← Wybór źródła','training:back:source')}<h3>3. Wybierz tryb ${trainingVoice('Wybierz trening albo sprawdzian.')}</h3><div class="tr71-grid">`+
+  content+=`<h3>Wybierz tryb ${trainingVoice('Wybierz trening albo sprawdzian.')}</h3><div class="tr71-grid">`+
    trainingCard('🎮 Sala treningowa','training:mode:game')+
    trainingCard('🏆 Próba superbohatera','training:mode:test')+(/angiel|english/i.test(trainingSelectedSubject)?trainingCard('🃏 Słówka','training:mode:vocab','Piszę · słucham · mówię'):'')+'</div>';
  }else if(trainingStep==='range'){
-  content+=trainingCard('← Wróć',trainingSource115==='books'?'training:back:source':hqReturn84?'hq:back':'training:back:mode')+
-   '<h3>Wybierz zakres '+trainingVoice('Wybierz cały materiał albo konkretne książki, działy i strony.')+'</h3>';
+  content+='<h3>Wybierz zakres '+trainingVoice('Wybierz cały materiał albo konkretne książki, działy i strony.')+'</h3>';
   content+=trainingPageItems().length?'<div class="tr71-grid">'+
    trainingCard('📚 Cały materiał z książek','training:range:all')+
    trainingCard('📄 Wybierz książkę, dział lub strony','training:range:pick')+'</div>':
    '<p>Brak stron z odczytanym tekstem dla tego przedmiotu. Wybierz inne materiały albo dodaj strony w panelu mamy.</p>';
  }else if(trainingStep==='pick'){
   const bs=trainingBookItems(),ps=trainingPageItems();
-  content+=`${trainingCard('← Wróć','training:back:range')}<h3>Zaznacz książki, działy lub strony ${trainingVoice('Możesz zaznaczyć wiele książek i stron.')}</h3>`+
+  content+=`<h3>Zaznacz książki, działy lub strony ${trainingVoice('Możesz zaznaczyć wiele książek i stron.')}</h3>`+
    `<div class="tr71-tools">${trainingCard('☑ Zaznacz wszystko','training:all')}${trainingCard('Odznacz wszystko','training:none')}</div>`+
    (bs.map(b=>v77RangeMarkup(b,ps.filter(p=>p.bookId===b.id)))
    .join('')||'<p>Nie ma jeszcze stron z zapisanym tekstem w tym przedmiocie.</p>')+
    `<p id="tr71-count" class="tr71-count">Zaznaczono ${trainingSelectedPages.size} stron.</p>`;
  }else if(trainingStep==='ready'){
-  content+=`${trainingCard('← Wybór zakresu','training:back:range')}<h3>🚀 Misja jest gotowa ${trainingVoice('Naciśnij Rozpocznij misję.')}</h3><p>Przedmiot: <strong>${e(trainingSelectedSubject)}</strong>. Tryb: <strong>${trainingMode==='test'?'Sprawdzian':'Trening'}</strong>.</p><p>Wybrano ${trainingSelectedPages.size} stron.</p>${v77HulkScene()}`;
+  content+=`<h3>🚀 Misja jest gotowa ${trainingVoice('Naciśnij Rozpocznij misję.')}</h3><p>Przedmiot: <strong>${e(trainingSelectedSubject)}</strong>. Tryb: <strong>${trainingMode==='test'?'Sprawdzian':'Trening'}</strong>.</p><p>Wybrano ${trainingSelectedPages.size} stron.</p>${v77HulkScene()}`;
  }
  if(trainingStep==='pick'||trainingStep==='ready')content+=`<button type="button" data-action="training:start" class="tr71-start">${trainingSource115==='books'?'Dalej · wybierz tryb':'⚡ Rozpocznij misję'}</button>`;
  content+='</section>';
@@ -1388,7 +1410,7 @@ function hqRoomPanel84(p){
  }
  const care=['pet','pet-select','pet-quiz'].includes(hqPanel84);
  return '<section class="card hq84-panel'+(care?' hq86-pet-panel':'')+'" id="hq84-panel" tabindex="-1">'+
-  button(care?'‹ Wróć':'✕ Zamknij','hq:close','alt')+body+'</section>';
+  (hqViews84.get(who)==='walk'?button(care?'‹ Wróć':'✕ Zamknij','hq:close','alt'):'')+body+'</section>';
 }
 function hqShow84(panel='',slot='',item='',focus=true){
  migrateBase(profile());
@@ -1654,9 +1676,7 @@ function childRender(){
  if(tab==='view-choice')return layout('Akademia '+p.name,academy102Choices(),'choice');
  if(tab==='missions-board'||tab==='home'&&walking){
   const audio=p.grade==='P'?interfaceVoice('Twoje misje. Alerty bohatera, misje szkolne i misje domowe.','Odsłuchaj'): '';
-  const head=academy102MissionsHeader({
-   audio,back:`<button type="button" class="alt" data-action="${walking?'hq:back':'child:home'}" aria-label="Wróć">←</button>`
-  });
+  const head=academy102MissionsHeader({audio});
   const history=data.history.filter(h=>h.child===who).slice(0,5);
   const latest=history.length?`<details class="card academy102-latest"><summary>Ostatnie osiągnięcia</summary>
    ${history.map(h=>`<p>+${h.points} złotych · ${e(h.reason)}</p>`).join('')}</details>`:'';
@@ -1669,21 +1689,17 @@ function childRender(){
  }
  if(tab==='learn'&&!v37Classic&&['source','train-options'].includes(trainingStep)){
   const choosingSource=trainingStep==='source';
-  const previous=choosingSource?'subject':trainingSource115==='books'?'range':'source';
-  const back=button('← Wróć','training:back:'+previous,'alt')+
-   (walking||hqReturn84?button('Wróć do bazy','hq:back','alt'):'');
   return layout(trainingSelectedSubject,academy115TrainingPanel({
-   subject:e(trainingSelectedSubject),source:choosingSource?null:trainingSource115,count:trainingScopePages115().length,back
+   subject:e(trainingSelectedSubject),source:choosingSource?null:trainingSource115,count:trainingScopePages115().length
   }),'knowledge');
  }
  if(tab==='missions93'){
-  layout('Akademia '+p.name,`<section class="sq93-shell">${button('‹ Gry edukacyjne','learning-games:more-back','alt')}
+  layout('Akademia '+p.name,`<section class="sq93-shell">
    <section class="sq93" id="missions93-training"></section></section>`);
   mountMissionsView93(p);return;
  }
  if(tab==='learning-games'){
-  const back=learningReturn92==='academy'?'‹ Sala Odkrywców':'‹ Trening';
-  layout('Akademia '+p.name,`<section class="lg92-shell">${button(back,'learning-games:back','alt lg92-back')}
+  layout('Akademia '+p.name,`<section class="lg92-shell">
    <section class="lg92-games" data-group="${gameGroup92(p.grade)}" id="learning-games92"></section>
    <p data-lg92-save role="status"></p></section>`);
   mountLearningGames92($('learning-games92'),{
@@ -1727,30 +1743,24 @@ function childRender(){
 if(tab==='song'){const mission=data.missions.find(m=>m.id===missionId);const song=data.settings.songs.find(x=>x.id===mission?.songId);html+=song?songScreen(song,mission):'<section class="card">Nie znaleziono piosenki.</section>'}
 if(tab==='books')html+=`<section class="card"><h2>📚 Moje podręczniki ${speakBtn('Moje podręczniki')}</h2>${books().filter(b=>!b.archived).map(b=>`<div class="item"><div><b>${e(b.title)}</b><small>${e(b.subject)} · ${gradeName(b.grade)}</small></div>${button('Otwórz','reader:'+b.id)}</div>`).join('')||'Mama jeszcze nie dodała książek.'}</section>`;
 if(tab==='subjectmissions')html+='<section id="subject-missions-root"></section>';
-if(tab==='reader'){let b=data.books.find(b=>b.id===bookId),ps=data.bookPages.filter(p=>p.bookId===bookId).sort((a,b)=>a.number-b.number);let pg=data.bookPages.find(p=>p.id===pageId)||ps[0];html+=`<section class="card">${button('← Książki','child:books')}<h2>${e(b?.title||'Podręcznik')}</h2>${select('readerpage','Strona',ps.map(p=>[p.id,'Strona '+p.number]),pg?.id)}${pg?`<img class="pagephoto" data-image="${pg.imageId}" alt="Strona podręcznika"><p class="guide">${e(pg.text||'Tekst nie jest jeszcze rozpoznany. Możesz oglądać zdjęcie strony.')}</p>${speakBtn(pg.text||'Brak zapisanego tekstu')}<label for="ocrlang">Język strony</label><select id="ocrlang"><option value="pol">Polski</option><option value="eng">Angielski</option></select><p id="ocrstatus" class="guide" role="status" hidden></p>${button('✨ Odczytaj przez AI','reader:ai','gold')}<p class="muted">Rozpoznawanie wymaga internetu. Sprawdź poprawność tekstu przed odczytem.</p>`:'Brak stron.'}${input('tasks','Numery zadań, np. 1, 2, 3, 5')}${button('Dodaj do moich misji','homework:create','gold')}${button('🤖 Zapytaj mentora','child:mentor')}</section>`}
-if(tab==='submission'){let m=data.missions.find(m=>m.id===missionId);html+=`<section class="card">${button('← Misje','child:missions-board')}<h2>${e(m?.title)}</h2><p>Prześlij zdjęcie pracy. Mama sprawdzi ją przed przyznaniem punktów.</p><label>Galeria</label><input type="file" accept="image/*" id="workfile"><label>Aparat</label><input type="file" accept="image/*" capture="environment" id="workcamera"><label>Wiadomość do mamy</label><textarea id="workcomment"></textarea>${button('📤 Zgłoś wykonanie','mission:send','gold')}</section>`}
+if(tab==='reader'){let b=data.books.find(b=>b.id===bookId),ps=data.bookPages.filter(p=>p.bookId===bookId).sort((a,b)=>a.number-b.number);let pg=data.bookPages.find(p=>p.id===pageId)||ps[0];html+=`<section class="card"><h2>${e(b?.title||'Podręcznik')}</h2>${select('readerpage','Strona',ps.map(p=>[p.id,'Strona '+p.number]),pg?.id)}${pg?`<img class="pagephoto" data-image="${pg.imageId}" alt="Strona podręcznika"><p class="guide">${e(pg.text||'Tekst nie jest jeszcze rozpoznany. Możesz oglądać zdjęcie strony.')}</p>${speakBtn(pg.text||'Brak zapisanego tekstu')}<label for="ocrlang">Język strony</label><select id="ocrlang"><option value="pol">Polski</option><option value="eng">Angielski</option></select><p id="ocrstatus" class="guide" role="status" hidden></p>${button('✨ Odczytaj przez AI','reader:ai','gold')}<p class="muted">Rozpoznawanie wymaga internetu. Sprawdź poprawność tekstu przed odczytem.</p>`:'Brak stron.'}${input('tasks','Numery zadań, np. 1, 2, 3, 5')}${button('Dodaj do moich misji','homework:create','gold')}${button('🤖 Zapytaj mentora','child:mentor')}</section>`}
+if(tab==='submission'){let m=data.missions.find(m=>m.id===missionId);html+=`<section class="card"><h2>${e(m?.title)}</h2><p>Prześlij zdjęcie pracy. Mama sprawdzi ją przed przyznaniem punktów.</p><label>Galeria</label><input type="file" accept="image/*" id="workfile"><label>Aparat</label><input type="file" accept="image/*" capture="environment" id="workcamera"><label>Wiadomość do mamy</label><textarea id="workcomment"></textarea>${button('📤 Zgłoś wykonanie','mission:send','gold')}</section>`}
 if(tab==='learn'&&v37Classic)html+=`<section class="card"><h2>🎓 Akademia wiedzy ${speakBtn('Trening bohatera')}</h2><div class="learning-banner"><span>📚</span><div><strong>Ucz się jak superbohater!</strong><small>Obrazki • słuchanie • quizy • sprawdziany</small></div><span>⭐</span></div><p>Ucz się także bez pracy domowej. Za poprawne zadania zdobywasz złote. Dzienny limit nagród chroni przed powtarzaniem najłatwiejszych ćwiczeń.</p>${speakBtn('Wybierz rodzaj treningu. Możesz ćwiczyć matematykę, czytanie, angielski, quizy, dyktanda i krzyżówki.')} ${select('trainingSubject','Wybierz przedmiot',trainingSubjects(), 'polski')}<div id="trainingKinds">${trainingKindSelect('polski')}</div><div class="learning-exercise" id="exercise"></div>${button('🔄 Nowe ćwiczenie','exercise:new')}</section><section class="card"><h3>🎵 Muzyczne nagrody</h3><p class="muted">Lista zaakceptowana przez mamę. Linki otwierają YouTube — rodzic powinien nadzorować korzystanie.</p>${data.settings.songs.map(s=>`<p><a href="${e(s.url)}" target="_blank" rel="noopener noreferrer">🎶 ${e(s.title)}</a></p>`).join('')}</section>`;
-if(tab==='academy'){const subjects=[['polish','📖','Język polski','Gramatyka i ortografia'],['math','🧮','Matematyka','Liczby, działania i figury'],['english','🇬🇧','Język angielski','Słówka i podstawowe zwroty']];const belongs=(l,i)=>l.subject==='english'?'english':i<5?'polish':'math';const chosen=subjects.find(x=>x[0]===academySubject);html+=`<section class="card discovery-head"><h2>🚀 Sala Odkrywców</h2>${chosen?`${button('← Wybierz przedmiot','academy:subjects')}<h3>${chosen[1]} ${chosen[2]}</h3><p>${chosen[3]}. Wybierz zagadnienie, poznaj zasadę i rozwiąż miniwyzwanie.</p><div class="discovery-grid">${LESSONS.map((l,i)=>belongs(l,i)===academySubject?`<button class="discovery-tile" data-action="lesson:open:${i}"><span>${l.icon}</span><b>${l.title}</b><small>${l.subtitle}</small></button>`:'').join('')}</div>`:`<p>Wybierz przedmiot, a potem zagadnienie, którego chcesz się nauczyć.</p><div class="discovery-grid">${subjects.map(([id,icon,title,subtitle])=>`<button class="discovery-tile" data-action="academy:subject:${id}"><span>${icon}</span><b>${title}</b><small>${subtitle}</small></button>`).join('')}</div>`}</section>`;}
+if(tab==='academy'){const subjects=[['polish','📖','Język polski','Gramatyka i ortografia'],['math','🧮','Matematyka','Liczby, działania i figury'],['english','🇬🇧','Język angielski','Słówka i podstawowe zwroty']];const belongs=(l,i)=>l.subject==='english'?'english':i<5?'polish':'math';const chosen=subjects.find(x=>x[0]===academySubject);html+=`<section class="card discovery-head"><h2>🚀 Sala Odkrywców</h2>${chosen?`<h3>${chosen[1]} ${chosen[2]}</h3><p>${chosen[3]}. Wybierz zagadnienie, poznaj zasadę i rozwiąż miniwyzwanie.</p><div class="discovery-grid">${LESSONS.map((l,i)=>belongs(l,i)===academySubject?`<button class="discovery-tile" data-action="lesson:open:${i}"><span>${l.icon}</span><b>${l.title}</b><small>${l.subtitle}</small></button>`:'').join('')}</div>`:`<p>Wybierz przedmiot, a potem zagadnienie, którego chcesz się nauczyć.</p><div class="discovery-grid">${subjects.map(([id,icon,title,subtitle])=>`<button class="discovery-tile" data-action="academy:subject:${id}"><span>${icon}</span><b>${title}</b><small>${subtitle}</small></button>`).join('')}</div>`}</section>`;}
 
-if(tab==='lesson'){const l=LESSONS[lessonIndex]||LESSONS[0];html+=`<section class="card lesson-card">${button('← Zagadnienia','child:academy')}<div class="lesson-art">${l.icon}</div><h2>${l.title}</h2><p class="lesson-story">${e(l.story)}</p><div class="lesson-rule"><strong>Zapamiętaj!</strong><p>${e(l.rule)}</p></div><p><strong>Przykłady:</strong> ${e(l.examples)}</p>${speakBtn(l.story+' '+l.rule+' Przykłady: '+l.examples)}<h3>🎯 Miniwyzwanie</h3><p>${e(l.question)} ${speakBtn(l.question)}</p><div class="discovery-grid">${l.answers.map((x,i)=>button(e(x),'lesson:answer:'+i)).join('')}</div><p id="lesson-feedback" role="status"></p><div class="discovery-playground"><h3>🎮 Zagraj i utrwal wiedzę!</h3><p>Wybierz grę. Każda runda ma inne pytania i kolorowe odpowiedzi.</p><div class="discovery-actions">${button('🔗 Dopasuj pary','discovery:start:match','gold')}${button('⚡ Szybka misja','discovery:start:quick','gold')}</div><div id="discovery-game"></div></div>${button('🔄 Inny temat','child:academy')}</section>`}
+if(tab==='lesson'){const l=LESSONS[lessonIndex]||LESSONS[0];html+=`<section class="card lesson-card"><div class="lesson-art">${l.icon}</div><h2>${l.title}</h2><p class="lesson-story">${e(l.story)}</p><div class="lesson-rule"><strong>Zapamiętaj!</strong><p>${e(l.rule)}</p></div><p><strong>Przykłady:</strong> ${e(l.examples)}</p>${speakBtn(l.story+' '+l.rule+' Przykłady: '+l.examples)}<h3>🎯 Miniwyzwanie</h3><p>${e(l.question)} ${speakBtn(l.question)}</p><div class="discovery-grid">${l.answers.map((x,i)=>button(e(x),'lesson:answer:'+i)).join('')}</div><p id="lesson-feedback" role="status"></p><div class="discovery-playground"><h3>🎮 Zagraj i utrwal wiedzę!</h3><p>Wybierz grę. Każda runda ma inne pytania i kolorowe odpowiedzi.</p><div class="discovery-actions">${button('🔗 Dopasuj pary','discovery:start:match','gold')}${button('⚡ Szybka misja','discovery:start:quick','gold')}</div><div id="discovery-game"></div></div>${button('🔄 Inny temat','child:academy')}</section>`}
 if(tab==='mentor')html+=`<section class="card mentor-room"><div class="mentor-header"><span class="mentor-tag">⚡ STREFA MENTORA</span><h2>Spotkaj swojego supermentora!</h2><p>Wybierz bohatera i zobacz jego supermoc.</p></div><div class="mentor-choices"><button type="button" class="mentor-choice ${p.mentor==='tech'?'selected':''}" data-action="mentor:choose:tech"><img class="mentor-choice-portrait" src="${heroPortrait('iron')}" alt="">Iron Man</button><button type="button" class="mentor-choice ${p.mentor==='fun'?'selected':''}" data-action="mentor:choose:fun"><img class="mentor-choice-portrait" src="${heroPortrait('spider')}" alt="">Spider-Man</button></div><div class="mentor-stage ${p.mentor==='fun'?'stage-spider':'stage-iron'}" id="mentor-stage" aria-label="Animacja wybranego mentora"><div class="mentor-stars">✦ ✧ ✦</div><div class="mentor-flight-lines"></div><div class="mentor-web" aria-hidden="true"><svg viewBox="0 0 500 280" preserveAspectRatio="none"><path d="M230 170 L480 18 M230 170 L498 85 M230 170 L498 160 M230 170 L488 248 M230 170 L370 0 M230 170 L310 0 M230 170 L490 280 M230 170 L360 280" stroke="white" stroke-width="3" fill="none"/><path d="M332 108 Q370 123 390 80 M355 134 Q415 158 442 110 M350 170 Q420 190 470 175 M345 203 Q400 210 442 234 M285 140 Q315 160 330 95" stroke="white" stroke-width="2" fill="none"/></svg></div><img class="mentor-figure" src="${heroPortrait(p.mentor==='fun'?'spider':'iron')}" alt="${p.mentor==='fun'?'Spider-Man':'Iron Man'}"><div class="mentor-floor"></div><div class="mentor-power-caption">${p.mentor==='fun'?'🕸️ Uwaga, leci sieć!':'🚀 Start silników! Iron Man leci!'}</div></div><div class="mentor-talk"><h3>${p.mentor==='fun'?'🕷️ Spider-Man mówi:':'🦾 Iron Man mówi:'}</h3><p>${p.mentor==='fun'?'Hej! Masz pytanie? Dawaj, zanim znowu zaplączę się w sieć!':'System gotowy. Zadaj pytanie, młody wynalazco.'}</p></div><p class="muted">Mentor korzysta z AI Gemini. Możesz pytać o naukę i superbohaterów.</p><label for="question">Twoje pytanie</label><input id="question" placeholder="Np. Co to rzeczownik? Jak mnożyć?"><div class="row">${button('💡 Wyjaśnij','mentor:answer','gold')}${button('🎙️ Zapytaj głosem','mic')}</div><p id="mentoranswer" class="guide">Zapytaj o rzeczowniki, czasowniki, sylaby, dodawanie, odejmowanie lub mnożenie.</p>${button('🔊 Odczytaj wyjaśnienie','mentor:speak')}</section>`;
 if(tab==='base'){
- html+=hqMarkup(p,who,hqViews84.get(who)||'classic',button)+hqRoomPanel84(p);
- html+=`<details class="card"><summary>🦸 Wybierz swojego bohatera</summary>${heroPicker(who)}</details>`;
+ if(hqPanel84)html+=hqRoomPanel84(p);
+ else html+=hqMarkup(p,who,hqViews84.get(who)||'classic',button)+
+  `<details class="card"><summary>🦸 Wybierz swojego bohatera</summary>${heroPicker(who)}</details>`;
 }
-if(walking&&tab!=='arcade'||hqReturn84&&['learn','subjectmissions','books','reader'].includes(tab))html=button('← Wróć do bazy','hq:back','alt')+html;
 if(tab==='crossword'){html+=crosswordView()}
 if(tab==='arcade'){
- html+=`<section class="card">${button('← Centrum Rozrywki','hq:arcade','alt')}<h2>🕹️ ${e(ARCADE_GAMES.find(x=>x.id===arcadeId)?.title||'Gra')}</h2><p>💎 Portfel: <strong id="hq84-arcade-gems">${hqBalances(p).gems}</strong> kryształów</p><div id="arcade-root"></div></section>`;
+ html+=`<section class="card"><h2>🕹️ ${e(ARCADE_GAMES.find(x=>x.id===arcadeId)?.title||'Gra')}</h2><p>💎 Portfel: <strong id="hq84-arcade-gems">${hqBalances(p).gems}</strong> kryształów</p><div id="arcade-root"></div></section>`;
 }
 if(tab==='learn'){
-  if(v37Classic){
-   html+=`<div class="v37-return">
-    <button data-action="v37:hub">← Sala Wyzwań</button>
-   </div>`;
-  }else if(trainingStep!=='hq-challenge'){
-   html+=trainingFlowMarkup();
-  }
+  if(!v37Classic&&trainingStep!=='hq-challenge')html+=trainingFlowMarkup();
   if(avengersRun)html+=avengersPanel();
  }layout('Akademia '+p.name,html);if(tab==='base'){mountBaseScene84(document.querySelector('[data-hq84-scene]'));mountPetCare86(app,careGesture);}if(tab==='arcade')hqMountArcade84();if(tab==='learn'&&v37Classic)newExercise();if(tab==='learn'&&['mixed','chosen'].includes(trainingStep))mountTraining95(p);if(tab==='trace')drawTrace()}
 const CROSSWORDS=[
@@ -2006,8 +2016,7 @@ if(action.startsWith('training:')){
   const repeat=()=>trainingAssessment115(catalog,game=>trainingOutsideTasks115(game,grade));
   const mission=smOpen('',{subject:trainingSelectedSubject,label:'Sprawdzian',pageIds:[],mode:'test',
    assessment:true,tasks:[],repeat,audioTap:()=>trainingTapSound(true,true)},'train-options');
-  app.querySelector('#subject-missions-root')?.scrollIntoView({block:'start'});
-  return mission;
+   return mission;
  }
  if(what==='mode'){trainingMode=value==='test'?'test':value==='vocab'&&/angiel|english/i.test(trainingSelectedSubject)?'vocab':'game';trainingStep='range';return render()}
  if(what==='play'&&role==='child'){
@@ -2026,6 +2035,7 @@ if(action.startsWith('training:')){
   if(value==='next'&&trainingStep==='mixed'&&trainingRun95)trainingRun95.index++;
   return render();
  }
+ if(what==='mission-back'&&tab==='subjectmissions')return returnFromMission116?.();
  if(what==='back')return openTrainingStep115(value);
  if(what==='range'){
   v772RangeModes.clear();
@@ -2488,7 +2498,7 @@ async function parentPinAction(action){
  }
  updateParentPinDisplay(input);
 }
-const academyPressControls = '.academy102-destinations button,.academy102-header-actions button,.academy102-screen-voice button,.academy102-choices button,.academy102-mic,.academy115-flow button,.academy107-entry button,.academy107-pin-key,.academy111-voice-slot .listen,.mentor-room .mentor-choice';
+const academyPressControls = '.academy102-destinations button,.academy102-header-actions button,.academy102-screen-voice button,.academy102-choices button,.academy102-mic,.academy115-flow button,.academy116-back,.academy107-entry button,.academy107-pin-key,.academy111-voice-slot .listen,.mentor-room .mentor-choice';
 const academyPressTimers=new WeakMap();
 function pressAcademyControl(control,complete,immediate=false,duration=190){
  const pending=academyPressTimers.get(control);

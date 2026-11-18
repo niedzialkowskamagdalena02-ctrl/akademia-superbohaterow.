@@ -260,7 +260,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,childG
   if(!games.size){materialCatalog=null;return false;}
   if(!game){
    const choices=[...games.keys()].sort((a,b)=>materialGameTitle(a).localeCompare(materialGameTitle(b),'pl'));
-   root.innerHTML='<section class="mg-panel">'+btn('← Wróć','back')+'<h2>Wybierz grę</h2><p>Materiał z książek · '+ps.length+' stron</p>'+
+   root.innerHTML='<section class="mg-panel">'+(launch.sectionBack?'':btn('← Wróć','back'))+'<h2>Wybierz grę</h2><p>Materiał z książek · '+ps.length+' stron</p>'+
     '<div class="v80-vocab-games">'+choices.map(kind=>btn(escape(materialGameTitle(kind)),'material-game:'+kind)).join('')+'</div></section>';
    return true;
   }
@@ -1428,7 +1428,7 @@ Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj
   if(idx>=tasks.length)return finish();
   const t=task();v774Normalize(t);
   const names={safe:'🔐 Sejf Iron Mana',shop:'🛒 Sklep Avengersów',clock:'⏰ Zegar misji',detective:'🕵️ Detektyw Spider-Mana',loki:'🦹 Bitwa z Lokim',reading:'🎙️ Laboratorium czytania',order:'🧩 Szyfr Avengersów',dictation:'✍️ Dyktando Kapitana',syllables:'🔠 Sylaby i głoski','vocab-choice':'🃏 Słówka · wybierz','vocab-write':'✍️ Słówka · napisz','vocab-speak':'🎙️ Słówka · powiedz','vocab-repeat':'🗣️ Słówka · powtórz','vocab-meaning':'💡 Słówka · znaczenie','vocab-listen':'🎧 Słówka · posłuchaj','vocab-reading':'📖 Słówka · przeczytaj','vocab-build':'🧩 Złóż słowo ze słuchu','vocab-match':'🔗 Połącz słówka',gallery77:'Galeria słów',radar77:'Radar słuchowy',command77:'Wykonaj polecenie',scene77:'Ustaw scenę',sort77:'Sortownia słów',detective77:'Detektyw tekstu',mosaic77:'Mozaika matematyczna',workshop77:'Warsztat liczenia',crossword:'📝 Krzyżówka',choice:'⚡ Zagadka bohatera',listening:'🎧 Misja słuchowa',memory:'🃏 Memory',spelling:'✍️ Pisownia',rebus:'🧩 Rebus Avengersów',memory:'🃏 Memory',"reading-mini":'🎙️ Czytaj słowo po słowie'};
-  root.innerHTML=`<section class="mg-panel v77-play">${launch?.chooseMaterialGame?btn('← Wróć','material-games'):launch?.strictMaterial||assessment?btn('← Wróć','back'):''}<header class="mg-header"><div class="v77-adventure-art" aria-hidden="true"><span class="v77-rocket">🚀</span><span class="v77-star s1">✦</span><span class="v77-star s2">✧</span></div><small>${mode==='test'?'🏆 PRÓBNY SPRAWDZIAN':'⚡ MISJA SPECJALNA'} · ${escape(t.sourceTitle||('STRONA '+(t.pageNumber||'?')))}</small>${btn('🔊 Odczytaj polecenie','read-instruction')}<h2>${launch?.label?escape(launch.label):t.game80?escape(t.subject82?(t.subject82==='matematyka'?'🧮 ':'📖 ')+GAME_TITLES_ALL81[t.game80]:GAME_TITLES_ALL81[t.game80]):t.type==='reading'?'📜 Tajny przekaz Avengersów':t.type==='loki'?'🦹 Pułapka Lokiego':t.type==='detective'?'🕵️ Detektyw Spider-Mana':t.type==='wordsearch'?'🔎 Wykreślanka':t.type==='draw'?'🎨 Misja rysunkowa':names[t.type]||'🎮 Misja bohatera'}</h2><p>Wyzwanie ${idx+1} z ${tasks.length}</p><div class="mg-bar"><div style="width:${Math.round(idx/tasks.length*100)}%"></div></div>${btn(embedded?'⏸ Pauza':'⏸ Stop / zapisz','pause')}</header><div class="v77-task-surface">${mode!=='test'&&t.studyDone82&&t.model82?'<p class="study82-model">Wzór: <strong lang="en">'+escape(t.model82)+'</strong> · Możesz na niego patrzeć podczas ćwiczenia.</p>':''}${stage()}</div></section>`;
+  root.innerHTML=`<section class="mg-panel v77-play">${launch?.sectionBack?'':launch?.chooseMaterialGame?btn('← Wróć','material-games'):launch?.strictMaterial||assessment?btn('← Wróć','back'):''}<header class="mg-header"><div class="v77-adventure-art" aria-hidden="true"><span class="v77-rocket">🚀</span><span class="v77-star s1">✦</span><span class="v77-star s2">✧</span></div><small>${mode==='test'?'🏆 PRÓBNY SPRAWDZIAN':'⚡ MISJA SPECJALNA'} · ${escape(t.sourceTitle||('STRONA '+(t.pageNumber||'?')))}</small>${btn('🔊 Odczytaj polecenie','read-instruction')}<h2>${launch?.label?escape(launch.label):t.game80?escape(t.subject82?(t.subject82==='matematyka'?'🧮 ':'📖 ')+GAME_TITLES_ALL81[t.game80]:GAME_TITLES_ALL81[t.game80]):t.type==='reading'?'📜 Tajny przekaz Avengersów':t.type==='loki'?'🦹 Pułapka Lokiego':t.type==='detective'?'🕵️ Detektyw Spider-Mana':t.type==='wordsearch'?'🔎 Wykreślanka':t.type==='draw'?'🎨 Misja rysunkowa':names[t.type]||'🎮 Misja bohatera'}</h2><p>Wyzwanie ${idx+1} z ${tasks.length}</p><div class="mg-bar"><div style="width:${Math.round(idx/tasks.length*100)}%"></div></div>${btn(embedded?'⏸ Pauza':'⏸ Stop / zapisz','pause')}</header><div class="v77-task-surface">${mode!=='test'&&t.studyDone82&&t.model82?'<p class="study82-model">Wzór: <strong lang="en">'+escape(t.model82)+'</strong> · Możesz na niego patrzeć podczas ćwiczenia.</p>':''}${stage()}</div></section>`;
   if(t.game80)motionCleanup80=t.game81?mountGame81(root,t,act=>v80GameAction(act,t)):mountMotion80(root,t,act=>v80GameAction(act,t));
   const canvas=root.querySelector('#mg-draw');if(canvas){const ctx=canvas.getContext('2d');ctx.lineWidth=4;ctx.lineCap='round';let painting=false;const point=e=>{const r=canvas.getBoundingClientRect();return [(e.clientX-r.left)*canvas.width/r.width,(e.clientY-r.top)*canvas.height/r.height]};canvas.onpointerdown=e=>{painting=true;canvas.setPointerCapture(e.pointerId);ctx.beginPath();ctx.moveTo(...point(e))};canvas.onpointermove=e=>{if(painting){ctx.lineTo(...point(e));ctx.stroke()}};canvas.onpointerup=()=>painting=false;}
  }
@@ -1748,7 +1748,13 @@ Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj
   })();
   return {work};
  }
- if(launch){mode=launch.mode==='test'?'test':'game';start();return {open:start,dispose}}
+ if(launch){
+  const back=()=>{
+   if(launch.chooseMaterialGame&&materialGame&&!busy){materialGame='';materialCatalog=null;return start();}
+   return onBack?onBack():setup();
+  };
+  mode=launch.mode==='test'?'test':'game';start();return {open:start,dispose,back};
+ }
  setup();return {open:setup,dispose};
 }
 

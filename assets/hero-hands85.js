@@ -111,7 +111,7 @@ export function drawHeroHands(ctx,canvas,hero,step,moving,image=null,web=null,po
   if(laserOrigin)paintLaser(ctx,width,height,power.age,laserOrigin);
   return;
  }
- const [base,light,shade,cuff,accent,kind]=costumes[hero]??costumes.iron;
+ const [base,light,shade,cuff,accent,kind]=costumes[hero==='groot-lady'?'groot':hero]??costumes.iron;
  const p=geometry(),scale=Math.min(width*.00315,height*.00132)*(kind==='skin'?1.15:1);
  for(const side of [-1,1]){
   const motion=handMotion(power,side);

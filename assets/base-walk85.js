@@ -1,9 +1,9 @@
-import {hqPet,hqPlaced,hqRead} from './headquarters84.js?v=91';
-import {baseArt88} from './base-art88.js?v=91';
-import {drawHeroHands,loadHeroHands88,loadHulkFist,HERO_POWER_TIME} from './hero-hands85.js?v=114';
+import {hqPet,hqPlaced,hqRead} from './headquarters84.js?v=116';
+import {baseArt88} from './base-art88.js?v=116';
+import {drawHeroHands,loadHeroHands88,loadHulkFist,HERO_POWER_TIME} from './hero-hands85.js?v=116';
 import {walkRooms,FLOOR_DEPTH,FULL_TURN,PHOTO_FOV,VERTICAL_SCALE,advance86,cameraBasis86,clamp86,roomAnchor86,wrapAngle} from './base-map86.js?v=95';
-import {energy86} from './base-training86.js?v=87';
-import {petSprite86} from './pet-care86.js?v=90';
+import {energy86} from './base-training86.js?v=116';
+import {petSprite86} from './pet-care86.js?v=116';
 import {mentorMarkup87,drawMentor87,MENTOR_GREETING_MS} from './base-mentor87.js?v=91';
 import {gameGroup92} from './learning-games92.js?v=92';
 

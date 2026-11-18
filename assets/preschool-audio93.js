@@ -46,7 +46,7 @@ export function mountPreschoolAudio93(root,speak=()=>{}){
    const speaker=voiceButton(doc,'screen');speaker.classList.add('pres93-screen');
    if(dialog&&panel.firstElementChild?.matches('[data-action="hq:close"]'))panel.firstElementChild.after(speaker);
    else {
-    const header=panel.querySelector(':scope > .academy102-header');
+    const header=panel.querySelector(':scope > :is(.academy102-header,.academy116-top)');
     if(header)header.after(speaker);else panel.prepend(speaker);
    }
   }
