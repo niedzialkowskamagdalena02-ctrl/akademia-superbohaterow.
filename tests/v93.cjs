@@ -141,7 +141,8 @@ function board(){
  assert.match(dashboardHeader,/interface106\/masthead\.webp/);
  for(const page of ['missions-board','books','academy','mentor','learn','base']){
   await view.api.handle('child:'+page);
-  assert.match(view.root.innerHTML,/<header class="academy116-top">[\s\S]*?data-action="child:home"[\s\S]*?>←<\/span> Wróć<\/button>/,page);
+  if(page==='learn')assert.match(view.root.innerHTML,/<header class="academy119-subject-header">[\s\S]*?data-action="child:home" aria-label="Wróć"/,page);
+  else assert.match(view.root.innerHTML,/<header class="academy116-top">[\s\S]*?data-action="child:home"[\s\S]*?>←<\/span> Wróć<\/button>/,page);
   assert.doesNotMatch(view.root.innerHTML,/class="academy102-header"|class="academy102-destinations|class="academy102-player"/,page);
   await view.api.handle('child:home');
   assert.equal(header(view.root.innerHTML),dashboardHeader,page);
@@ -155,11 +156,11 @@ function board(){
    assert.match(view.root.innerHTML,/class="mentor-figure" src="assets\/interface108\/hero-patryk\.webp"/);
   }
   if(page==='learn'){
-   assert.match(view.root.innerHTML,/class="academy111-board"/);
-   assert.match(view.root.innerHTML,/class="mic academy102-mic" data-action="mic"/);
-   assert.equal((view.root.innerHTML.match(/data-action="mic"/g)||[]).length,1);
+   assert.match(view.root.innerHTML,/data-interface119="subjects"/);
+   assert.equal((view.root.innerHTML.match(/data-action="mic"/g)||[]).length,0);
+   assert.doesNotMatch(view.root.innerHTML,/training:subject:Przedszkole/);
    for(const subject of ['Chemia','Fizyka']){
-    assert.ok(view.root.innerHTML.includes(`class="academy111-subject" disabled aria-label="${subject} — w przygotowaniu"`));
+    assert.match(view.root.innerHTML,new RegExp(`class="academy119-subject"[^>]* disabled aria-label="${subject} — w przygotowaniu"`));
     assert.ok(!view.root.innerHTML.includes('training:subject:'+subject));
    }
   }
@@ -196,9 +197,9 @@ function board(){
  assert.match(schoolView.root.innerHTML,/data-speak="Książki"/);
  assert.equal((schoolView.root.innerHTML.match(/academy107-wide-face/g)||[]).length,6);
  await schoolView.api.handle('child:learn');
- assert.match(schoolView.root.innerHTML,/academy111-globe/);
- assert.match(schoolView.root.innerHTML,/academy111-butterfly/);
- assert.match(schoolView.root.innerHTML,/academy111-numbers/);
+ assert.match(schoolView.root.innerHTML,/assets\/interface119\/subjects\.webp/);
+ assert.match(schoolView.root.innerHTML,/data-theme="matematyka"/);
+ assert.match(schoolView.root.innerHTML,/data-theme="przyroda"/);
  schoolView.ctx.window.AudioContext=view.ctx.window.AudioContext;
  const mathCard={
   dataset:{action:'training:subject:Matematyka',theme:'matematyka'},isConnected:true,
@@ -215,7 +216,7 @@ function board(){
  assert.match(schoolView.root.innerHTML,/data-v77-step="source"/);
  for(const subject of ['Matematyka','Wiedza ogólna']){
   await schoolView.api.handle('training:subject:'+encodeURIComponent(subject));
-  assert.match(schoolView.root.innerHTML,/data-action="training:back:subject"[^>]*><span aria-hidden="true">←<\/span> Wróć/);
+  assert.match(schoolView.root.innerHTML,/data-action="training:back:subject" aria-label="Wróć"/);
   assert.match(schoolView.root.innerHTML,/data-action="training:source:books"/);
   assert.match(schoolView.root.innerHTML,/data-action="training:source:outside"/);
   assert.doesNotMatch(schoolView.root.innerHTML,/data-action="training:(mixed:start|catalog|assessment)"/);
@@ -227,8 +228,8 @@ function board(){
  assert.equal((schoolView.root.innerHTML.match(/data-action="mic"/g)||[]).length,1);
  assert.match(schoolView.root.innerHTML,/data-action="training:assessment"/);
  assert.match(schoolView.root.innerHTML,/data-action="training:mixed:start"/);
- for(const illustration of ['dice','controller'])
-  assert.ok(schoolView.root.innerHTML.includes('interface113/'+illustration+'.webp'),illustration);
+ assert.ok(schoolView.root.innerHTML.includes('assets/interface119/modes.webp'));
+ assert.match(schoolView.root.innerHTML,/academy119-illustration/);
  schoolView.ctx.window.matchMedia=()=>({matches:false});
  const gameTile={
   dataset:{action:'training:catalog'},isConnected:true,
@@ -238,7 +239,7 @@ function board(){
  for(const listener of schoolView.listeners.click)listener({target:gameTile,detail:1,isTrusted:true});
  assert.equal(clicks,3);
  assert.equal(gameTile.dataset.academyPressed,'true');
- assert.match(schoolView.root.innerHTML,/class="academy102-knowledge-panel/);
+ assert.match(schoolView.root.innerHTML,/class="academy119-page academy119-options/);
  [...schoolView.timers.values()].find(timer=>timer.ms===840).fn();
  assert.match(schoolView.root.innerHTML,/data-v77-step="catalog"/);
  await schoolView.api.handle('training:back:train-options');
@@ -252,7 +253,7 @@ function board(){
  assert.match(schoolView.root.innerHTML,/data-v77-step="train-options"/);
  assert.match(schoolView.root.innerHTML,/Materiał z książek · 1 strona/);
  await schoolView.api.handle('training:back:subject');
- assert.match(schoolView.root.innerHTML,/class="academy111-board"/);
+ assert.match(schoolView.root.innerHTML,/data-interface119="subjects"/);
  await schoolView.api.handle('child:missions-board');
  assert.match(schoolView.root.innerHTML,/interface117\/nav-missions\.webp/);
  for(const icon of ['alert','school','home']){
@@ -339,7 +340,7 @@ function board(){
  assert.match(pinView.root.innerHTML,/class="academy107-entry"/);
  assert.match(pinView.root.innerHTML,/academy107-pair/);
  assert.match(pinView.root.innerHTML,/data-action="enter:pawel"[\s\S]*data-action="enter:patryk"/);
- assert.match(pinView.root.innerHTML,/class="academy107-profile-card academy107-profile-pawel" data-action="enter:pawel">\s*<img[^>]*assets\/art\/hulk\.webp/);
+ assert.match(pinView.root.innerHTML,/class="academy107-profile-card academy107-profile-pawel" data-action="enter:pawel">\s*<img[^>]*assets\/interface119\/hulk\.svg/);
  assert.match(pinView.root.innerHTML,/assets\/interface108\/hero-patryk\.webp/);
  assert.match(pinView.root.innerHTML,/data-action="enter:admin" aria-label="Centrum dowodzenia mamy"><\/button>/);
  assert.match(pinView.root.innerHTML,/data-action="academy:update" aria-label="Aktualizuj Akademię"><\/button>/);
@@ -377,7 +378,8 @@ function board(){
  assert.equal(pinAccount.parentPin,'1111');
  await pinView.api.handle('admin:settings');
  for(const hero of ['hulk','captain','thor','hood']){
-  assert.match(pinView.root.innerHTML,new RegExp(`hero:set:pawel:${hero}"[^>]*><img[^>]*assets/art/${hero}\\.webp`));
+  const art=hero==='hulk'?'interface119/hulk\\.svg':`art/${hero}\\.webp`;
+  assert.match(pinView.root.innerHTML,new RegExp(`hero:set:pawel:${hero}"[^>]*><img[^>]*assets/${art}`));
  }
  await pinView.api.handle('hero:set:patryk:hood');
  assert.equal(pinAccount.profiles.patryk.hero,'hood');

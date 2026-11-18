@@ -1,0 +1,22 @@
+[
+  {
+    "asset": "assets/interface119/subjects.webp",
+    "source": "05-1795033578299.jpeg",
+    "sha256": "3d4f400716a81fca326a1484619fd98f068f5308e57b7d71dcf8d4df730c2121"
+  },
+  {
+    "asset": "assets/interface119/range.webp",
+    "source": "02-1000058903.webp",
+    "sha256": "538f5bcdda0e1baa76c833d9b4ffde81cd3231970212938e4c08097c4d1231d6"
+  },
+  {
+    "asset": "assets/interface119/modes.webp",
+    "source": "03-1000058904.webp",
+    "sha256": "c5dd069a1b8691fc65d98d2c73404b0600064a20772948dcb5a8acdddcfd7ef2"
+  },
+  {
+    "asset": "assets/interface119/hulk-source.webp",
+    "source": "01-1000058913.jpg",
+    "sha256": "1f22348582c7cf2b4e6b61ae32cf2107ab91eda3b0ea087134286498016699d1"
+  }
+]

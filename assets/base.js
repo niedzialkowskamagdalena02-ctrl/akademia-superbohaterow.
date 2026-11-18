@@ -1,5 +1,5 @@
 import {affordable82} from './wallet82.js?v=82';
-import {heroPortrait} from './interface102.js?v=117';
+import {heroPortrait} from './interface102.js?v=119';
 // Autorski świat bohaterów. Wersjonowane identyfikatory ułatwiają przyszłą synchronizację.
 export const BASE_ITEMS=[
 {id:'shield',name:'Tarcza Kapitana Ameryki',icon:'🛡️',cost:0,zone:'training',type:'gadżet'},

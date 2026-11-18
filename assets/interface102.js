@@ -1,3 +1,4 @@
+import {training119Subjects,training119Options} from './interface119.js?v=119';
 const art = (name, className = '') =>
   `<img class="academy102-art ${className}" src="assets/interface102/${name}.webp" alt="" draggable="false">`;
 const dashboardArt = (name) =>
@@ -12,7 +13,7 @@ const referenceArt = (name, className = '') =>
 const heroPortraits = new Map([
   ['iron','assets/interface108/hero-pawel.webp'],
   ['spider','assets/interface108/hero-patryk.webp'],
-  ['hulk','assets/art/hulk.webp'],
+  ['hulk','assets/interface119/hulk.svg'],
   ['captain','assets/art/captain.webp'],
   ['thor','assets/art/thor.webp'],
   ['hood','assets/art/hood.webp'],
@@ -100,6 +101,11 @@ const testBanner = () => `<div class="academy102-test" role="note" aria-label="T
 
 export function academy102Shell(scene, {title, content, menu='', voice='', release, test, status, sound, exit, base, back, skipScreenReader=false}) {
   const screen = scene==='missions'?'mission-screen':scene;
+  if(back&&content.includes('data-interface119='))return `<main class="academy102-screen academy116-section academy119-full" ${skipScreenReader?'data-preschool-screen-skip':''}>
+    ${test?`<div class="academy116-test" role="note">Tryb mamy · postępy nie są zapisywane ${exit}</div>`:''}
+    <div class="academy104-section-body">${content.replaceAll('data-back119',`data-action="${back}"`)}</div>
+    ${content.includes('data-interface119="subjects"')?'':microphone()}
+  </main>`;
   if(back)return `<main class="academy102-screen academy102-${screen} academy116-section${base?' hq88-base-page':''}" ${skipScreenReader?'data-preschool-screen-skip':''}>
     <header class="academy116-top">
       <button type="button" class="academy116-back alt" data-action="${back}"><span aria-hidden="true">←</span> Wróć</button>
@@ -171,65 +177,7 @@ export function academy102DashboardNav(preschool, speak, current) {
   }).join('')}</nav>`;
 }
 
-const trainingArtBounds=[0,0,1422,1536];
-const trainingBoardBounds=[0,0,1422,1720];
-const subjectTiles=[
-  {key:'wiedza', label:'Wiedza ogólna', rect:[142,339,1091,479], placement:[142,339,1091,532], motion:'knowledge'},
-  {key:'polski', label:'Polski', rect:[91,832,389,350], placement:[91,883,389,393], illustration:[161,897,267,180]},
-  {key:'matematyka', label:'Matematyka', rect:[490,832,388,350], placement:[490,883,388,393], illustration:[548,874,268,217], effect:'<span class="academy111-numbers">1 + 2 × 3</span>'},
-  {key:'angielski', label:'Angielski', rect:[890,832,389,350], placement:[890,883,389,393], illustration:[952,874,270,216]},
-  {key:'przyroda', label:'Przyroda', rect:[91,1190,302,333], placement:[91,1290,389,393], illustration:[137,1218,199,180], effect:'<span class="academy111-butterfly">🦋</span>'},
-  {label:'Chemia', rect:[397,1190,288,333], placement:[490,1290,388,393]},
-  {label:'Fizyka', rect:[694,1190,289,333], placement:[890,1290,389,393]}
-];
-const knowledgePieces=[
-  ['globe',[587,408,226,222]],
-  ['letter',[567,387,62,64]],
-  ['letter',[783,407,58,78]],
-  ['letter',[1037,413,70,83]],
-  ['letter',[352,690,63,74]],
-  ['letter',[967,698,62,77]],
-  ['bulb',[1022,577,104,134]],
-  ['leaf',[248,400,120,145]]
-];
-
-function trainingArtPlacement(rect,[left,top,parentWidth,parentHeight]=trainingBoardBounds,crop=rect) {
-  const [x,y,width,height]=rect;
-  const [cropX,cropY,cropWidth,cropHeight]=crop;
-  const [, ,artWidth,artHeight]=trainingArtBounds;
-  const percent=(part,whole)=>(part/whole*100).toFixed(4)+'%';
-  return `--left:${percent(x-left,parentWidth)};--top:${percent(y-top,parentHeight)};
-    --width:${percent(width,parentWidth)};--height:${percent(height,parentHeight)};
-    --crop-position:${percent(cropX,artWidth-cropWidth)} ${percent(cropY,artHeight-cropHeight)};
-    --crop-size:${percent(artWidth,cropWidth)} ${percent(artHeight,cropHeight)}`;
-}
-
-function trainingArtPiece(kind,rect,parent) {
-  return `<span class="academy111-piece academy111-${kind}" style="${trainingArtPlacement(rect,parent)}" aria-hidden="true"></span>`;
-}
-
-export function academy111Training(voice,extraSubjects='') {
-  return `<section class="academy111-training" aria-labelledby="academy111-training-title" data-v77-step="subject">
-    <div class="academy111-board">
-      <h2 id="academy111-training-title" class="academy102-sr">Trenuj</h2>
-      <p class="academy102-sr">Wybierz przedmiot</p>
-      ${trainingArtPiece('rocket',[491,75,123,126])}
-      <span class="academy111-voice-slot" style="${trainingArtPlacement([395,222,112,109])}">${voice}</span>
-      ${subjectTiles.map(({key,label,rect,placement,motion,illustration,effect=''})=>{
-        const style=trainingArtPlacement(placement,trainingBoardBounds,rect);
-        if(!key)return `<button type="button" class="academy111-subject" disabled aria-label="${label} — w przygotowaniu" style="${style}"></button>`;
-        const motionName=motion||key;
-        const pieces=motion?knowledgePieces.map(([kind,area])=>trainingArtPiece(kind,area,rect)).join('') :
-          trainingArtPiece('illustration',illustration,rect);
-        return `<button type="button" class="tr72-subject-card academy111-subject" data-theme="${key}" data-action="training:subject:${encodeURIComponent(label)}"
-          aria-label="Wybierz przedmiot ${label}" style="${style};--motion-art:url(assets/interface111/${motionName}-motion.webp)">
-          <span class="academy111-motion" aria-hidden="true">${pieces}${effect}</span>
-        </button>`;
-      }).join('')}
-    </div>
-    ${extraSubjects?`<div class="tr71 tr72-subject-grid academy111-extra-subjects">${extraSubjects}</div>`:''}
-  </section>`;
-}
+export function academy111Training(voice,extraSubjects='') { return training119Subjects(voice,extraSubjects); }
 
 export function academy102DashboardVoice(name, speak) {
   return `<div class="academy102-screen-voice">${speak('Akademia '+name+'. Wybierz: Misje, Książki, Trening, Sala odkrywców, Mentor albo Baza Avengersów i gry.', 'Odsłuchaj ekran')}</div>`;
@@ -253,29 +201,6 @@ export function academy102FamilyHeading(title) {
   return `<h2>${dashboardArt('family')}${title}</h2>`;
 }
 
-export function academy115TrainingPanel({subject, source, count}) {
-  const rollingDice = `<span class="academy113-dice" aria-hidden="true">${activityArt('dice')}</span>`;
-  const gamepad = `<span class="academy113-controller" aria-hidden="true">
-    ${activityArt('controller')}
-    <span class="academy113-hand academy113-hand-left"></span>
-    <span class="academy113-hand academy113-hand-right"></span>
-  </span>`;
-  const shelfBooks = `<span class="academy115-shelf" aria-hidden="true">${referenceArt('shelf')}<span class="academy113-shelf-books">
-    ${activityArt('book-1')}${activityArt('book-2')}${activityArt('book-3')}
-  </span></span>`;
-  const makeTile = (kind,title,action,description,artwork) =>
-    `<button type="button" class="academy102-tile academy115-card academy115-${kind}" data-action="${action}"
-      aria-description="${description}"><span class="academy115-illustration" aria-hidden="true">${artwork}</span>
-      <strong>${title}</strong><small>${description}</small></button>`;
-  const cards = source ?
-    makeTile('practice','Trenuj','training:mixed:start','Losowa mieszanka gier i zadań',rollingDice)+
-    makeTile('choose','Wybierz grę','training:catalog','Wybrana gra, losowe zadania',gamepad)+
-    makeTile('assessment','Sprawdzian','training:assessment','Różne zadania bez podpowiedzi','<span class="academy115-symbol">🏆</span>') :
-    makeTile('books','Materiał z książek','training:source:books','Cała książka, dział lub strony',shelfBooks)+
-    makeTile('outside','Inne materiały','training:source:outside','Zadania spoza książek',referenceArt('planet','academy117-planet'));
-  return `<section class="academy102-knowledge-panel academy115-flow" aria-labelledby="academy115-title" data-v77-step="${source?'train-options':'source'}">
-    <h2 id="academy115-title">${subject}</h2>
-    <p>${source==='books'?'Materiał z książek · '+count+(count===1?' strona':[2,3,4].includes(count%10)&&![12,13,14].includes(count%100)?' strony':' stron'):source==='outside'?'Inne materiały':'Wybierz materiał'}</p>
-    <div class="academy115-cards">${cards}</div>
-  </section>`;
+export function academy115TrainingPanel(options) {
+ return training119Options({...options,booksArt:referenceArt('shelf'),outsideArt:referenceArt('planet','academy117-planet')});
 }

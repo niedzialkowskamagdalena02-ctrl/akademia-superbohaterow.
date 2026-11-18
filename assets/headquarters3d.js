@@ -1,4 +1,4 @@
-import {heroPortrait} from './interface102.js?v=117';
+import {heroPortrait} from './interface102.js?v=119';
 // V25: self-contained 3D scene. Geometry is in world coordinates and rendered with
 // perspective projection, face depth sorting and an orbiting camera; no CDN required.
 const ROOM_NAMES={lab:'Laboratorium',armory:'Zbrojownia',hangar:'Hangar',team:'Sala drużyny'};
