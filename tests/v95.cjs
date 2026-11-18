@@ -14,11 +14,12 @@ function fixture(){
   addEventListener(name,fn,{signal}){listeners[name]=fn;signal.addEventListener('abort',()=>delete listeners[name]);},
   querySelector(key){
    if(!nodes.has(key))nodes.set(key,{
-    ownerDocument:root.ownerDocument,dataset:{},classList:{add(){}},style:{setProperty(){}},
+    ownerDocument:root.ownerDocument,dataset:{},classList:{add(){}},style:new Map(),
     querySelector:key=>root.querySelector(key),
     querySelectorAll:key=>root.querySelectorAll(key),
     insertAdjacentHTML(_position,html){root.content+=html;},getContext(){return null;}
    });
+   nodes.get(key).style.setProperty=nodes.get(key).style.set;
    return nodes.get(key);
   },
   querySelectorAll(key){
@@ -36,6 +37,7 @@ function fixture(){
 (async()=>{
  const {mountHangar95,hangarDeck95}=await import(asset('hangar95.js'));
  const {captainMissions93,aceMissions93}=await import(asset('missions93-data.js'));
+ const {boardingDeck97,boardingRoundCount97,canBoard97}=await import(asset('hangar-boarding97.js'));
  const {trainingCatalog95,trainingSequence95,outsideDeck95}=await import(asset('training95.js'));
 
  const preset=Math.random;
@@ -82,33 +84,52 @@ function fixture(){
     if(id==='baggage'){
      function load(task){
       let seat=0;
-      const wrong=task.options.findIndex(item=>item.value!==task.answer);
+      const wrong=task.options.findIndex(item=>!task.targets.includes(item.value));
       root.click('bag:'+wrong);root.click('seat:0');
       assert.doesNotMatch(root.innerHTML,/data-f95-filled/);
+      const left=[...task.targets];
       task.options.forEach((item,i)=>{
-       if(item.value!==task.answer)return;
+       const found=left.indexOf(item.value);
+       if(found<0)return;
+       left.splice(found,1);
        root.click('bag:'+i);root.click('seat:'+seat++);
       });
+      assert.equal(left.length,0);
       assert.equal((root.innerHTML.match(/data-f95-filled/g)||[]).length,task.count);
      }
      assert.match(root.innerHTML,/0 \/ 3/);
-     assert.match(root.innerHTML,/aircraft-nose.webp/);
+     assert.match(root.innerHTML,/pilot.webp/);
      load(t);
      assert.match(root.innerHTML,/Teraz czas na pasażerów/);
      root.click('next');
-     assert.match(root.innerHTML,/0 \/ 4/);
+     assert.match(root.innerHTML,/0 \/ 1/);
      load(hangarDeck95(id,grade)[1]);
      assert.match(root.innerHTML,/Bagaże i pasażerowie na pokładzie/);
     }
     if(id==='takeoff'){
      assert.match(root.innerHTML,/Pociągnij dźwignię/);
+     const plane=root.querySelector('[data-f97-aircraft]');
+     assert.equal(plane.style.get('--plane-y'),'60%');
      root.click('lever');
-     assert.match(root.innerHTML,/cyfrą jeden/);
-     pass(2);
-     assert.match(root.innerHTML,/0 \/ 4/);
-     for(const value of t.needed)pass(value);
-     assert.match(root.innerHTML,/4 \/ 4/);
-     assert.match(root.innerHTML,/flight96-ring-win/);
+     const stage=root.querySelector('.flight97-takeoff');
+     assert.equal(stage.dataset.f97Phase,'roll');
+     frames(1);
+     assert.notEqual(plane.style.get('--plane-y'),'60%');
+     frames(.5);
+     assert.equal(stage.dataset.f97Phase,'lift');
+     frames(1.2);
+     assert.equal(stage.dataset.f97Phase,'air');
+     assert.match(root.querySelector('[data-game-prompt]').textContent,/cyfrą jeden/);
+     root.click('aim:1'); frames(2);
+     assert.equal(root.querySelector('[data-f97-board-progress]').textContent,'0 / 4');
+     for(const i of [0,1,2,3]){
+      root.click('aim:'+i);
+      frames(3);
+      assert.equal(root.querySelector('[data-f97-board-progress]').textContent,(i+1)+' / 4');
+      assert.equal(root.querySelector('[data-f97-aircraft]'),plane);
+     }
+     assert.equal(stage.dataset.f97Phase,'done');
+     assert.match(root.querySelector('[data-game-prompt]').textContent,/Wszystkie cyfry zaliczone/);
     }
     if(id==='airballs'){
      assert.doesNotMatch(root.innerHTML,/Odsłuchaj: Chmura burzowa|Odsłuchaj: [0-9]/);
@@ -155,6 +176,16 @@ function fixture(){
   }
  }finally{mountHangar95(null);Math.random=preset;globalThis.setTimeout=timer;}
 
+ const rounds=Array.from({length:boardingRoundCount97},(_,i)=>boardingDeck97(i,()=>.32));
+ assert.equal(new Set(rounds.map(([bags])=>bags.targets.join(''))).size,boardingRoundCount97);
+ assert.deepEqual([...new Set(rounds.map(([,riders])=>riders.count))].sort(),[1,2,3,4]);
+ assert.ok(rounds.some(([bags])=>bags.targets.join('')==='KMS'));
+ const mixed=rounds.find(([,riders])=>riders.targets.join(' ')==='dog dog cat')[1];
+ const dog=mixed.options.findIndex(item=>item.value==='dog');
+ assert.ok(canBoard97(mixed,[{index:dog}],'dog'));
+ assert.ok(!canBoard97(mixed,[{index:dog},{index:dog}],'dog'));
+ assert.ok(canBoard97(mixed,[{index:dog},{index:dog}],'cat'));
+ assert.ok(mixed.options.some(item=>item.value==='cat'));
  const school=trainingCatalog95('2','Wiedza ogólna'),preschool=trainingCatalog95('P','Wiedza ogólna');
  assert.ok(school.some(g=>g.kind==='race'&&g.subject==='matematyka'));
  assert.ok(preschool.some(g=>g.kind==='dino'&&g.subject==='polski'));
@@ -171,7 +202,7 @@ function fixture(){
  assert.ok(scope.some(turn=>turn.page?.number===12&&turn.key==='matematyka'));
  assert.deepEqual([...new Set(scope.map(turn=>turn.key))].sort(),['angielski','matematyka','polski','przyroda']);
  const manifest=vm.runInNewContext(fs.readFileSync(path.join(dir,'sw.js'),'utf8')+'\n({CACHE,ASSETS})',{self:{addEventListener(){}}});
- assert.equal(manifest.CACHE,'academy-v96');
+ assert.equal(manifest.CACHE,'academy-v97');
  for(const resource of manifest.ASSETS)assert.ok(fs.existsSync(path.resolve(dir,resource.split('?')[0])),resource);
- console.log('PASS V96 – 14 misji, odprawa i kabina, obręcze, slalom, karmnik, katalog, trening i cache.');
+ console.log('PASS V97 – 14 misji, odprawa i kabina, obręcze, slalom, karmnik, katalog, trening i cache.');
 })().catch(error=>{console.error(error);process.exitCode=1;});

@@ -1,4 +1,4 @@
-import {cockpitFlight96, feederPlane96, feederReward96, ring96, storm96} from './hangar-art96.js?v=96';
+import {feederPlane96, feederReward96, storm96} from './hangar-art96.js?v=97';
 
 const altitude = [24, 49, 74];
 const targetAltitudes = length => length === 2 ? [altitude[0], altitude[2]] : altitude;
@@ -9,7 +9,6 @@ const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({
 })[c]);
 
 export const flightStyles95 = {
-  takeoff: { target: 'ring', sky: 'day' },
   airballs: { target: 'balloon', sky: 'day' },
   feeder: { target: 'cloud', sky: 'day' },
   landing: { target: 'runway', sky: 'runway' },
@@ -38,7 +37,7 @@ export function surface95(theme, content, cls = '') {
 function target95(item, index, kind, lane, audio) {
   const type = item.value === 'storm' ? 'storm' : kind;
   const graphic = type === 'tanker' ? plane95() : type === 'runway' ? shape95(item.icon)
-    : type === 'storm' ? storm96 : type === 'ring' ? ring96()
+    : type === 'storm' ? storm96
     : item.icon ? `<span class="flight95-object-icon" aria-hidden="true">${item.icon}</span>` : '';
   return `<div class="flight95-object" data-f95-object data-f95-type="${type}" data-f96-lane="${index}" style="--alt:${lane}%;--color:${index}">
     <button type="button" data-f95-action="aim:${index}" class="flight95-target" aria-label="${esc(item.label)}">
@@ -50,8 +49,8 @@ function target95(item, index, kind, lane, audio) {
 
 export function airMarkup95(id, task, options, { turn, preschool, complete, lastRound }) {
   const { target, sky } = flightStyles95[id];
-  const front = id === 'takeoff', feeder = id === 'feeder', slalom = id === 'airballs';
-  const theme = task.theme ?? (sky === 'day' && !front && !slalom && !feeder ? routeSkies[turn % routeSkies.length] : sky);
+  const feeder = id === 'feeder', slalom = id === 'airballs';
+  const theme = task.theme ?? (sky === 'day' && !slalom && !feeder ? routeSkies[turn % routeSkies.length] : sky);
   const attachment = id === 'spelling' ? `<span class="flight95-banner" data-f95-banner>${esc(task.prompt)}</span>`
     : id === 'fuel' ? '<span class="flight95-hose" aria-hidden="true"></span>' : '';
   const dashboard = id === 'fuel'
@@ -61,7 +60,7 @@ export function airMarkup95(id, task, options, { turn, preschool, complete, last
   ].map(([action, arrow, label]) => `<div class="flight95-paired">
     <button type="button" data-f95-action="${action}" aria-label="${label}"><span aria-hidden="true">${arrow}</span> ${label}</button>
     ${preschool ? voice95(label, 'pl-PL', 'Odsłuchaj: ' + label) : ''}</div>`).join('');
-  const speech = preschool && !slalom && !front && !feeder;
+  const speech = preschool && !slalom && !feeder;
   const targets = complete ? '' : options.map((item, i) =>
     target95(item, i, target, targetAltitudes(options.length)[i], speech)).join('');
   const reward = complete && feeder ? feederReward96(esc(task.answer),esc(task.word),lastRound)
@@ -72,10 +71,9 @@ export function airMarkup95(id, task, options, { turn, preschool, complete, last
       <div class="flight95-drift" aria-hidden="true"></div>
       ${targets}
       <div class="flight95-player" data-f95-player>${feeder?feederPlane96(complete):attachment+plane95()}</div>
-      ${front ? cockpitFlight96(complete) : ''}
       ${dashboard}${reward}
     </div>${complete ? '' : `<div class="flight95-steering">${controls}</div>`}`,
-    `flight95-air${front?' flight96-takeoff':feeder?' flight96-feeder':slalom?' flight96-slalom':''}${complete?' flight96-air-win':''}`);
+    `flight95-air${feeder?' flight96-feeder':slalom?' flight96-slalom':''}${complete?' flight96-air-win':''}`);
 }
 
 export function mountAir95(root, { id, options, getFuel, onPass, onEmpty, initialAltitude }) {
@@ -84,10 +82,10 @@ export function mountAir95(root, { id, options, getFuel, onPass, onEmpty, initia
   const objects = [...view.querySelectorAll('[data-f95-object]')];
   const lanes = targetAltitudes(options.length);
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const front = id === 'takeoff';
-  const illustrated = front || id === 'airballs' || id === 'feeder';
-  const slow = front ? 3.6 : id === 'fuel' ? 10.8 : illustrated ? 6.4 : 9.4;
+  const illustrated = id === 'airballs' || id === 'feeder';
+  const slow = id === 'fuel' ? 10.8 : illustrated ? 6.4 : 9.4;
   let elapsed = 0;
+  let motionClock = 0;
   let height = initialAltitude ?? altitude[1];
   let targetHeight = height;
   let issued = false;
@@ -109,11 +107,15 @@ export function mountAir95(root, { id, options, getFuel, onPass, onEmpty, initia
     height += yDifference * Math.min(1, dt * 9);
     player.style.setProperty('--pilot-y', height + '%');
     player.style.setProperty('--bank', reduced ? '0deg' : (yDifference * .40).toFixed(2) + 'deg');
-    if (front) view.style.setProperty('--pitch',Math.round((height-49)*.35)+'px');
-    const size = (front ? .42 : .66) + Math.min(approach, 1) * (front ? .73 : .34);
-    for (const object of objects) {
+    motionClock+=dt;
+    const size = .68 + Math.min(approach,1)*.32;
+    for (let i=0;i<objects.length;i++) {
+      const object=objects[i];
+      const bob = reduced ? 0 : Math.sin(motionClock*2.15+i*1.5);
       object.style.setProperty('--object-x', x + '%');
       object.style.setProperty('--object-scale', String(size));
+      object.style.setProperty('--flight-bob',(bob*4.4).toFixed(1)+'px');
+      object.style.setProperty('--flight-sway',(bob*3.2).toFixed(1)+'deg');
     }
     if (getFuel) {
       const fuel = getFuel(dt);

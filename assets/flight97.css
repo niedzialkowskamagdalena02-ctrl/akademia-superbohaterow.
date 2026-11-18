@@ -1,0 +1,335 @@
+/* The pilot's illustrated speech stays next to the action on narrow screens. */
+.flight97-pilot-call {
+  position:relative; z-index:8; display:grid; grid-template-columns:clamp(54px,15vw,94px) 1fr auto;
+  align-items:center; gap:6px; padding:5px 7px 6px; min-height:75px;
+  background:linear-gradient(#1a4475e8,#122f55f2); border-bottom:1px solid #8addfa89;
+}
+.flight97-pilot-face {
+  position:relative; display:grid; place-items:end center; align-self:end; isolation:isolate;
+  width:100%; aspect-ratio:1; border-radius:50% 50% 27% 27%; background:radial-gradient(circle,#f7edc6,#88cfee 60%,#3083b7);
+  border:2px solid #c1edff; box-shadow:0 2px 5px #102746;
+  animation:flight97-pilot-greet 620ms cubic-bezier(.24,.78,.35,1) both;
+}
+.flight97-pilot-face img { width:96%; height:100%; object-fit:contain; object-position:center bottom; transform-origin:bottom center }
+.flight97-pilot-face[data-f97-speaking="yes"] img { animation:flight97-talk .46s ease-in-out infinite alternate }
+.flight97-pilot-face[data-f97-speaking="yes"] i {
+  position:absolute; left:62%; top:61%; width:11%; height:6%; border-radius:50%;
+  background:#682c2b; animation:flight97-mouth .26s steps(2,end) infinite alternate;
+}
+@keyframes flight97-pilot-greet { from { translate:-12px 8px; scale:.78; opacity:.4 } 75% { scale:1.05 } }
+@keyframes flight97-talk { to { rotate:-2deg; translate:0 -2px } }
+@keyframes flight97-mouth { from { scale:.65 .45 } to { scale:1 1.2 } }
+.flight97-bubble {
+  position:relative; min-width:0; border-radius:13px; padding:4px 8px 5px;
+  color:#12343f; background:linear-gradient(150deg,#fbffff,#d4f1fb);
+  border:2px solid #77c3e1; box-shadow:0 2px 7px #09244470;
+}
+.flight97-bubble::before {
+  position:absolute; content:""; left:-7px; bottom:11px; width:11px; height:11px; rotate:45deg;
+  background:#f4fbff; border-left:2px solid #77c3e1; border-bottom:2px solid #77c3e1;
+}
+.flight97-bubble small {
+  display:inline-block; background:#225479; border-radius:5px; padding:1px 6px; line-height:1.25;
+  color:#e6f9ff; font-size:.73rem; font-weight:900;
+}
+#missions93-cockpit .flight97-bubble p {
+  margin:3px 0 0; font-size:clamp(.89rem,3.4vw,1.24rem); font-weight:820; line-height:1.17; color:#12343f;
+}
+#missions93-cockpit .flight97-pilot-call>.flight95-voice { min-width:40px; min-height:42px }
+
+#missions93-cockpit .flight97-board { min-height:clamp(385px,66dvh,610px); background:#10689e }
+.flight97-board .flight97-board-world {
+  position:absolute; z-index:-1; inset:58px 0 0; background:#56afea url('flight95/runway.webp') center 45%/cover;
+  animation:flight97-room-enter 540ms ease-out both;
+}
+.flight97-board[data-f97-style="1"] .flight97-board-world { filter:saturate(1.2) hue-rotate(-10deg) }
+.flight97-board[data-f97-style="2"] .flight97-board-world { filter:saturate(.88) hue-rotate(8deg) brightness(1.05) }
+.flight97-board[data-f96-scene="cabin"] .flight97-board-world {
+  background-image:url('flight95/cabin.webp'); background-position:center 56%;
+}
+.flight97-board[data-f96-scene="cabin"][data-f97-style="1"] .flight97-board-world { background-position:58% 42% }
+.flight97-board[data-f96-scene="cabin"][data-f97-style="2"] .flight97-board-world { background-position:46% 65% }
+@keyframes flight97-room-enter { from { scale:1.08; opacity:.72 } }
+.flight97-board .flight96-airframe { top:clamp(119px,27%,196px); height:clamp(135px,35%,235px) }
+.flight97-board .flight96-nose { object-fit:fill; height:100%; width:35%; top:0 }
+.flight97-board .flight96-airframe::after {
+  content:""; position:absolute; z-index:-2; width:94%; height:10%; left:4%; bottom:-4%;
+  border-radius:50%; background:#243b54a8; filter:blur(9px);
+}
+.flight97-board .flight96-hatch { top:21%; bottom:13%; perspective:480px }
+.flight97-board .flight96-hatch::before {
+  transform-origin:bottom; transform:rotateX(9deg); animation:flight97-hatch .68s ease-out both;
+}
+@keyframes flight97-hatch { from { transform:rotateX(-95deg) translateY(7px) } 65% { transform:rotateX(16deg) } }
+.flight97-board .flight96-hold,.flight97-board .flight96-cabin-seats {
+  grid-template-columns:repeat(var(--places),minmax(0,1fr));
+}
+.flight97-board .flight96-cabin-seats { inset:auto 3% 30%; justify-items:center }
+#missions93-cockpit .flight97-board .flight96-slot { max-width:138px }
+#missions93-cockpit .flight97-board .flight96-hold .flight96-slot { max-width:none; min-height:clamp(53px,12vw,91px) }
+#missions93-cockpit .flight97-board .flight96-cabin-seats .flight96-slot {
+  min-height:clamp(80px,19vw,157px); border-radius:22% 22% 13% 13%;
+  box-shadow:inset 0 -13px 0 #141d4a27,inset 0 6px 7px #fffc,0 6px 0 #465775,0 9px 12px #172945a4;
+  background:linear-gradient(123deg,var(--seat-top),var(--seat-bottom));
+}
+.flight97-board .flight96-pieces {
+  grid-template-columns:repeat(var(--choices),minmax(0,1fr)); background:linear-gradient(#17416dc7,#15335bea);
+}
+.flight97-board .flight96-case { animation:flight97-case-idle 3.1s ease-in-out infinite alternate }
+.flight97-board .flight96-piece:nth-child(even) .flight96-case { animation-delay:-1.7s }
+@keyframes flight97-case-idle { from { rotate:-1.4deg } to { rotate:1.4deg } }
+.flight97-animal {
+  position:relative; display:block; width:min(100%,119px); aspect-ratio:1; pointer-events:none;
+  filter:drop-shadow(0 3px 3px #1223418c); transform-origin:50% 90%;
+}
+.flight97-animal>img { position:absolute; inset:0; width:100%; height:100%; object-fit:contain }
+.flight97-animal[data-f97-pose="1"] { scale:-1 1 }
+.flight97-bear { animation:flight97-bear-idle 2.2s ease-in-out infinite alternate }
+@keyframes flight97-bear-idle { from { transform:rotate(-2deg) scaleY(.97) } to { transform:rotate(2deg) scaleY(1.025) } }
+.flight97-walking:has(img:nth-child(3)) img { animation:flight97-pet-steps 2.35s steps(1,end) infinite }
+.flight97-walking:has(img:nth-child(3)) img:nth-child(2) { animation-delay:-.78s }
+.flight97-walking:has(img:nth-child(3)) img:nth-child(3) { animation-delay:-1.55s }
+@keyframes flight97-pet-steps { 0%,33% { opacity:1 } 34%,100% { opacity:0 } }
+.flight97-transfer {
+  position:absolute; z-index:11; display:grid; place-items:center; pointer-events:none;
+  filter:drop-shadow(0 8px 6px #1f3c577d); will-change:transform;
+}
+.flight97-transfer .flight96-case,.flight97-transfer .flight97-animal { width:100% }
+.flight97-board [data-f95-loaded]>* { visibility:hidden }
+.flight97-board [data-f95-filled]>.flight97-animal,.flight97-board [data-f95-filled]>.flight96-case {
+  animation:flight97-settle .38s ease-out both;
+}
+@keyframes flight97-settle { from { translate:0 -7px; scale:.88 } 63% { scale:1.06 } }
+.flight97-board-cheer {
+  position:absolute; z-index:7; left:50%; top:23%; translate:-50%; isolation:isolate;
+  color:#ffe35e; -webkit-text-stroke:2px #a56410; text-shadow:0 0 14px #fff06b;
+  font-size:clamp(3.5rem,16vw,9rem); line-height:1;
+  animation:flight97-cheer .64s cubic-bezier(.28,.68,.27,1.23) both;
+}
+@keyframes flight97-cheer { from { scale:.35; rotate:-19deg; opacity:0 } }
+
+.flight97-takeoff { background:#14355c }
+.flight97-window { position:relative; height:clamp(310px,50dvh,535px); overflow:hidden; overflow:clip; isolation:isolate; touch-action:none }
+.flight97-window [hidden] { display:none }
+.flight97-sky {
+  position:absolute; inset:-9%; z-index:-6; background:#58c4ec url('flight95/day.webp') center/cover;
+  transform:translateX(calc(var(--cloud-slide,0px)*.1)) rotate(var(--turn,0deg)) scale(1.09);
+}
+.flight97-flight-clouds { position:absolute; z-index:-5; inset:0; transform:rotate(var(--turn,0deg)); pointer-events:none }
+.flight97-flight-clouds i {
+  position:absolute; width:39%; height:13%; left:var(--cloud-x,calc(var(--cloud)*29% - 25%)); top:calc(8% + var(--cloud)*8%);
+  opacity:.78; border-radius:49%; transform:scale(calc(.61 + var(--cloud)*.16));
+  background:
+    radial-gradient(ellipse at 16% 68%,#f6feff 9%,transparent 36%),
+    radial-gradient(ellipse at 39% 51%,#fff 14%,transparent 44%),
+    radial-gradient(ellipse at 62% 46%,#fff 8%,transparent 37%),
+    radial-gradient(ellipse at 78% 64%,#e5f9ff 9%,transparent 41%);
+}
+.flight97-ground {
+  position:absolute; z-index:-4; inset:39% -8% -11%; overflow:hidden;
+  background:repeating-linear-gradient(0deg,#7eb638 0px,#96c944 28px,#a0d04b 32px,#74a638 67px);
+  border-top:3px solid #b0d458; transform:translateY(calc(var(--lift,0)*74%));
+  opacity:calc(1 - var(--lift,0)*.91);
+}
+.flight97-ground::before {
+  content:""; position:absolute; top:0; left:6%; width:29%; height:7%; border-radius:40% 23% 0 0;
+  background:#cddfeb; box-shadow:0 4px 0 #7898aa; transform:translateX(calc(var(--runway-flow,0px)*.25));
+}
+.flight97-tarmac {
+  position:absolute; inset:0; overflow:hidden; clip-path:polygon(45% 0,55% 0,90% 100%,10% 100%);
+  background:linear-gradient(#5f7483,#334759 76%,#243b4f);
+}
+.flight97-tarmac::before,.flight97-tarmac::after {
+  content:""; position:absolute; inset:0; background:#ebf6fc;
+  clip-path:polygon(45% 0,46% 0,13% 100%,11% 100%);
+}
+.flight97-tarmac::after { scale:-1 1 }
+.flight97-mark {
+  position:absolute; top:var(--mark-y,0%); left:50%; translate:-50%;
+  width:calc(1px + 6px*var(--mark-depth,0)); height:calc(1px + 36px*var(--mark-depth,0)*var(--mark-depth,0));
+  background:#f8fcfe; border-radius:1px; opacity:calc(.35 + .65*var(--mark-depth,0));
+}
+.flight97-cockpit-frame {
+  position:absolute; z-index:5; inset:0; pointer-events:none; border-radius:29% 29% 0 0/7% 7% 0 0;
+  box-shadow:inset 0 7px 0 #263d55;
+  background:linear-gradient(65deg,#26394e 0 9%,#455d77 9.2% 12.4%,transparent 12.7%) left/60% 100% no-repeat,
+    linear-gradient(-65deg,#26394e 0 9%,#455d77 9.2% 12.4%,transparent 12.7%) right/60% 100% no-repeat;
+}
+.flight97-dashboard {
+  position:absolute; z-index:6; inset:auto 0 0; height:25%; border-radius:35% 35% 0 0/16% 16% 0 0; overflow:hidden;
+  pointer-events:none; background:linear-gradient(#314d6f,#172a43); border-top:3px solid #668ba4;
+  box-shadow:0 -4px 10px #24415a70;
+}
+.flight97-dash-art { position:absolute; width:100%; height:100%; object-fit:cover; object-position:center 56% }
+.flight97-status-lights { position:absolute; top:15%; right:8%; display:flex; gap:6px }
+.flight97-status-lights i {
+  width:10px; height:6px; border-radius:4px; background:#15372c; box-shadow:inset 0 0 3px #000a;
+}
+.flight97-takeoff:is([data-f97-phase="roll"],[data-f97-phase="lift"],[data-f97-phase="air"],[data-f97-phase="done"]) .flight97-status-lights i {
+  background:#80ee87; box-shadow:0 0 8px #5eec80; animation:flight97-light 1.6s ease-in-out infinite alternate;
+}
+.flight97-status-lights i:nth-child(2) { animation-delay:.25s!important }
+.flight97-status-lights i:nth-child(3) { animation-delay:.5s!important }
+.flight97-status-lights i:nth-child(4) { animation-delay:.75s!important }
+@keyframes flight97-light { to { opacity:.45 } }
+.flight97-yoke {
+  position:absolute; bottom:0; left:50%; width:clamp(106px,29%,190px); height:70%;
+  display:flex; justify-content:space-between; border-radius:0 0 39% 39%; border-bottom:12px solid #576a85;
+  filter:drop-shadow(0 4px 6px #071520ad);
+  transform:translateX(-50%) rotate(calc(-1.9*var(--turn,0deg)));
+}
+.flight97-yoke>i {
+  width:16%; height:93%; border-radius:37%; background:linear-gradient(94deg,#22364b,#7288a1 55%,#233549);
+  box-shadow:inset 0 3px 1px #c7d8e49c; rotate:-12deg;
+}
+.flight97-yoke>i:nth-child(2) { rotate:12deg }
+.flight97-yoke>b {
+  position:absolute; left:42%; bottom:0; width:16%; height:19%; border-radius:4px; background:#23384f; border:1px solid #8fa8c7;
+}
+.flight97-takeoff:not([data-f97-phase="ready"]) .flight97-throttle { visibility:hidden }
+.flight97-takeoff[data-f97-phase="roll"] .flight97-throttle {
+  visibility:visible; pointer-events:none; animation:flight97-lever-out .43s ease-in both;
+}
+@keyframes flight97-lever-out { to { translate:-50% 39px; opacity:0 } }
+.flight97-joystick { display:grid; grid-template-columns:repeat(2,44px) minmax(98px,1fr) repeat(2,44px); gap:4px; padding:5px }
+#missions93-cockpit .flight97-joystick button { min-width:0; padding:4px; white-space:normal }
+#missions93-cockpit .flight97-takeoff:not([data-f97-phase="air"]) .flight97-joystick { display:none }
+.flight97-hoop {
+  position:absolute; z-index:2; left:var(--gate-x,50%); top:var(--gate-y,35%); translate:-50% -50%;
+  scale:var(--gate-scale,.72); width:clamp(87px,29vw,158px); aspect-ratio:1; --ring-light:#afedff;
+}
+.flight97-hoop[data-f97-hoop="1"] { --ring-light:#5fd9ff }
+.flight97-hoop[data-f97-hoop="2"] { --ring-light:#cb9eff }
+.flight97-hoop[data-f97-hoop="3"] { --ring-light:#ffcb4c }
+#missions93-cockpit .flight97-hoop-button {
+  position:relative; display:grid; place-items:center; width:100%; height:100%; isolation:isolate;
+  border-radius:50%; border:0; min-height:0; background:#c6eff426; color:#ffd958;
+  box-shadow:0 0 15px var(--ring-light),inset 0 0 14px var(--ring-light);
+  font-size:clamp(2.2rem,11vw,4.7rem); line-height:1; font-weight:950;
+  -webkit-text-stroke:2px #854b1f; paint-order:stroke fill; text-shadow:0 2px 0 #ae622c,0 0 14px white;
+}
+.flight97-hoop-button .flight96-ring-puffs { animation:flight97-ring-spin 11s linear infinite }
+.flight97-hoop-button .flight96-ring-puffs>i { opacity:.94 }
+@keyframes flight97-ring-spin { to { rotate:360deg } }
+.flight97-hoop[data-f97-gate="passed"] { animation:flight97-gate-pass .65s ease-out both; pointer-events:none }
+@keyframes flight97-gate-pass { from { opacity:.93 } to { opacity:0; transform:scale(1.55) } }
+.flight97-takeoff[data-f97-phase="done"] .flight97-hoop[data-f97-hoop="3"] { animation:none; opacity:1; scale:1.31 }
+.flight97-takeoff[data-f97-phase="done"] .flight97-hoop-button { opacity:1; background:#ffe58748; box-shadow:0 0 25px #ffd13e,inset 0 0 23px #ffd13e }
+.flight97-sparks { position:absolute; z-index:5; top:38%; left:50%; width:6px; height:6px; border-radius:50%; pointer-events:none }
+.flight97-takeoff[data-f97-final="yes"] .flight97-sparks {
+  box-shadow:-118px 13px #fc88cc,-142px -65px #ffe774,-84px -27px #78f8ff,-54px -38px #a5f98b,
+     -33px -76px #ff88d6,9px -90px #fcef7d,49px -59px #9cfc7b,117px -24px #c993ff,
+     141px 28px #8aefff,71px 88px #fff46b,19px 71px #f289ff,-90px 92px #6afff7;
+  animation:flight97-final-sparks .9s ease-out both;
+}
+@keyframes flight97-final-sparks { from { scale:.15; rotate:-24deg; opacity:0 } 65% { opacity:1 } to { scale:1.15; rotate:14deg; opacity:.85 } }
+
+.flight97-aircraft {
+  position:absolute; z-index:4; left:var(--plane-x,50%); top:var(--plane-y,60%);
+  width:clamp(114px,38vw,253px); height:auto; aspect-ratio:3.35;
+  transform:translate(-50%,-50%) perspective(200px) rotateZ(var(--plane-bank,0deg))
+    rotateX(var(--plane-pitch,0deg)) scale(var(--plane-scale,.7));
+  transform-origin:center; filter:drop-shadow(0 5px 4px #17385c72); pointer-events:none;
+}
+.flight97-aircraft>span { position:absolute; display:block }
+.flight97-fuselage {
+  inset:18% 39% 3%; border-radius:55% 55% 47% 47%;
+  background:linear-gradient(105deg,#91afc9 3%,#eff9ff 33%,#fff 45%,#adc6de 74%,#527a9a);
+  border:1px solid #5c7eaa; box-shadow:inset 0 -4px 2px #2c577855;
+}
+.flight97-fuselage>i {
+  position:absolute; top:57%; left:24%; right:24%; height:24%; border-radius:50%;
+  border:1px solid #f3f8ff; background:radial-gradient(ellipse at 46% 39%,#23405d,#56718f 64%,#ecfbff 74%);
+}
+.flight97-fin {
+  width:9%; height:59%; bottom:46%; left:45.5%;
+  clip-path:polygon(40% 0,63% 0,100% 95%,0 100%);
+  background:linear-gradient(101deg,#8eadd5 11%,#e6faff 51%,#6899c8 79%,#365d93 83%);
+  transform-origin:50% 100%; transform:rotate(calc(-.23*var(--plane-bank,0deg)));
+}
+.flight97-tailplane {
+  inset:46% 29% 31%; border-radius:100% 100% 45% 45%;
+  background:linear-gradient(#d9f6fd,#9fbae1); border-bottom:2px solid #497396;
+}
+.flight97-wing {
+  width:43%; height:46%; top:47%; border-radius:15% 47% 66% 28%;
+  background:linear-gradient(#f6fcff,#9cbed9 60%,#668aae); border-bottom:2px solid #4c789d;
+  transform-origin:100% 64%; rotate:5deg;
+}
+.flight97-wing-left { left:1%; transform:rotate(calc(.18*var(--plane-bank,0deg))) }
+.flight97-wing-right {
+  right:1%; border-radius:47% 15% 28% 66%; transform-origin:0 64%;
+  rotate:-5deg; transform:rotate(calc(-.18*var(--plane-bank,0deg)));
+}
+.flight97-wing>i {
+  position:absolute; width:5%; min-width:4px; aspect-ratio:1; top:26%; left:1%;
+  border-radius:50%; background:#ff7c63; box-shadow:0 0 5px #ff702f; animation:flight97-light .7s infinite alternate;
+}
+.flight97-wing-right>i { left:auto; right:1%; background:#6af6ba; box-shadow:0 0 6px #1df6ac }
+.flight97-wing>b {
+  position:absolute; width:22%; height:103%; top:47%; right:12%; border-radius:50%;
+  border:2px solid #809fb8; background:radial-gradient(circle,#1b365b 24%,#435e80 35%,#7894aa 46%,#def9ff 50%,#8baec9 71%);
+  transform:skewX(-9deg);
+}
+.flight97-wing-right>b { right:auto; left:12%; transform:skewX(9deg) }
+.flight97-wing>b::after {
+  content:""; position:absolute; inset:19%; border-radius:50%;
+  background:repeating-conic-gradient(from 7deg,#203c5b 0deg 38deg,#799ab4 39deg 55deg);
+  animation:flight97-ring-spin .19s linear infinite paused;
+}
+.flight97-takeoff:not([data-f97-phase="ready"]) .flight97-wing-right>b { right:auto; left:12%; transform:skewX(9deg) }
+.flight97-wing>b::after { animation-play-state:running }
+.flight97-wheel {
+  height:24%; aspect-ratio:.75; top:92%; border-radius:45%; background:#273d5a; box-shadow:inset -2px 0 #54728e;
+}
+.flight97-wheel-left { left:40% }
+.flight97-wheel-right { right:40% }
+.flight97-takeoff:is([data-f97-phase="lift"],[data-f97-phase="air"],[data-f97-phase="done"]) .flight97-wheel {
+  animation:flight97-wheels-up .58s ease-in both;
+}
+@keyframes flight97-wheels-up { to { translate:0 -12px; scale:.65; opacity:0 } }
+.flight97-trail {
+  display:none!important; z-index:-1; top:94%; width:4%; height:130%; transform-origin:top;
+  background:linear-gradient(#effcffba,transparent); border-radius:49%; filter:blur(2px);
+}
+.flight97-trail-left { left:29%; rotate:14deg }
+.flight97-trail-right { right:29%; rotate:-14deg }
+.flight97-takeoff:is([data-f97-phase="air"],[data-f97-phase="done"]) .flight97-trail {
+  display:block!important; animation:flight97-trail .88s ease-in-out infinite alternate;
+}
+@keyframes flight97-trail { to { opacity:.28; scale:.78 1.31 } }
+
+/* Small secondary movements complement the controls in the other hangar missions. */
+#missions93-cockpit .flight95-air .flight95-drift { background-repeat:no-repeat; background-size:cover }
+.flight95-viewport>.flight95-object { top:calc(var(--alt) + var(--flight-bob,0px)) }
+.flight95-viewport>.flight95-object .flight95-target { transform:rotate(var(--flight-sway,0deg)) }
+.flight96-feeder .flight96-chick { animation:flight97-perch 1.15s ease-in-out infinite alternate }
+.flight96-feeder.flight96-air-win .flight96-chick { animation:f95-flap .25s alternate 5 }
+@keyframes flight97-perch { to { translate:1px -2px; rotate:5deg } }
+.flight95-viewport .flight95-plane-art { animation:flight97-cruise .65s ease-in-out infinite alternate }
+.flight95-viewport [data-f95-type="balloon"] .flight95-target::after {
+  animation:flight97-string 1.4s ease-in-out infinite alternate;
+}
+@keyframes flight97-string { from { rotate:-14deg } to { rotate:16deg } }
+@keyframes flight97-cruise { from { scale:1 .986 } to { scale:1 1.018 } }
+.flight95-map-plane .flight95-plane-art,.flight95-cargo-plane .flight95-plane-art,.flight95-arrival .flight95-plane-art {
+  transform-origin:center; animation:flight97-aircraft-bob 1.9s ease-in-out infinite alternate;
+}
+@keyframes flight97-aircraft-bob { from { transform:translateY(-1px) rotate(-1deg) } to { transform:translateY(3px) rotate(2deg) } }
+.flight95-radio-window { animation:flight97-radio-clouds 12s ease-in-out infinite alternate }
+@keyframes flight97-radio-clouds { to { background-size:110% } }
+.flight95-instruments i { animation:flight97-light 1.65s ease-in-out infinite alternate }
+.flight95-instruments i:last-child { animation-delay:.65s }
+.flight95-radar button { animation:flight97-radar-lock 2.4s ease-in-out infinite alternate }
+@keyframes flight97-radar-lock { to { filter:brightness(1.27) } }
+.flight95-radio-call { animation:flight97-pilot-greet .45s ease-out both }
+.flight95-loading-board .flight95-crate[data-f95-loaded] { animation:flight97-settle .38s ease-out both }
+
+@media (max-width:370px) {
+  .flight97-pilot-call { gap:4px; padding-inline:4px }
+  .flight97-joystick { grid-template-columns:repeat(2,35px) minmax(85px,1fr) repeat(2,35px) }
+  #missions93-cockpit .flight97-board .flight96-piece .flight95-voice { min-width:29px }
+}
+@media (prefers-reduced-motion:reduce) {
+  .flight97-walking:has(img:nth-child(3)) img:not(:last-child) { opacity:0 }
+}
