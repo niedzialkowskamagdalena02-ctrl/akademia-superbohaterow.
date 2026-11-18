@@ -26,9 +26,10 @@ export function academy107Entry({release, profiles, status, linked, parent, pair
       <h1>${refinedArt('entry-logo')}<span class="academy102-sr">Akademia Superbohaterów</span><span>V${release}</span></h1>
       <p>Wybierz swoją bazę</p>
     </header>
-    <section class="academy107-welcome">${refinedArt('entry-welcome')}
-      <h2 class="academy102-sr">Witaj w Akademii!</h2>
-      <p class="academy102-sr">Każdy bohater ma własne misje i nagrody.</p>
+    <section class="academy107-welcome">
+      <img src="assets/interface110/welcome-shield.webp" alt="" draggable="false">
+      <h2>Witaj w Akademii!</h2>
+      <p>Każdy bohater ma własne misje i nagrody.</p>
     </section>
     <div class="academy107-profiles">${profiles.map(({id, name, grade, coins, progress, hero, audio})=>{
       const portrait=heroPortrait(hero);
@@ -115,9 +116,15 @@ export function academy102Shell(scene, {title, content, menu='', voice='', relea
 }
 
 export function academy102Choices() {
+  const views=[
+    ['classic','Widok klasyczny','overview','☰'],
+    ['walk','Spacer po bazie','walk','']
+  ];
   return `<nav class="academy102-choices" aria-label="Wybór widoku">
-    ${tile('classic','Widok klasyczny','hq:view:classic',{artwork:refinedArt('classic')})}
-    ${tile('walk','Spacer po bazie','hq:view:walk',{artwork:refinedArt('walk')})}
+    ${views.map(([key,label,background,icon])=>tile(key,label,'hq:view:'+key,{
+      artwork:`<img class="academy102-art" src="assets/hq/${background}.webp" alt="" draggable="false">`,
+      content:`<span class="academy110-choice-label">${icon?`<span aria-hidden="true">${icon}</span>`:''}${label}</span>`
+    })).join('')}
   </nav>`;
 }
 

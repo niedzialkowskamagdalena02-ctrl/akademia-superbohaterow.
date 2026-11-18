@@ -137,12 +137,13 @@ function board(){
  pinView.api.render();
  assert.match(pinView.root.innerHTML,/class="academy107-entry"/);
  assert.match(pinView.root.innerHTML,/academy107-pair/);
+ assert.match(pinView.root.innerHTML,/data-action="enter:pawel"[\s\S]*data-action="enter:patryk"/);
  assert.match(pinView.root.innerHTML,/class="academy107-profile-card academy107-profile-pawel" data-action="enter:pawel">\s*<img[^>]*assets\/art\/hulk\.webp/);
  assert.match(pinView.root.innerHTML,/assets\/interface108\/hero-patryk\.webp/);
  assert.match(pinView.root.innerHTML,/data-action="enter:admin" aria-label="Centrum dowodzenia mamy"><\/button>/);
  assert.match(pinView.root.innerHTML,/data-action="academy:update" aria-label="Aktualizuj Akademię"><\/button>/);
  const choices=pinView.ctx.academy102Choices();
- assert.match(choices,/data-action="hq:view:classic"[\s\S]*interface108\/classic\.webp[\s\S]*data-action="hq:view:walk"[\s\S]*interface108\/walk\.webp/);
+ assert.match(choices,/data-action="hq:view:classic"[\s\S]*hq\/overview\.webp[\s\S]*<\/span>Widok klasyczny<\/span>[\s\S]*data-action="hq:view:walk"[\s\S]*hq\/walk\.webp[\s\S]*>Spacer po bazie<\/span>/);
  await pinView.api.handle('enter:admin');
  const pinMarkup=pinView.root.innerHTML;
  assert.equal((pinMarkup.match(/parent-pin:cancel/g)||[]).length,1);

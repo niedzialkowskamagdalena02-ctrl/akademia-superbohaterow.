@@ -363,7 +363,9 @@ function fixture(){
  assert.ok(scope.some(turn=>turn.page?.number===12&&turn.key==='matematyka'));
  assert.deepEqual([...new Set(scope.map(turn=>turn.key))].sort(),['angielski','matematyka','polski','przyroda']);
  const manifest=vm.runInNewContext(fs.readFileSync(path.join(dir,'sw.js'),'utf8')+'\n({CACHE,ASSETS})',{self:{addEventListener(){}}});
- assert.equal(manifest.CACHE,'academy-v109');
+ assert.equal(manifest.CACHE,'academy-v110');
+ for(const asset of ['hq/overview.webp','hq/walk.webp','interface110/welcome-shield.webp','interface110/pair-phone.webp'])
+  assert.ok(manifest.ASSETS.includes('./assets/'+asset),asset);
  for(const name of ['hulk','captain','thor','hood'])assert.ok(manifest.ASSETS.includes('./assets/art/'+name+'.webp'));
  for(const resource of manifest.ASSETS)assert.ok(fs.existsSync(path.resolve(dir,resource.split('?')[0])),resource);
  console.log('PASS V104 – Kokpit Matematyczny, cyfry i odsłuch, przyspieszanie, gesty, tryb mamy i cache.');

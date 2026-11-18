@@ -1,5 +1,5 @@
 import {gamePreview99, hangarPaint99} from './game-art99.js?v=99';
-import {academy102Shell,academy102Choices,academy102Player,academy102DashboardNav,academy102DashboardVoice,academy102FamilyHeading,academy102Knowledge,academy102MissionsHeader,academy102MissionZone,academy107Entry,academy107PinScreen,heroPortrait} from './interface102.js?v=109';
+import {academy102Shell,academy102Choices,academy102Player,academy102DashboardNav,academy102DashboardVoice,academy102FamilyHeading,academy102Knowledge,academy102MissionsHeader,academy102MissionZone,academy107Entry,academy107PinScreen,heroPortrait} from './interface102.js?v=110';
 // V48_AI_RESPONSE_DIAGNOSTICS
 // V44_BULK_CHAPTERS
 // V42_CHAPTERS
@@ -9,7 +9,7 @@ import {initial,get,put,del,allRecords,replaceRecords,compress,uid,gradeName} fr
 import {speak,listen,stopVoice,getVoiceState,setVoiceState,spellEnglish77} from './voice.js?v=81';
 import {vocabulary,readings,explanation} from './learning.js';
 import {syncAdapter} from './sync.js?v=81';
-import {BASE_ITEMS,baseMarkup,migrateBase} from './base.js?v=109';
+import {BASE_ITEMS,baseMarkup,migrateBase} from './base.js?v=110';
 import {mountArcade,stopArcade} from './arcade.js?v=93';
 import {mountBaseScene84} from './base-scene84.js?v=88';
 import {baseWalkMarkup,mountBaseWalk,resetBaseWalk,openWalkRoom87,focusWalkCase88,walkRoomId93} from './base-walk85.js?v=102';
@@ -79,7 +79,7 @@ const select=(id,label,options,value)=>`<label for="${id}">${label}</label><sele
 const grades=[['P','Przedszkole'],...Array.from({length:12},(_,i)=>[String(i+1),`Klasa ${i+1}`])];
 const people=[['pawel','Paweł'],['patryk','Patryk']];
 const note=t=>{const n=$('hq85-notice')||$('notice');if(!n){console.warn('Powiadomienie:',t);return}n.textContent=t;n.classList.add('visible');setTimeout(()=>{if(n.isConnected)n.classList.remove('visible')},4500)};
-const ACADEMY_RELEASE=109;
+const ACADEMY_RELEASE=110;
 async function checkAcademyUpdate(button){
  if(!button||button.disabled)return;
  const label=button.textContent,controller=new AbortController();
@@ -3044,7 +3044,7 @@ function sync78Markup(entry=false){if(globalThis.AKADEMIA_TEST80)return '<p clas
  if(d?.role==='child')return '<section class="card"><p data-sync78-message role="status">'+e(syncAdapter.status())+'</p>'+button('🔄 Pobierz od mamy','sync78:now','gold')+sync78ConflictMarkup()+'</section>';
  if(role==='admin')return '<section class="card"><h2>📱 Połącz telefony</h2><p>Najpierw włącz udostępnianie na swoim telefonie. Twoje zapisane materiały zostaną wysłane do prywatnej bazy rodziny. Potem pokażemy kod do wpisania u Pawła.</p><p data-sync78-message role="status">'+e(syncAdapter.status())+'</p>'+button('☁️ Włącz udostępnianie','sync78:create','gold')+'</section>';
  const fields='<p>Wpisz kod pokazany na telefonie mamy. Materiały tej instalacji zostaną zastąpione udostępnioną biblioteką dziecka.</p><label for="sync78-code">Jednorazowy kod</label><input id="sync78-code" autocomplete="off" autocapitalize="characters" maxlength="12" placeholder="8 znaków">'+button('Połącz i pobierz materiały','sync78:join','gold')+'<p data-sync78-message role="status">'+e(syncAdapter.status())+'</p>';
- return entry?`<details class="academy107-pair"><summary>Połącz z mamą</summary><div class="academy107-pair-fields">${fields}</div></details>`:`<section class="card"><details><summary>📱 Połącz z mamą</summary>${fields}</details></section>`;
+ return entry?`<details class="academy107-pair"><summary><img src="assets/interface110/pair-phone.webp" alt="">Połącz z mamą</summary><div class="academy107-pair-fields">${fields}</div></details>`:`<section class="card"><details><summary>📱 Połącz z mamą</summary>${fields}</details></section>`;
 }
 function sync78ConflictMarkup(){return syncAdapter.debug?.().conflict?'<div role="alert"><p>Te same dane zmieniono jednocześnie. Twoje zmiany są zachowane na telefonie. Wybierz, którą wersję pozostawić.</p>'+button('Pobierz wersję z chmury','sync78:remote','alt')+button('Zachowaj moje zmiany','sync78:local','alt')+'</div>':'';}
 async function sync78Action(action,target){

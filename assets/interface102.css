@@ -84,7 +84,34 @@ body:has(.academy102-screen) { background:#080f2b }
   padding:2.1cqi 0 0; margin:.9cqi 1.83cqi 0;
   border-top:2px solid #839cdd58;
 }
-.academy102-choices .academy102-tile { width:100%; }
+.academy102-screen .academy102-choices button.academy102-tile:not(:disabled) {
+  --view-border:#ffe288;
+  --view-glow:#eac66b65;
+  display:grid; place-items:center; isolation:isolate;
+  width:100%; aspect-ratio:1.9; max-height:304px;
+  border:clamp(2px,.7cqi,5px) solid var(--view-border)!important;
+  border-radius:clamp(18px,5cqi,35px);
+  background:#12274a!important;
+  box-shadow:0 0 16px var(--view-glow),0 6px 0 #0a1531!important;
+}
+.academy102-screen .academy102-choices button.academy102-walk:not(:disabled) {
+  --view-border:#5debff; --view-glow:#36cffb80;
+}
+.academy102-choices .academy102-art,
+.academy102-choices .academy102-tile::after {
+  position:absolute; inset:0; width:100%; height:100%; pointer-events:none;
+}
+.academy102-choices .academy102-art { object-fit:cover; object-position:center 48%; }
+.academy102-choices .academy102-walk .academy102-art { object-position:center 42%; }
+.academy102-choices .academy102-tile::after {
+  content:"";
+  background:linear-gradient(180deg,#0a204750 4%,#080f379c 56%,#09152ad9);
+}
+.academy110-choice-label {
+  position:relative; z-index:1; display:flex; align-items:center; justify-content:center; gap:.36em;
+  padding:.6em; color:#fff; font-size:clamp(1.05rem,5.7cqi,2.55rem); font-weight:900;
+  line-height:1.08; text-align:center; text-shadow:0 2px 8px #051225,0 2px 1px #051225;
+}
 .academy102-player {
   margin:.9cqi 2.65cqi 0; border:.44cqi solid #426aa4; border-radius:3.85cqi;
   padding:2.95cqi 3.95cqi 2.7cqi;
