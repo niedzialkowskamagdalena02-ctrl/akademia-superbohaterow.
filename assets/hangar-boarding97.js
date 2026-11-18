@@ -13,6 +13,13 @@ const passengers = [
   ['cat'], ['bear','bear','bear','bear'], ['dog','dog','cat'], ['cat','dog'],
   ['dog','dog','dog','dog'], ['cat','cat','bear'], ['dog'], ['cat','bear','dog','dog']
 ];
+const destinations = [
+  {city:'Nowy Jork', country:'USA', to:'do Nowego Jorku', at:'w Nowym Jorku', reason:'Zobaczymy Statuę Wolności.'},
+  {city:'Paryż', country:'Francja', to:'do Paryża', at:'w Paryżu', reason:'Z góry wypatruj wieży Eiffla.'},
+  {city:'Rzym', country:'Włochy', to:'do Rzymu', at:'w Rzymie', reason:'Spójrz, czy widać już Koloseum.'},
+  {city:'Londyn', country:'Wielka Brytania', to:'do Londynu', at:'w Londynie', reason:'Nad Tamizą wypatruj Big Bena.'},
+  {city:'Reykjavík', country:'Islandia', to:'do Reykjavíku', at:'w Reykjavíku', reason:'To ostatni przystanek. Lecimy na Islandię, gdzie jest tata.'}
+];
 const paint = ['purple','blue','green','red','amber','teal','pink'];
 const seatPaint = ['orange','yellow','red','blue'];
 const bagCount = ['jedną walizkę','dwie walizki','trzy walizki','cztery walizki'];
@@ -22,6 +29,18 @@ const particles = '<span class="flight96-confetti" aria-hidden="true"></span>';
 
 export const boardingRoundCount97 = bags.length;
 export const boardingSlots98 = 4;
+export const boardingFlightCount101 = destinations.length;
+
+export function boardingTrip101(turn, random = Math.random) {
+  return destinations.flatMap((destination,index) => {
+    const flight = {...destination, number:index+1};
+    return boardingDeck97(turn+index,random).map(task=>({...task,flight}));
+  });
+}
+
+export function boardingFlightLabel101(flight) {
+  return 'Lot '+flight.number+' / '+boardingFlightCount101;
+}
 
 export function boardingDeck97(turn, random = Math.random) {
   const bagLetters = [...bags[turn % bags.length]];
@@ -52,10 +71,11 @@ export function boardingDeck97(turn, random = Math.random) {
   ];
 }
 
-export function pilotCall97(message, progress, button) {
+export function pilotCall97(message, progress, button, flight) {
   return `<div class="flight97-pilot-call">
     <span class="flight97-pilot-face" aria-hidden="true">${pilotImg}<i></i></span>
     <div class="flight97-bubble"><small data-f97-board-progress>${progress}</small>
+      ${flight?`<span class="flight101-route">${boardingFlightLabel101(flight)} · ${flight.city}</span>`:''}
       <p data-game-prompt>${message}</p></div>
     ${button('read','🔊','class="flight95-voice" aria-label="Odsłuchaj polecenie pilota"')}
   </div>`;
@@ -107,7 +127,7 @@ export function boardingMarkup97(task, state, message, button, listen) {
   return `<div class="flight95-surface flight96-baggage flight97-board" data-f96-scene="${task.seat?'cabin':'hold'}"
       data-f97-style="${task.style}" style="--places:${boardingSlots98};--choices:${task.options.length}">
     <div class="flight97-board-world" aria-hidden="true"></div>
-    ${pilotCall97(message,done.length+' / '+task.count,button)}
+    ${pilotCall97(message,done.length+' / '+task.count,button,task.flight)}
     ${board}
     <div class="flight96-pieces">${items}</div>
   </div>`;

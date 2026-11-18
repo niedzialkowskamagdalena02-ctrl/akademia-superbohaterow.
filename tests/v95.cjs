@@ -69,10 +69,15 @@ function fixture(){
  const won=name=>assert.ok(root.querySelector(name==='baggage'?'.flight97-board':'.flight95-surface').dataset.f95Win,name);
 
  try{
-  for(const [grade,missions] of [['P',captainMissions93],['2',aceMissions93]]){
-   mountHangar95(root,{grade,legacy:grade==='P',speak:message=>spoken.push(message)});
-   assert.equal((root.innerHTML.match(/data-f95-action="mission:/g)||[]).length,7);
-   assert.equal((root.innerHTML.match(/class="flight95-card"/g)||[]).length,8);
+  for(const grade of ['1','3','4']){
+   mountHangar95(root,{grade});
+   assert.equal(root.innerHTML.includes('data-f95-action="mission:baggage"'),grade!=='4');
+  }
+  const boardingMission=captainMissions93.find(([id])=>id==='baggage');
+  for(const [grade,missions] of [['P',captainMissions93],['2',[...aceMissions93,boardingMission]]]){
+   mountHangar95(root,{grade,profileKey:grade,legacy:grade==='P',speak:message=>spoken.push(message)});
+   assert.equal((root.innerHTML.match(/data-f95-action="mission:/g)||[]).length,missions.length);
+   assert.equal((root.innerHTML.match(/class="flight95-card"/g)||[]).length,missions.length+1);
    assert.match(root.innerHTML,/data-action="hq:flight"[^>]*>[\s\S]*?<i aria-hidden="true">8<\/i>/);
    assert.equal(/data-action="hq:flight" disabled/.test(root.innerHTML),grade!=='P');
    for(const [id] of missions){
@@ -88,8 +93,10 @@ function fixture(){
       assert.deepEqual(places,[0,1,2,3]);
       let seat=places.length-1;
       const wrong=task.options.findIndex(item=>!task.targets.includes(item.value));
-      root.click('bag:'+wrong);root.click('seat:'+seat);
-      assert.equal(root.querySelector('[data-f95-seat="'+seat+'"]').disabled,undefined);
+      if(wrong!==-1){
+       root.click('bag:'+wrong);root.click('seat:'+seat);
+       assert.equal(root.querySelector('[data-f95-seat="'+seat+'"]').disabled,undefined);
+      }
       const left=[...task.targets];
       task.options.forEach((item,i)=>{
        const found=left.indexOf(item.value);
@@ -106,14 +113,39 @@ function fixture(){
       assert.equal(root.querySelector('.flight97-board'),board,'The board survives completion');
       assert.equal(root.innerHTML.match(/data-f95-seat="/g).length,boardingSlots98);
      }
-     assert.match(root.innerHTML,/0 \/ 3/);
-     assert.match(root.innerHTML,/pilot.webp/);
-     load(t);
-     assert.match(root.innerHTML,/Teraz czas na pasażerów/);
-     root.click('next');
-     assert.match(root.innerHTML,/0 \/ 1/);
-     load(hangarDeck95(id,grade)[1]);
-     assert.match(root.querySelector('[data-game-prompt]').textContent,/Bagaże i pasażerowie na pokładzie/);
+     const trip=hangarDeck95(id,grade);
+     assert.deepEqual(trip.filter(stage=>!stage.seat).map(stage=>stage.flight.city),['Nowy Jork','Paryż','Rzym','Londyn','Reykjavík']);
+     for(let flight=0;flight<5;flight++){
+      const [bags,riders]=trip.slice(flight*2,flight*2+2);
+      assert.equal(bags.flight,riders.flight);
+      assert.ok(root.innerHTML.includes('Lot '+(flight+1)+' / 5'));
+      assert.ok(root.innerHTML.includes(bags.flight.city));
+      assert.ok(root.innerHTML.includes(bags.flight.country));
+      assert.ok(root.innerHTML.includes(bags.prompt));
+      assert.ok(root.innerHTML.includes(riders.prompt));
+      assert.match(root.innerHTML,/pilot.webp/);
+      assert.ok(spoken.at(-1).includes(bags.speech));
+      assert.ok(spoken.at(-1).includes(riders.speech));
+      assert.doesNotMatch(root.innerHTML,/Pięć lotów ukończonych/);
+      if(flight===4) assert.match(spoken.at(-1),/Islandię, gdzie jest tata/);
+      root.click('boarding-load');
+      assert.ok(root.innerHTML.includes('0 / '+bags.count));
+      load(bags);
+      assert.match(root.innerHTML,/Teraz czas na pasażerów/);
+      root.click('next');
+      assert.ok(root.innerHTML.includes('0 / '+riders.count));
+      load(riders);
+      assert.ok(root.innerHTML.includes('Start '+riders.flight.to));
+      assert.match(root.querySelector('[data-game-prompt]').textContent,/Bagaże i pasażerowie na pokładzie/);
+      root.click('next');
+     }
+     assert.equal(root.dataset.fl95Mode,'result');
+     assert.match(root.innerHTML,/Pięć lotów ukończonych!/);
+     assert.match(root.innerHTML,/Wylądowaliśmy w Reykjavíku/);
+     root.click('start');
+     assert.ok(root.innerHTML.includes(hangarDeck95(id,grade,()=>.32,5)[0].prompt));
+     root.click('catalog');
+     continue;
     }
     if(id==='takeoff'){
      assert.match(root.innerHTML,/Pociągnij dźwignię/);
@@ -246,7 +278,7 @@ function fixture(){
  assert.ok(scope.some(turn=>turn.page?.number===12&&turn.key==='matematyka'));
  assert.deepEqual([...new Set(scope.map(turn=>turn.key))].sort(),['angielski','matematyka','polski','przyroda']);
  const manifest=vm.runInNewContext(fs.readFileSync(path.join(dir,'sw.js'),'utf8')+'\n({CACHE,ASSETS})',{self:{addEventListener(){}}});
- assert.equal(manifest.CACHE,'academy-v100');
+ assert.equal(manifest.CACHE,'academy-v101');
  for(const resource of manifest.ASSETS)assert.ok(fs.existsSync(path.resolve(dir,resource.split('?')[0])),resource);
- console.log('PASS V100 – 14 misji, odprawa i kabina, obręcze, slalom, karmnik, katalog, trening i cache.');
+ console.log('PASS V101 – 14 gier, trasa pięciu lotów w obu kokpitach, obręcze, slalom, karmnik, trening i cache.');
 })().catch(error=>{console.error(error);process.exitCode=1;});

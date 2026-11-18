@@ -42,6 +42,21 @@
 .flight97-board .flight96-piece:nth-child(3n) { --idle-delay:-1.8s }
 .flight97-board .flight96-piece:nth-child(5n) { --idle-delay:-2.4s }
 
+.flight101-route {
+  display:inline-block; margin-inline-start:5px; color:#14527a;
+  font-size:.75rem; font-weight:800; line-height:1.2;
+}
+.flight101-brief { display:flex; flex-direction:column }
+.flight101-brief .flight101-brief-body { min-height:0; flex:1; justify-content:center }
+.flight101-flight-card {
+  display:grid; justify-items:start; gap:12px; padding:14px;
+  background:#f2faff; color:#133754; border:2px solid #9bd8f4; border-radius:14px;
+  width:min(100%,430px); box-shadow:0 4px 14px #0a2d5766;
+}
+#missions93-cockpit .flight101-flight-card h3 { margin:0; color:#164b77 }
+#missions93-cockpit .flight101-flight-card p { margin:0; color:#133754; line-height:1.28 }
+.flight101-flight-card strong { display:block; margin-bottom:2px; color:#175987 }
+
 /* Each character has a head, ears, torso, front paws, hind paws, and a tail. */
 .flight98-pet {
   --fur:#bd8053; --light-fur:#edbf8e; --shade:#754633; --cream:#ffe7bc;
