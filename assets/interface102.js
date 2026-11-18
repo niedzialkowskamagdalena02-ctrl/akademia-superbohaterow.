@@ -7,6 +7,19 @@ const detailArt = (name) =>
 const refinedArt = (name) =>
   `<img class="academy102-art" src="assets/interface108/${name}.webp" alt="" draggable="false">`;
 
+const heroPortraits = new Map([
+  ['iron','assets/interface108/hero-pawel.webp'],
+  ['spider','assets/interface108/hero-patryk.webp'],
+  ['hulk','assets/art/hulk.webp'],
+  ['captain','assets/art/captain.webp'],
+  ['thor','assets/art/thor.webp'],
+  ['hood','assets/art/hood.webp']
+]);
+
+export function heroPortrait(key) {
+  return heroPortraits.get(key) ?? `assets/art/${key}.svg`;
+}
+
 export function academy107Entry({release, profiles, status, linked, parent, pair, update}) {
   return `<main class="academy107-entry">
     <header class="academy107-entry-header">
@@ -17,16 +30,18 @@ export function academy107Entry({release, profiles, status, linked, parent, pair
       <h2 class="academy102-sr">Witaj w Akademii!</h2>
       <p class="academy102-sr">Każdy bohater ma własne misje i nagrody.</p>
     </section>
-    <div class="academy107-profiles">${profiles.map(({id, name, grade, coins, progress, hero, audio})=>`
+    <div class="academy107-profiles">${profiles.map(({id, name, grade, coins, progress, hero, audio})=>{
+      const portrait=heroPortrait(hero);
+      return `
       <div class="academy107-profile">
         <button type="button" class="academy107-profile-card academy107-profile-${id}" data-action="enter:${id}">
-          ${hero ? `<img class="academy107-profile-hero academy108-selected-hero" src="assets/art/${hero}.svg" alt="" draggable="false">`
-            : `<img class="academy107-profile-hero" src="assets/interface108/hero-${id}.webp" alt="" draggable="false">`}
+          <img class="academy107-profile-hero${portrait.endsWith('.svg')?' academy108-selected-hero':''}" src="${portrait}" alt="" draggable="false">
           <span class="academy107-profile-name">${name}</span>
           <span class="academy107-profile-grade">${grade} · ${coins} złotych</span>
           <span class="academy107-profile-progress" aria-label="Postęp ${progress}%"><span style="width:${progress}%"></span></span>
         </button>${audio}
-      </div>`).join('')}</div>
+      </div>`;
+    }).join('')}</div>
     <section class="academy107-link-panel">
       ${parent ? `<button type="button" class="academy107-entry-art academy107-entry-parent" data-action="enter:admin" aria-label="Centrum dowodzenia mamy"></button>` : ''}
       <p${linked?' data-sync78-message role="status"':''}>${status}</p>

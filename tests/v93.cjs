@@ -137,7 +137,7 @@ function board(){
  pinView.api.render();
  assert.match(pinView.root.innerHTML,/class="academy107-entry"/);
  assert.match(pinView.root.innerHTML,/academy107-pair/);
- assert.match(pinView.root.innerHTML,/class="academy107-profile-card academy107-profile-pawel" data-action="enter:pawel">\s*<img[^>]*assets\/art\/hulk\.svg/);
+ assert.match(pinView.root.innerHTML,/class="academy107-profile-card academy107-profile-pawel" data-action="enter:pawel">\s*<img[^>]*assets\/art\/hulk\.webp/);
  assert.match(pinView.root.innerHTML,/assets\/interface108\/hero-patryk\.webp/);
  assert.match(pinView.root.innerHTML,/data-action="enter:admin" aria-label="Centrum dowodzenia mamy"><\/button>/);
  assert.match(pinView.root.innerHTML,/data-action="academy:update" aria-label="Aktualizuj Akademię"><\/button>/);
@@ -173,6 +173,14 @@ function board(){
  await pinView.api.handle('parent-pin:confirm');
  assert.match(pinView.root.innerHTML,/data-action="admin:settings"/);
  assert.equal(pinAccount.parentPin,'1111');
+ await pinView.api.handle('admin:settings');
+ for(const hero of ['hulk','captain','thor','hood']){
+  assert.match(pinView.root.innerHTML,new RegExp(`hero:set:pawel:${hero}"[^>]*><img[^>]*assets/art/${hero}\\.webp`));
+ }
+ await pinView.api.handle('hero:set:patryk:hood');
+ assert.equal(pinAccount.profiles.patryk.hero,'hood');
+ await pinView.api.handle('exit');
+ assert.match(pinView.root.innerHTML,/data-action="enter:patryk">\s*<img[^>]*assets\/art\/hood\.webp/);
  const setupView=app(),setupAccount=data();
  setupAccount.parentPin='';
  setupView.api.set(setupAccount,{role:''});

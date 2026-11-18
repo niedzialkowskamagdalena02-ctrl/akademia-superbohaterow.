@@ -1,4 +1,5 @@
 import {affordable82} from './wallet82.js?v=82';
+import {heroPortrait} from './interface102.js?v=109';
 // Autorski świat bohaterów. Wersjonowane identyfikatory ułatwiają przyszłą synchronizację.
 export const BASE_ITEMS=[
 {id:'shield',name:'Tarcza Kapitana Ameryki',icon:'🛡️',cost:0,zone:'training',type:'gadżet'},
@@ -44,7 +45,10 @@ const FIGURES={
 };
 const HERO_ASSET={guardian:'iron',inventor:'spider',shadow:'hulk',cosmo:'thor',blackwidow:'widow',panther:'panther',captain:'captain',hawkeye:'hawkeye',groot:'groot',gamora:'gamora'};
 const ART_ITEMS=new Set(['helmet','armor','cape','gauntlet','quinjet','shield','web','arc','thorhammer','spidermask']);
-function artImage(id,hero=false){const k=hero?(HERO_ASSET[id]||id):id;return `<img class="av-art" src="assets/art/${hero?k+'.svg':'item-'+k+'.svg'}" alt="" loading="lazy">`}
+function artImage(id,hero=false){
+ const src=hero?heroPortrait(HERO_ASSET[id]||id):`assets/art/item-${id}.svg`;
+ return `<img class="av-art" src="${src}" alt="" loading="lazy">`;
+}
 function heroFigure(id){return artImage(id,true)}
 
 const STONES=[
