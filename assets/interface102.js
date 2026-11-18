@@ -1,5 +1,7 @@
 const art = (name, className = '') =>
   `<img class="academy102-art ${className}" src="assets/interface102/${name}.webp" alt="" draggable="false">`;
+const dashboardArt = (name) =>
+  `<img class="academy102-art" src="assets/interface106/${name}.webp" alt="" draggable="false">`;
 
 function tile(name, label, action, content = '', description = '') {
   return `<button type="button" class="academy102-tile academy102-${name}" data-action="${action}" aria-label="${label}"
@@ -14,15 +16,15 @@ function microphone(className = '') {
 const testBanner = () => `<div class="academy102-test" role="note" aria-label="Tryb mamy — bezpłatny test. Postępy nie są zapisywane.">${art('test')}</div>`;
 
 export function academy102Shell(scene, {title, content, menu='', voice='', release, test, status, sound, exit, base}) {
-  const profiles = test ? exit : `<button type="button" class="academy102-profiles" data-action="exit">
-    ${art('avatar')}<span aria-hidden="true">←</span><b>Profile</b></button>`;
+  const profiles = test ? exit : `<button type="button" class="academy102-profiles" data-action="exit" aria-label="Profile">
+    ${dashboardArt('profiles')}</button>`;
   const regular = scene==='section';
   const screen = scene==='missions'?'mission-screen':scene;
   return `<main class="academy102-screen academy102-${screen}${base?' hq88-base-page':''}" ${regular?'':'data-preschool-screen-skip'}>
     <header class="academy102-header">
       <div class="academy102-masthead">
-        <span class="academy104-bolt" aria-hidden="true"></span>
-        <div class="academy104-wordmark">Akademia<br>Superbohaterów</div><span class="academy102-version">V${release}</span>
+        ${dashboardArt('masthead')}<span class="academy102-sr">Akademia Superbohaterów</span>
+        <span class="academy102-version">V${release}</span>
       </div>
       <div class="academy102-identity">
         <div class="academy102-status"><h1>${title}</h1>${status}</div>
@@ -45,12 +47,12 @@ export function academy102Choices() {
 export function academy102Player({name, child, coins, grade, level, progress}) {
   return `<section class="academy102-player" aria-label="Profil bohatera">
     <div class="academy102-player-row">
-      <h2>${name}${art(child==='patryk'?'patryk-spider':'shield')}</h2>
-      <b class="academy102-wallet">${art('coin')}<span class="academy102-wallet-value" data-wallet82="${child}">${coins} złotych</span></b>
+      <h2>${name}${dashboardArt(child==='patryk'?'patryk-spider':'shield')}</h2>
+      <b class="academy102-wallet">${dashboardArt('coin')}<span class="academy102-wallet-value" data-wallet82="${child}">${coins} złotych</span></b>
     </div>
     <p>${grade} · Baza poziom ${level}</p>
     <div class="academy102-progress" role="progressbar" aria-label="Postęp do następnego poziomu" aria-valuenow="${progress}">
-      <div style="width:${progress}%"></div>
+      <div style="width:${progress}%">${dashboardArt('progress')}</div>
     </div>
   </section>`;
 }
@@ -65,10 +67,11 @@ const destinations = [
 ];
 
 export function academy102DashboardNav(preschool, speak, current) {
-  return `<nav class="academy102-destinations${preschool?' academy102-preschool':''}" aria-label="Menu Akademii">${destinations.map(([picture,label,tab])=>{
-    const link = `<button type="button" class="academy104-destination academy104-${picture}" data-action="child:${tab}"${tab===current?' aria-current="page"':''}>
-      <span class="academy105-face">${art('icon-'+picture)}<span>${label}</span></span></button>`;
-    return preschool ? `<div class="academy102-voiced">${link}${speak(label)}</div>` : link;
+  return `<nav class="academy102-destinations${preschool?' academy102-preschool':''}" aria-label="Menu Akademii">${destinations.map(([picture,label,tab],index)=>{
+    const withSpeaker = preschool && index < 4;
+    const link = `<button type="button" class="academy104-destination" data-action="child:${tab}"${tab===current?' aria-current="page"':''} aria-label="${label}">
+      ${dashboardArt(withSpeaker ? 'patryk-'+picture : picture)}</button>`;
+    return preschool ? `<div class="academy102-voiced${withSpeaker?' academy106-drawn-speaker':''}">${link}${speak(label)}</div>` : link;
   }).join('')}</nav>`;
 }
 
@@ -91,7 +94,7 @@ export function academy102MissionZone({key, icon, title, desc, count, cards, voi
 }
 
 export function academy102FamilyHeading(title) {
-  return `<h2>${art('family')}${title}</h2>`;
+  return `<h2>${dashboardArt('family')}${title}</h2>`;
 }
 
 export function academy102Knowledge(hasBookItems, back) {

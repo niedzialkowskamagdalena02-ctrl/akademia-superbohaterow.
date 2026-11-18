@@ -1,5 +1,5 @@
 import {gamePreview99, hangarPaint99} from './game-art99.js?v=99';
-import {academy102Shell,academy102Choices,academy102Player,academy102DashboardNav,academy102DashboardVoice,academy102FamilyHeading,academy102Knowledge,academy102MissionsHeader,academy102MissionZone} from './interface102.js?v=105';
+import {academy102Shell,academy102Choices,academy102Player,academy102DashboardNav,academy102DashboardVoice,academy102FamilyHeading,academy102Knowledge,academy102MissionsHeader,academy102MissionZone} from './interface102.js?v=106';
 // V48_AI_RESPONSE_DIAGNOSTICS
 // V44_BULK_CHAPTERS
 // V42_CHAPTERS
@@ -78,7 +78,7 @@ const select=(id,label,options,value)=>`<label for="${id}">${label}</label><sele
 const grades=[['P','Przedszkole'],...Array.from({length:12},(_,i)=>[String(i+1),`Klasa ${i+1}`])];
 const people=[['pawel','Paweł'],['patryk','Patryk']];
 const note=t=>{const n=$('hq85-notice')||$('notice');if(!n){console.warn('Powiadomienie:',t);return}n.textContent=t;n.classList.add('visible');setTimeout(()=>{if(n.isConnected)n.classList.remove('visible')},4500)};
-const ACADEMY_RELEASE=105;
+const ACADEMY_RELEASE=106;
 async function checkAcademyUpdate(button){
  if(!button||button.disabled)return;
  const label=button.textContent,controller=new AbortController();
@@ -2370,7 +2370,7 @@ document.addEventListener('toggle',ev=>{
   image.dataset.v75Loading='1';img(id).then(url=>{if(image.isConnected&&url){image.src=url;image.onload=()=>URL.revokeObjectURL(url)}}).catch(err=>console.warn('Nie udało się wyświetlić zdjęcia strony',err));
  }
 },true);
-const academyPressControls = '.academy102-destinations button,.academy102-header-actions button,.academy102-screen-voice button,.academy102-choices button';
+const academyPressControls = '.academy102-destinations button,.academy102-header-actions button,.academy102-screen-voice button,.academy102-choices button,.academy102-mic:not(.academy102-mic--knowledge)';
 function pressAcademyControl(control,complete){
  if(control.disabled||control.dataset.academyPressed)return;
  control.dataset.academyPressed='true';
@@ -2378,7 +2378,7 @@ function pressAcademyControl(control,complete){
  setTimeout(()=>{
   delete control.dataset.academyPressed;
   if(control.isConnected&&!control.disabled)complete();
- },165);
+ },190);
 }
 const baseButtonClicks88=new WeakMap();
 document.addEventListener('pointerdown',event=>{
@@ -2399,8 +2399,9 @@ document.addEventListener('click',event=>{
  trainingTapSound(true);
 },true);
 document.addEventListener('click',ev=>{const btn=ev.target.closest('[data-action]');if(btn){if(ev.target.closest('[data-speak]'))return;
+ if(btn.dataset.action==='mic'&&micDragIgnoreClick){ev.preventDefault();ev.stopPropagation();return}
  if(btn.matches?.(academyPressControls)){pressAcademyControl(btn,()=>handle(btn.dataset.action,btn));return;}
- if(btn.dataset.action==='mic'&&micDragIgnoreClick){ev.preventDefault();ev.stopPropagation();return}if(btn.classList.contains('tr72-subject-card')){if(btn.dataset.opening)return;btn.dataset.opening='1';btn.classList.add('tr72-selected');trainingTapSound();setTimeout(()=>{if(btn.isConnected)handle(btn.dataset.action,btn)},['matematyka','przyroda','wiedza'].includes(btn.dataset.theme)?1150:480);return}if(btn.closest('.tr71')&&/^training:(source|mode):/.test(btn.dataset.action||'')){if(btn.dataset.opening)return;btn.dataset.opening='1';btn.classList.add('v76-tile-pressed');btn.setAttribute('aria-busy','true');trainingTapSound();setTimeout(()=>{if(btn.isConnected)handle(btn.dataset.action,btn)},280);return}if(btn.closest('.tr71')&&btn.dataset.action?.startsWith('training:')&&btn.dataset.action!=='training:toggle-sound')trainingTapSound();handle(btn.dataset.action,btn)}});
+ if(btn.classList.contains('tr72-subject-card')){if(btn.dataset.opening)return;btn.dataset.opening='1';btn.classList.add('tr72-selected');trainingTapSound();setTimeout(()=>{if(btn.isConnected)handle(btn.dataset.action,btn)},['matematyka','przyroda','wiedza'].includes(btn.dataset.theme)?1150:480);return}if(btn.closest('.tr71')&&/^training:(source|mode):/.test(btn.dataset.action||'')){if(btn.dataset.opening)return;btn.dataset.opening='1';btn.classList.add('v76-tile-pressed');btn.setAttribute('aria-busy','true');trainingTapSound();setTimeout(()=>{if(btn.isConnected)handle(btn.dataset.action,btn)},280);return}if(btn.closest('.tr71')&&btn.dataset.action?.startsWith('training:')&&btn.dataset.action!=='training:toggle-sound')trainingTapSound();handle(btn.dataset.action,btn)}});
 document.addEventListener('input',ev=>{const box=ev.target.closest('[data-v74-edit]');if(!box||!ev.target.matches('[data-v74-field],[data-v75-field]'))return;const key=decodeURIComponent(box.dataset.v74Edit||'');const btn=box.querySelector('[data-action^="book:save-question:"]');if(btn)btn.disabled=!v74QuestionModified(box,key);});
 document.addEventListener('change',ev=>{if(ev.target.hasAttribute?.('data-v77-range-book')){v77ApplyRange(ev.target.dataset.v77RangeBook,false);return;}if(ev.target.hasAttribute?.('data-v772-chapter-book')){v772ApplyChapter(ev.target.dataset.v772ChapterBook);return;}if(ev.target.id==='page-chapter-filter'){if($('page-filter')?.value==='none')$('page-filter').value='all';filterBookPages($('page-filter')?.value||'all');return;}if(ev.target.matches('[data-tr71-page],[data-tr71-book],[data-tr71-chapter]'))return trainingSelectionChange(ev.target);if(ev.target.matches('[data-page-select]'))updateBookPageSelection();if(ev.target.id==='bchild')refreshBookSubjectSelect();if(ev.target.id==='btype'){const other=ev.target.value==='Inne';const a=$('v73-book-title'),b=$('v73-book-part');if(a)a.hidden=!other;if(b)b.hidden=other;}if(ev.target.id==='page-filter'){filterBookPages(ev.target.value);const old=v77BookViews.get(bookId)||{scroll:0,selected:[]};v77BookViews.set(bookId,{...old,filter:ev.target.value})}if(ev.target.id==='v74-report-child')v74UpdateReportFilter();if(ev.target.id==='booknumberlocation'){const b=data.books.find(x=>x.id===bookId);if(b){b.pageNumberPosition=ev.target.value;save().then(()=>note('✅ Zapisano położenie numeru strony.')).catch(err=>note('❌ '+err.message))}}if(ev.target.id==='replacefile'&&ev.target.files?.length)handle('page:replace');if(ev.target.id==='replacecamera'&&ev.target.files?.length)handle('page:replace-camera');if(ev.target.id==='bookcoverfile'&&ev.target.files?.length)handle('book:cover');if(ev.target.id==='pagefiles'&&ev.target.files?.length)handle('page:upload');if(ev.target.id==='pagecamera'&&ev.target.files?.length)handle('page:camera');if(ev.target.id==='trainingSubject')trainingChooseSubject(ev.target.value);if(ev.target.id==='kind')newExercise();if(ev.target.id==='booktrainingpage')bookExercise();if(ev.target.id==='tracechar')drawTrace();if(ev.target.id==='readerpage'){pageId=ev.target.value;render()}if(ev.target.id==='mentorstyle'){profile().mentor=ev.target.value;save()}});
 // V76_PANEL: zachowujemy kolejnosc Dodaj -> Biblioteka -> Trudnosci -> Baza poza.

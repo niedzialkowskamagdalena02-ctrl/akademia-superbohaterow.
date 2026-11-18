@@ -80,16 +80,18 @@ function board(){
  const view=app(),account=data();
  view.api.set(account,{role:'child',who:'patryk'});
  await view.api.handle('child:home');
- assert.equal((view.root.innerHTML.match(/class="academy104-destination /g)||[]).length,6);
+ assert.equal((view.root.innerHTML.match(/class="academy104-destination"/g)||[]).length,6);
  assert.equal((view.root.innerHTML.match(/data-action="child:academy"/g)||[]).length,1);
- assert.match(view.root.innerHTML,/icon-books\.webp[^>]*><span>Książki<\/span>/);
+ assert.match(view.root.innerHTML,/aria-label="Książki">\s*<img[^>]*interface106\/patryk-books\.webp/);
+ assert.match(view.root.innerHTML,/data-speak="Książki"/);
  const header=markup=>markup.match(/<header class="academy102-header">[\s\S]*?<\/header>/)?.[0];
  const dashboardHeader=header(view.root.innerHTML);
  assert.match(dashboardHeader,/Akademia Patryk/);
+ assert.match(dashboardHeader,/interface106\/masthead\.webp/);
  for(const page of ['missions-board','books','academy','mentor','learn','base']){
   await view.api.handle('child:'+page);
   assert.equal(header(view.root.innerHTML),dashboardHeader,page);
-  assert.equal((view.root.innerHTML.match(/class="academy104-destination /g)||[]).length,6,page);
+  assert.equal((view.root.innerHTML.match(/class="academy104-destination"/g)||[]).length,6,page);
   assert.equal((view.root.innerHTML.match(/class="academy102-player"/g)||[]).length,1,page);
   assert.match(view.root.innerHTML,new RegExp(`data-action="child:${page}" aria-current="page"`));
  }
@@ -108,7 +110,7 @@ function board(){
  assert.equal(clicks,1);
  assert.equal(tile.dataset.academyPressed,'true');
  assert.doesNotMatch(view.root.innerHTML,/Moje podręczniki/);
- const opens=[...view.timers].filter(([,timer])=>timer.ms===165);
+ const opens=[...view.timers].filter(([,timer])=>timer.ms===190);
  assert.equal(opens.length,1);
  opens[0][1].fn();view.timers.delete(opens[0][0]);
  assert.equal(tile.dataset.academyPressed,undefined);
@@ -116,7 +118,12 @@ function board(){
  view.storage.setItem('academy-v72-training-silent','1');tap();
  assert.equal(clicks,1);
  assert.equal(tile.dataset.academyPressed,'true');
- [...view.timers.values()].find(timer=>timer.ms===165).fn();
+ [...view.timers.values()].find(timer=>timer.ms===190).fn();
+ const schoolView=app();
+ schoolView.api.set(account,{role:'child',who:'pawel'});
+ await schoolView.api.handle('child:home');
+ assert.match(schoolView.root.innerHTML,/aria-label="Trening">\s*<img[^>]*interface106\/training\.webp/);
+ assert.doesNotMatch(schoolView.root.innerHTML,/interface106\/patryk-training\.webp/);
  await view.api.handle('child:learn');
  await view.api.handle('learning-games:open');
  await view.api.handle('learning-games:more');
