@@ -42,7 +42,7 @@ export function mountPreschoolAudio93(root,speak=()=>{}){
   }
   const dialog=root.querySelector('dialog[open]');
   const panel=dialog?.querySelector('.hq84-panel')??root.querySelector('main');
-  if(panel&&!root.querySelector('.sq93')&&!panel.querySelector(':scope > [data-voice93="screen"]')){
+  if(panel&&!panel.hasAttribute('data-preschool-screen-skip')&&!root.querySelector('.sq93')&&!panel.querySelector(':scope > [data-voice93="screen"]')){
    const speaker=voiceButton(doc,'screen');speaker.classList.add('pres93-screen');
    if(dialog&&panel.firstElementChild?.matches('[data-action="hq:close"]'))panel.firstElementChild.after(speaker);
    else panel.prepend(speaker);

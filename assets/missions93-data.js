@@ -20,7 +20,7 @@ export const preschoolMissions93=[
 ];
 export const captainMissions93=[
  ['baggage','🧳','Odprawa Bagażowa i Fotele w Kabinie','Załaduj właściwe walizki lub posadź misie.'],
- ['takeoff','🛫','Dźwignia Startowa i Cyferkowa Brama','Pociągnij dźwignię i przeleć przez obręcze po kolei.'],
+ ['takeoff','🛫','Lot przez obręcze','Pociągnij czerwoną dźwignię, a potem poprowadź samolot palcem do obręczy z cyfrą podaną przez pilota.'],
  ['airballs','🎈','Podniebny Slalom z Balonami','Steruj w górę lub w dół, omijaj burzę i łap liczby po kolei.'],
  ['feeder','🐦','Karmnik na Skrzydle Samolotu','Posłuchaj ptaszka i wleć w chmurę z właściwą literą.'],
  ['parcels','🌍','Zrzut Paczek dla Zwierząt','Zrzuć paczkę nad odpowiednią częścią świata.'],
@@ -48,11 +48,27 @@ const times=(a,b)=>a+' × '+b;
 const timesVoice=(a,b)=>a+' razy '+b;
 const mathChoices=(a,b,random)=>multiple(a*b,[a*b-a,a*b+b,a*b+1,a*b+2,a*b-1].filter(v=>v>0),random);
 
+function takeoffDeck(random){
+ const digits=numberList(9);
+ const first=shuffle92(digits,random).slice(0,5);
+ const last=shuffle92(digits,random).slice(0,6);
+ if(last[0]===first.at(-1)) [last[0],last[1]]=[last[1],last[0]];
+ const needed=[...first,...last];
+ const gates=needed.map((answer,i)=>{
+  const count=i===0?1:i<first.length?2:3;
+  const other=shuffle92(digits.filter(digit=>digit!==answer),random).slice(0,count-1);
+  return shuffle92([answer,...other],random);
+ });
+ const prompt=captainMissions93.find(([id])=>id==='takeoff')[3];
+ return [{kind:'flightSequence',prompt,speech:prompt,needed,gates}];
+}
+
 export function missionDeck93(id,grade,random=Math.random){
+ if(id==='takeoff')return takeoffDeck(random);
  const cap=Number(grade)===1?25:50;
  const factors=numberList(Number(grade)===1?5:10).slice(1);
  const pool=shuffle92(factors.flatMap(a=>factors.filter(b=>a*b<=cap).map(b=>[a,b])),random);
- const length={takeoff:1,airballs:1,seasons:4,bubble:3,camera:4,closet:4,baggage:4,parcels:4,landing:5,cargo:6,radio:6,airport:5}[id]??6;
+ const length={airballs:1,seasons:4,bubble:3,camera:4,closet:4,baggage:4,parcels:4,landing:5,cargo:6,radio:6,airport:5}[id]??6;
  const spelling=[['G_RA','Ó','góra','Ó','U'],['B_TY','U','buty','Ó','U'],['_ABA','Ż','żaba','RZ','Ż'],['BU_ZA','RZ','burza','RZ','Ż'],['W_ZEK','Ó','wózek','Ó','U'],['KU_Z','RZ','kurz','RZ','Ż']];
  const biomes=[
   ['Pingwin cesarski','🐧','Antarktyda','Pingwin cesarski żyje w okolicach Antarktydy.'],
@@ -161,10 +177,7 @@ export function missionDeck93(id,grade,random=Math.random){
      speech:seat?'Posadź misie na fotelach. Jest ich '+count+'.':'Włóż do luku walizki z pierwszą głoską słowa '+word+'. Wybierz '+count+' walizek.',
      count,seat,answer:seat?'bear':letter,options:shuffle92([...Array(count).fill(seat?card('Miś','bear','🧸'):card(letter,letter,'🧳',sound)),...(seat?[card('Piłka','ball','⚽'),card('Bagaż','case','🧳')]:letterOptions().filter(c=>c.value!==letter).map(c=>({...c,icon:'🧳'})))],random)};
    }
-   case 'takeoff':case 'airballs':{
-    const needed=numberList(id==='takeoff'?4:6);
-    return {kind:'flightSequence',prompt:id==='takeoff'?'Uruchom silnik i przeleć przez obręcze.':'Łap balony w kolejności i omijaj burzę.',speech:id==='takeoff'?'Przeciągnij dźwignię i przeleć przez obręcze od jedynki.':'Steruj w górę i w dół. Łap balony od jedynki i omijaj burzę.',needed};
-   }
+   case 'airballs':return {kind:'flightSequence',prompt:'Łap balony w kolejności i omijaj burzę.',speech:'Steruj w górę i w dół. Łap balony od jedynki i omijaj burzę.',needed:numberList(6)};
    case 'feeder':{
     const options=letterOptions();
     return {kind:'flight',prompt:'Złap chmurę z pierwszą literą.',speech:'Ćwir, ćwir! Szukam czegoś, co zaczyna się tak: '+sound+'… '+word+'.',icon:'🐦 '+icon,word,sound,

@@ -45,7 +45,7 @@ export function baseWalkMarkup(profile,child,hero,release,panel,mic=''){
     const label=p.action==='hq:pet'&&animal?escapeText(animal.name):p.label;
     const art=p.fixture?`<img src="assets/hq/${p.fixture}91.webp" alt="" draggable="false">`:p.icon?`<span aria-hidden="true">${p.icon}</span>`:'';
     const content=mentor?mentorMarkup87(profile.mentor):`${art}<b>${label}</b>`;
-    const action=locked?'data-action="hq:room:workshop"':p.room?`data-walk-door="${p.room}"` :`data-action="${p.action==='hq:board'&&!school?'hq:flight':p.action}"`;
+    const action=locked?'data-action="hq:room:workshop"':p.room?`data-walk-door="${p.room}"` :`data-action="${p.action}"`;
     return `<button type="button" class="hq86-point${style}" data-room="${room}" data-index="${i}" ${action} hidden>${content}</button>`;
    })).join('')}
    ${Object.entries(casePositions).map(([slot,[u,v]])=>trophy(slot,'armory',u,v)).join('')+trophy('lab','polish',labShelf.u,labShelf.v-.041,false)+pet+shop}
@@ -199,7 +199,7 @@ export function mountBaseWalk(root){
  const location=root.querySelector('.hq86-location'),dialog=root.querySelector('dialog');
  const back=stage.querySelector('[data-walk-back]'),menu=stage.querySelector('[data-action="hq:view:menu"]');
  const markers=[...stage.querySelectorAll('.hq86-point,.hq86-prop')];
- const flightButton=stage.querySelector('[data-action="hq:board"],[data-action="hq:flight"]');
+ const flightButton=stage.querySelector('[data-action="hq:board"]');
  const ctx=hands.getContext('2d'),controller=new AbortController(),{signal}=controller;
  const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
  const child=root.dataset.child,stack=routes.get(child)??[pose('hall')];

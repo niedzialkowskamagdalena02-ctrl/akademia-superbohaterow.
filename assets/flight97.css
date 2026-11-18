@@ -96,7 +96,7 @@
 }
 @keyframes flight97-cheer { from { scale:.35; rotate:-19deg; opacity:0 } }
 
-.flight97-takeoff { background:#14355c }
+.flight97-takeoff { background:#14355c; min-height:0 }
 .flight97-window { position:relative; height:clamp(310px,50dvh,535px); overflow:hidden; overflow:clip; isolation:isolate; touch-action:none }
 .flight97-window [hidden] { display:none }
 .flight97-sky {
@@ -144,11 +144,11 @@
     linear-gradient(-65deg,#26394e 0 9%,#455d77 9.2% 12.4%,transparent 12.7%) right/60% 100% no-repeat;
 }
 .flight97-dashboard {
-  position:absolute; z-index:6; inset:auto 0 0; height:25%; border-radius:35% 35% 0 0/16% 16% 0 0; overflow:hidden;
+  position:absolute; z-index:6; inset:auto 0 0; height:25%; border-radius:35% 35% 0 0/16% 16% 0 0;
   pointer-events:none; background:linear-gradient(#314d6f,#172a43); border-top:3px solid #668ba4;
   box-shadow:0 -4px 10px #24415a70;
 }
-.flight97-dash-art { position:absolute; width:100%; height:100%; object-fit:cover; object-position:center 56% }
+.flight97-dash-art { position:absolute; width:100%; height:100%; object-fit:fill; border-radius:inherit }
 .flight97-status-lights { position:absolute; top:15%; right:8%; display:flex; gap:6px }
 .flight97-status-lights i {
   width:10px; height:6px; border-radius:4px; background:#15372c; box-shadow:inset 0 0 3px #000a;
@@ -174,34 +174,54 @@
 .flight97-yoke>b {
   position:absolute; left:42%; bottom:0; width:16%; height:19%; border-radius:4px; background:#23384f; border:1px solid #8fa8c7;
 }
-.flight97-takeoff:not([data-f97-phase="ready"]) .flight97-throttle { visibility:hidden }
-.flight97-takeoff[data-f97-phase="roll"] .flight97-throttle {
-  visibility:visible; pointer-events:none; animation:flight97-lever-out .43s ease-in both;
+.flight97-throttle {
+  position:absolute; left:16%; bottom:5%; translate:-50%; width:clamp(45px,12%,78px); height:86%;
 }
-@keyframes flight97-lever-out { to { translate:-50% 39px; opacity:0 } }
-.flight97-joystick { display:grid; grid-template-columns:repeat(2,44px) minmax(98px,1fr) repeat(2,44px); gap:4px; padding:5px }
-#missions93-cockpit .flight97-joystick button { min-width:0; padding:4px; white-space:normal }
-#missions93-cockpit .flight97-takeoff:not([data-f97-phase="air"]) .flight97-joystick { display:none }
+.flight97-throttle::before {
+  content:""; position:absolute; inset:29% 30% 0; border-radius:9px;
+  border:2px solid #435b73; background:linear-gradient(90deg,#293b4d 28%,#101e2e 29% 70%,#293b4d 71%);
+  box-shadow:inset 0 3px 4px #0c1828,0 2px 3px #0c1828a0;
+}
+#missions93-cockpit .flight97-throttle button {
+  position:absolute; inset:0; min-width:0; min-height:0; padding:0; background:transparent;
+  border:0; border-radius:8px; box-shadow:none; touch-action:none; pointer-events:auto; cursor:grab;
+}
+#missions93-cockpit .flight97-throttle button:active:not(:disabled) { cursor:grabbing; translate:none; box-shadow:none }
+#missions93-cockpit .flight97-throttle button:disabled { opacity:1; pointer-events:none }
+.flight97-lever-arm {
+  position:absolute; inset:0 9% auto; height:66%; overflow:hidden; pointer-events:none;
+  translate:0 clamp(0px,var(--drag-y,0px),24px);
+}
+.flight97-lever-arm::before,.flight97-lever-arm::after { content:""; position:absolute }
+.flight97-lever-arm::before {
+  inset:23% 40% 0; border-radius:4px; background:linear-gradient(90deg,#253241,#b6c5ce 48%,#3d4952 83%);
+}
+.flight97-lever-arm::after {
+  inset:2% 0 auto; height:44%; border-radius:50% 50% 40% 40%;
+  background:linear-gradient(#ff8a67,#e13528 49%,#a51411 72%); border:1px solid #f3ab83;
+  box-shadow:0 3px 5px #161925aa;
+}
+.flight97-takeoff[data-f97-phase="ready"] .flight97-lever-arm::after { box-shadow:0 0 8px #ffbd50,0 3px 5px #161925aa }
+.flight97-takeoff:not([data-f97-phase="ready"]) .flight97-lever-arm { translate:0 34%; transition:translate .25s ease-out }
+#missions93-cockpit[data-fl95-mode="takeoff"] .flight95-bottom[hidden] { display:none }
 .flight97-hoop {
   position:absolute; z-index:2; left:var(--gate-x,50%); top:var(--gate-y,35%); translate:-50% -50%;
-  scale:var(--gate-scale,.72); width:clamp(87px,29vw,158px); aspect-ratio:1; --ring-light:#afedff;
+  scale:var(--gate-scale,.81); width:min(24%,158px); aspect-ratio:1; --ring-light:#afedff;
 }
-.flight97-hoop[data-f97-hoop="1"] { --ring-light:#5fd9ff }
-.flight97-hoop[data-f97-hoop="2"] { --ring-light:#cb9eff }
-.flight97-hoop[data-f97-hoop="3"] { --ring-light:#ffcb4c }
+.flight97-hoop[data-f97-lane="1"] { --ring-light:#cb9eff }
+.flight97-hoop[data-f97-lane="2"] { --ring-light:#ffcb4c }
 #missions93-cockpit .flight97-hoop-button {
   position:relative; display:grid; place-items:center; width:100%; height:100%; isolation:isolate;
   border-radius:50%; border:0; min-height:0; background:#c6eff426; color:#ffd958;
   box-shadow:0 0 15px var(--ring-light),inset 0 0 14px var(--ring-light);
-  font-size:clamp(2.2rem,11vw,4.7rem); line-height:1; font-weight:950;
+  font-size:clamp(1.65rem,8vw,4.1rem); line-height:1; font-weight:950;
   -webkit-text-stroke:2px #854b1f; paint-order:stroke fill; text-shadow:0 2px 0 #ae622c,0 0 14px white;
 }
 .flight97-hoop-button .flight96-ring-puffs { animation:flight97-ring-spin 11s linear infinite }
 .flight97-hoop-button .flight96-ring-puffs>i { opacity:.94 }
 @keyframes flight97-ring-spin { to { rotate:360deg } }
-.flight97-hoop[data-f97-gate="passed"] { animation:flight97-gate-pass .65s ease-out both; pointer-events:none }
-@keyframes flight97-gate-pass { from { opacity:.93 } to { opacity:0; transform:scale(1.55) } }
-.flight97-takeoff[data-f97-phase="done"] .flight97-hoop[data-f97-hoop="3"] { animation:none; opacity:1; scale:1.31 }
+.flight97-hoop[data-f97-gate="wrong"] { --ring-light:#ff857c }
+.flight97-takeoff[data-f97-phase="done"] .flight97-hoop { scale:1.13 }
 .flight97-takeoff[data-f97-phase="done"] .flight97-hoop-button { opacity:1; background:#ffe58748; box-shadow:0 0 25px #ffd13e,inset 0 0 23px #ffd13e }
 .flight97-sparks { position:absolute; z-index:5; top:38%; left:50%; width:6px; height:6px; border-radius:50%; pointer-events:none }
 .flight97-takeoff[data-f97-final="yes"] .flight97-sparks {
@@ -315,6 +335,5 @@
 
 @media (max-width:370px) {
   .flight97-pilot-call { gap:4px; padding-inline:4px }
-  .flight97-joystick { grid-template-columns:repeat(2,35px) minmax(85px,1fr) repeat(2,35px) }
   #missions93-cockpit .flight97-board .flight96-piece .flight95-voice { min-width:29px }
 }

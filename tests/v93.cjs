@@ -124,8 +124,8 @@ function board(){
  }
  const choose=task=>root.click('pick-'+task.options.findIndex(c=>c.value===task.answer));
  const code=n=>{for(const d of String(n))root.click('key-'+(d==='0'?10:Number(d)-1));root.click('key-11');};
- function passGates(count){
-  for(let value=1;value<=count;value++){
+ function passGates(digits){
+  for(const value of digits){
    const lanes=[...root.innerHTML.matchAll(/data-mission93="lane-(\d+)"[^>]*>(?:<span[^>]*>[^<]*<\/span>)?<span>(\d+)<\/span>/g)];
    const lane=lanes.find(match=>Number(match[2])===value);
    assert.ok(lane,'brama '+value);
@@ -199,7 +199,7 @@ function board(){
     drag('piece',i,hold);
    }});
    if(id==='takeoff')root.click('lever');
-   if(['takeoff','airballs'].includes(id))passGates(t.needed.length);
+   if(['takeoff','airballs'].includes(id))passGates(t.needed);
    if(['feeder','landing','seasons'].includes(id)){root.click('lane-'+t.options.findIndex(c=>c.value===t.answer));root.click('fly');}
    if(id==='parcels'){root.click('zone-'+t.options.findIndex(c=>c.value===t.answer));root.click('dispatch');}
    success();root.click('catalog');

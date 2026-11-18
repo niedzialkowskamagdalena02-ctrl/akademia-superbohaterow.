@@ -1,13 +1,13 @@
 import {digitWord96, picture96, ring96} from './hangar-art96.js?v=97';
 import {pilotCall97} from './hangar-boarding97.js?v=101';
 
-const positions = [[50,40],[71,25],[30,38],[51,28]];
+const positions = {1:[[50,35]],2:[[29,36],[71,30]],3:[[21,38],[50,25],[79,38]]};
 const clamp = (value, min, max) => Math.min(max,Math.max(min,value));
 const ease = value => value*value*(3-2*value);
 const lerp = (start,end,ratio) => start+(end-start)*ratio;
 const launchPrompt = 'Pociągnij czerwoną dźwignię, aby ruszyć.';
-const finishPrompt = 'Wszystkie cyfry zaliczone! Wspaniale, kapitanie!';
-const gatePrompt = number => 'Skieruj samolot przez obręcz z cyfrą '+digitWord96(number)+'.';
+const finishPrompt = 'Wszystkie obręcze zaliczone! Wspaniale, kapitanie!';
+const gatePrompt = number => 'Przeleć przez obręcz z cyfrą '+digitWord96(number)+'.';
 
 function aircraft97() {
   return `<div class="flight97-aircraft" data-f97-aircraft aria-hidden="true">
@@ -19,12 +19,10 @@ function aircraft97() {
   </div>`;
 }
 
-export function takeoffMarkup97(needed,button) {
-  const control=(action,arrow,label)=>button('move:'+action,`<span aria-hidden="true">${arrow}</span>`,
-    `aria-label="${label}" title="${label}"`);
+export function takeoffMarkup97({needed,gates},button) {
   return `<div class="flight95-surface flight97-takeoff" data-f97-phase="ready">
     ${pilotCall97(launchPrompt,'0 / '+needed.length,button)}
-    <div class="flight97-window" data-f95-viewport aria-label="Widok z kokpitu. Steruj strzałkami lub przeciągnij po szybie." tabindex="0">
+    <div class="flight97-window" data-f95-viewport aria-label="Przeciągnij samolot palcem do wybranej obręczy. Na klawiaturze użyj strzałek." tabindex="0">
       <div class="flight97-sky" aria-hidden="true"></div>
       <div class="flight97-flight-clouds" aria-hidden="true">
         ${Array.from({length:5},(_,i)=>`<i style="--cloud:${i}"></i>`).join('')}
@@ -34,40 +32,40 @@ export function takeoffMarkup97(needed,button) {
           ${Array.from({length:8},()=>'<i class="flight97-mark"></i>').join('')}
         </div>
       </div>
-      ${needed.map((n,i)=>`<div class="flight97-hoop" data-f97-hoop="${i}" hidden>
-        ${button('aim:'+i,`${ring96()}<b>${n}</b>`,`class="flight97-hoop-button" aria-label="Obręcz ${n}" disabled`)}
-      </div>`).join('')}
+      ${gates.map((digits,round)=>digits.map((digit,i)=>{
+        const [x,y]=positions[digits.length][i];
+        return `<div class="flight97-hoop" data-f97-hoop="${round}:${i}" data-f97-lane="${i}"
+          style="--gate-x:${x}%;--gate-y:${y}%" hidden>
+          ${button('aim:'+i,`${ring96()}<b>${digit}</b>`,`class="flight97-hoop-button" aria-label="Obręcz ${digit}"`)}
+        </div>`;
+      }).join('')).join('')}
       ${aircraft97()}
       <div class="flight97-cockpit-frame" aria-hidden="true"></div>
       <div class="flight97-sparks" aria-hidden="true"></div>
-      <div class="flight97-dashboard" aria-hidden="true">
+      <div class="flight97-dashboard">
         ${picture96('instruments','flight97-dash-art')}
-        <span class="flight97-status-lights"><i></i><i></i><i></i><i></i></span>
-        <span class="flight97-yoke"><i></i><i></i><b></b></span>
+        <span class="flight97-status-lights" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        <span class="flight97-yoke" aria-hidden="true"><i></i><i></i><b></b></span>
+        <div class="flight97-throttle" data-f95-lever>
+          ${button('lever','<span class="flight97-lever-arm" aria-hidden="true"></span>',
+            'aria-label="Pociągnij dźwignię w dół"')}
+        </div>
       </div>
-      <div class="flight96-throttle flight97-throttle" data-f95-lever>
-        ${button('lever',`${picture96('lever','flight96-lever-art')}<b>Pociągnij dźwignię</b>`,
-         'aria-label="Pociągnij dźwignię w dół"')}
-      </div>
-    </div>
-    <div class="flight97-joystick" aria-label="Sterowanie samolotem">
-      ${control('left','◀︎','W lewo')}${control('up','▲','Wyżej')}
-      ${button('move:hold','Przeleć obręcz','class="flight95-primary"')}
-      ${control('down','▼','Niżej')}${control('right','▶︎','W prawo')}
     </div>
   </div>`;
 }
 
-export function mountTakeoff97(root,needed,{onLaunch,onLift,onGate,onFinish}) {
+export function mountTakeoff97(root,{needed,gates},{onLaunch,onGate,onFinish}) {
   const stage = root.querySelector('.flight97-takeoff');
   const view = root.querySelector('[data-f95-viewport]');
   const aircraft = root.querySelector('[data-f97-aircraft]');
   const clouds = [...view.querySelectorAll('.flight97-flight-clouds i')];
   const marks = [...view.querySelectorAll('.flight97-mark')];
-  const hoops = needed.map((_,i)=>root.querySelector('[data-f97-hoop="'+i+'"]'));
+  const hoops = gates.map((digits,round)=>digits.map((_,i)=>root.querySelector(`[data-f97-hoop="${round}:${i}"]`)));
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   let phase='ready', elapsed=0, skyClock=0, runwayTravel=0, crossing=0, passed=0, raf=0, stopped=false;
-  let x=50,y=60,targetX=50,targetY=48, roll=0, scale=.70, engaged=false;
+  let x=50,y=60,targetX=50,targetY=48, roll=0, scale=.70, engaged=false, approached=-1;
+  let wrong=-1, retryAt=0;
   let last=performance.now();
   const style = (el,name,value) => el.style.setProperty(name,value);
 
@@ -77,12 +75,7 @@ export function mountTakeoff97(root,needed,{onLaunch,onLift,onGate,onFinish}) {
     stage.dataset.f97Phase=value;
   }
   function showGate() {
-    hoops.forEach((ring,i)=>{
-      ring.hidden=i!==passed && i!==passed-1;
-      ring.dataset.f97Gate=i===passed?'current':'passed';
-      const control=ring.querySelector('button');
-      if (control) control.disabled=i!==passed;
-    });
+    hoops[passed].forEach(ring=>{ ring.hidden=false; });
     onGate(passed,gatePrompt(needed[passed]));
   }
   function project(time, progress) {
@@ -109,16 +102,30 @@ export function mountTakeoff97(root,needed,{onLaunch,onLift,onGate,onFinish}) {
     style(aircraft,'--plane-bank',bank+'deg');
     style(aircraft,'--plane-pitch',(reduced?0:(phase==='lift'?-24*progress:clamp((targetY-y)*1.3,-24,24)))+'deg');
     style(aircraft,'--plane-scale',scale);
-    for (const index of [passed-1,passed]) {
-      if (!hoops[index] || hoops[index].hidden) continue;
-      const [gx,gy]=positions[index];
-      const cleared=index!==passed;
-      const depth=cleared ? 1.2 : .72+.65*crossing;
-      style(hoops[index],'--gate-x',clamp(gx+(gx-50)*(depth-1)*.27,15,85)+'%');
-      style(hoops[index],'--gate-y',gy+'%');
-      style(hoops[index],'--gate-scale',depth);
-    }
+    hoops[passed]?.forEach((ring,i)=>style(ring,'--gate-scale',.81+(i===approached?.39*crossing:0)));
   }
+  function crossGate(index) {
+    engaged=false; crossing=0; approached=-1;
+    if (gates[passed][index]!==needed[passed]) {
+      wrong=index;
+      retryAt=elapsed+.6;
+      hoops[passed][index].dataset.f97Gate='wrong';
+      onGate(passed,'Spróbuj jeszcze raz. '+gatePrompt(needed[passed]),true);
+      return;
+    }
+    const lastRound=passed+1===needed.length;
+    hoops[passed].forEach((ring,i)=>{
+      ring.hidden=!lastRound||i!==index;
+      if(!ring.hidden)ring.querySelector('button').disabled=true;
+    });
+    passed+=1;
+    wrong=-1;
+    if (!lastRound) { showGate(); return; }
+    stage.dataset.f97Final='yes';
+    setPhase('done');
+    onFinish(finishPrompt);
+  }
+
   function update(now) {
     if (stopped) return;
     const dt=view.ownerDocument.hidden ? 0 : clamp((now-last)/1000,0,.12);
@@ -138,31 +145,23 @@ export function mountTakeoff97(root,needed,{onLaunch,onLift,onGate,onFinish}) {
       if (progress===1) {
         setPhase('air');
         y=48;
-        onLift();
         showGate();
       }
     } else if (phase==='air') {
       skyClock+=dt*(engaged?2.7:1);
-      const [gx,gy]=positions[passed];
-      const near=engaged&&Math.abs(x-gx)<7&&Math.abs(y-gy)<7;
-      crossing=clamp(crossing+dt*(near?.92:-.42),0,1);
       roll=lerp(roll,clamp((targetX-x)*1.45,-32,32),Math.min(dt*5,1));
       x=lerp(x,targetX,Math.min(dt*4,1));
       y=lerp(y,targetY,Math.min(dt*4,1));
-      scale=.78-.24*crossing;
-      if (crossing===1) {
-        hoops[passed].dataset.f97Gate='passed';
-        passed+=1;
-        engaged=false; crossing=0;
-        if (passed===needed.length) {
-          stage.dataset.f97Final='yes';
-          hoops[passed-1].querySelector('button').disabled=true;
-          setPhase('done');
-          onFinish(finishPrompt);
-        } else {
-          showGate();
-        }
+      if (wrong>=0 && elapsed>=retryAt) {
+        delete hoops[passed][wrong].dataset.f97Gate;
+        wrong=-1;
       }
+      const near=engaged&&wrong<0
+        ? positions[gates[passed].length].findIndex(([gx,gy])=>Math.abs(x-gx)<7&&Math.abs(y-gy)<7) : -1;
+      if (near!==approached) { crossing=0; approached=near; }
+      if (near>=0) crossing=clamp(crossing+dt*1.6,0,1);
+      scale=.78-.24*crossing;
+      if (crossing===1) crossGate(near);
     } else if (phase==='done') {
       skyClock+=dt*1.1;
       x=lerp(x,61,Math.min(dt*1.3,1)); y=lerp(y,39,Math.min(dt*1.25,1));
@@ -185,13 +184,14 @@ export function mountTakeoff97(root,needed,{onLaunch,onLift,onGate,onFinish}) {
     launch(){
       if(phase!=='ready')return;
       setPhase('roll');
+      root.querySelector('[data-f95-action="lever"]').disabled=true;
       onLaunch('Silniki pracują. Rozpędzamy się!');
     },
     aim(index){
-      if(index===passed&&positions[index]) align(...positions[index]);
+      const point=positions[gates[passed]?.length]?.[index];
+      if(point)align(...point);
     },
     steer(direction) {
-      if (direction==='hold') { if (positions[passed]) align(...positions[passed]); return; }
       const dx=direction==='left'?-11:direction==='right'?11:0;
       const dy=direction==='up'?-8:direction==='down'?8:0;
       align(targetX+dx,targetY+dy);

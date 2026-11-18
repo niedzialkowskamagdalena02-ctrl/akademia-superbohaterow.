@@ -143,11 +143,13 @@
 .hangar99-mic .v76-mic-glyph { font-size: 1.35rem }
 
 #missions93-cockpit[data-fl95-mode="menu"] .flight95-hero {
-  min-height: 85px;
-  height: auto;
-  padding: 13px 50px;
+  min-height: clamp(155px,29dvh,285px);
+  align-items: end;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
   border-radius: 20px;
-  background: linear-gradient(110deg,#06375fcf,#0d51919b), url('missions93/cockpit.webp') center 39%/cover;
+  background: linear-gradient(0deg,#03182de8,transparent 46%), url('missions93/cockpit.webp') center 70%/cover;
 }
 #missions93-cockpit[data-fl95-mode="menu"] .flight95-hero h3 {
   font-size: clamp(1.2rem, 5vw, 2rem);

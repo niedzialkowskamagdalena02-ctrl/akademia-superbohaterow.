@@ -8,7 +8,7 @@ const dir=path.resolve(__dirname,'..'),asset=name=>pathToFileURL(path.join(dir,'
 function fixture(){
  const nodes=new Map(),listeners={};
  const root={
-  dataset:{},ownerDocument:{hidden:false},
+  dataset:{},ownerDocument:{hidden:false,elementFromPoint:()=>null},
   set innerHTML(html){this.content=html;nodes.clear();},
   get innerHTML(){return this.content||'';},
   addEventListener(name,fn,{signal}){listeners[name]=fn;signal.addEventListener('abort',()=>delete listeners[name]);},
@@ -17,9 +17,12 @@ function fixture(){
     ownerDocument:root.ownerDocument,dataset:{},classList:{add(){}},style:new Map(),
     querySelector:key=>root.querySelector(key),
     querySelectorAll:key=>root.querySelectorAll(key),
+    hasAttribute:name=>key===`[${name}]`,
+    getBoundingClientRect:()=>({top:0,left:0,width:400,height:400}),
     insertAdjacentHTML(_position,html){root.content+=html;},getContext(){return null;}
    });
    nodes.get(key).style.setProperty=nodes.get(key).style.set;
+   nodes.get(key).style.removeProperty=nodes.get(key).style.delete;
    return nodes.get(key);
   },
   querySelectorAll(key){
@@ -29,6 +32,13 @@ function fixture(){
   click(action){
    const target={dataset:{f95Action:action},closest:selector=>selector==='[data-f95-action]'?target:null};
    listeners.click({target,detail:0});
+  },
+  drag(selector,from,to){
+   const target={closest:query=>query.includes(selector)?root.querySelector(selector):null};
+   const event=(type,[clientX,clientY])=>({type,target,pointerId:1,button:0,clientX,clientY});
+   listeners.pointerdown(event('pointerdown',from));
+   listeners.pointermove(event('pointermove',to));
+   listeners.pointerup(event('pointerup',to));
   }
  };
  return root;
@@ -148,10 +158,16 @@ function fixture(){
      continue;
     }
     if(id==='takeoff'){
-     assert.match(root.innerHTML,/Pociągnij dźwignię/);
+     assert.match(root.innerHTML,/flight97-dashboard[\s\S]*data-f95-lever/);
+     assert.doesNotMatch(root.innerHTML,/flight97-joystick|move:hold/);
+     assert.deepEqual(t.gates.map(gates=>gates.length),[1,2,2,2,2,3,3,3,3,3,3]);
+     assert.ok(t.gates.every((gates,i)=>gates.includes(t.needed[i])&&new Set(gates).size===gates.length));
+     assert.notDeepEqual(t.needed,hangarDeck95(id,grade,()=>.77)[0].needed);
+     const progress=root.querySelector('[data-f97-board-progress]'),prompt=root.querySelector('[data-game-prompt]');
+     const gate=(round,i)=>root.querySelector(`[data-f97-hoop="${round}:${i}"]`);
      const plane=root.querySelector('[data-f97-aircraft]');
      assert.equal(plane.style.get('--plane-y'),'60%');
-     root.click('lever');
+     root.drag('[data-f95-lever]',[50,300],[50,330]);
      const stage=root.querySelector('.flight97-takeoff');
      assert.equal(stage.dataset.f97Phase,'roll');
      frames(1);
@@ -160,17 +176,23 @@ function fixture(){
      assert.equal(stage.dataset.f97Phase,'lift');
      frames(1.2);
      assert.equal(stage.dataset.f97Phase,'air');
-     assert.match(root.querySelector('[data-game-prompt]').textContent,/cyfrą jeden/);
-     root.click('aim:1'); frames(2);
-     assert.equal(root.querySelector('[data-f97-board-progress]').textContent,'0 / 4');
-     for(const i of [0,1,2,3]){
-      root.click('aim:'+i);
-      frames(3);
-      assert.equal(root.querySelector('[data-f97-board-progress]').textContent,(i+1)+' / 4');
+     assert.match(prompt.textContent,/cyfrą/);
+     const positions={1:[[50,35]],2:[[29,36],[71,30]],3:[[21,38],[50,25],[79,38]]};
+     const steer=(count,index)=>root.drag('[data-f95-viewport]',[200,240],positions[count][index].map(percent=>percent*4));
+     for(const [round,gates] of t.gates.entries()){
+      const correct=gates.indexOf(t.needed[round]);
+      assert.ok(gates.every((_,i)=>gate(round,i).hidden===false));
+      if(round===1){
+       steer(gates.length,1-correct);frames(2);
+       assert.equal(progress.textContent,'1 / 11');
+       assert.match(prompt.textContent,/Spróbuj jeszcze raz/);
+      }
+      steer(gates.length,correct);frames(2);
+      assert.equal(progress.textContent,(round+1)+' / 11');
       assert.equal(root.querySelector('[data-f97-aircraft]'),plane);
      }
      assert.equal(stage.dataset.f97Phase,'done');
-     assert.match(root.querySelector('[data-game-prompt]').textContent,/Wszystkie cyfry zaliczone/);
+     assert.match(prompt.textContent,/Wszystkie obręcze zaliczone/);
     }
     if(id==='airballs'){
      assert.doesNotMatch(root.innerHTML,/Odsłuchaj: Chmura burzowa|Odsłuchaj: [0-9]/);
@@ -278,7 +300,7 @@ function fixture(){
  assert.ok(scope.some(turn=>turn.page?.number===12&&turn.key==='matematyka'));
  assert.deepEqual([...new Set(scope.map(turn=>turn.key))].sort(),['angielski','matematyka','polski','przyroda']);
  const manifest=vm.runInNewContext(fs.readFileSync(path.join(dir,'sw.js'),'utf8')+'\n({CACHE,ASSETS})',{self:{addEventListener(){}}});
- assert.equal(manifest.CACHE,'academy-v101');
+ assert.equal(manifest.CACHE,'academy-v102');
  for(const resource of manifest.ASSETS)assert.ok(fs.existsSync(path.resolve(dir,resource.split('?')[0])),resource);
- console.log('PASS V101 – 14 gier, trasa pięciu lotów w obu kokpitach, obręcze, slalom, karmnik, trening i cache.');
+ console.log('PASS V102 – 14 gier, trasa pięciu lotów w obu kokpitach, obręcze, slalom, karmnik, trening i cache.');
 })().catch(error=>{console.error(error);process.exitCode=1;});

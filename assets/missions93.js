@@ -1,7 +1,7 @@
 import {gamePreview99} from './game-art99.js?v=99';
 import {gameGroup92,shuffle92} from './learning-games92.js?v=92';
 import {mountTrace92} from './learning-trace92.js?v=95';
-import {schoolMissions93,preschoolMissions93,captainMissions93,aceMissions93,missionDeck93} from './missions93-data.js?v=99';
+import {schoolMissions93,preschoolMissions93,captainMissions93,aceMissions93,missionDeck93} from './missions93-data.js?v=102';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const button=(text,action,attributes='')=>`<button type="button" data-mission93="${action}" ${attributes}>${text}</button>`;
@@ -116,11 +116,16 @@ export function mountMissions93(root,{grade,flight=false,speak=()=>{},tap=()=>{}
   turn=0;finishCount=0;misses=0;fresh();
  }
  function makeFlightOptions(){
-  const wanted=task().needed[state.done.length],options=[
+  const t=task(),i=state.done.length;
+  if(t.gates){
+   state.gates=t.gates[i].map(value=>({label:value,value,words:String(value)}));
+   state.lane=Math.min(state.lane,state.gates.length-1);
+   return;
+  }
+  const wanted=t.needed[i],options=[
    {label:wanted,value:wanted,words:wanted},
    {label:wanted===1?3:wanted-1,value:wanted===1?3:wanted-1,words:wanted===1?3:wanted-1},
-   id==='airballs'?{label:'Burza',value:'storm',icon:'⛈️',words:'Chmura burzowa'}:
-    {label:wanted+1,value:wanted+1,words:wanted+1}
+   {label:'Burza',value:'storm',icon:'⛈️',words:'Chmura burzowa'}
   ];
   state.gates=shuffle92(options);
  }
