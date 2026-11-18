@@ -155,7 +155,8 @@ const destinations = [
 export function academy102DashboardNav(preschool, speak, current) {
   return `<nav class="academy102-destinations${preschool?' academy102-preschool':''}" aria-label="Menu Akademii">${destinations.map(([picture,label,tab])=>{
     const icon='icon-'+picture;
-    const artwork=picture==='missions'?activityArt('target'):picture==='training'?activityArt('training-lime'):
+    const artwork=picture==='missions'?activityArt('target'):picture==='training'?
+      '<img class="academy102-art" src="assets/interface115/brain.webp" alt="" draggable="false">':
       ['mentor','headquarters'].includes(picture)?detailArt(icon):art(icon);
     const link = `<button type="button" class="academy104-destination" data-action="child:${tab}"${tab===current?' aria-current="page"':''} aria-label="${label}">
       <span class="academy107-wide-face">${artwork}<span>${label}</span></span></button>`;
@@ -245,22 +246,30 @@ export function academy102FamilyHeading(title) {
   return `<h2>${dashboardArt('family')}${title}</h2>`;
 }
 
-export function academy102Knowledge(hasBookItems, back) {
-  const mixed = hasBookItems ? 'Różne zadania z książki i spoza niej' : 'Losowe zadania spoza książki';
+export function academy115TrainingPanel({subject, source, count, back}) {
   const rollingDice = `<span class="academy113-dice" aria-hidden="true">${activityArt('dice')}</span>`;
   const gamepad = `<span class="academy113-controller" aria-hidden="true">
     ${activityArt('controller')}
     <span class="academy113-hand academy113-hand-left"></span>
     <span class="academy113-hand academy113-hand-right"></span>
   </span>`;
-  const shelfBooks = `<span class="academy113-shelf-books" aria-hidden="true">
+  const shelfBooks = `<span class="academy115-shelf" aria-hidden="true"><span class="academy113-shelf-books">
     ${activityArt('book-1')}${activityArt('book-2')}${activityArt('book-3')}
-  </span>`;
-  return `<section class="academy102-knowledge-panel${hasBookItems ? '' : ' academy102-outside'}" aria-labelledby="academy102-knowledge-title">
-    <h2 id="academy102-knowledge-title" class="academy102-sr">Wiedza ogólna</h2>
-    ${activityArt('knowledge-background','academy102-knowledge-backdrop')}
-    ${tile('train','Trenuj','training:mixed:start',{artwork:activityArt('train'),content:rollingDice+`<span class="academy102-mixed-label" aria-hidden="true">${mixed}</span>`,description:mixed})}
-    ${tile('game','Wybierz grę','training:back:catalog',{artwork:activityArt('game'),content:gamepad})}
-    ${tile('library','Tylko z książki','training:mode:game',{artwork:activityArt('library'),content:shelfBooks,description:'Cały materiał albo wybrane strony'})}
-  </section><nav class="academy102-return" aria-label="Powrót">${back}</nav>`;
+  </span></span>`;
+  const makeTile = (kind,title,action,description,artwork) =>
+    `<button type="button" class="academy102-tile academy115-card academy115-${kind}" data-action="${action}"
+      aria-description="${description}"><span class="academy115-illustration" aria-hidden="true">${artwork}</span>
+      <strong>${title}</strong><small>${description}</small></button>`;
+  const cards = source ?
+    makeTile('practice','Trenuj','training:mixed:start','Losowa mieszanka gier i zadań',rollingDice)+
+    makeTile('choose','Wybierz grę','training:catalog','Wybrana gra, losowe zadania',gamepad)+
+    makeTile('assessment','Sprawdzian','training:assessment','Różne zadania bez podpowiedzi','<span class="academy115-symbol">🏆</span>') :
+    makeTile('books','Materiał z książek','training:source:books','Cała książka, dział lub strony',shelfBooks)+
+    makeTile('outside','Inne materiały','training:source:outside','Zadania spoza książek','<span class="academy115-symbol">🪐</span>');
+  return `<section class="academy102-knowledge-panel academy115-flow" aria-labelledby="academy115-title" data-v77-step="${source?'train-options':'source'}">
+    <div class="academy115-back">${back}</div>
+    <h2 id="academy115-title">${subject}</h2>
+    <p>${source==='books'?'Materiał z książek · '+count+(count===1?' strona':[2,3,4].includes(count%10)&&![12,13,14].includes(count%100)?' strony':' stron'):source==='outside'?'Inne materiały':'Wybierz materiał'}</p>
+    <div class="academy115-cards">${cards}</div>
+  </section>`;
 }

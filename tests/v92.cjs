@@ -94,8 +94,8 @@ function board(){
  await view.api.handle('child:learn');
  assert.match(view.root.innerHTML,/Wybierz przedmiot/);
  await view.api.handle('training:subject:Matematyka');
- await view.api.handle('training:mode:train');
- await view.api.handle('training:back:catalog');
+ await view.api.handle('training:source:outside');
+ await view.api.handle('training:catalog');
  assert.match(view.root.innerHTML,/Wyścig mnożeniowy/);
  assert.doesNotMatch(view.root.innerHTML,/Ortografia|Ortograficzne Balony/);
  await view.api.handle('learning-games:open');
@@ -105,8 +105,8 @@ function board(){
  view.api.set(v,{who:'patryk',role:'child'});
  await view.api.handle('child:learn');
  await view.api.handle('training:subject:Matematyka');
- await view.api.handle('training:mode:train');
- await view.api.handle('training:back:catalog');
+ await view.api.handle('training:source:outside');
+ await view.api.handle('training:catalog');
  assert.match(view.root.innerHTML,/Cyfrowe łowy/);
  assert.doesNotMatch(view.root.innerHTML,/Wyścig mnożeniowy|Poznaj literki/);
  await view.api.handle('child:academy');

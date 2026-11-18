@@ -124,7 +124,7 @@ function board(){
   }
  }
 
- const {app,data}=require('./legacy/test.cjs');
+ const {app,data,mission}=require('./legacy/test.cjs');
  const view=app(),account=data();
  view.api.set(account,{role:'child',who:'patryk'});
  await view.api.handle('child:home');
@@ -186,7 +186,7 @@ function board(){
  const schoolView=app();
  schoolView.api.set(account,{role:'child',who:'pawel'});
  await schoolView.api.handle('child:home');
- assert.match(schoolView.root.innerHTML,/aria-label="Trening">\s*<span[^>]*>\s*<img[^>]*interface113\/training-lime\.webp/);
+ assert.match(schoolView.root.innerHTML,/aria-label="Trening">\s*<span[^>]*>\s*<img[^>]*interface115\/brain\.webp/);
  assert.match(schoolView.root.innerHTML,/data-speak="Książki"/);
  assert.equal((schoolView.root.innerHTML.match(/academy107-wide-face/g)||[]).length,6);
  await schoolView.api.handle('child:learn');
@@ -207,17 +207,25 @@ function board(){
  assert.match(schoolView.root.innerHTML,/data-v77-step="subject"/);
  [...schoolView.timers.values()].find(timer=>timer.ms===1150).fn();
  assert.match(schoolView.root.innerHTML,/data-v77-step="source"/);
- assert.match(schoolView.root.innerHTML,/data-action="training:mode:train"/);
- await schoolView.api.handle('training:subject:Wiedza%20og%C3%B3lna');
- assert.match(schoolView.root.innerHTML,/class="academy102-knowledge-panel/);
+ for(const subject of ['Matematyka','Wiedza ogólna']){
+  await schoolView.api.handle('training:subject:'+encodeURIComponent(subject));
+  assert.match(schoolView.root.innerHTML,/data-action="training:back:subject"[^>]*>← Wróć/);
+  assert.match(schoolView.root.innerHTML,/data-action="training:source:books"/);
+  assert.match(schoolView.root.innerHTML,/data-action="training:source:outside"/);
+  assert.doesNotMatch(schoolView.root.innerHTML,/data-action="training:(mixed:start|catalog|assessment)"/);
+ }
+ await schoolView.api.handle('training:source:outside');
+ assert.match(schoolView.root.innerHTML,/data-v77-step="train-options"/);
  assert.equal((schoolView.root.innerHTML.match(/data-action="mic"/g)||[]).length,1);
- for(const illustration of ['dice','controller','book-1','book-2','book-3'])
+ assert.match(schoolView.root.innerHTML,/data-action="training:assessment"/);
+ assert.match(schoolView.root.innerHTML,/data-action="training:mixed:start"/);
+ for(const illustration of ['dice','controller'])
   assert.ok(schoolView.root.innerHTML.includes('interface113/'+illustration+'.webp'),illustration);
  schoolView.ctx.window.matchMedia=()=>({matches:false});
  const gameTile={
-  dataset:{action:'training:back:catalog'},isConnected:true,
-  closest(selector){return ['button,summary','[data-action]','.academy102-knowledge-panel'].includes(selector)?this:null;},
-  matches(selector){return selector.includes('.academy102-knowledge-panel .academy102-tile');}
+  dataset:{action:'training:catalog'},isConnected:true,
+  closest(selector){return ['button,summary','[data-action]'].includes(selector)?this:null;},
+  matches(selector){return selector.includes('.academy115-flow button')||selector.includes('.academy115-choose');}
  };
  for(const listener of schoolView.listeners.click)listener({target:gameTile,detail:1,isTrusted:true});
  assert.equal(clicks,3);
@@ -226,8 +234,15 @@ function board(){
  [...schoolView.timers.values()].find(timer=>timer.ms===840).fn();
  assert.match(schoolView.root.innerHTML,/data-v77-step="catalog"/);
  await schoolView.api.handle('training:back:train-options');
- await schoolView.api.handle('training:mode:game');
+ await schoolView.api.handle('training:mixed:start');
+ assert.match(schoolView.root.innerHTML,/data-v77-step="mixed"/);
+ assert.match(schoolView.root.innerHTML,/Spoza książki/);
+ await schoolView.api.handle('training:back:source');
+ await schoolView.api.handle('training:source:books');
  assert.match(schoolView.root.innerHTML,/data-v77-step="range"/);
+ await schoolView.api.handle('training:range:all');
+ assert.match(schoolView.root.innerHTML,/data-v77-step="train-options"/);
+ assert.match(schoolView.root.innerHTML,/Materiał z książek · 1 strona/);
  await schoolView.api.handle('training:back:subject');
  assert.match(schoolView.root.innerHTML,/class="academy111-board"/);
  await schoolView.api.handle('child:missions-board');
@@ -236,6 +251,45 @@ function board(){
  for(const icon of ['alert','school','home']){
   assert.ok(schoolView.root.innerHTML.includes('interface107/'+icon+'.webp'),icon);
  }
+
+ const selectedPage={id:'p1',bookId:'math',number:4,text:'3 + 5 = 8. 2 + 4 = 6. 7 - 4 = 3.'};
+ const excludedPage={id:'p2',bookId:'math',number:5,text:'50 + 30 = 80.'};
+ const textbook={id:'math',title:'Matematyka',subject:'Matematyka',child:'pawel'};
+ const materialLaunch={pageIds:['p1'],strictMaterial:true,subject:'Matematyka'};
+ for(const options of [{mode:'game'},{mode:'game',chooseMaterialGame:true},{mode:'test',assessment:true}]){
+  const view=mission({books:[textbook],pages:[selectedPage,excludedPage],launch:{...materialLaunch,...options}});
+  await view.api.start();
+  if(options.chooseMaterialGame){
+   assert.match(view.root.innerHTML,/Wybierz grę/);
+   assert.match(view.root.innerHTML,/data-mg="material-game:write"/);
+   await view.root.listeners.click({target:{closest:()=>({dataset:{mg:'material-game:write'}})}});
+  }
+  const deck=view.api.tasks();
+  assert.ok(deck.length>1);
+  assert.ok(deck.every(t=>t.sourcePageId==='p1'));
+  assert.ok(options.chooseMaterialGame?deck.every(t=>t.type==='write'):true);
+  if(options.assessment){
+   assert.doesNotMatch(view.root.innerHTML,/mg-tutor|data-mg="hint"/);
+   view.api.answer('9999');
+   assert.equal(view.api.answered(),true);
+   assert.match(view.root.innerHTML,/Odpowiedź zapisana/);
+   assert.doesNotMatch(view.root.innerHTML,/Poprawna odpowiedź|mg-tutor|Błędna odpowiedź|data-mg="written"/);
+   await view.api.tutorAsk('Podaj odpowiedź');
+   assert.equal(view.api.tutorMessages().length,0);
+  }else if(!options.chooseMaterialGame){
+   assert.ok(deck.some(t=>t.game80||t.visual77));
+   assert.ok(deck.some(t=>t.type==='write'));
+  }
+ }
+ const outside=mission({launch:{mode:'test',assessment:true,tasks:[
+  {type:'write',question:'Oblicz: 2 + 3',answer:'5',options:[],outsideSubject95:'matematyka',hint:'Podpowiedź'},
+  {type:'choice',question:'Co rośnie w lesie?',answer:'drzewa',options:['drzewa','samochody'],outsideSubject95:'przyroda'}
+ ]}});
+ await outside.api.start();
+ assert.equal(outside.api.tasks().length,2);
+ outside.api.answer('5');
+ assert.equal(outside.api.score(),1);
+ assert.doesNotMatch(outside.root.innerHTML,/mg-tutor|Podpowiedź|Brawo/);
 
  const pinView=app(),pinAccount=data();
  pinAccount.parentPin='1111';

@@ -202,3 +202,29 @@ export function trainingSequence95(catalog,pages,books,rotation,subject) {
   const item=queue.shift();queue.push(item);return {game:item,key};
  }).filter(Boolean);
 }
+
+export function trainingAssessment115(catalog,makeTasks) {
+ const queues=shuffle92(catalog.filter(game=>game.engine==='task')).map(game=>
+  makeTasks(game).map(task=>game.kind==='math'?{...task,type:'write',options:[]}:task));
+ const result=[],seen=new Set();
+ for(let round=0;round<8&&result.length<10;round++){
+  for(const queue of queues){
+   const task=queue[round];
+   if(!task||seen.has(task.question))continue;
+   seen.add(task.question);
+   result.push(task);
+   if(result.length===10)break;
+  }
+ }
+ return result;
+}
+
+export function outsideMix115(catalog,subject) {
+ const sequence=trainingSequence95(shuffle92(catalog),[],[],0,subject);
+ const exercises=shuffle92(catalog.filter(game=>game.engine==='task'));
+ if(exercises.length&&!sequence.some(turn=>turn.game.engine==='task')){
+  const slot=sequence.findIndex(turn=>exercises.some(game=>game.subject===turn.key));
+  if(slot>=0)sequence[slot]={key:sequence[slot].key,game:exercises.find(game=>game.subject===sequence[slot].key)};
+ }
+ return sequence;
+}

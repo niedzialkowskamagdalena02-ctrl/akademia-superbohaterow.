@@ -1,15 +1,15 @@
 import {gamePreview99, hangarPaint99} from './game-art99.js?v=99';
-import {academy102Shell,academy102Choices,academy102Player,academy102DashboardNav,academy102DashboardVoice,academy102FamilyHeading,academy102Knowledge,academy102MissionsHeader,academy102MissionZone,academy107Entry,academy107PinScreen,heroPortrait,academy111Training} from './interface102.js?v=113';
+import {academy102Shell,academy102Choices,academy102Player,academy102DashboardNav,academy102DashboardVoice,academy102FamilyHeading,academy115TrainingPanel,academy102MissionsHeader,academy102MissionZone,academy107Entry,academy107PinScreen,heroPortrait,academy111Training} from './interface102.js?v=115';
 // V48_AI_RESPONSE_DIAGNOSTICS
 // V44_BULK_CHAPTERS
 // V42_CHAPTERS
-import {mountMissionGame} from './mission-game.js?v=95';
+import {mountMissionGame} from './mission-game.js?v=115';
 import { initHeadquarters3D } from './headquarters3d.js';
 import {initial,get,put,del,allRecords,replaceRecords,compress,uid,gradeName} from './data.js';
 import {speak,listen,stopVoice,getVoiceState,setVoiceState,spellEnglish77} from './voice.js?v=81';
 import {vocabulary,readings,explanation} from './learning.js';
 import {syncAdapter} from './sync.js?v=81';
-import {BASE_ITEMS,baseMarkup,migrateBase} from './base.js?v=113';
+import {BASE_ITEMS,baseMarkup,migrateBase} from './base.js?v=115';
 import {mountArcade,stopArcade} from './arcade.js?v=93';
 import {mountBaseScene84} from './base-scene84.js?v=88';
 import {baseWalkMarkup,mountBaseWalk,resetBaseWalk,openWalkRoom87,focusWalkCase88,walkRoomId93} from './base-walk85.js?v=114';
@@ -21,7 +21,7 @@ import {gameGroup92,recordGameAward92} from './learning-games92.js?v=92';
 import {mountLearningGames92} from './learning-play92.js?v=95';
 import {mountMissions93,missionNote93} from './missions93.js?v=103';
 import {mountHangar95} from './hangar95.js?v=104';
-import {trainingCatalog95,trainingSubject95,trainingGroupName95,trainingSequence95,outsideDeck95} from './training95.js?v=95';
+import {trainingCatalog95,trainingSubject95,trainingGroupName95,outsideDeck95,trainingAssessment115,outsideMix115} from './training95.js?v=115';
 import {mountPreschoolAudio93} from './preschool-audio93.js?v=104';
 import {MASTER_PRIZES86,MASTER_SCORE86,recordEnergy86,trainingRound86,trainingConsole86,unlockMaster86} from './base-training86.js?v=87';
 import {affordable82,purchase82,credit82} from './wallet82.js?v=82';
@@ -79,7 +79,7 @@ const select=(id,label,options,value)=>`<label for="${id}">${label}</label><sele
 const grades=[['P','Przedszkole'],...Array.from({length:12},(_,i)=>[String(i+1),`Klasa ${i+1}`])];
 const people=[['pawel','Paweł'],['patryk','Patryk']];
 const note=t=>{const n=$('hq85-notice')||$('notice');if(!n){console.warn('Powiadomienie:',t);return}n.textContent=t;n.classList.add('visible');setTimeout(()=>{if(n.isConnected)n.classList.remove('visible')},4500)};
-const ACADEMY_RELEASE=114;
+const ACADEMY_RELEASE=115;
 async function checkAcademyUpdate(button){
  if(!button||button.disabled)return;
  const label=button.textContent,controller=new AbortController();
@@ -1099,13 +1099,13 @@ function v37Voice(text,lang='pl-PL'){
 
 
 // V41_INTERACTIVE_AI_MISSIONS
-function smOpen(initialBookId='',launch=null){
+function smOpen(initialBookId='',launch=null,backStep='range'){
  tab='subjectmissions';
  avengersRun=null;
  render();
  const root=document.getElementById('subject-missions-root');
  if(!root)return;
- return smMount95(root,initialBookId,launch,()=>{tab='learn';trainingStep='range';render()});
+ return smMount95(root,initialBookId,launch,()=>{tab='learn';openTrainingStep115(backStep)});
 }
 function smMount95(root,initialBookId,launch,onBack){
  const missionChild82=who;
@@ -1125,7 +1125,7 @@ function smMount95(root,initialBookId,launch,onBack){
    const token=result?.perfect&&await hqToken84(missionChild82,key,result.subject,true);
    const previous=data.history.find(h=>h.key===key&&h.child===missionChild82);
    if(previous){if(progressed&&!token)await save();return Number(previous.points)||0;}
-   const ok=await grant(missionChild82,n,mode==='test'?'Sprawdzian z podręcznika':launch?.tasks?'Trening spoza książki':'Trening z podręcznika',key);
+   const ok=await grant(missionChild82,n,mode==='test'?(launch?.tasks?'Sprawdzian spoza książek':'Sprawdzian z podręcznika'):launch?.tasks?'Trening spoza książki':'Trening z podręcznika',key);
    if(!ok&&progressed&&!token)await save();
    if(ok)note('🏆 +'+n+' złotych do portfela!');return ok?n:0;
   }
@@ -1193,6 +1193,20 @@ function v37Hub(){
 }
 
 let trainingStep='subject',trainingSelectedSubject='Polski',trainingMode='game',trainingSelectedPages=new Set();
+let trainingSource115=null;
+function openTrainingStep115(step,scroll=true){
+ trainingStep=step;
+ render();
+ if(scroll)app.querySelector('[data-v77-step], #subject-missions-root')?.scrollIntoView({block:'start'});
+}
+function trainingScopePages115(){return trainingPageItems().filter(p=>trainingSelectedPages.has(p.id))}
+function trainingBookMission115(options){
+ const pages=trainingScopePages115();
+ if(!pages.length){note('Wybierz co najmniej jedną stronę z odczytanym tekstem.');return openTrainingStep115('range');}
+ const mission=smOpen(pages[0].bookId,{subject:trainingSelectedSubject,pageIds:pages.map(p=>p.id),strictMaterial:true,audioTap:()=>trainingTapSound(true,true),...options},'train-options');
+ app.querySelector('#subject-missions-root')?.scrollIntoView({block:'start'});
+ return mission;
+}
 function trainingBookItems(){return books().filter(b=>!b.archived&&(/wiedza og[oó]lna/i.test(trainingSelectedSubject)||(trainingSubject95(trainingSelectedSubject)!=='other'?trainingSubject95(b.subject)===trainingSubject95(trainingSelectedSubject):String(b.subject||'').trim().toLocaleLowerCase('pl-PL')===trainingSelectedSubject.toLocaleLowerCase('pl-PL'))))}
 function trainingPageItems(){const ids=new Set(trainingBookItems().map(b=>b.id));return data.bookPages.filter(p=>ids.has(p.bookId)&&p.text?.trim()).sort((a,b)=>a.number-b.number)}
 function trainingSubjectsList(){return [...new Set(['Polski','Matematyka','Angielski','Przyroda','Wiedza ogólna',...((profile().subjects)||[]),...books().map(b=>b.subject)].filter(Boolean))]}
@@ -1244,24 +1258,14 @@ function trainingFlowMarkup(){
   return academy111Training(trainingVoice('Wybierz przedmiot. Wiedza ogólna łączy wszystkie przedmioty.'),extras.map(trainingSubjectCard).join(''));
  }
  let content='<section class="tr71 v73-training" data-v77-step="'+e(trainingStep)+'"><header><h2>'+e(trainingSelectedSubject)+'</h2></header>';
- if(trainingStep==='source'){
-  content+=`${trainingCard('← Przedmioty','training:back:subject')}<div class="tr71-grid">`+
-   trainingCard('🎮 Trening','training:mode:train','Ćwicz w grach i zadaniach')+
-   trainingCard('🏆 Sprawdzian','training:mode:test','Przećwicz materiał z książki')+'</div>';
- }else if(trainingStep==='train-options'){
-  content+=`${trainingCard('← Wybór trybu','training:back:source')}<div class="tr71-grid">`+
-   trainingCard('🎲 Trenuj','training:mixed:start',trainingPageItems().length?'Różne zadania z książki i spoza niej':'Losowe zadania spoza książki')+
-   trainingCard('🎮 Wybierz grę','training:back:catalog','Jedna gra, nowe przykłady')+
-   trainingCard('📚 Tylko z książki','training:mode:game','Cały materiał albo wybrane strony')+
-   (/angiel|english/i.test(trainingSelectedSubject)?trainingCard('🃏 Słówka z książki','training:mode:vocab'):'')+'</div>';
- }else if(trainingStep==='catalog'){
-  content+=trainingCard('← Trening','training:back:train-options')+'<h3>Wybierz grę</h3>'+trainingList95();
+ if(trainingStep==='catalog'){
+  content+=trainingCard('← Wróć','training:back:train-options')+'<h3>Wybierz grę</h3>'+trainingList95();
  }else if(trainingStep==='mixed'||trainingStep==='chosen'){
-  const mixed=trainingStep==='mixed',item=mixed?trainingRun95?.items[trainingRun95.index]:{game:trainingGame95};
-  const back=trainingCard(mixed?'← Trening':'← Wybierz grę',mixed?'training:back:train-options':'training:back:catalog');
+  const mixed=trainingStep==='mixed',item=mixed?trainingRun95?.items[trainingRun95.index]:trainingGame95&&{game:trainingGame95};
+  const back=trainingCard('← Wróć',mixed?'training:back:train-options':'training:back:catalog');
   if(!item)content+=back+'<h3>🏆 Trening ukończony</h3>'+trainingCard('Zagraj ponownie','training:mixed:start');
   else content+=back+(mixed?`<p class="tr95-current">Zadanie ${trainingRun95.index+1} z ${trainingRun95.items.length} · ${e(trainingGroupName95(item.key))}</p>`:'')+
-   (item.page?`<p>Z książki · strona ${item.page.number}</p>`:`<p>Spoza książki · ${e(item.game.name)}</p>`)+
+   `<p>Spoza książki · ${e(item.game.name)}</p>`+
    '<div id="training95-game"></div><p data-lg92-save role="status"></p>'+
    (mixed?trainingCard('Pomiń zadanie','training:mixed:next'):'');
  }else if(trainingStep==='outside'){
@@ -1275,12 +1279,15 @@ function trainingFlowMarkup(){
    trainingCard('🎮 Sala treningowa','training:mode:game')+
    trainingCard('🏆 Próba superbohatera','training:mode:test')+(/angiel|english/i.test(trainingSelectedSubject)?trainingCard('🃏 Słówka','training:mode:vocab','Piszę · słucham · mówię'):'')+'</div>';
  }else if(trainingStep==='range'){
-  content+=`${trainingCard('← Wybór trybu',trainingMode==='test'?'training:back:source':'training:back:train-options')}<h3>Wybierz zakres ${trainingVoice('Wybierz cały materiał albo konkretne książki, działy i strony.')}</h3><div class="tr71-grid">`+
+  content+=trainingCard('← Wróć',trainingSource115==='books'?'training:back:source':hqReturn84?'hq:back':'training:back:mode')+
+   '<h3>Wybierz zakres '+trainingVoice('Wybierz cały materiał albo konkretne książki, działy i strony.')+'</h3>';
+  content+=trainingPageItems().length?'<div class="tr71-grid">'+
    trainingCard('📚 Cały materiał z książek','training:range:all')+
-   trainingCard('📄 Wybierz książkę, dział lub strony','training:range:pick')+'</div>';
+   trainingCard('📄 Wybierz książkę, dział lub strony','training:range:pick')+'</div>':
+   '<p>Brak stron z odczytanym tekstem dla tego przedmiotu. Wybierz inne materiały albo dodaj strony w panelu mamy.</p>';
  }else if(trainingStep==='pick'){
   const bs=trainingBookItems(),ps=trainingPageItems();
-  content+=`${trainingCard('← Wybór zakresu','training:back:range')}<h3>5. Zaznacz książki, działy lub strony ${trainingVoice('Możesz zaznaczyć wiele książek i stron. Naciśnij Rozpocznij misję.')}</h3>`+
+  content+=`${trainingCard('← Wróć','training:back:range')}<h3>Zaznacz książki, działy lub strony ${trainingVoice('Możesz zaznaczyć wiele książek i stron.')}</h3>`+
    `<div class="tr71-tools">${trainingCard('☑ Zaznacz wszystko','training:all')}${trainingCard('Odznacz wszystko','training:none')}</div>`+
    (bs.map(b=>v77RangeMarkup(b,ps.filter(p=>p.bookId===b.id)))
    .join('')||'<p>Nie ma jeszcze stron z zapisanym tekstem w tym przedmiocie.</p>')+
@@ -1288,7 +1295,7 @@ function trainingFlowMarkup(){
  }else if(trainingStep==='ready'){
   content+=`${trainingCard('← Wybór zakresu','training:back:range')}<h3>🚀 Misja jest gotowa ${trainingVoice('Naciśnij Rozpocznij misję.')}</h3><p>Przedmiot: <strong>${e(trainingSelectedSubject)}</strong>. Tryb: <strong>${trainingMode==='test'?'Sprawdzian':'Trening'}</strong>.</p><p>Wybrano ${trainingSelectedPages.size} stron.</p>${v77HulkScene()}`;
  }
- if(trainingStep==='pick'||trainingStep==='ready')content+=`<button type="button" data-action="training:start" class="tr71-start">⚡ Rozpocznij misję</button>`;
+ if(trainingStep==='pick'||trainingStep==='ready')content+=`<button type="button" data-action="training:start" class="tr71-start">${trainingSource115==='books'?'Dalej · wybierz tryb':'⚡ Rozpocznij misję'}</button>`;
  content+='</section>';
  return content;
 }
@@ -1420,7 +1427,7 @@ function hqFoodQuestions84(){
 function openBaseTraining86(step='subject',subject='Polski'){
  hqReturn84=true;hqPanel84='';hqSessions84.delete(who);
  tab='learn';v37Classic=false;avengersRun=null;
- trainingStep=step;trainingSelectedSubject=subject;trainingSelectedPages=new Set();
+ trainingStep=step;trainingSelectedSubject=subject;trainingSelectedPages=new Set();trainingSource115=null;
  v772RangeModes.clear();
  render();window.scrollTo(0,0);
 }
@@ -1618,13 +1625,10 @@ function awardLearning95(p,id){
 function mountTraining95(p){
  const root=$('training95-game');
  if(!root)return;
- const mixed=trainingStep==='mixed', item=mixed?trainingRun95?.items[trainingRun95.index]:{game:trainingGame95};
+ const mixed=trainingStep==='mixed', item=mixed?trainingRun95?.items[trainingRun95.index]:trainingGame95&&{game:trainingGame95};
  if(!item)return;
  const advance=()=>{if(mixed&&root.isConnected)void handle('training:mixed:next');};
  const onBack=()=>handle(mixed?'training:back:train-options':'training:back:catalog');
- if(item.page){
-  return smMount95(root,item.page.bookId,{pageIds:[item.page.id],mode:'game',single:true,onFinish:advance},onBack);
- }
  const g=item.game,grade=p.grade;
  const say=(text,lang='pl-PL')=>speak(text,lang,p.mentor,data.settings.rate||1);
  if(g.engine==='arcade'||g.engine==='scene'){
@@ -1635,14 +1639,14 @@ function mountTraining95(p){
    awards:()=>p.base?.headquarters?.learningAwards92??{},onAward:id=>awardLearning95(p,id)
   });
  }
- const makeTasks=()=>{
-  const custom=v75OutsideBank(who,g.subject).filter(item=>typeof item?.q==='string'&&Array.isArray(item.a));
-  const stock=g.kind==='bank'&&Number(grade)>=2?(v37Bank[g.subject]||[]).map(([q,a,ok,qPl])=>({q,a,ok,qPl})):[];
-  const questions=[...custom.map(item=>outsideQuestion(item,g.subject)),...stock].filter(item=>item.q);
-  return outsideDeck95(g,grade,questions,mixed);
- };
- const launch={subject:trainingSelectedSubject,label:g.name,pageIds:[],mode:'game',tasks:makeTasks(),repeat:makeTasks,onFinish:mixed?advance:null};
+ const makeTasks=()=>trainingOutsideTasks115(g,grade,mixed);
+ const launch={subject:trainingSelectedSubject,label:g.name,pageIds:[],mode:'game',tasks:[],repeat:makeTasks,onFinish:mixed?advance:null};
  return smMount95(root,'',launch,onBack);
+}
+function trainingOutsideTasks115(game,grade,one=false){
+ const custom=v75OutsideBank(who,game.subject).filter(item=>typeof item?.q==='string'&&Array.isArray(item.a));
+ const stock=game.kind==='bank'&&Number(grade)>=2?(v37Bank[game.subject]||[]).map(([q,a,ok,qPl])=>({q,a,ok,qPl})):[];
+ return outsideDeck95(game,grade,[...custom.map(item=>outsideQuestion(item,game.subject)),...stock].filter(item=>item.q),one);
 }
 
 function childRender(){
@@ -1663,9 +1667,14 @@ function childRender(){
   const voice=preschool?academy102DashboardVoice(p.name,interfaceVoice):'';
   return layout('Akademia '+p.name,sync81ChildConnectionMarkup(true),'dashboard',voice);
  }
- if(tab==='learn'&&!v37Classic&&trainingStep==='train-options'&&trainingSubject95(trainingSelectedSubject)==='all'){
-  const back=(walking||hqReturn84?button('← Wróć do bazy','hq:back'):'')+button('← Przedmioty','training:back:subject')+button('🏆 Sprawdzian','training:mode:test');
-  return layout('Wiedza ogólna',academy102Knowledge(trainingPageItems().length>0,back),'knowledge');
+ if(tab==='learn'&&!v37Classic&&['source','train-options'].includes(trainingStep)){
+  const choosingSource=trainingStep==='source';
+  const previous=choosingSource?'subject':trainingSource115==='books'?'range':'source';
+  const back=button('← Wróć','training:back:'+previous,'alt')+
+   (walking||hqReturn84?button('Wróć do bazy','hq:back','alt'):'');
+  return layout(trainingSelectedSubject,academy115TrainingPanel({
+   subject:e(trainingSelectedSubject),source:choosingSource?null:trainingSource115,count:trainingScopePages115().length,back
+  }),'knowledge');
  }
  if(tab==='missions93'){
   layout('Akademia '+p.name,`<section class="sq93-shell">${button('‹ Gry edukacyjne','learning-games:more-back','alt')}
@@ -1976,39 +1985,56 @@ if(action.startsWith('training:')){
   trainingSelectedSubject=value;
   trainingSelectedPages=new Set();
   avengersRun=null;
-  trainingStep=trainingSubject95(value)==='all'?'train-options':'source';
-  render();
-  app.querySelector('.academy102-knowledge-panel')?.scrollIntoView({block:'start'});
-  return;
+  trainingSource115=null;
+  trainingMode='game';
+  trainingRun95=null;
+  trainingGame95=null;
+  return openTrainingStep115('source');
  }
- if(what==='source'){trainingStep=value==='outside'?'outside':'mode';if(value==='outside'){const map={Polski:'polski',Matematyka:'matematyka',Angielski:'angielski',Przyroda:'przyroda'};v37Subject=map[trainingSelectedSubject]||'all'}return render()}
- if(what==='mode'&&value==='train'){trainingStep='train-options';return render()}
+ if(what==='source'&&['books','outside'].includes(value)){
+  trainingSource115=value;
+  trainingMode='game';
+  v772RangeModes.clear();
+  trainingSelectedPages=new Set();
+  return openTrainingStep115(value==='books'?'range':'train-options');
+ }
+ if(what==='catalog'&&role==='child')return trainingSource115==='books'?
+  trainingBookMission115({mode:'game',chooseMaterialGame:true}):openTrainingStep115('catalog');
+ if(what==='assessment'&&role==='child'){
+  if(trainingSource115==='books')return trainingBookMission115({mode:'test',assessment:true});
+  const grade=profile().grade,catalog=trainingCatalog95(grade,trainingSelectedSubject);
+  const repeat=()=>trainingAssessment115(catalog,game=>trainingOutsideTasks115(game,grade));
+  const mission=smOpen('',{subject:trainingSelectedSubject,label:'Sprawdzian',pageIds:[],mode:'test',
+   assessment:true,tasks:[],repeat,audioTap:()=>trainingTapSound(true,true)},'train-options');
+  app.querySelector('#subject-missions-root')?.scrollIntoView({block:'start'});
+  return mission;
+ }
  if(what==='mode'){trainingMode=value==='test'?'test':value==='vocab'&&/angiel|english/i.test(trainingSelectedSubject)?'vocab':'game';trainingStep='range';return render()}
  if(what==='play'&&role==='child'){
   const selected=trainingCatalog95(profile().grade,trainingSelectedSubject).find(item=>item.id===value);
   if(!selected)return;
-  trainingGame95=selected;avengersRun=null;v37Classic=false;trainingStep='chosen';return render();
+  trainingGame95=selected;avengersRun=null;v37Classic=false;return openTrainingStep115('chosen');
  }
  if(what==='mixed'&&role==='child'){
   if(value==='start'){
+   if(trainingSource115==='books')return trainingBookMission115({mode:'game'});
    const p=profile(),catalog=trainingCatalog95(p.grade,trainingSelectedSubject),key=trainingSubject95(trainingSelectedSubject);
-   const rotationKey='academy-v95-training-'+who+'-'+key;
-   let rotation=Math.floor(Math.random()*999);
-   if(!testMode){
-    const stored=localStorage.getItem(rotationKey);
-    if(stored!==null)rotation=Number(stored)||0;
-    localStorage.setItem(rotationKey,String(rotation+5));
-   }
-   trainingRun95={index:0,items:trainingSequence95(catalog,trainingPageItems(),trainingBookItems(),rotation,key)};
-   avengersRun=null;v37Classic=false;trainingStep='mixed';
-  }else if(value==='next'&&trainingStep==='mixed'&&trainingRun95)trainingRun95.index++;
+   trainingRun95={index:0,items:outsideMix115(catalog,key)};
+   avengersRun=null;v37Classic=false;
+   return openTrainingStep115('mixed');
+  }
+  if(value==='next'&&trainingStep==='mixed'&&trainingRun95)trainingRun95.index++;
   return render();
  }
- if(what==='back'){trainingStep=value;return render()}
+ if(what==='back')return openTrainingStep115(value);
  if(what==='range'){
   v772RangeModes.clear();
-  if(value==='all'){trainingSelectedPages=new Set(trainingPageItems().map(p=>p.id));trainingStep='ready'}
-  else{trainingSelectedPages=new Set();trainingStep='pick'}return render();
+  if(value==='all'){
+   trainingSelectedPages=new Set(trainingPageItems().map(p=>p.id));
+   if(!trainingSelectedPages.size)return note('Brak stron z odczytanym tekstem.');
+   return openTrainingStep115(trainingSource115==='books'?'train-options':'ready');
+  }
+  return openTrainingStep115('pick');
  }
  if(what==='all'){v772RangeModes.clear();trainingSelectedPages=new Set(trainingPageItems().map(p=>p.id));return render()}
  if(what==='none'){v772RangeModes.clear();trainingSelectedPages=new Set();return render()}
@@ -2018,6 +2044,7 @@ if(action.startsWith('training:')){
   const eligible=new Set(trainingPageItems().map(p=>p.id));
   const selected=[...trainingSelectedPages].filter(id=>eligible.has(id));
   if(!selected.length)return note('Wybierz co najmniej jedną stronę, której tekst został odczytany.');
+  if(trainingSource115==='books')return openTrainingStep115('train-options');
   const first=data.bookPages.find(p=>p.id===selected[0]);
   return smOpen(first?.bookId||'',{subject:trainingSelectedSubject,pageIds:selected,mode:trainingMode,...(trainingMode==='vocab'?{chooseGame80:true}:{})});
  }
@@ -2107,7 +2134,7 @@ if(action==='av36:next'&&avengersRun&&avengersRun.done){
  }
  return render();
 }
-const [a,b,c]=action.split(':');try{if(action==='exit'){hqSessions84.delete(who);hqReturn84=false;hqPanel84='';if(testMode){data=testSnapshot;testSnapshot=null;testMode=false;role='admin';who='';tab='home';adminTab='test';return render()}role='';who='';tab='home';return render()}if(a==='enter'){const p=data.profiles[b];if(!p)return;if(p.pin&&prompt('PIN profilu '+p.name)!==p.pin)return note('Nieprawidłowy PIN');role='child';who=b;tab='view-choice';hqPanel84='';hqReturn84=false;hqViews84.set(who,'classic');return render()}if(a==='test'&&b==='enter'){if(role!=='admin'||!['pawel','patryk'].includes(c))return;testSnapshot=data;data=structuredClone(data);testMode=true;for(const id of ['pawel','patryk']){const p=data.profiles[id];p.coins=99999;p.arcadeUnlocked=ARCADE_GAMES.map(g=>g.id);const base=migrateBase(p);base.owned=BASE_ITEMS.map(i=>i.id)}role='child';who=c;tab='base';return render()}if(a==='admin'){adminTab=b;return render()}if(a==='child'){if(b==='base')return hqShow84();hqSessions84.delete(who);hqReturn84=false;tab=b;if(b==='learn'){v37Classic=false;avengersRun=null;trainingStep='subject';trainingSelectedPages=new Set()}return render()}if(action==='book:add')return runAdminAction(target,'Dodaje ksiazke…',async()=>{
+const [a,b,c]=action.split(':');try{if(action==='exit'){hqSessions84.delete(who);hqReturn84=false;hqPanel84='';if(testMode){data=testSnapshot;testSnapshot=null;testMode=false;role='admin';who='';tab='home';adminTab='test';return render()}role='';who='';tab='home';return render()}if(a==='enter'){const p=data.profiles[b];if(!p)return;if(p.pin&&prompt('PIN profilu '+p.name)!==p.pin)return note('Nieprawidłowy PIN');role='child';who=b;tab='view-choice';hqPanel84='';hqReturn84=false;hqViews84.set(who,'classic');return render()}if(a==='test'&&b==='enter'){if(role!=='admin'||!['pawel','patryk'].includes(c))return;testSnapshot=data;data=structuredClone(data);testMode=true;for(const id of ['pawel','patryk']){const p=data.profiles[id];p.coins=99999;p.arcadeUnlocked=ARCADE_GAMES.map(g=>g.id);const base=migrateBase(p);base.owned=BASE_ITEMS.map(i=>i.id)}role='child';who=c;tab='base';return render()}if(a==='admin'){adminTab=b;return render()}if(a==='child'){if(b==='base')return hqShow84();hqSessions84.delete(who);hqReturn84=false;tab=b;if(b==='learn'){v37Classic=false;avengersRun=null;trainingStep='subject';trainingSelectedPages=new Set();trainingSource115=null;trainingMode='game'}return render()}if(action==='book:add')return runAdminAction(target,'Dodaje ksiazke…',async()=>{
  if(!$('bsubject')?.value)throw Error('Najpierw zaznacz przedmioty w profilu dziecka.');
  const chosenKind=$('btype')?.value||'Podręcznik';const chosenSubject=$('bsubject')?.value||'Materiał';const chosenPart=$('bpart')?.value||'1';const title=chosenKind==='Inne'?$('btitle')?.value.trim():chosenSubject+' — '+chosenKind+' — część '+chosenPart;if(!title)return note('Wpisz nazwę materiału.');
  const child=$('bchild').value,subject=$('bsubject').value,part=$('bpart').value;
@@ -2152,7 +2179,7 @@ if(action==='v75:outside:generate')return v75OutsideGenerate(target);
 if(action.startsWith('v75:outside:delete:'))return v75OutsideDelete(Number(action.split(':').pop()));
 if(action==='v75:pre:game'||action==='v75:pre:test'){
  trainingMode=action.endsWith(':test')?'test':'game';trainingSelectedSubject='Wiedza ogólna';trainingSelectedPages=new Set();
- trainingStep='mode';const pagesReady=trainingPageItems();if(pagesReady.length){trainingSelectedPages=new Set(pagesReady.map(p=>p.id));return smOpen('',{subject:'Wiedza ogólna',pageIds:[...trainingSelectedPages],mode:trainingMode})}
+ trainingStep='mode';trainingSource115=null;const pagesReady=trainingPageItems();if(pagesReady.length){trainingSelectedPages=new Set(pagesReady.map(p=>p.id));return smOpen('',{subject:'Wiedza ogólna',pageIds:[...trainingSelectedPages],mode:trainingMode})}
  v37Subject='all';avengersRun={items:v75PreschoolQuestions().slice(0,10),i:0,points:0,done:false,good:false};trainingStep='outside-quiz';return render();
 }
 if(action==='report:reset')return v74ResetReport();
@@ -2371,6 +2398,7 @@ function installMicDrag(){
  window.addEventListener('resize',()=>{const x=parseFloat(mic.style.left),y=parseFloat(mic.style.top);if(Number.isFinite(x)&&Number.isFinite(y))putPos(x,y)},{passive:true});
 }
 function microphone(){
+ if(document.querySelector('[data-assessment115]'))return note('W sprawdzianie odpowiedz samodzielnie. Polecenie możesz odsłuchać.');
  if(getVoiceState()!=='idle'||window.speechSynthesis?.speaking||window.speechSynthesis?.pending){cancelAIRequests();stopVoice();return;}
 
  const answer=q=>{
@@ -2460,7 +2488,7 @@ async function parentPinAction(action){
  }
  updateParentPinDisplay(input);
 }
-const academyPressControls = '.academy102-destinations button,.academy102-header-actions button,.academy102-screen-voice button,.academy102-choices button,.academy102-mic,.academy102-knowledge-panel .academy102-tile,.academy107-entry button,.academy107-pin-key,.academy111-voice-slot .listen,.mentor-room .mentor-choice';
+const academyPressControls = '.academy102-destinations button,.academy102-header-actions button,.academy102-screen-voice button,.academy102-choices button,.academy102-mic,.academy115-flow button,.academy107-entry button,.academy107-pin-key,.academy111-voice-slot .listen,.mentor-room .mentor-choice';
 const academyPressTimers=new WeakMap();
 function pressAcademyControl(control,complete,immediate=false,duration=190){
  const pending=academyPressTimers.get(control);
@@ -2504,7 +2532,7 @@ document.addEventListener('click',ev=>{
  if(btn.dataset.action==='mic'&&micDragIgnoreClick){ev.preventDefault();ev.stopPropagation();return}
  if(btn.matches?.(academyPressControls)){
   const action=btn.dataset.action;
-  const animate=btn.closest('.academy102-knowledge-panel')&&!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  const animate=btn.matches('.academy115-books,.academy115-practice,.academy115-choose')&&!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   pressAcademyControl(btn,()=>handle(action,btn),/^parent-pin:(digit:|erase$)/.test(action),animate?840:190);
   return;
  }
