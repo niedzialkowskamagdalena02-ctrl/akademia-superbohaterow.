@@ -12,21 +12,30 @@ const costumes={
 };
 
 const handImages=new Map(),illustratedHands=new Set(['hulk','iron','spider','captain']);
-export function loadHeroHands88(hero){
- if(!illustratedHands.has(hero))return Promise.resolve(null);
- if(!handImages.has(hero)){
-  handImages.set(hero,new Promise(resolve=>{
+export const HERO_POWER_TIME=Object.freeze({punch:440,laser:640});
+
+function loadHandImage(path,fallback){
+ if(!handImages.has(path)){
+  handImages.set(path,new Promise(resolve=>{
    const image=new Image();
    image.onload=()=>resolve(image);
-   const original='assets/hq/hands90-'+hero+'.webp';
    image.onerror=()=>{
-    if(image.src.endsWith(original)){handImages.delete(hero);resolve(null);}
-    else image.src=original;
+    if(fallback&&!image.src.endsWith(fallback))image.src=fallback;
+    else{handImages.delete(path);resolve(null);}
    };
-   image.src='assets/hq/hd93/hands-'+hero+'.webp';
+   image.src=path;
   }));
  }
- return handImages.get(hero);
+ return handImages.get(path);
+}
+
+export function loadHeroHands88(hero){
+ if(!illustratedHands.has(hero))return Promise.resolve(null);
+ return loadHandImage('assets/hq/hd93/hands-'+hero+'.webp','assets/hq/hands90-'+hero+'.webp');
+}
+
+export function loadHulkFist(){
+ return loadHandImage('assets/hq/hands90-hulk.webp');
 }
 
 let paths;
@@ -49,34 +58,59 @@ function geometry(){
  return paths;
 }
 
-export function drawHeroHands(ctx,canvas,hero,step,moving,image=null,web=null){
+function smoothStep(age,start,end){
+ const t=Math.max(0,Math.min(1,(age-start)/(end-start)));
+ return t*t*(3-2*t);
+}
+
+function handMotion(power,side){
+ const {kind,age,reduced}=power??{};
+ const closed=kind==='punch'&&age>=34&&age<HERO_POWER_TIME.punch-22;
+ const reach=kind==='punch'&&power.side===side ?
+  (reduced ? .24 : smoothStep(age,55,151)*(1-smoothStep(age,173,409))) : 0;
+ const lift=kind==='laser'&&side===1 ?
+  (reduced ? .34 : smoothStep(age,0,173)*(1-smoothStep(age,376,HERO_POWER_TIME.laser))) : 0;
+ return {closed,lean:.56*reach+.38*lift,length:1+.64*reach+.61*lift};
+}
+
+export function drawHeroHands(ctx,canvas,hero,step,moving,image=null,web=null,power=null,fistImage=null){
  const {width,height}=canvas;
  ctx.clearRect(0,0,width,height);
- if(image){
+ const needsFist=handMotion(power,-1).closed;
+ if(image&&(!needsFist||fistImage)){
+  const art=needsFist?fistImage:image;
   const scale=Math.min(width*.35/image.naturalWidth,height*.25/image.naturalHeight)*(hero==='hulk'?1.1:1);
-  const w=image.naturalWidth*scale,h=image.naturalHeight*scale;
-  let origin;
+  const h=image.naturalHeight*scale,w=h*art.naturalWidth/art.naturalHeight;
+  let webOrigin,laserOrigin;
   for(const side of [-1,1]){
-   const sway=moving?Math.sin(step+side*Math.PI/2):0;
+   const {lean,length}=handMotion(power,side);
+   const sway=moving&&!lean?Math.sin(step+side*Math.PI/2):0;
    ctx.save();
    const reach=web?.side===side?Math.max(0,1-web.age/330):0;
    const x=width*(side<0?.022:.978)-side*reach*w*.19,y=height+h*(.035+sway*.037-reach*.25);
-   ctx.translate(x,y);
-   if(web?.side===side)origin={startX:x-side*w*.52,startY:y-h*.51};
-   ctx.scale(-side,1);ctx.rotate(sway*.04);
-   ctx.drawImage(image,0,-h,w,h);
+   ctx.transform(-side,0,side*lean,length,x,y);
+   ctx.rotate(sway*.04);
+   if(needsFist)ctx.filter='brightness(.78) saturate(.84)';
+   ctx.drawImage(art,0,-h,w,h);
+   if(web?.side===side)webOrigin={startX:x-side*w*.52,startY:y-h*.51};
+   if(power?.kind==='laser'&&side===1){
+    const palmY=-h*.53;
+    laserOrigin={x:x-w*.63+lean*palmY,y:y+length*palmY};
+   }
    ctx.restore();
   }
-  if(web)paintWeb93(ctx,width,height,{...web,...origin});
+  if(web)paintWeb93(ctx,width,height,{...web,...webOrigin});
+  if(laserOrigin)paintLaser(ctx,width,height,power.age,laserOrigin);
   return;
  }
  const [base,light,shade,cuff,accent,kind]=costumes[hero]??costumes.iron;
  const p=geometry(),scale=Math.min(width*.00315,height*.00132)*(kind==='skin'?1.15:1);
  for(const side of [-1,1]){
-  const sway=moving?Math.sin(step+side*Math.PI/2):0;
+  const {lean,length}=handMotion(power,side);
+  const sway=moving&&!lean?Math.sin(step+side*Math.PI/2):0;
   ctx.save();
-  ctx.translate(width*(side<0?.084:.916),height+(sway*5-130)*scale);
-  ctx.scale(-side*scale,scale);
+  ctx.transform(-side*scale,0,side*lean*scale,length*scale,
+   width*(side<0?.084:.916)-side*lean*130*scale,height+(sway*5-130*length)*scale);
   ctx.rotate(-.13-sway*.048);
   ctx.shadowColor='#070a17cc';ctx.shadowBlur=9*scale;ctx.shadowOffsetY=4*scale;
   ctx.lineJoin='round';ctx.lineWidth=1.25;ctx.strokeStyle=shade;
@@ -114,6 +148,25 @@ export function drawHeroHands(ctx,canvas,hero,step,moving,image=null,web=null){
   ctx.restore();
  }
  if(web)paintWeb93(ctx,width,height,web);
+ if(power?.kind==='laser')paintLaser(ctx,width,height,power.age,{x:width*.71,y:height*.76});
+}
+
+function paintLaser(ctx,width,height,age,palm){
+ const charge=smoothStep(age,45,170)*(1-smoothStep(age,355,510));
+ if(!charge)return;
+ const end={x:width*.5,y:height*.37};
+ const beam=smoothStep(age,173,210)*(1-smoothStep(age,282,410));
+ const unit=Math.max(2,Math.min(width,height)*.01);
+ ctx.save();
+ ctx.fillStyle='#d8ffff';ctx.shadowColor='#38daff';ctx.shadowBlur=unit*3;
+ ctx.globalAlpha=charge*.92;
+ ctx.beginPath();ctx.arc(palm.x,palm.y,unit*(.65+charge),0,Math.PI*2);ctx.fill();
+ if(beam){
+  ctx.globalAlpha=beam;ctx.strokeStyle='#55e5ff';ctx.lineWidth=unit*3;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(palm.x,palm.y);ctx.lineTo(end.x,end.y);ctx.stroke();
+  ctx.lineWidth=unit*.96;ctx.strokeStyle='#f2ffff';ctx.shadowBlur=0;ctx.stroke();
+ }
+ ctx.restore();
 }
 
 function paintWeb93(ctx,width,height,{side,age,startX=width*(side<0?.27:.73),startY=height*.83}){

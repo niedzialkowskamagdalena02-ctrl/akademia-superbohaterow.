@@ -1,6 +1,6 @@
 import {hqPet,hqPlaced,hqRead} from './headquarters84.js?v=91';
 import {baseArt88} from './base-art88.js?v=91';
-import {drawHeroHands,loadHeroHands88} from './hero-hands85.js?v=93';
+import {drawHeroHands,loadHeroHands88,loadHulkFist,HERO_POWER_TIME} from './hero-hands85.js?v=112';
 import {walkRooms,FLOOR_DEPTH,FULL_TURN,PHOTO_FOV,VERTICAL_SCALE,advance86,cameraBasis86,clamp86,roomAnchor86,wrapAngle} from './base-map86.js?v=95';
 import {energy86} from './base-training86.js?v=87';
 import {petSprite86} from './pet-care86.js?v=90';
@@ -17,6 +17,15 @@ const labShelf=walkRooms.polish.points.find(point=>point.fixture==='shelf');
 const escapeText=value=>String(value).replace(/[&<>]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[ch]));
 const prop=(room,u,v,front,art,key,paint='',extra='')=>
  `<img class="hq86-prop hq88-item-art${extra?' '+extra:''}" data-room="${room}" data-u="${u}" data-v="${v}" data-front="${front?1:0}" data-prop="${key}" data-paint="${paint}" style="--hq-art-hue:${art.hue}deg" data-tall="${art.tall}"${art.caseScale?` data-case-scale="${art.caseScale}"`:''} src="${art.src}" alt="" hidden>`;
+const powerControls={
+ hulk:`<div class="hq112-power-controls" role="group" aria-label="Pięści Hulka">
+  <button type="button" data-walk-power="-1" aria-label="Cios lewą pięścią" aria-keyshortcuts="F">👊 Lewa</button>
+  <button type="button" data-walk-power="1" aria-label="Cios prawą pięścią" aria-keyshortcuts="G">👊 Prawa</button>
+ </div>`,
+ iron:`<div class="hq112-power-controls">
+  <button type="button" data-walk-power="1" aria-label="Strzel laserem z prawej dłoni" aria-keyshortcuts="F">⚡ Laser</button>
+ </div>`
+};
 
 export function baseWalkMarkup(profile,child,hero,release,panel,mic=''){
  const state=hqRead(profile),animal=hqPet(profile),scene=walkRooms[current(child).room];
@@ -59,6 +68,7 @@ export function baseWalkMarkup(profile,child,hero,release,panel,mic=''){
     </div>
    </header>
    ${hero==='spider'?'<button type="button" data-walk-web class="hq93-web" aria-label="Wystrzel pajęczynę">🕸️ Sieć</button>':''}
+   ${Object.hasOwn(powerControls,hero)?powerControls[hero]:''}
    <div class="hq86-location" role="status">${scene.name}</div><small class="hq86-release">V${release}</small>
    <p class="hq86-help">Przesuń palcem, żeby się rozejrzeć. Przytrzymaj, żeby iść.</p>
    ${panel?'':'<div class="hq86-notice" id="hq85-notice" role="status"></div>'}
@@ -202,12 +212,14 @@ export function mountBaseWalk(root){
  const flightButton=stage.querySelector('[data-action="hq:board"]');
  const ctx=hands.getContext('2d'),controller=new AbortController(),{signal}=controller;
  const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
- const child=root.dataset.child,stack=routes.get(child)??[pose('hall')];
+ const {hero,child}=root.dataset,stack=routes.get(child)??[pose('hall')];
+ const powerKind=hero==='hulk'?'punch':hero==='iron'?'laser':null;
  routes.set(child,stack);
  let world=panoramaWorld(canvas),width=0,height=0,frame=0,last=0,step=0;
  let pointer=null,transition=null,busy=false,effect=null,ignoreClickUntil=0,forwarding=false;
  let portraitRatio=.73,sceneMarkers=[],greeting=null;
- let handArt=null,ironArt=null,jetBounds=null,webShot=null;
+ let handArt=null,fistArt=null,ironArt=null,jetBounds=null,webShot=null;
+ let power=null,queuedPunch=0;
  const on=(target,name,listener,options={})=>target.addEventListener(name,listener,{...options,signal});
  const state=()=>stack.at(-1);
  const room=()=>walkRooms[state().room];
@@ -218,8 +230,11 @@ export function mountBaseWalk(root){
   });
  }
  function renderSoon(){if(!frame)frame=requestAnimationFrame(draw);}
- loadHeroHands88(root.dataset.hero).then(image=>{
+ loadHeroHands88(hero).then(image=>{
   if(!signal.aborted&&image){handArt=image;renderSoon();}
+ });
+ if(hero==='hulk')loadHulkFist().then(image=>{
+  if(!signal.aborted&&image){fistArt=image;renderSoon();}
  });
  if(stage.querySelector('[data-mentor="iron"]'))image86('mentor-iron91-sheet.webp').then(image=>{
   if(!signal.aborted){ironArt=image;renderSoon();}
@@ -251,6 +266,7 @@ export function mountBaseWalk(root){
   back.hidden=stack.length===1;menu.hidden=stack.length!==1;
   greeting=null;sceneMarkers=[];markers.forEach(marker=>marker.hidden=true);
   jetBounds=null;
+  power=null;queuedPunch=0;
   fallback.style.backgroundImage=`url("assets/hq/${roomImage93(selected.portrait??selected.art)}")`;
   fallback.classList.toggle('has-portrait',!!selected.portrait);
   try{
@@ -356,8 +372,13 @@ export function mountBaseWalk(root){
    fallback.style.transform=`scale(${1+Math.min(.16,Math.hypot(live.x,live.z)*.025)})`;
   }
   const webAge=webShot?now-webShot.at:Infinity;
- if(webAge>460)webShot=null;
- if(ctx)drawHeroHands(ctx,hands,root.dataset.hero,reduced?0:step,moving,handArt,webShot?{...webShot,age:webAge}:null);
+  if(webAge>460)webShot=null;
+  if(power&&now-power.at>=HERO_POWER_TIME[power.kind]){
+   power=queuedPunch?{kind:'punch',side:queuedPunch,at:now}:null;
+   queuedPunch=0;
+  }
+  const motion=power?{...power,age:now-power.at,reduced}:null;
+  if(ctx)drawHeroHands(ctx,hands,hero,reduced?0:step,moving,handArt,webShot?{...webShot,age:webAge}:null,motion,fistArt);
   if(flightButton&&live.room==='hangar'){
    const projectPhoto=(u,v)=>project(basis,fx,fy,roomAnchor86(selected,{u,v,front:true},portraitRatio));
    const a=projectPhoto(.09,.44),b=projectPhoto(.92,.69);
@@ -368,7 +389,7 @@ export function mountBaseWalk(root){
    greeting.open=false;forwardPoint(greeting.marker);
    if(signal.aborted)return;
   }
-  if(pointer||transition||effect||webShot||greeting&&now-greeting.at<MENTOR_GREETING_MS)renderSoon();else last=0;
+  if(pointer||transition||effect||webShot||power||greeting&&now-greeting.at<MENTOR_GREETING_MS)renderSoon();else last=0;
  }
  function forwardPoint(marker){
   forwarding=true;marker.dataset.hqForwarded='1';
@@ -393,7 +414,7 @@ export function mountBaseWalk(root){
  }
  on(stage,'pointerdown',event=>{
   ignoreClickUntil=0;
-  if(event.button!==0||pointer||busy||transition||dialog||event.target.closest('.hq86-top,[data-walk-web],.pres93-speaker'))return;
+  if(event.button!==0||pointer||busy||transition||dialog||event.target.closest('.hq86-top,[data-walk-web],[data-walk-power],.pres93-speaker'))return;
   const point=event.target.closest('.hq86-point')||jetTarget(event);
   pointer={id:event.pointerId,time:performance.now(),x:event.clientX,y:event.clientY,drag:false,walk:false,point};
   if(!point)stage.setPointerCapture(event.pointerId);
@@ -422,6 +443,7 @@ export function mountBaseWalk(root){
    if(stack.length>1&&!busy&&!transition){stack.pop();void load();}
    return;
   }
+  if(event.target.closest('[data-walk-power]'))return;
   const marker=event.target.closest('.hq86-point');
   if(!marker&&!busy&&!transition&&event.detail&&jetTarget(event)){
    event.preventDefault();flightButton.click();return;
@@ -446,15 +468,30 @@ export function mountBaseWalk(root){
   });
  },{capture:true});
  function shoot(){
-  if(root.dataset.hero!=='spider'||dialog||busy||transition)return;
+  if(hero!=='spider'||dialog||busy||transition)return;
   webShot={at:performance.now(),side:webShot?.side===1?-1:1};
   renderSoon();
  }
+ function activatePower(side){
+  if(!powerKind||dialog||busy||transition||!ctx)return;
+  if(power){
+   if(powerKind==='punch')queuedPunch=side;
+   return;
+  }
+  power={kind:powerKind,side,at:performance.now()};
+  renderSoon();
+ }
  stage.querySelector('[data-walk-web]')?.addEventListener('click',shoot,{signal});
+ for(const button of stage.querySelectorAll('[data-walk-power]')){
+  on(button,'click',()=>activatePower(Number(button.dataset.walkPower)));
+ }
  on(stage,'keydown',event=>{
   if(event.target!==stage||dialog||busy||transition)return;
   const view=state();
-  if(event.code==='KeyF'&&root.dataset.hero==='spider'){shoot();}
+  if(event.code==='KeyF'&&hero==='spider'){shoot();}
+  else if(powerKind&&!event.repeat&&(event.code==='KeyF'||powerKind==='punch'&&event.code==='KeyG')){
+   activatePower(powerKind==='punch'&&event.code==='KeyF'?-1:1);
+  }
   else if(event.code==='Space'){
    if(!pointer)pointer={id:'keyboard',time:performance.now(),drag:false,walk:false};
   }else if(['ArrowLeft','ArrowRight'].includes(event.code)){

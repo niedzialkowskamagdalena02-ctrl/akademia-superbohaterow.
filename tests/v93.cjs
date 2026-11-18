@@ -32,6 +32,7 @@ function board(){
  const {mountMissions93,chocolateSelection93}=await import(url('missions93.js'));
  const {rotateBlock93}=await import(url('arcade.js'));
  const {baseWalkMarkup,openWalkRoom87}=await import(url('base-walk85.js'));
+ const {drawHeroHands}=await import(url('hero-hands85.js'));
  const {preschoolSpeech93}=await import(url('preschool-audio93.js'));
  const {traceStrokes92}=await import(url('learning-trace92.js'));
  const all=[schoolMissions93,preschoolMissions93,captainMissions93,aceMissions93];
@@ -75,6 +76,34 @@ function board(){
  assert.ok(walk.includes('data-walk-web'));
  assert.ok(!walk.includes('id="missions93-cockpit"'));
  assert.ok(!baseWalkMarkup(spider,'test','iron',93,'').includes('data-walk-web'));
+ assert.doesNotMatch(walk,/data-walk-power/);
+ const hulkWalk=baseWalkMarkup(spider,'test','hulk',112,'');
+ assert.match(hulkWalk,/data-walk-power="-1" aria-label="Cios lewą pięścią"/);
+ assert.match(hulkWalk,/data-walk-power="1" aria-label="Cios prawą pięścią"/);
+ assert.match(baseWalkMarkup(spider,'test','iron',112,''),/data-walk-power="1" aria-label="Strzel laserem z prawej dłoni"/);
+ assert.doesNotMatch(baseWalkMarkup(spider,'test','captain',112,''),/data-walk-power/);
+ const hand={naturalWidth:621,naturalHeight:627},fist={naturalWidth:289,naturalHeight:420};
+ const handsFrame=(hero,power)=>{
+  const poses=[],images=[],beam=[];
+  const ctx={
+   clearRect(){},save(){},restore(){},rotate(){},beginPath(){},arc(){},fill(){},moveTo(){},stroke(){},
+   transform(...pose){poses.push(pose);},drawImage(image){images.push(image);},lineTo(x,y){beam.push([x,y]);}
+  };
+  drawHeroHands(ctx,{width:360,height:740},hero,0,false,hand,null,power,fist);
+  return {poses,images,beam};
+ };
+ for(const side of [-1,1]){
+  const frame=handsFrame('hulk',{kind:'punch',side,age:160});
+  assert.deepEqual(frame.images,[fist,fist]);
+  assert.ok(frame.poses[(side+1)/2][3]>1);
+  assert.equal(frame.poses[(1-side)/2][3],1);
+ }
+ assert.deepEqual(handsFrame('hulk',null).images,[hand,hand]);
+ assert.equal(handsFrame('iron',{kind:'laser',side:1,age:110}).beam.length,0);
+ const blast=handsFrame('iron',{kind:'laser',side:1,age:240});
+ assert.equal(blast.poses[0][3],1);
+ assert.ok(blast.poses[1][3]>1);
+ assert.deepEqual(blast.beam,[[180,740*.37]]);
 
  const {app,data}=require('./legacy/test.cjs');
  const view=app(),account=data();
