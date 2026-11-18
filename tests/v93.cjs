@@ -162,8 +162,18 @@ function board(){
   for(const [id] of preschoolMissions93){
    if(id==='snail'){root.click('play-snail');assert.match(root.innerHTML,/Wejdź do ogrodu/);root.click('catalog');continue;}
    const t=start(id,'P');
-   if(id==='dino'){choose(t);root.click('drop');}
-   if(id==='rail')root.click('wagon-'+t.options.findIndex(c=>c.value===t.answer));
+   if(id==='dino'){
+    root.click('pause');choose(t);root.click('drop');
+    assert.doesNotMatch(root.innerHTML,/data-mission93="next"/);
+    root.click('resume');choose(t);root.click('drop');
+   }
+   if(id==='rail'){
+    const index=t.options.findIndex(c=>c.value===t.answer);
+    const target={dataset:{mission93:'wagon-'+index},closest:sel=>sel.includes('wagon-')?target:null};
+    drag('piece','rail-0',target);
+    assert.doesNotMatch(root.innerHTML,/data-mission93="next"/);
+    drag('piece','rail-'+index,target);
+   }
    if(id==='camera')t.options.forEach((item,i)=>{if(item.value===t.answer)root.click('pick-'+i);});
    if(id==='bubble'){
     played.length=0;

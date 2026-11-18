@@ -1,3 +1,4 @@
+import {gamePreview99, hangarPaint99} from './game-art99.js?v=99';
 // V48_AI_RESPONSE_DIAGNOSTICS
 // V44_BULK_CHAPTERS
 // V42_CHAPTERS
@@ -17,8 +18,8 @@ import {flightMarkup88,mountNounFlight88} from './noun-flight88.js?v=90';
 import {petQuiz88} from './pet-quiz88.js?v=88';
 import {gameGroup92,recordGameAward92} from './learning-games92.js?v=92';
 import {mountLearningGames92} from './learning-play92.js?v=95';
-import {mountMissions93,missionNote93} from './missions93.js?v=95';
-import {mountHangar95} from './hangar95.js?v=98';
+import {mountMissions93,missionNote93} from './missions93.js?v=99';
+import {mountHangar95} from './hangar95.js?v=99';
 import {trainingCatalog95,trainingSubject95,trainingGroupName95,trainingSequence95,outsideDeck95} from './training95.js?v=95';
 import {mountPreschoolAudio93} from './preschool-audio93.js?v=95';
 import {MASTER_PRIZES86,MASTER_SCORE86,recordEnergy86,trainingRound86,trainingConsole86,unlockMaster86} from './base-training86.js?v=87';
@@ -76,7 +77,7 @@ const select=(id,label,options,value)=>`<label for="${id}">${label}</label><sele
 const grades=[['P','Przedszkole'],...Array.from({length:12},(_,i)=>[String(i+1),`Klasa ${i+1}`])];
 const people=[['pawel','Paweł'],['patryk','Patryk']];
 const note=t=>{const n=$('hq85-notice')||$('notice');if(!n){console.warn('Powiadomienie:',t);return}n.textContent=t;n.classList.add('visible');setTimeout(()=>{if(n.isConnected)n.classList.remove('visible')},4500)};
-const ACADEMY_RELEASE=98;
+const ACADEMY_RELEASE=99;
 async function checkAcademyUpdate(button){
  if(!button||button.disabled)return;
  const label=button.textContent,controller=new AbortController();
@@ -1166,7 +1167,7 @@ function trainingList95(){
  const groups=trainingSubject95(trainingSelectedSubject)==='all'?[...new Set(items.map(item=>item.subject))]:[items[0]?.subject];
  return groups.map(group=>`${groups.length>1?`<h4>${e(trainingGroupName95(group))}</h4>`:''}
   <div class="tr71-grid tr95-game-list">${items.filter(item=>item.subject===group).map(item=>
-   `<button type="button" class="tr71-choice" data-action="training:play:${encodeURIComponent(item.id)}"><span aria-hidden="true">${item.icon}</span><strong>${e(item.name)}</strong></button>`).join('')}</div>`).join('');
+   `<button type="button" class="tr71-choice" data-action="training:play:${encodeURIComponent(item.id)}">${gamePreview99(item.kind,`<span aria-hidden="true">${item.icon}</span>`)}<strong>${e(item.name)}</strong></button>`).join('')}</div>`).join('');
 }
 function trainingFlowMarkup(){
  const subject=trainingStep==='subject';
@@ -1275,17 +1276,24 @@ function hqRoomPanel84(p){
  if(hqPanel84==='flight')body=flightMarkup88(button,speakBtn,{child:who,preview:testMode});
  if(hqPanel84==='hangar'){
   const jet=p.base?.owned?.includes('quinjet');
-  const board=gameGroup92(p.grade)?button('✈️ Wsiądź do samolotu','hq:board','gold'):'';
+  const board=gameGroup92(p.grade);
   const audio=label=>p.grade==='P'?speakBtn(label):'';
-  const entry=board?board+audio('Wsiądź do samolotu.'):jet?button('✈️ Lot Quinjetem','hq:flight','gold')+audio('Lot Quinjetem.'):'';
-  const paint=[['blue','Niebieskie'],['mint','Miętowe'],['gold','Złote']].map(([id,label])=>
-   `<div>${button(label,'hq:paint:'+id,hqRead(p).paint===id?'gold':'alt')}${audio(label+' malowanie.')}</div>`).join('');
+  const entry=board?button('Wsiądź do samolotu','hq:board','gold'):jet?button('Wsiądź do samolotu','hq:flight','gold'):'';
+  if(jet){
+   const paint=hangarPaint99(hqRead(p).paint,(id,label,selected)=>
+    `<button type="button" class="hangar99-choice" data-action="hq:paint:${id}" aria-pressed="${selected}">
+      <strong>${label}</strong><img src="assets/art99/jet-${id}.webp" alt="" draggable="false">
+    </button>`,speakBtn);
+   return `<section class="card hq84-panel hangar99-panel" id="hq84-panel" tabindex="-1">
+    <header><button type="button" class="hangar99-close" data-action="hq:close" aria-label="Zamknij">×</button>
+    <h3 data-game-prompt>Wybierz malowanie<br><strong>Quinjeta.</strong></h3></header>
+    ${paint}<footer>${entry}<button type="button" class="mic hangar99-mic" data-action="mic" aria-label="Zadaj pytanie">🎙️<small>Zadaj pytanie</small></button></footer>
+   </section>`;
+  }
   body='<div class="flight96-hangar"><h3>🛩️ Hangar</h3>'+
-   (entry?`<div class="flight96-hangar-entry">${entry}</div>`:'')+
-   (jet?'<div class="flight96-hangar-help"><p data-game-prompt>Wybierz malowanie Quinjeta.</p>'+
-     audio('Wybierz malowanie Quinjeta.')+'</div><div class="flight96-paints">'+paint+'</div>':
-     '<p>W sklepie możesz kupić własnego Quinjeta.</p><div class="flight96-hangar-entry">'+
-     button('🛒 Idź do sklepu','hq:room:shop','alt')+audio('Idź do sklepu.')+'</div>')+'</div>';
+   (entry?`<div class="flight96-hangar-entry">${entry}${audio('Wsiądź do samolotu.')}</div>`:'')+
+   '<p>W sklepie możesz kupić własnego Quinjeta.</p><div class="flight96-hangar-entry">'+
+   button('🛒 Idź do sklepu','hq:room:shop','alt')+audio('Idź do sklepu.')+'</div></div>';
  }
  if(hqPanel84==='joke'){
   const joke=hqJokes84[hqJoke84];
@@ -1596,8 +1604,9 @@ function childRender(){
   const care=['pet','pet-select','pet-quiz'].includes(hqPanel84);
   const mic='<button type="button" class="mic hq87-mic" data-action="mic" aria-label="Zadaj pytanie">🎙️</button>';
   const cockpit=hqPanel84==='cockpit';
+  const paintPicker=hqPanel84==='hangar'&&p.base?.owned?.includes('quinjet');
   const dialog=panel?'<dialog class="hq85-dialog'+(cockpit?' hq95-cockpit-dialog':care?' hq86-pet-dialog':'')+'" aria-label="'+(cockpit?'Kokpit samolotu':care?'Kącik zwierzaka':'Interakcja w bazie')+'">'+panel+
-   (cockpit?'':'<div id="hq85-notice" role="status"></div><div class="hq87-dialog-mic">'+mic+'</div>')+'</dialog>':'';
+   (cockpit?'':'<div id="hq85-notice" role="status"></div><div class="hq87-dialog-mic">'+(paintPicker?'':mic)+'</div>')+'</dialog>':'';
   const walk=baseWalkMarkup(p,who,hero(p.hero||(who==='pawel'?'iron':'spider'))[0],ACADEMY_RELEASE,dialog,mic);
   layout('Spacer po bazie',walk,'walk');
   mountBaseWalk(document.querySelector('[data-hq86-walk]'));mountPetCare86(app,careGesture);

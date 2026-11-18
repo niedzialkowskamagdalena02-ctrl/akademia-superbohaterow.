@@ -101,12 +101,12 @@ export function missionDeck93(id,grade,random=Math.random){
   const formula=times(a,b)+' = ?';
   const formulaSpeech='Ile to '+timesVoice(a,b)+'?';
   const [letter,word,icon,sound]=select(words,i);
-  const letterOptions=()=>shuffle92([letter,...shuffle92(letters.map(row=>row[0]).filter(l=>l!==letter),random).slice(0,3)],random).map(l=>card(l,l,'',letters.find(row=>row[0]===l)[3]));
+  const letterOptions=(choices=4)=>shuffle92([letter,...shuffle92(letters.map(row=>row[0]).filter(l=>l!==letter),random).slice(0,choices-1)],random).map(l=>card(l,l,'',letters.find(row=>row[0]===l)[3]));
   switch(id){
    case 'monster':{
     const groups=2+i%3,each=2+Math.floor(i/2);
     const apples=each+' '+(each<5?'jabłka':'jabłek');
-    return {kind:'baskets',prompt:groups+' koszyki. W każdym po '+apples+'.',speech:'Policz wszystkie jabłka. Mamy '+groups+' koszyki, po '+apples+' w każdym.',groups,each,answer:groups*each,options:mathChoices(groups,each,random),explain:times(groups,each)+' = '+Array(groups).fill(each).join(' + ')+' = '+groups*each};
+    return {kind:'baskets',prompt:times(groups,each)+' = ?',speech:'Policz wszystkie jabłka. Mamy '+groups+' koszyki, po '+apples+' w każdym.',groups,each,answer:groups*each,options:mathChoices(groups,each,random),explain:times(groups,each)+' = '+Array(groups).fill(each).join(' + ')+' = '+groups*each};
    }
    case 'space': case 'fuel':
     return {kind:'flight',prompt:formula,speech:formulaSpeech,options:mathChoices(a,b,random),answer:product,time:id==='space'?10:16,explain:times(a,b)+' = '+product};
@@ -131,7 +131,7 @@ export function missionDeck93(id,grade,random=Math.random){
     const [c,d]=pool.find(pair=>pair[0]*pair[1]!==product&&(i%2?pair[0]*pair[1]>product:pair[0]*pair[1]<product))??pool.find(pair=>pair[0]*pair[1]!==product);
     return {kind:'duel',prompt:'Która karta ma większy wynik?',speech:'Która karta ma większy wynik?',options:[card(times(a,b),'you','🦸',timesVoice(a,b)),card(times(c,d),'pirate','🏴‍☠️',timesVoice(c,d))],answer:product>c*d?'you':'pirate',explain:times(a,b)+' = '+product+' · '+times(c,d)+' = '+c*d};
    }
-   case 'dino':return {kind:'drop',prompt:'Podaj jajko z pierwszą literą.',speech:'Posłuchaj początku słowa: '+sound+'… '+word+'. Podaj właściwe jajko.',icon,drop:'Pyszczek dinozaura',options:letterOptions(),answer:letter,explain:'Pierwsza litera słowa „'+word+'” to '+letter+'.'};
+   case 'dino':return {kind:'drop',prompt:'Podaj jajko z pierwszą literą.',speech:'Posłuchaj początku słowa: '+sound+'… '+word+'. Podaj właściwe jajko.',icon,drop:'Pyszczek dinozaura',options:letterOptions(5),answer:letter,explain:'Pierwsza litera słowa „'+word+'” to '+letter+'.'};
    case 'rail':{
     const count=select([3,1,4,2,5,3],i);
     return {kind:'rail',prompt:'Policz i wybierz wagonik.',speech:'Policz przedmioty. Przeciągnij je do wagonika z odpowiednią liczbą.',count,icon:select(['🎈','🧸','🍎','⭐','🍐'],i),options:numberList(5).map(n=>card(n)),answer:count};

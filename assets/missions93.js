@@ -1,6 +1,7 @@
+import {gamePreview99} from './game-art99.js?v=99';
 import {gameGroup92,shuffle92} from './learning-games92.js?v=92';
 import {mountTrace92} from './learning-trace92.js?v=95';
-import {schoolMissions93,preschoolMissions93,captainMissions93,aceMissions93,missionDeck93} from './missions93-data.js?v=93';
+import {schoolMissions93,preschoolMissions93,captainMissions93,aceMissions93,missionDeck93} from './missions93-data.js?v=99';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const button=(text,action,attributes='')=>`<button type="button" data-mission93="${action}" ${attributes}>${text}</button>`;
@@ -82,8 +83,8 @@ export function mountMissions93(root,{grade,flight=false,speak=()=>{},tap=()=>{}
   const heading=flight?(preschool?'Mały Kapitan':'As Przestworzy'):(preschool?'Zabawy dla przedszkolaka':'Gry do nauki mnożenia');
   root.innerHTML=`<div class="sq93-catalog${flight?' sq93-cockpit':''}">
    <header><h2>${heading}</h2>${preschool?sound('Jesteś w '+(flight?'kokpicie. Wybierz misję lotniczą.':'sali zabaw. Wybierz grę.')):''}</header>
-   <div class="sq93-menu">${games.map(([key,icon,name,desc])=>`<div class="sq93-game-card">
-    ${button(`<span aria-hidden="true">${icon}</span><strong>${name}</strong><small>${desc}</small>`,'play-'+key)}
+   <div class="sq93-menu game99-catalog">${games.map(([key,icon,name,desc])=>`<div class="sq93-game-card">
+    ${button(`${gamePreview99(key,`<span aria-hidden="true">${icon}</span>`)}<strong>${name}</strong><small>${desc}</small>`,'play-'+key)}
     ${preschool?sound(name+'. '+desc):''}</div>`).join('')}</div>
    ${flight&&legacy?'<button type="button" class="alt" data-action="hq:flight">✈ Klasyczny lot Quinjetem</button>':''}</div>`;
  }
@@ -98,7 +99,7 @@ export function mountMissions93(root,{grade,flight=false,speak=()=>{},tap=()=>{}
   if(!games.some(row=>row[0]===key))return;
   cancelClock();id=key;turn=0;state=null;gesture=null;
   const desc=games.find(row=>row[0]===id)[3];
-  shell(`<section class="sq93-brief sq93-scene">${preschool?sound(desc):''}<p data-game-prompt>${desc}</p>
+  shell(`<section class="sq93-brief sq93-scene">${gamePreview99(id,'')}${preschool?sound(desc):''}<p data-game-prompt>${desc}</p>
    ${button(id==='snail'?'Wejdź do ogrodu':'Zaczynamy','start','class="sq93-primary"')}${preschool?sound('Zaczynamy'):''}</section>`);
   if(preschool)say(desc);
   if(oneRound)start();
@@ -166,17 +167,16 @@ export function mountMissions93(root,{grade,flight=false,speak=()=>{},tap=()=>{}
   const picture=t.icon?`<div class="sq93-picture" aria-hidden="true">${t.icon}</div>`:'';
   const scene=()=>{
    switch(t.kind){
-    case 'baskets':return `<div class="sq93-baskets" aria-label="${t.groups} koszyki po ${t.each} jabłek">${repeat(t.groups,()=>
-     `<div class="sq93-basket"><div>${repeat(t.each,()=>'<img src="assets/games80/pictures/apple.svg" alt="Jabłko">')}</div></div>`)}</div>${available(t.options)}`;
+    case 'baskets':return forest(t);
+
     case 'chocolate':return chocolate(t);
     case 'collect':return collect(t);
     case 'sequence':return sequence(t);
     case 'flight':case 'flightSequence':return air(t);
-    case 'drop':return `${picture}<div class="sq93-target" data-sq93-drop="target">
+    case 'drop':return id==='dino'?dino(t):`${picture}<div class="sq93-target" data-sq93-drop="target">
      ${button(`${t.targetIcon??'🦕'} <span>${esc(t.drop)}</span>`,'drop',state.finished?'disabled':'')}
      ${preschool?sound(t.drop):''}</div>${available(t.options,{draggable:true})}`;
-    case 'rail':return `<div class="sq93-group" data-sq93-drag="group" aria-label="Przedmioty do policzenia">${repeat(t.count,()=>`<span>${t.icon}</span>`)}</div>
-     <div class="sq93-wagons">${t.options.map((item,i)=>option(item,i,{action:'wagon',blocked:state.finished})).join('')}</div>`;
+    case 'rail':return rail(t);
     case 'load':return load(t);
     case 'closet':return closet(t);
     case 'memory':return memory(t);
@@ -192,8 +192,70 @@ export function mountMissions93(root,{grade,flight=false,speak=()=>{},tap=()=>{}
   const hud=`<p class="sq93-progress">⭐ ${turn+1} / ${deck.length}${t.time?` <span><progress max="${t.time}" value="${Math.ceil(state.gateTime)}" data-sq93-progress></progress> <b data-sq93-time>${Math.ceil(state.gateTime)} s</b></span>`:''}</p>`;
   const nextLabel=oneRound||turn+1<deck.length?'Następne zadanie':'Podsumowanie';
   const next=state.finished?`<div class="sq93-next">${button(nextLabel,'next','class="sq93-primary"')}${preschool?sound(nextLabel):''}</div>`:'';
-  shell(hud+prompt()+`<div class="sq93-scene sq93-kind-${t.kind}" ${state.finished?'data-win':''}>${scene()}</div>`+next,feedback);
+  const illustrated=['monster','space','dino','rail'].includes(id);
+  const outsidePrompt=illustrated?'':hud+prompt();
+  shell(outsidePrompt+`<div class="sq93-scene sq93-kind-${t.kind}${illustrated?' game99-scene':''}" ${state.finished?'data-win':''}>${scene()}</div>`+next,feedback);
   if(t.kind==='map')paintWorld(root.querySelector('.sq93-world-map'));
+ }
+ function forest(t){
+  return `<div class="game99-forest">
+   <div class="game99-stars" aria-label="Runda ${turn+1} z ${deck.length}">★ ${turn+1}</div>
+   <div class="game99-forest-sign"><h3 data-game-prompt>${esc(t.prompt)}</h3></div>
+   <div class="game99-baskets" aria-label="${t.groups} koszyki po ${t.each} jabłek">${repeat(t.groups,()=>
+    `<div class="game99-basket"><div aria-hidden="true">${repeat(t.each,()=>'<img src="assets/art99/apple.webp" alt="">')}</div></div>`)}</div>
+   <p class="game99-forest-instruction">Dotknij wyniku</p>${available(t.options)}
+   ${sound(t.speech)}
+   </div>`;
+ }
+ function dino(t){
+  return `<div class="game99-dino">
+   <span class="game99-score">Punkty: ${finishCount}</span>
+   <span class="game99-cue" role="img" aria-label="Posłuchaj nazwy obrazka">${t.icon}</span>
+   <div class="game99-mouth" data-sq93-drop="target">${button('','drop',
+    `aria-label="Pyszczek dinozaura" ${state.finished?'disabled':''}`)}</div>
+   ${t.options.map((item,i)=>button(esc(item.label),'pick-'+i,
+    `class="game99-egg game99-egg-${i}" data-sq93-drag="${i}" ${state.finished?'disabled':''}
+     aria-pressed="${state.selection===i}" aria-label="Jajko z literą ${esc(item.label)}"`)).join('')}
+   ${sound(t.speech)}
+   ${button('⏸','pause','class="game99-pause" aria-label="Wstrzymaj grę"')}
+   ${state.paused?`<div class="game99-paused">${button('Wznów','resume','class="sq93-primary"')}</div>`:''}
+   </div><p class="game99-dino-instruction" data-game-prompt>${esc(t.prompt)}</p>`;
+ }
+ function rail(t){
+  const groups=t.count===5?5:4;
+  const selected=state.selection??t.options.findIndex(item=>item.value===t.answer);
+  const wagons=t.options.slice(0,groups);
+  return `<div class="game99-rail" style="--wagons:${groups}">
+   <div class="game99-rail-top">${prompt(t.prompt)}</div>
+   <div class="game99-balloon-row" aria-label="Balony do policzenia">${wagons.map((item,i)=>{
+    const count=item.value;
+    return button(repeat(count,j=>`<i style="--balloon:${(j+i)%5}" aria-hidden="true"></i>`),'balloons-'+i,
+     `class="game99-balloon-group" data-sq93-drag="rail-${i}" aria-label="Grupa balonów, zestaw ${String.fromCharCode(65+i)}"
+      aria-pressed="${selected===i}" ${state.finished?'disabled':''}`);
+   }).join('')}</div>
+   <div class="game99-wagons">${wagons.map((item,i)=>button(esc(item.label),'wagon-'+i,
+    `aria-label="Wagon ${item.label}" ${state.finished?'disabled':''}`)).join('')}</div>
+   </div><p class="game99-rail-hint">Przeciągnij balony lub wybierz grupę i wagonik.</p>`;
+ }
+ function space(t){
+  const lanePositions=[[20.3,49.4],[50.7,29.6],[80,49.4]];
+  return `<div class="game99-space" aria-label="Kosmiczny slalom">
+   <div class="game99-score">Punkty: ${finishCount}</div>
+   <div class="game99-level">Runda: ${turn+1}/${deck.length}</div>
+   <div class="game99-space-stars" aria-hidden="true">${'★'.repeat(Math.min(finishCount,4))}${'☆'.repeat(4-Math.min(finishCount,4))}</div>
+   <div class="game99-space-timer"><progress max="${t.time}" value="${Math.ceil(state.gateTime)}" data-sq93-progress aria-label="Czas lotu"></progress>
+    <b data-sq93-time>${Math.ceil(state.gateTime)} s</b></div>
+   <div class="sq93-air game99-space-flight" style="--lanes:${t.options.length};--lane:${state.lane}">
+    <div class="sq93-gates" data-fly-space>${t.options.map((item,i)=>`<div class="game99-asteroid" style="--x:${lanePositions[i][0]}%;--y:${lanePositions[i][1]}%">
+     ${option(item,i,{selected:state.lane===i,action:'lane',blocked:state.finished})}</div>`).join('')}</div>
+    <span class="game99-flight-path" aria-hidden="true"></span>
+   </div>
+   <h3 data-game-prompt>${esc(t.prompt)}</h3>${sound(t.speech)}
+   </div>
+   <div class="sq93-flight-actions game99-flight-actions">${button('◀','up',`aria-label="W lewo" ${state.finished?'disabled':''}`)}
+    ${button('Leć','fly',`class="sq93-primary" ${state.finished?'disabled':''}`)}
+    ${button('▶','down',`aria-label="W prawo" ${state.finished?'disabled':''}`)}
+   </div>`;
  }
  function collect(t){
   if(id==='chameleon')return `<div class="sq93-lizard">${state.done.length?'👅 ':''}🦎 <b>${t.answer}</b></div>${available(t.options)}`;
@@ -207,19 +269,19 @@ export function mountMissions93(root,{grade,flight=false,speak=()=>{},tap=()=>{}
    <div class="sq93-sequence">${t.options.map((item,i)=>option(id==='frog'&&last===i?{...item,icon:'🐸'}:item,i,{selected:state.done.includes(i),blocked:state.finished||state.done.includes(i)})).join('')}</div>`;
  }
  function air(t){
+  if(id==='space')return space(t);
   if(state.phase==='lever')return `<div class="sq93-lever-area" data-sq93-lever>
    ${button('🔴 Pociągnij dźwignię','lever','aria-label="Pociągnij dźwignię startową"')}
    ${sound('Pociągnij dźwignię w dół albo dotknij uchwytu.')}<div aria-hidden="true">⬇</div></div>`;
   const options=t.kind==='flightSequence'?state.gates:t.options;
   const launch=t.kind==='flightSequence'&&id==='takeoff'?'Przeleć przez obręcz':t.shape?'Ląduj':id==='fuel'?'Tankuj':id==='seasons'?'Złap':'Leć';
-  const label=id==='space'?'🚀':'✈️';
   const altitude=['airballs','spelling','landing','feeder'].includes(id);
   return `<div class="sq93-air" ${altitude?'data-altitude':''} style="--lanes:${options.length};--lane:${state.lane}">
    ${t.icon?`<div class="sq93-wing" aria-hidden="true">${t.icon}</div>`:''}
    <div class="sq93-gates" data-fly-${id}>${options.map((item,i)=>option(item,i,{
     selected:state.lane===i,action:'lane',shape:t.shape,blocked:state.finished
    })).join('')}</div>
-   <div class="sq93-plane-slot"><span class="sq93-plane" aria-hidden="true">${label}</span></div>
+   <div class="sq93-plane-slot"><span class="sq93-plane" aria-hidden="true">✈️</span></div>
    <div class="sq93-flight-actions">
     ${button('⬆','up',`aria-label="Leć w górę" ${state.finished?'disabled':''}`)}
     ${button(launch,'fly',`class="sq93-primary" ${state.finished?'disabled':''}`)}
@@ -390,6 +452,13 @@ export function mountMissions93(root,{grade,flight=false,speak=()=>{},tap=()=>{}
   if(action==='catalog')return onBack?onBack():catalog();
   if(action==='start')return start();
   if(!state)return;
+  if(id==='dino'&&action==='pause'&&!state.finished){
+   state.paused=true;draw();root.querySelector('[data-mission93="resume"]')?.focus?.();return;
+  }
+  if(id==='dino'&&action==='resume'&&state.paused){
+   state.paused=false;draw();root.querySelector('[data-mission93="pause"]')?.focus?.();return;
+  }
+  if(state.paused)return;
   if(action==='next'&&state.finished){
    if(oneRound){onFinish();return;}
    if(++turn<deck.length){fresh();return;}
@@ -408,7 +477,12 @@ export function mountMissions93(root,{grade,flight=false,speak=()=>{},tap=()=>{}
   switch(name){
    case 'pick':return pick(i);
    case 'drag':return place(i,true);
-   case 'wagon':return judge(t.options[i].value);
+   case 'balloons':state.selection=i;draw();return;
+   case 'wagon':{
+    const value=t.options[state.selection]?.value??t.answer;
+    if(value!==t.options[i].value)return retry('Policz balony w wybranej grupie.');
+    return judge(value);
+   }
    case 'lane':return setLane(i);
    case 'up':return setLane(state.lane-1);
    case 'down':return setLane(state.lane+1);
@@ -456,11 +530,12 @@ export function mountMissions93(root,{grade,flight=false,speak=()=>{},tap=()=>{}
  }
  on('click',event=>{
   const audio=event.target.closest('[data-sq93-say]');
-  if(audio){tap();say(audio.dataset.sq93Say,audio.dataset.lang);return;}
+  if(audio){if(!state?.paused){tap();say(audio.dataset.sq93Say,audio.dataset.lang);}return;}
   const target=event.target.closest('[data-mission93]');
   if(!target||target.disabled||event.detail&&performance.now()<ignoreClickUntil)return;
-  tap();
   const action=target.dataset.mission93;
+  if(state?.paused&&!['catalog','resume'].includes(action))return;
+  tap();
   if(action.startsWith('key-')&&!state.finished){keyInput(Number(action.slice(4)));return;}
   if(action.startsWith('pick-')&&['drop','load'].includes(task()?.kind)&&state&&!state.finished){
    const index=Number(action.slice(5));
@@ -488,7 +563,7 @@ export function mountMissions93(root,{grade,flight=false,speak=()=>{},tap=()=>{}
   }else if(t.kind==='keypad'&&/^\d$/.test(event.key)){event.preventDefault();keyInput(event.key==='0'?10:Number(event.key)-1);}
  });
  on('pointerdown',event=>{
-  if(event.button!==0||!state||state.finished||gesture||event.target.closest('[data-sq93-say]'))return;
+  if(event.button!==0||!state||state.finished||state.paused||gesture||event.target.closest('[data-sq93-say]'))return;
   const cell=event.target.closest('[data-sq93-cell]'),piece=event.target.closest('[data-sq93-drag]'),lever=event.target.closest('[data-sq93-lever]');
   if(!cell&&!piece&&!lever)return;
   if(piece?.disabled)return;
@@ -520,8 +595,15 @@ export function mountMissions93(root,{grade,flight=false,speak=()=>{},tap=()=>{}
   const hit=root.ownerDocument.elementFromPoint(event.clientX,event.clientY);
   if(old.kind==='cell'){delete state.corner;return;}
   if(old.kind==='lever'){if(event.clientY-old.y>15)handle('lever');return;}
-  const from=Number(old.index),target=hit?.closest('[data-mission93^="wagon-"]');
-  if(old.index==='group'&&target)return handle(target.dataset.mission93);
+  const target=hit?.closest('[data-mission93^="wagon-"]');
+  if(old.index?.startsWith('rail-')){
+   if(target){
+    state.selection=Number(old.index.slice(5));
+    handle(target.dataset.mission93);
+   }
+   return;
+  }
+  const from=Number(old.index);
   if(hit?.closest('[data-sq93-drop]')){
    if(task().kind==='cargo')handle('cargo-load');
    else handle('drag-'+from);

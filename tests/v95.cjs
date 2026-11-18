@@ -189,6 +189,13 @@ function fixture(){
  assert.equal(new Set(rounds.map(([bags])=>bags.targets.join(''))).size,boardingRoundCount97);
  assert.deepEqual([...new Set(rounds.map(([,riders])=>riders.count))].sort(),[1,2,3,4]);
  assert.ok(rounds.some(([bags])=>bags.targets.join('')==='KMS'));
+ for(const [,riders] of rounds){
+  for(const species of new Set(riders.targets)){
+   assert.equal(riders.options.filter(item=>item.value===species).length,
+    riders.targets.filter(value=>value===species).length);
+  }
+  assert.ok(riders.options.every(item=>['bear','cat','dog'].includes(item.value)));
+ }
  const mixed=rounds.find(([,riders])=>riders.targets.join(' ')==='dog dog cat')[1];
  const dog=mixed.options.findIndex(item=>item.value==='dog');
  assert.ok(canBoard97(mixed,[{index:dog}],'dog'));
@@ -239,7 +246,7 @@ function fixture(){
  assert.ok(scope.some(turn=>turn.page?.number===12&&turn.key==='matematyka'));
  assert.deepEqual([...new Set(scope.map(turn=>turn.key))].sort(),['angielski','matematyka','polski','przyroda']);
  const manifest=vm.runInNewContext(fs.readFileSync(path.join(dir,'sw.js'),'utf8')+'\n({CACHE,ASSETS})',{self:{addEventListener(){}}});
- assert.equal(manifest.CACHE,'academy-v98');
+ assert.equal(manifest.CACHE,'academy-v99');
  for(const resource of manifest.ASSETS)assert.ok(fs.existsSync(path.resolve(dir,resource.split('?')[0])),resource);
- console.log('PASS V98 – 14 misji, odprawa i kabina, obręcze, slalom, karmnik, katalog, trening i cache.');
+ console.log('PASS V99 – 14 misji, odprawa i kabina, obręcze, slalom, karmnik, katalog, trening i cache.');
 })().catch(error=>{console.error(error);process.exitCode=1;});

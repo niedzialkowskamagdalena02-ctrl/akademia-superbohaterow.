@@ -1,10 +1,11 @@
+import {flightPreview99} from './game-art99.js?v=99';
 import {captainMissions93, aceMissions93, missionDeck93} from './missions93-data.js?v=96';
 import {gameGroup92, shuffle92} from './learning-games92.js?v=92';
-import {paintWorld} from './missions93.js?v=95';
+import {paintWorld} from './missions93.js?v=99';
 import {airMarkup95, flightStyles95, mountAir95, plane95, shape95, surface95, voice95} from './hangar-flight95.js?v=97';
-import {digitWord96, picture96} from './hangar-art96.js?v=97';
-import {boardingDeck97, boardingRoundCount97, boardingSlots98, boardingMarkup97, boardingTransfer97, canBoard97, finishBoarding98, syncBoarding97} from './hangar-boarding97.js?v=98';
-import {mountTakeoff97, takeoffMarkup97} from './hangar-takeoff97.js?v=98';
+import {digitWord96} from './hangar-art96.js?v=97';
+import {boardingDeck97, boardingRoundCount97, boardingSlots98, boardingMarkup97, boardingTransfer97, canBoard97, finishBoarding98, syncBoarding97} from './hangar-boarding97.js?v=99';
+import {mountTakeoff97, takeoffMarkup97} from './hangar-takeoff97.js?v=99';
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -16,7 +17,7 @@ const scenes = {
   fuel: ['day',''], radar: ['radar','📡'], cargo: ['cargo','📦'],
   radio: ['islands','🎧'], airport: ['airport','💬']
 };
-const previews = {baggage:'baggage-preview', takeoff:'takeoff-preview', feeder:'feeder-preview'};
+const previewArt = (key, css) => `<img class="${css}" src="${flightPreview99[key]}" alt="" draggable="false">`;
 const directions = {left:['◀','W lewo'], up:['▲','W górę'], down:['▼','W dół'], right:['▶','W prawo']};
 const islands = [['red','Czerwona'],['blue','Niebieska'],['green','Zielona']];
 const mapLocations = [[48,13],[50,55],[85,70],[59,90]];
@@ -110,13 +111,13 @@ export function mountHangar95(root,{grade,legacy=false,profileKey='default',spea
     const classicTitle = 'Klasyczny lot Quinjetem';
     setContent(top(title)+`<section class="flight95-menu">
       <div class="flight95-hero">
-        <h3><span>Wybierz</span> <span>misję</span> <span>w kokpicie</span></h3>
+        <h3>Wybierz misję w kokpicie</h3>
         ${forChild('Wybierz misję w kokpicie.', 'Odsłuchaj instrukcję kokpitu')}
       </div>
       <div class="flight95-missions">${games.map(([key,,name,desc],i) => {
         const title = key === 'takeoff' ? 'Lot przez obręcze' : name;
         const instruction = key==='baggage' ? 'Posłuchaj pilota. Załaduj walizki i posadź pasażerów.' : desc;
-        const art = previews[key] ? picture96(previews[key],'flight96-card-art')
+        const art = flightPreview99[key] ? previewArt(key,'flight96-card-art')
           : key === 'fuel' ? plane95() : key === 'airballs' ? '<span class="flight96-slalom-tile" aria-hidden="true"><i></i><i></i><i></i></span>' : icon(scenes[key][1]);
         return `<div class="flight95-card">
           ${buttons('mission:'+key,`<span class="flight95-card-image" data-f95-sky="${scenes[key][0]}"><i aria-hidden="true">${i+1}</i>
@@ -125,7 +126,7 @@ export function mountHangar95(root,{grade,legacy=false,profileKey='default',spea
       }).join('')}
       <div class="flight95-card">
         <button type="button" data-action="hq:flight" ${legacy?'':'disabled'}>
-          <span class="flight95-card-image" data-f95-sky="cockpit"><i aria-hidden="true">8</i></span>
+          <span class="flight95-card-image flight99-classic-card" data-f95-sky="cockpit"><i aria-hidden="true">8</i></span>
           <strong>${classicTitle}${legacy?'':'<small>🔒 Dostępny po zakupie Quinjeta</small>'}</strong>
         </button>
         ${forChild(classicTitle+(legacy?'.':'. Dostępny po zakupie Quinjeta.'),'Odsłuchaj: '+classicTitle)}
@@ -138,8 +139,10 @@ export function mountHangar95(root,{grade,legacy=false,profileKey='default',spea
     id = key;
     const intro = id === 'baggage' ? 'Spakuj walizki, o które poprosi pilot. Potem posadź pasażerów w kabinie.' : game()[3];
     setContent(top(id === 'takeoff' ? 'Lot przez obręcze' : game()[2], buttons('catalog','‹ Kokpit','class="flight95-back"'))+
-      surface95(scenes[id][0],`<div class="flight95-intro-body ${previews[id]?'flight96-intro-art':''}">
-        ${previews[id]?picture96(previews[id],'flight96-brief-art'):plane95()}
+      surface95(scenes[id][0],`<div class="flight95-intro-body ${flightPreview99[id]?'flight96-intro-art':''}">
+        ${id==='baggage'?'<div class="flight99-brief-scenes">'+previewArt(id,'flight96-brief-art')+
+          '<img class="flight96-brief-art" src="assets/art99/boarding-cover.webp" alt="" draggable="false"></div>':
+          flightPreview99[id]?previewArt(id,'flight96-brief-art'):plane95()}
         <div class="flight95-brief"><div><strong>Misja ${games.indexOf(game())+1}</strong><p>${esc(intro)}</p></div>
         ${audio(intro,'pl-PL','Odsłuchaj polecenie')}</div>
         ${paired(buttons('start', 'Rozpocznij misję', 'class="flight95-primary"'),'Rozpocznij misję')}</div>`,'flight95-intro'), 'brief');

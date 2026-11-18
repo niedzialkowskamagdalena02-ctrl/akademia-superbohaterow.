@@ -37,8 +37,8 @@ export function boardingDeck97(turn, random = Math.random) {
   );
   const seatPrompt = 'Posadź '+format.format(riderList)+(riders.length===1?' na fotelu.':' na fotelach.');
   const suitcases = [...bagLetters,...shuffle92(Object.keys(letters).filter(letter=>!bagLetters.includes(letter)),random).slice(0,2)];
-  const passengerChoices = [...riders,...shuffle92(['bear','cat','dog','ball','rabbit'],random)
-    .sort((a,b)=>Number(riders.includes(a))-Number(riders.includes(b))).slice(0,2)];
+  const otherSpecies = Object.keys(animals).filter(species=>!riders.includes(species));
+  const passengerChoices = [...riders,...shuffle92(otherSpecies,random).slice(0,2)];
   const boardTask = (seat, targets, options, prompt, speech) => ({
     kind:'load', seat, targets, count:targets.length, options, prompt, speech, style:turn%3
   });
@@ -47,8 +47,7 @@ export function boardingDeck97(turn, random = Math.random) {
       value,label:'Walizka z literą '+value,words:value+' jak '+letters[value],paint:paint[(turn+i)%paint.length]
     })),'Włóż '+loadCount+' '+letterNote+' do luku.','Włóż '+loadCount+' '+voiceNote+' do luku.'),
     boardTask(true,riders,shuffle92(passengerChoices,random).map((value,i)=>({
-      value,label:animals[value]?.label ?? (value==='ball'?'Piłka':'Królik'),
-      icon:value==='ball'?'⚽':'🐰',pose:(turn+i)%2
+      value,label:animals[value].label,pose:(turn+i)%2
     })),seatPrompt,seatPrompt)
   ];
 }
@@ -63,7 +62,6 @@ export function pilotCall97(message, progress, button) {
 }
 
 function petPiece(item, pose) {
-  if (!animals[item.value]) return `<span class="flight96-decoy" aria-hidden="true">${item.icon}</span>`;
   return `<span class="flight98-pet" data-f98-species="${item.value}" data-f98-pose="${pose}" data-f98-color="${item.pose}"
       aria-hidden="true">
     <span class="flight98-pet-shadow"></span>
@@ -82,6 +80,7 @@ function petPiece(item, pose) {
           <span class="flight98-muzzle"><i></i><b></b></span>
         </span>
       </span>
+      ${item.value==='bear'?'<img class="flight99-teddy" src="assets/flight96/bear.webp" alt="" draggable="false">':''}
     </span>
   </span>`;
 }
@@ -97,7 +96,7 @@ export function boardingMarkup97(task, state, message, button, listen) {
   const positions = Array.from({length:boardingSlots98}, (_,i) => {
     const label = (task.seat?'Fotel ':'Miejsce w luku ')+(i+1);
     return button('seat:'+i,`<b aria-hidden="true">${i+1}</b>`,
-      `class="flight96-slot" data-f95-seat="${i}" data-f96-color="${seatPaint[(i+task.style)%seatPaint.length]}"
+      `class="flight96-slot" data-f95-seat="${i}" data-f96-color="${seatPaint[i]}"
        aria-label="${label}"`);
   }).join('');
   const items = task.options.map((item,i) => `<div class="flight96-piece">
