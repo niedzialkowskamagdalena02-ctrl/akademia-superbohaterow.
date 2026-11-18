@@ -1,5 +1,5 @@
 import {digitWord96, picture96, ring96} from './hangar-art96.js?v=97';
-import {pilotCall97} from './hangar-boarding97.js?v=97';
+import {pilotCall97} from './hangar-boarding97.js?v=98';
 
 const positions = [[50,40],[71,25],[30,38],[51,28]];
 const clamp = (value, min, max) => Math.min(max,Math.max(min,value));

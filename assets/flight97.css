@@ -78,25 +78,13 @@
 .flight97-board .flight96-case { animation:flight97-case-idle 3.1s ease-in-out infinite alternate }
 .flight97-board .flight96-piece:nth-child(even) .flight96-case { animation-delay:-1.7s }
 @keyframes flight97-case-idle { from { rotate:-1.4deg } to { rotate:1.4deg } }
-.flight97-animal {
-  position:relative; display:block; width:min(100%,119px); aspect-ratio:1; pointer-events:none;
-  filter:drop-shadow(0 3px 3px #1223418c); transform-origin:50% 90%;
-}
-.flight97-animal>img { position:absolute; inset:0; width:100%; height:100%; object-fit:contain }
-.flight97-animal[data-f97-pose="1"] { scale:-1 1 }
-.flight97-bear { animation:flight97-bear-idle 2.2s ease-in-out infinite alternate }
-@keyframes flight97-bear-idle { from { transform:rotate(-2deg) scaleY(.97) } to { transform:rotate(2deg) scaleY(1.025) } }
-.flight97-walking:has(img:nth-child(3)) img { animation:flight97-pet-steps 2.35s steps(1,end) infinite }
-.flight97-walking:has(img:nth-child(3)) img:nth-child(2) { animation-delay:-.78s }
-.flight97-walking:has(img:nth-child(3)) img:nth-child(3) { animation-delay:-1.55s }
-@keyframes flight97-pet-steps { 0%,33% { opacity:1 } 34%,100% { opacity:0 } }
 .flight97-transfer {
   position:absolute; z-index:11; display:grid; place-items:center; pointer-events:none;
   filter:drop-shadow(0 8px 6px #1f3c577d); will-change:transform;
 }
-.flight97-transfer .flight96-case,.flight97-transfer .flight97-animal { width:100% }
+.flight97-transfer .flight96-case { width:100% }
 .flight97-board [data-f95-loaded]>* { visibility:hidden }
-.flight97-board [data-f95-filled]>.flight97-animal,.flight97-board [data-f95-filled]>.flight96-case {
+.flight97-board [data-f95-filled]>.flight96-case {
   animation:flight97-settle .38s ease-out both;
 }
 @keyframes flight97-settle { from { translate:0 -7px; scale:.88 } 63% { scale:1.06 } }
@@ -329,7 +317,4 @@
   .flight97-pilot-call { gap:4px; padding-inline:4px }
   .flight97-joystick { grid-template-columns:repeat(2,35px) minmax(85px,1fr) repeat(2,35px) }
   #missions93-cockpit .flight97-board .flight96-piece .flight95-voice { min-width:29px }
-}
-@media (prefers-reduced-motion:reduce) {
-  .flight97-walking:has(img:nth-child(3)) img:not(:last-child) { opacity:0 }
 }

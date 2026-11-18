@@ -3,8 +3,8 @@ import {gameGroup92, shuffle92} from './learning-games92.js?v=92';
 import {paintWorld} from './missions93.js?v=95';
 import {airMarkup95, flightStyles95, mountAir95, plane95, shape95, surface95, voice95} from './hangar-flight95.js?v=97';
 import {digitWord96, picture96} from './hangar-art96.js?v=97';
-import {boardingDeck97, boardingRoundCount97, boardingMarkup97, boardingTransfer97, canBoard97, syncBoarding97} from './hangar-boarding97.js?v=97';
-import {mountTakeoff97, takeoffMarkup97} from './hangar-takeoff97.js?v=97';
+import {boardingDeck97, boardingRoundCount97, boardingSlots98, boardingMarkup97, boardingTransfer97, canBoard97, finishBoarding98, syncBoarding97} from './hangar-boarding97.js?v=98';
+import {mountTakeoff97, takeoffMarkup97} from './hangar-takeoff97.js?v=98';
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -242,8 +242,15 @@ export function mountHangar95(root,{grade,legacy=false,profileKey='default',spea
     stop();
     state.complete = true;
     tone(6);
-    if (['baggage','airballs','feeder'].includes(id)) {
-      draw(id === 'baggage' ? message : '');
+    if (id === 'baggage') {
+      finishBoarding98(root,message);
+      const next = task().seat?'Zobacz wynik':'Teraz czas na pasażerów';
+      get('.flight95-bottom').insertAdjacentHTML('beforeend',paired(buttons('next',next+' →','class="flight95-primary"'),next));
+      if (preschool) say(message);
+      return;
+    }
+    if (['airballs','feeder'].includes(id)) {
+      draw();
       get('.flight95-surface').dataset.f95Win = id;
       if (preschool) say(message);
       return;
@@ -382,6 +389,7 @@ export function mountHangar95(root,{grade,legacy=false,profileKey='default',spea
   function bagSelect(index) {
     if (transfer || state.done.some(entry=>entry.index===index)) return;
     state.pick=index;
+    get('.flight97-board').dataset.f98Picked='';
     root.querySelectorAll('[data-f95-drag^="bag:"]').forEach((item,i)=>{
       item.setAttribute('aria-pressed',String(i===index));
     });
@@ -390,7 +398,7 @@ export function mountHangar95(root,{grade,legacy=false,profileKey='default',spea
   function bagPlace(index,slot,point) {
     if (transfer || state.complete) return;
     const t = task(), item = t.options[index];
-    if (!item || slot < 0 || slot >= t.count || state.done.some(entry=>entry.slot===slot || entry.index===index)) {
+    if (!item || slot < 0 || slot >= boardingSlots98 || state.done.some(entry=>entry.slot===slot || entry.index===index)) {
       return report('Wybierz przedmiot i wolne miejsce.');
     }
     if (!canBoard97(t,state.done,item.value)) {
@@ -404,16 +412,21 @@ export function mountHangar95(root,{grade,legacy=false,profileKey='default',spea
       state.done.push(placed);
       state.pick=null;
       tone(state.done.length);
-      if (state.done.length===t.count) {
-        return result(t.seat?'Bagaże i pasażerowie na pokładzie. Czas na start!':'Świetnie! Teraz czas na pasażerów.');
-      }
+      delete get('.flight97-board').dataset.f98Picked;
       syncBoarding97(root,t,placed);
       get('[data-f97-board-progress]').textContent=state.done.length+' / '+t.count;
       report('');
+      if (state.done.length===t.count) {
+        return result(t.seat?'Bagaże i pasażerowie na pokładzie. Czas na start!':'Świetnie! Teraz czas na pasażerów.');
+      }
     };
-    transfer=boardingTransfer97(root,t,placed,point);
-    if (transfer) transfer.finished.then(commit,()=>{});
-    else commit();
+    const movement = boardingTransfer97(root,t,placed,point);
+    transfer=movement;
+    if (movement) {
+      movement.finished.then(commit,()=>{
+        if (transfer===movement) commit();
+      });
+    } else commit();
   }
   function crateLoad(index) {
     if (index === null || state.crates.includes(index)) return report('Najpierw wybierz skrzynię.');
@@ -528,7 +541,7 @@ export function mountHangar95(root,{grade,legacy=false,profileKey='default',spea
     }
   },{signal});
   root.addEventListener('pointerdown',event=>{
-    if (!state||state.complete||event.button!==0||gesture||event.target.closest('[data-f95-say]')) return;
+    if (!state||state.complete||transfer||event.button!==0||gesture||event.target.closest('[data-f95-say]')) return;
     const aim=event.target.closest('[data-f95-action^="aim:"]');
     if (aim&&!aim.disabled) air?.aim(Number(aim.dataset.f95Action.split(':')[1]));
     const target=event.target.closest('[data-f95-drag],[data-f95-lever],[data-f95-viewport],[data-f95-stick]');

@@ -1,0 +1,213 @@
+/* Keep the cabin layout fixed, including when only one passenger is needed. */
+.flight97-board { color-scheme:only light }
+.flight97-board .flight96-cabin-seats {
+  box-sizing:border-box; bottom:36%;
+  grid-template-columns:repeat(2,minmax(0,1fr)) minmax(12px,5%) repeat(2,minmax(0,1fr));
+  gap:4px;
+}
+.flight97-board .flight96-cabin-seats button:nth-child(3) { grid-column:4 }
+.flight97-board .flight96-cabin-seats button:nth-child(4) { grid-column:5 }
+.flight97-board.flight96-baggage[data-f96-scene="cabin"][data-f95-win="baggage"] .flight96-cabin-seats { bottom:36% }
+#missions93-cockpit .flight97-board .flight96-cabin-seats .flight96-slot {
+  padding:8px 3px 14px; isolation:isolate; position:relative; margin:0;
+  min-height:clamp(73px,20vw,137px); align-items:end;
+  border-radius:26% 26% 11% 11%; border:2px solid #fff0a9;
+  background:linear-gradient(105deg,var(--seat-top),var(--seat-bottom));
+  box-shadow:inset 0 4px 4px #ffffda80,inset 0 -12px 0 #55251130,0 4px 0 #456285,0 6px 8px #172945a4;
+}
+.flight97-board .flight96-cabin-seats .flight96-slot::before {
+  content:""; position:absolute; z-index:-1; inset:9% 10% 27%; border-radius:24%;
+  border:1px solid #9b49344d; box-shadow:inset 1px 2px 3px #ffffbd66;
+}
+.flight97-board .flight96-cabin-seats .flight96-slot::after {
+  content:""; position:absolute; z-index:-1; inset:auto 3% 10%;
+  height:12%; border-radius:4px 4px 27% 27%; background:#fff1c757; box-shadow:0 3px 0 #53345636;
+}
+#missions93-cockpit .flight97-board .flight96-cabin-seats .flight96-slot>b {
+  min-width:24px; min-height:30px; width:65%; height:72%; margin:auto;
+  border:2px dashed #fff6df; border-radius:26%; display:grid; place-items:center;
+  color:#fff; text-shadow:0 2px 3px #392840; background:#4b294124;
+}
+#missions93-cockpit .flight97-board[data-f98-picked] .flight96-slot:not(:disabled) {
+  outline:2px solid #ffea91; outline-offset:-2px; box-shadow:0 0 12px #ffe78d9d;
+}
+.flight97-board .flight96-hold { gap:2px }
+#missions93-cockpit .flight97-board .flight96-hold .flight96-slot { padding:1px; min-height:clamp(48px,11vw,88px) }
+#missions93-cockpit .flight97-board .flight96-hold .flight96-slot[data-f95-filled] { opacity:1 }
+#missions93-cockpit .flight97-board[data-f95-win="baggage"] .flight96-slot:not([data-f95-filled]) { opacity:.76 }
+.flight97-board .flight96-pick[data-f98-moving]>* { visibility:hidden }
+.flight97-board .flight96-piece { --idle-delay:-.4s; grid-template-rows:minmax(0,1fr) 39px }
+.flight97-board .flight96-piece .flight95-voice { align-self:center }
+.flight97-board .flight96-piece:nth-child(2n) { --idle-delay:-1.1s }
+.flight97-board .flight96-piece:nth-child(3n) { --idle-delay:-1.8s }
+.flight97-board .flight96-piece:nth-child(5n) { --idle-delay:-2.4s }
+
+/* Each character has a head, ears, torso, front paws, hind paws, and a tail. */
+.flight98-pet {
+  --fur:#bf7a43; --light-fur:#f5c78e; --shade:#83492f; --cream:#ffe5b9;
+  --inner-ear:#f5af82; --mark:#9c572e;
+  position:relative; display:block; width:min(98%,112px); aspect-ratio:1; pointer-events:none;
+  transform-origin:50% 87%; transform:scaleX(var(--facing,1));
+  filter:drop-shadow(0 2px 2px #12234182);
+}
+.flight98-pet[data-f98-species="bear"][data-f98-color="1"] {
+  --fur:#aa603d; --light-fur:#e9b777; --shade:#743e29; --cream:#fbe1ad;
+}
+.flight98-pet[data-f98-species="cat"] {
+  --fur:#ed9437; --light-fur:#ffd77c; --shade:#ab551c; --cream:#fff1cd; --mark:#bd641f;
+}
+.flight98-pet[data-f98-species="cat"][data-f98-color="1"] {
+  --fur:#7287a7; --light-fur:#becfe2; --shade:#465576; --cream:#eef7ff; --mark:#4d617f;
+}
+.flight98-pet[data-f98-species="dog"] {
+  --fur:#ce9660; --light-fur:#ffcf9c; --shade:#885137; --cream:#fff0ce; --mark:#995d3e;
+}
+.flight98-pet[data-f98-species="dog"][data-f98-color="1"] {
+  --fur:#b87959; --light-fur:#ead4bd; --shade:#704232; --cream:#fff1dc; --mark:#775243;
+}
+.flight98-pet-shadow {
+  position:absolute; inset:auto 12% 3%; height:10%; border-radius:70%;
+  background:#15284481; transform:scaleX(.88); filter:blur(1px);
+}
+.flight98-pet-body { position:absolute; inset:0; transform-origin:50% 91% }
+.flight98-torso {
+  position:absolute; z-index:2; inset:44% 26% 10%;
+  border-radius:48% 48% 41% 41%; border:1px solid var(--shade);
+  background:radial-gradient(ellipse at 52% 63%,var(--cream) 0 34%,transparent 40%),
+             radial-gradient(ellipse at 30% 16%,var(--light-fur),var(--fur) 58%,var(--shade));
+}
+.flight98-tail {
+  position:absolute; z-index:1; height:24%; width:11%; left:72%; bottom:16%; border-radius:80% 71% 25% 33%;
+  border:1px solid var(--shade); transform-origin:19% 91%; transform:rotate(44deg);
+  background:linear-gradient(70deg,var(--shade),var(--fur) 40%,var(--light-fur));
+  animation:flight98-wag .71s ease-in-out infinite alternate;
+  animation-delay:var(--idle-delay,0s);
+}
+.flight98-pet[data-f98-species="cat"] .flight98-tail {
+  width:10%; height:38%; bottom:18%;
+  background:repeating-linear-gradient(var(--fur) 0 18%,var(--mark) 19% 32%,var(--fur) 33% 40%);
+}
+.flight98-pet[data-f98-species="bear"] .flight98-tail { height:15%; width:14%; bottom:13%; animation-duration:1.08s }
+.flight98-leg,.flight98-arm {
+  position:absolute; height:29%; width:17%; bottom:6%; border-radius:48%;
+  border:1px solid var(--shade); background:linear-gradient(125deg,var(--light-fur),var(--fur) 64%,var(--shade));
+  transform-origin:48% 16%;
+}
+.flight98-leg { z-index:1; bottom:4%; height:30% }
+.flight98-leg-left { left:24%; transform:rotate(12deg) }
+.flight98-leg-right { right:24%; transform:rotate(-12deg) }
+.flight98-arm { z-index:3; bottom:17%; height:31%; width:15% }
+.flight98-arm-left { left:20%; transform:rotate(21deg) }
+.flight98-arm-right { right:20%; transform:rotate(-21deg) }
+.flight98-leg i,.flight98-arm i {
+  position:absolute; display:block; inset:auto -15% -6%; height:40%;
+  border-radius:48% 48% 44% 44%; background:linear-gradient(var(--light-fur),var(--fur)); border:1px solid var(--shade);
+}
+.flight98-head {
+  position:absolute; z-index:5; inset:8% 16% 40%; isolation:isolate; transform-origin:50% 87%;
+  animation:flight98-look 2.65s ease-in-out infinite alternate;
+  animation-delay:var(--idle-delay,0s);
+}
+.flight98-face {
+  position:absolute; z-index:2; inset:0; border-radius:47% 47% 44% 44%;
+  background:radial-gradient(ellipse at 30% 18%,var(--light-fur),var(--fur) 74%,var(--shade));
+  border:1px solid var(--shade); box-shadow:inset 0 2px 2px #fff4d68c;
+}
+.flight98-face::after {
+  content:""; position:absolute; top:56%; inset-inline:10%; height:19%;
+  background:radial-gradient(ellipse at 12% 46%,#f3977acb 0 8%,transparent 21%),
+             radial-gradient(ellipse at 88% 46%,#f3977acb 0 8%,transparent 21%);
+}
+.flight98-ear {
+  position:absolute; z-index:1; top:-8%; width:28%; height:45%; border-radius:53%;
+  border:1px solid var(--shade); background:radial-gradient(ellipse at 49% 51%,var(--inner-ear) 0 40%,var(--light-fur) 46%,var(--fur) 72%);
+  transform-origin:50% 84%; animation:flight98-ear 2.25s ease-in-out infinite;
+  animation-delay:var(--idle-delay,0s);
+}
+.flight98-ear-left { left:1%; rotate:-14deg }
+.flight98-ear-right { right:1%; rotate:14deg; animation-direction:reverse }
+.flight98-pet[data-f98-species="cat"] .flight98-ear {
+  top:-14%; height:62%; width:35%; border-radius:34%;
+  clip-path:polygon(9% 3%,88% 52%,100% 100%,0 100%);
+  background:radial-gradient(ellipse at 35% 53%,#f0a0a1 0 29%,var(--shade) 74%);
+}
+.flight98-pet[data-f98-species="cat"] .flight98-ear-right { scale:-1 1 }
+.flight98-pet[data-f98-species="dog"] .flight98-ear {
+  z-index:3; top:10%; width:28%; height:71%; border-radius:60% 46% 49% 55%;
+  background:linear-gradient(100deg,var(--fur),var(--mark) 45%,var(--shade));
+}
+.flight98-pet[data-f98-species="dog"] .flight98-ear-left { left:-7% }
+.flight98-pet[data-f98-species="dog"] .flight98-ear-right { right:-7% }
+.flight98-eye {
+  position:absolute; top:35%; width:15%; height:22%; border-radius:49%;
+  background:radial-gradient(circle at 35% 27%,#fffdf1 0 15%,#2b2029 23% 72%,#1a1420 75%);
+  box-shadow:0 -1px 0 var(--shade); transform-origin:center; animation:flight98-blink 3.05s linear infinite;
+  animation-delay:var(--idle-delay,0s);
+}
+.flight98-eye-left { left:21% }
+.flight98-eye-right { right:21% }
+.flight98-muzzle {
+  position:absolute; z-index:2; inset:57% 22% 8%; border-radius:50%;
+  background:radial-gradient(ellipse at 45% 38%,#fff8e1,var(--cream) 71%,var(--light-fur));
+  box-shadow:0 1px 1px #612b283f;
+}
+.flight98-muzzle>i {
+  position:absolute; inset:8% 33% 53%; border-radius:46% 46% 51% 51%;
+  background:radial-gradient(ellipse at 34% 21%,#895b54,#352127 75%);
+}
+.flight98-muzzle>b {
+  position:absolute; inset:32% 32% 19%; border-bottom:1.5px solid #633735;
+  border-radius:0 0 49% 49%;
+}
+.flight98-whiskers { display:none }
+.flight98-pet[data-f98-species="cat"] .flight98-whiskers {
+  display:block; position:absolute; top:55%; inset-inline:0; height:22%;
+}
+.flight98-whiskers::before,.flight98-whiskers::after {
+  content:""; position:absolute; left:-6%; top:15%; width:27%; height:1px; rotate:12deg;
+  background:#624147; box-shadow:0 4px #624147;
+}
+.flight98-whiskers::after { left:auto; right:-6%; rotate:-12deg }
+
+.flight98-pet[data-f98-pose="idle"] .flight98-pet-body {
+  animation:flight98-breathe 1.7s ease-in-out infinite alternate;
+  animation-delay:var(--idle-delay,0s);
+}
+.flight98-pet[data-f98-pose="idle"] .flight98-arm-left {
+  animation:flight98-hello 3.1s ease-in-out infinite;
+  animation-delay:var(--idle-delay,0s);
+}
+.flight96-pick[aria-pressed="true"] .flight98-pet .flight98-pet-body { animation:flight98-eager .67s ease-in-out infinite }
+.flight96-pick[data-f95-dragging] .flight98-arm-left,.flight98-pet[data-f98-pose="jump"] .flight98-arm-left { transform:rotate(131deg) }
+.flight96-pick[data-f95-dragging] .flight98-arm-right,.flight98-pet[data-f98-pose="jump"] .flight98-arm-right { transform:rotate(-131deg) }
+
+.flight97-transfer .flight98-pet { width:100% }
+.flight98-pet[data-f98-pose="walk"] .flight98-pet-body { animation:flight98-step-body .30s ease-in-out infinite alternate }
+.flight98-pet[data-f98-pose="walk"] .flight98-head { animation:flight98-step-head .32s ease-in-out infinite alternate }
+.flight98-pet[data-f98-pose="walk"] .flight98-leg,.flight98-pet[data-f98-pose="walk"] .flight98-arm {
+  animation:flight98-step-limb .40s ease-in-out infinite alternate;
+}
+.flight98-pet[data-f98-pose="walk"] .flight98-leg-right,.flight98-pet[data-f98-pose="walk"] .flight98-arm-left { animation-direction:alternate-reverse }
+.flight98-pet[data-f98-pose="walk"] .flight98-leg i { animation:flight98-step-paw .40s ease-in-out infinite alternate }
+.flight98-pet[data-f98-pose="walk"] .flight98-tail { animation-duration:.28s }
+.flight98-pet[data-f98-pose="jump"] .flight98-leg-left { transform:translateY(-12%) rotate(25deg) }
+.flight98-pet[data-f98-pose="jump"] .flight98-leg-right { transform:translateY(-12%) rotate(-25deg) }
+.flight98-pet[data-f98-pose="jump"] .flight98-head { animation:none; transform:rotate(-9deg) translateY(-5%) }
+.flight98-pet[data-f98-pose="sit"] .flight98-leg { z-index:4; height:23%; bottom:6% }
+.flight98-pet[data-f98-pose="sit"] .flight98-leg-left { left:23%; transform:rotate(26deg); animation:flight98-kick 1.8s ease-in-out infinite }
+.flight98-pet[data-f98-pose="sit"] .flight98-leg-right { right:23%; transform:rotate(-26deg); animation:flight98-kick 1.8s .86s ease-in-out infinite reverse }
+.flight98-pet[data-f98-pose="sit"] .flight98-arm-right { animation:flight98-wave 2.6s .64s ease-in-out infinite }
+.flight98-pet[data-f98-pose="sit"] .flight98-arm-left { transform:rotate(19deg) }
+@keyframes flight98-step-limb { from { rotate:-44deg } to { rotate:44deg } }
+@keyframes flight98-step-paw { from { rotate:-32deg } to { rotate:32deg } }
+@keyframes flight98-step-head { from { transform:rotate(-8deg) translateY(-5%) } to { transform:rotate(6deg) translateY(3%) } }
+@keyframes flight98-step-body { from { transform:translateY(-6%) rotate(-4deg) } to { transform:translateY(3%) rotate(4deg) } }
+@keyframes flight98-hello { 0%,42%,83%,100% { rotate:0deg } 56%,68% { rotate:71deg } 62% { rotate:53deg } }
+@keyframes flight98-wave { 0%,42%,79%,100% { rotate:0deg } 51%,65% { rotate:-111deg } 57%,71% { rotate:-79deg } }
+@keyframes flight98-kick { 0%,54%,92%,100% { translate:0; rotate:0deg } 65%,80% { translate:0 -19%; rotate:16deg } }
+@keyframes flight98-breathe { from { scale:1 .95 } to { scale:1 1.045 } }
+@keyframes flight98-eager { 0%,100% { transform:translateY(0) rotate(-4deg) } 47% { transform:translateY(-11%) rotate(5deg) } }
+@keyframes flight98-wag { from { rotate:-18deg } to { rotate:23deg } }
+@keyframes flight98-look { from { rotate:-9deg; translate:-3% 2% } to { rotate:9deg; translate:3% -1% } }
+@keyframes flight98-ear { 0%,36%,49%,100% { transform:rotate(0deg) } 42% { transform:rotate(19deg) } }
+@keyframes flight98-blink { 0%,60%,69%,100% { scale:1 1 } 64%,66% { scale:1 .11 } }

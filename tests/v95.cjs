@@ -37,7 +37,7 @@ function fixture(){
 (async()=>{
  const {mountHangar95,hangarDeck95}=await import(asset('hangar95.js'));
  const {captainMissions93,aceMissions93}=await import(asset('missions93-data.js'));
- const {boardingDeck97,boardingRoundCount97,canBoard97}=await import(asset('hangar-boarding97.js'));
+ const {boardingDeck97,boardingRoundCount97,boardingSlots98,boardingTransfer97,canBoard97}=await import(asset('hangar-boarding97.js'));
  const {trainingCatalog95,trainingSequence95,outsideDeck95}=await import(asset('training95.js'));
 
  const preset=Math.random;
@@ -66,7 +66,7 @@ function fixture(){
   root.click('aim:'+target[1]);
   frames(10);
  };
- const won=name=>assert.ok(root.querySelector('.flight95-surface').dataset.f95Win,name);
+ const won=name=>assert.ok(root.querySelector(name==='baggage'?'.flight97-board':'.flight95-surface').dataset.f95Win,name);
 
  try{
   for(const [grade,missions] of [['P',captainMissions93],['2',aceMissions93]]){
@@ -83,19 +83,28 @@ function fixture(){
     assert.ok(t.prompt,id);
     if(id==='baggage'){
      function load(task){
-      let seat=0;
+      const board=root.querySelector('.flight97-board');
+      const places=[...root.innerHTML.matchAll(/data-f95-seat="(\d+)"/g)].map(match=>+match[1]);
+      assert.deepEqual(places,[0,1,2,3]);
+      let seat=places.length-1;
       const wrong=task.options.findIndex(item=>!task.targets.includes(item.value));
-      root.click('bag:'+wrong);root.click('seat:0');
-      assert.doesNotMatch(root.innerHTML,/data-f95-filled/);
+      root.click('bag:'+wrong);root.click('seat:'+seat);
+      assert.equal(root.querySelector('[data-f95-seat="'+seat+'"]').disabled,undefined);
       const left=[...task.targets];
       task.options.forEach((item,i)=>{
        const found=left.indexOf(item.value);
        if(found<0)return;
        left.splice(found,1);
-       root.click('bag:'+i);root.click('seat:'+seat++);
+       root.click('bag:'+i);root.click('seat:'+seat);
+       const destination=root.querySelector('[data-f95-seat="'+seat+'"]');
+       assert.equal(destination.disabled,true);
+       assert.match(destination.innerHTML,task.seat?/data-f98-pose="sit"/:/flight96-case/);
+       seat--;
       });
       assert.equal(left.length,0);
-      assert.equal((root.innerHTML.match(/data-f95-filled/g)||[]).length,task.count);
+      assert.equal(root.querySelector('[data-f97-board-progress]').textContent,task.count+' / '+task.count);
+      assert.equal(root.querySelector('.flight97-board'),board,'The board survives completion');
+      assert.equal(root.innerHTML.match(/data-f95-seat="/g).length,boardingSlots98);
      }
      assert.match(root.innerHTML,/0 \/ 3/);
      assert.match(root.innerHTML,/pilot.webp/);
@@ -104,7 +113,7 @@ function fixture(){
      root.click('next');
      assert.match(root.innerHTML,/0 \/ 1/);
      load(hangarDeck95(id,grade)[1]);
-     assert.match(root.innerHTML,/Bagaże i pasażerowie na pokładzie/);
+     assert.match(root.querySelector('[data-game-prompt]').textContent,/Bagaże i pasażerowie na pokładzie/);
     }
     if(id==='takeoff'){
      assert.match(root.innerHTML,/Pociągnij dźwignię/);
@@ -186,6 +195,34 @@ function fixture(){
  assert.ok(!canBoard97(mixed,[{index:dog},{index:dog}],'dog'));
  assert.ok(canBoard97(mixed,[{index:dog},{index:dog}],'cat'));
  assert.ok(mixed.options.some(item=>item.value==='cat'));
+ const poses=[], phases=[];
+ const pet={dataset:{},style:{setProperty(){}}};
+ const mover={
+  style:{},setAttribute(){},querySelector(){return pet;},remove(){this.removed=true;},
+  animate(frames,{duration}){
+   poses.push(pet.dataset.f98Pose);
+   phases.push({frames,duration});
+   return {finished:Promise.resolve(),cancel(){}};
+  }
+ };
+ const box=(left,top,width,height)=>({left,top,width,height,bottom:top+height});
+ const source={dataset:{},getBoundingClientRect:()=>box(20,445,53,59)};
+ const destination={getBoundingClientRect:()=>box(260,316,69,75)};
+ const board={animate(){},getBoundingClientRect:()=>box(0,0,350,560),append(){}};
+ const transferRoot={
+  ownerDocument:{createElement:()=>mover},
+  querySelector(selector){
+   return selector.startsWith('[data-f95-drag')?source:selector.startsWith('[data-f95-seat')?destination:board;
+  }
+ };
+ globalThis.matchMedia=()=>({matches:false});
+ const boarding=boardingTransfer97(transferRoot,mixed,{index:dog,slot:3});
+ await boarding.finished;
+ assert.deepEqual(poses,['walk','jump','sit']);
+ assert.ok(phases[0].duration>800 && phases[0].frames.length===3);
+ assert.match(mover.innerHTML,/flight98-leg-left/);
+ assert.equal(mover.removed,true);
+ assert.equal(source.dataset.f98Moving,undefined);
  const school=trainingCatalog95('2','Wiedza ogólna'),preschool=trainingCatalog95('P','Wiedza ogólna');
  assert.ok(school.some(g=>g.kind==='race'&&g.subject==='matematyka'));
  assert.ok(preschool.some(g=>g.kind==='dino'&&g.subject==='polski'));
@@ -202,7 +239,7 @@ function fixture(){
  assert.ok(scope.some(turn=>turn.page?.number===12&&turn.key==='matematyka'));
  assert.deepEqual([...new Set(scope.map(turn=>turn.key))].sort(),['angielski','matematyka','polski','przyroda']);
  const manifest=vm.runInNewContext(fs.readFileSync(path.join(dir,'sw.js'),'utf8')+'\n({CACHE,ASSETS})',{self:{addEventListener(){}}});
- assert.equal(manifest.CACHE,'academy-v97');
+ assert.equal(manifest.CACHE,'academy-v98');
  for(const resource of manifest.ASSETS)assert.ok(fs.existsSync(path.resolve(dir,resource.split('?')[0])),resource);
- console.log('PASS V97 – 14 misji, odprawa i kabina, obręcze, slalom, karmnik, katalog, trening i cache.');
+ console.log('PASS V98 – 14 misji, odprawa i kabina, obręcze, slalom, karmnik, katalog, trening i cache.');
 })().catch(error=>{console.error(error);process.exitCode=1;});
