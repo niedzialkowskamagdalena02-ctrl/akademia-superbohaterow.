@@ -89,7 +89,34 @@ function board(){
  for(const page of ['missions-board','books','academy','mentor','learn','base']){
   await view.api.handle('child:'+page);
   assert.equal(header(view.root.innerHTML),dashboardHeader,page);
+  assert.equal((view.root.innerHTML.match(/class="academy104-destination /g)||[]).length,6,page);
+  assert.equal((view.root.innerHTML.match(/class="academy102-player"/g)||[]).length,1,page);
+  assert.match(view.root.innerHTML,new RegExp(`data-action="child:${page}" aria-current="page"`));
  }
+ let clicks=0;
+ const audioParam={setValueAtTime(){},exponentialRampToValueAtTime(){}};
+ view.ctx.window.AudioContext=class {
+  state='running';currentTime=0;
+  createOscillator(){return {frequency:audioParam,connect(){},start(){clicks++;},stop(){}};}
+  createGain(){return {gain:audioParam,connect(){}};}
+ };
+ const tile={dataset:{action:'child:books'},isConnected:true,
+  closest(selector){return ['button,summary','[data-action]'].includes(selector)?this:null;},
+  matches(selector){return selector.includes('.academy102-destinations button');}};
+ const tap=()=>view.listeners.click.forEach(listener=>listener({target:tile,detail:1,isTrusted:true}));
+ tap();tap();
+ assert.equal(clicks,1);
+ assert.equal(tile.dataset.academyPressed,'true');
+ assert.doesNotMatch(view.root.innerHTML,/Moje podręczniki/);
+ const opens=[...view.timers].filter(([,timer])=>timer.ms===165);
+ assert.equal(opens.length,1);
+ opens[0][1].fn();view.timers.delete(opens[0][0]);
+ assert.equal(tile.dataset.academyPressed,undefined);
+ assert.match(view.root.innerHTML,/Moje podręczniki/);
+ view.storage.setItem('academy-v72-training-silent','1');tap();
+ assert.equal(clicks,1);
+ assert.equal(tile.dataset.academyPressed,'true');
+ [...view.timers.values()].find(timer=>timer.ms===165).fn();
  await view.api.handle('child:learn');
  await view.api.handle('learning-games:open');
  await view.api.handle('learning-games:more');

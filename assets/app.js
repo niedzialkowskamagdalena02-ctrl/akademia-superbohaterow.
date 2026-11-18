@@ -1,5 +1,5 @@
 import {gamePreview99, hangarPaint99} from './game-art99.js?v=99';
-import {academy102Shell,academy102Choices,academy102Player,academy102DashboardNav,academy102DashboardVoice,academy102FamilyHeading,academy102Knowledge,academy102MissionsHeader,academy102MissionZone} from './interface102.js?v=104';
+import {academy102Shell,academy102Choices,academy102Player,academy102DashboardNav,academy102DashboardVoice,academy102FamilyHeading,academy102Knowledge,academy102MissionsHeader,academy102MissionZone} from './interface102.js?v=105';
 // V48_AI_RESPONSE_DIAGNOSTICS
 // V44_BULK_CHAPTERS
 // V42_CHAPTERS
@@ -78,7 +78,7 @@ const select=(id,label,options,value)=>`<label for="${id}">${label}</label><sele
 const grades=[['P','Przedszkole'],...Array.from({length:12},(_,i)=>[String(i+1),`Klasa ${i+1}`])];
 const people=[['pawel','Paweł'],['patryk','Patryk']];
 const note=t=>{const n=$('hq85-notice')||$('notice');if(!n){console.warn('Powiadomienie:',t);return}n.textContent=t;n.classList.add('visible');setTimeout(()=>{if(n.isConnected)n.classList.remove('visible')},4500)};
-const ACADEMY_RELEASE=104;
+const ACADEMY_RELEASE=105;
 async function checkAcademyUpdate(button){
  if(!button||button.disabled)return;
  const label=button.textContent,controller=new AbortController();
@@ -746,14 +746,28 @@ const grant=async(child,points,reason,key)=>{
  try{await syncAdapter.onLocalChange(data);}catch{note('Nagroda zapisana na telefonie. Ponów synchronizację, kiedy wróci połączenie.');}
  return true;
 };
+const academyMenuTabs = {
+ 'missions-board':'missions-board',submission:'missions-board',song:'missions-board',
+ books:'books',reader:'books',learn:'learn',subjectmissions:'learn',
+ academy:'academy',lesson:'academy',mentor:'mentor',base:'base',arcade:'base'
+};
+function childMenu(p,scene){
+ const current=academyMenuTabs[tab];
+ if(scene!=='dashboard'&&(hqViews84.get(who)==='walk'||scene&&scene!=='missions'||['missions93','learning-games'].includes(tab)))return '';
+ return academy102Player({name:e(p.name),child:who,coins:e(p.coins),grade:e(gradeName(p.grade)),
+  level:1+Math.floor(p.xp/100),progress:p.xp%100})+academy102DashboardNav(p.grade==='P',interfaceVoice,current);
+}
 function layout(title,content,scene='',voice=''){stopMission95();stopMission95=()=>{};mountLearningGames92(null);mountMissions93(null);mountHangar95(null);mountPreschoolAudio93(null);if(typeof mountNounFlight88==='function')mountNounFlight88(null);if(typeof mountBaseScene84==='function')mountBaseScene84(null);if(typeof mountBaseWalk==='function')mountBaseWalk(null);cancelAIRequests();stopVoice();closeMicBubble();
  const illustrated=role==='child'&&scene!=='walk';
  app.innerHTML=illustrated?academy102Shell(scene||'section',{
-  title:e('Akademia '+profile().name),content,voice,release:ACADEMY_RELEASE,test:testMode,status:sync78StatusMarkup(true),
+  title:e('Akademia '+profile().name),content,voice,menu:childMenu(profile(),scene),release:ACADEMY_RELEASE,test:testMode,status:sync78StatusMarkup(true),
   sound:trainingSoundControl(),exit:button('← Zakończ test','exit','gold'),base:tab==='base'||hqViews84.get(who)==='walk'
- }):scene==='walk'?'<main class="hq86-main">'+content+'</main>':`<main class="wrap${role==='child'&&(tab==='base'||hqViews84.get(who)==='walk')?' hq88-base-page':''}"><header class="head"><div><div class="brand">⚡ AKADEMIA SUPERBOHATERÓW <span style="display:inline-block;font-size:0.72em;border:1px solid currentColor;border-radius:8px;padding:2px 7px;vertical-align:middle">V${ACADEMY_RELEASE}</span></div><div class="sub">${e(title)}</div>${sync78StatusMarkup()}</div>${role==='child'&&scene!=='choice'?trainingSoundControl():''}${role?button(testMode?'← Zakończ test':'← Profile','exit','alt'):''}</header>${testMode?'<div class="test-banner">🧪 TRYB MAMY — BEZPŁATNY TEST • POSTĘPY NIE SĄ ZAPISYWANE</div>':''}${content}</main>${role==='child'&&scene!=='choice'?'<button class="mic" data-action="mic" aria-label="Sterowanie głosowe">🎙️</button>':''}`;document.querySelectorAll('[data-speak]').forEach(b=>b.addEventListener('click',()=>speak(b.dataset.speak,b.dataset.lang,role==='child'?profile().mentor:'tech',data.settings.rate||1)));hydrateImages();v76AfterRender();if(role==='child'&&profile().grade==='P')mountPreschoolAudio93(app,text=>speak(text,'pl-PL',profile().mentor,data.settings.rate||1));if(role==='child'&&scene!=='knowledge'&&(tab==='learn'||tab==='subjectmissions'))installMicDrag()}
+ }):scene==='walk'?'<main class="hq86-main">'+content+'</main>':`<main class="wrap${role==='child'&&(tab==='base'||hqViews84.get(who)==='walk')?' hq88-base-page':''}"><header class="head"><div><div class="brand">⚡ AKADEMIA SUPERBOHATERÓW <span style="display:inline-block;font-size:0.72em;border:1px solid currentColor;border-radius:8px;padding:2px 7px;vertical-align:middle">V${ACADEMY_RELEASE}</span></div><div class="sub">${e(title)}</div>${sync78StatusMarkup()}</div>${role==='child'&&scene!=='choice'?trainingSoundControl():''}${role?button(testMode?'← Zakończ test':'← Profile','exit','alt'):''}</header>${testMode?'<div class="test-banner">🧪 TRYB MAMY — BEZPŁATNY TEST • POSTĘPY NIE SĄ ZAPISYWANE</div>':''}${content}</main>${role==='child'&&scene!=='choice'?'<button class="mic" data-action="mic" aria-label="Sterowanie głosowe">🎙️</button>':''}`;document.querySelectorAll('[data-speak]').forEach(b=>b.addEventListener('click',()=>{
+ const read=()=>speak(b.dataset.speak,b.dataset.lang,role==='child'?profile().mentor:'tech',data.settings.rate||1);
+ if(b.matches(academyPressControls))pressAcademyControl(b,read);else read();
+ }));hydrateImages();v76AfterRender();if(role==='child'&&profile().grade==='P')mountPreschoolAudio93(app,text=>speak(text,'pl-PL',profile().mentor,data.settings.rate||1));if(role==='child'&&scene!=='knowledge'&&(tab==='learn'||tab==='subjectmissions'))installMicDrag()}
 async function hydrateImages(){for(const el of document.querySelectorAll('[data-image]')){const src=await img(el.dataset.image);if(el.isConnected&&src){el.src=src;el.onload=()=>URL.revokeObjectURL(src)}}}
-function nav(){return role==='admin'?`<div class="tabs">${[['home','Przegląd'],['books','📚 Książki'],['missions','📋 Misje'],['settings','⚙️ Ustawienia'],['test','🧪 Testuj wszystko'],['sync','📱 Telefony'],['backup','💾 Kopia']].map(([k,n])=>button(n,'admin:'+k,adminTab===k?'gold':'alt')).join('')}</div>`:`<div class="tabs">${[['missions-board','🎯 Misje'],['books','📚 Książki'],['learn','🧠 Trening'],['academy','📖 Sala odkrywców'],['mentor','🤖 Mentor'],['base','🏙️ Baza Avengersów i gry']].map(([k,n])=>button(n,'child:'+k,tab===k?'gold':'alt')).join('')}</div>`}
+function nav(){return `<div class="tabs">${[['home','Przegląd'],['books','📚 Książki'],['missions','📋 Misje'],['settings','⚙️ Ustawienia'],['test','🧪 Testuj wszystko'],['sync','📱 Telefony'],['backup','💾 Kopia']].map(([k,n])=>button(n,'admin:'+k,adminTab===k?'gold':'alt')).join('')}</div>`}
 function render(){if(tab!=='arcade')stopArcade();if(!role){layout('Wybierz swoją bazę',`<section class="card"><h1>Witaj w Akademii! 🛡️</h1><p>Każdy bohater ma własne misje i nagrody.</p></section><div class="grid">${people.filter(([id])=>!syncAdapter.device?.()||syncAdapter.device().role!=='child'||syncAdapter.device().child===id).map(([id,name])=>`<button class="tile" data-action="enter:${id}"><img class="profile-hero" src="assets/art/${data.profiles[id].hero||(id==='pawel'?'iron':'spider')}.svg" alt=""><h2>${name}</h2><small>${gradeName(data.profiles[id].grade)} · ${data.profiles[id].coins} złotych</small></button>`).join('')}</div><section class="card">${syncAdapter.device?.()?.role==='child'?'':button('🔐 Centrum dowodzenia mamy','enter:admin','gold')}<p class="muted">${syncAdapter.status()}</p></section>${!syncAdapter.device?.()?sync78Markup():''}${globalThis.AKADEMIA_TEST80?'':`<footer class="academy-update">${button('🔄 Aktualizuj Akademię','academy:update','line')}</footer>`}`);return}if(role==='admin')adminRender();else childRender()}
 const DEFAULT_SUBJECTS=['Polski','Matematyka','Angielski','Przyroda','Plastyka','Muzyka','Informatyka','Wychowanie fizyczne','Etyka','Religia','Przedszkole'];
 function subjectChecks(id){const current=data.profiles[id].subjects||[],items=[...new Set([...DEFAULT_SUBJECTS,...current])];return `<label>Przedmioty — zaznacz właściwe</label><div class="subject-list">${items.map(x=>`<label class="subject-chip"><input type="checkbox" data-subject-for="${id}" value="${e(x)}" ${current.includes(x)?'checked':''}> ${e(x)}</label>`).join('')}</div>`}
@@ -1172,14 +1186,19 @@ function trainingSubjectCard(subject){
  };
  return `<button type="button" class="tr71-choice tr72-subject-card" data-theme="${key}" data-action="training:subject:${encodeURIComponent(name)}" aria-label="Wybierz przedmiot ${e(name)}"><span class="tr72-illustration-frame">${illustrations[key]}</span>${key==='wiedza'?'<div class="v76-knowledge-decor" aria-hidden="true"><i class="v76-pyramid"></i><span class="v76-letter">A</span><span class="v76-letter">7</span><span class="v76-letter">b</span><span class="v76-letter">3</span><span class="v76-leaf">🌿</span><span class="v76-mag">🔎</span><span class="v76-bulb">💡</span></div>':''}<strong>${e(name)}</strong></button>`;
 }
-function trainingTapSound(whileSpeaking=false){
+function trainingTapSound(whileSpeaking=false,click=false){
  if(localStorage.getItem('academy-v72-training-silent')==='1')return;
  if(!whileSpeaking&&(window.speechSynthesis?.speaking||window.speechSynthesis?.pending))return;
  try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;
-  const c=new C(),o=c.createOscillator(),g=c.createGain();
-  o.type='sine';o.frequency.setValueAtTime(570,c.currentTime);o.frequency.exponentialRampToValueAtTime(790,c.currentTime+.085);
-  g.gain.setValueAtTime(.0001,c.currentTime);g.gain.exponentialRampToValueAtTime(.035,c.currentTime+.014);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+.12);
-  o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.14);o.onended=()=>c.close().catch(()=>{});
+  const c=new C(),o=c.createOscillator(),g=c.createGain(),start=c.currentTime;
+  if(c.state==='suspended')void c.resume().catch(()=>{});
+  o.type=click?'triangle':'sine';
+  o.frequency.setValueAtTime(click?450:570,start);
+  o.frequency.exponentialRampToValueAtTime(click?155:790,start+(click?.045:.085));
+  g.gain.setValueAtTime(.0001,start);
+  g.gain.exponentialRampToValueAtTime(click?.16:.035,start+(click?.004:.014));
+  g.gain.exponentialRampToValueAtTime(.0001,start+(click?.075:.12));
+  o.connect(g);g.connect(c.destination);o.start();o.stop(start+(click?.09:.14));o.onended=()=>c.close().catch(()=>{});
  }catch(err){console.warn('Krótki dźwięk przycisku:',err)}
 }
 function trainingSoundControl(){const muted=localStorage.getItem('academy-v72-training-silent')==='1';return `<button type="button" class="tr72-sound-toggle" data-action="training:toggle-sound" aria-label="Dźwięki" aria-pressed="${!muted}">${muted?'🎵':'🎶'}</button>`}
@@ -1615,10 +1634,8 @@ function childRender(){
  }
  if(tab==='home'){
   const preschool=p.grade==='P';
-  const player=academy102Player({name:e(p.name),child:who,coins:e(p.coins),grade:e(gradeName(p.grade)),
-   level:1+Math.floor(p.xp/100),progress:p.xp%100});
   const voice=preschool?academy102DashboardVoice(p.name,interfaceVoice):'';
-  return layout('Akademia '+p.name,player+academy102DashboardNav(preschool,interfaceVoice)+sync81ChildConnectionMarkup(true),'dashboard',voice);
+  return layout('Akademia '+p.name,sync81ChildConnectionMarkup(true),'dashboard',voice);
  }
  if(tab==='learn'&&!v37Classic&&trainingStep==='train-options'&&trainingSubject95(trainingSelectedSubject)==='all'){
   const back=(walking||hqReturn84?button('← Wróć do bazy','hq:back'):'')+button('← Wybór trybu','training:back:source');
@@ -1671,7 +1688,7 @@ function childRender(){
   if(hqPanel84==='flight')mountNounFlight88(app,hqRead(p).paint,{child:who,preview:testMode});
   return;
  }
- let html=walking?'':`<section class="card"><div class="row between"><div><h2>${p.name} ${hero(p.hero||(who==='pawel'?'iron':'spider'))[2]}</h2><small>${gradeName(p.grade)} · Baza poziom ${1+Math.floor(p.xp/100)}</small></div><b class="xp" data-wallet82="${who}">🪙 ${p.coins} złotych</b></div><div class="progress"><div style="width:${p.xp%100}%"></div></div></section>`+nav();
+ let html='';
 if(tab==='song'){const mission=data.missions.find(m=>m.id===missionId);const song=data.settings.songs.find(x=>x.id===mission?.songId);html+=song?songScreen(song,mission):'<section class="card">Nie znaleziono piosenki.</section>'}
 if(tab==='books')html+=`<section class="card"><h2>📚 Moje podręczniki ${speakBtn('Moje podręczniki')}</h2>${books().filter(b=>!b.archived).map(b=>`<div class="item"><div><b>${e(b.title)}</b><small>${e(b.subject)} · ${gradeName(b.grade)}</small></div>${button('Otwórz','reader:'+b.id)}</div>`).join('')||'Mama jeszcze nie dodała książek.'}</section>`;
 if(tab==='subjectmissions')html+='<section id="subject-missions-root"></section>';
@@ -2353,6 +2370,16 @@ document.addEventListener('toggle',ev=>{
   image.dataset.v75Loading='1';img(id).then(url=>{if(image.isConnected&&url){image.src=url;image.onload=()=>URL.revokeObjectURL(url)}}).catch(err=>console.warn('Nie udało się wyświetlić zdjęcia strony',err));
  }
 },true);
+const academyPressControls = '.academy102-destinations button,.academy102-header-actions button,.academy102-screen-voice button,.academy102-choices button';
+function pressAcademyControl(control,complete){
+ if(control.disabled||control.dataset.academyPressed)return;
+ control.dataset.academyPressed='true';
+ trainingTapSound(true,true);
+ setTimeout(()=>{
+  delete control.dataset.academyPressed;
+  if(control.isConnected&&!control.disabled)complete();
+ },165);
+}
 const baseButtonClicks88=new WeakMap();
 document.addEventListener('pointerdown',event=>{
  const tool=event.target.closest?.('[data-pet-tool]');
@@ -2361,7 +2388,7 @@ document.addEventListener('pointerdown',event=>{
 },true);
 document.addEventListener('click',event=>{
  const control=event.target.closest?.('button,summary');
- if(!control||control.disabled||control.dataset.hqForwarded||control.closest('#missions93-cockpit')&&!control.dataset.action||control.dataset.petTool&&event.detail||
+ if(!control||control.disabled||control.matches?.(academyPressControls)||control.dataset.hqForwarded||control.closest('#missions93-cockpit')&&!control.dataset.action||control.dataset.petTool&&event.detail||
     !control.closest('.hq86-main,.hq88-base-page,.hq84-choices'))return;
  const action=control.dataset.action;
  if(control.classList.contains('tr72-subject-card')||
@@ -2371,7 +2398,9 @@ document.addEventListener('click',event=>{
  baseButtonClicks88.set(control,{at:now,trusted:event.isTrusted});
  trainingTapSound(true);
 },true);
-document.addEventListener('click',ev=>{const btn=ev.target.closest('[data-action]');if(btn){if(ev.target.closest('[data-speak]'))return;if(btn.dataset.action==='mic'&&micDragIgnoreClick){ev.preventDefault();ev.stopPropagation();return}if(btn.classList.contains('tr72-subject-card')){if(btn.dataset.opening)return;btn.dataset.opening='1';btn.classList.add('tr72-selected');trainingTapSound();setTimeout(()=>{if(btn.isConnected)handle(btn.dataset.action,btn)},['matematyka','przyroda','wiedza'].includes(btn.dataset.theme)?1150:480);return}if(btn.closest('.tr71')&&/^training:(source|mode):/.test(btn.dataset.action||'')){if(btn.dataset.opening)return;btn.dataset.opening='1';btn.classList.add('v76-tile-pressed');btn.setAttribute('aria-busy','true');trainingTapSound();setTimeout(()=>{if(btn.isConnected)handle(btn.dataset.action,btn)},280);return}if(btn.closest('.tr71')&&btn.dataset.action?.startsWith('training:')&&btn.dataset.action!=='training:toggle-sound')trainingTapSound();handle(btn.dataset.action,btn)}});
+document.addEventListener('click',ev=>{const btn=ev.target.closest('[data-action]');if(btn){if(ev.target.closest('[data-speak]'))return;
+ if(btn.matches?.(academyPressControls)){pressAcademyControl(btn,()=>handle(btn.dataset.action,btn));return;}
+ if(btn.dataset.action==='mic'&&micDragIgnoreClick){ev.preventDefault();ev.stopPropagation();return}if(btn.classList.contains('tr72-subject-card')){if(btn.dataset.opening)return;btn.dataset.opening='1';btn.classList.add('tr72-selected');trainingTapSound();setTimeout(()=>{if(btn.isConnected)handle(btn.dataset.action,btn)},['matematyka','przyroda','wiedza'].includes(btn.dataset.theme)?1150:480);return}if(btn.closest('.tr71')&&/^training:(source|mode):/.test(btn.dataset.action||'')){if(btn.dataset.opening)return;btn.dataset.opening='1';btn.classList.add('v76-tile-pressed');btn.setAttribute('aria-busy','true');trainingTapSound();setTimeout(()=>{if(btn.isConnected)handle(btn.dataset.action,btn)},280);return}if(btn.closest('.tr71')&&btn.dataset.action?.startsWith('training:')&&btn.dataset.action!=='training:toggle-sound')trainingTapSound();handle(btn.dataset.action,btn)}});
 document.addEventListener('input',ev=>{const box=ev.target.closest('[data-v74-edit]');if(!box||!ev.target.matches('[data-v74-field],[data-v75-field]'))return;const key=decodeURIComponent(box.dataset.v74Edit||'');const btn=box.querySelector('[data-action^="book:save-question:"]');if(btn)btn.disabled=!v74QuestionModified(box,key);});
 document.addEventListener('change',ev=>{if(ev.target.hasAttribute?.('data-v77-range-book')){v77ApplyRange(ev.target.dataset.v77RangeBook,false);return;}if(ev.target.hasAttribute?.('data-v772-chapter-book')){v772ApplyChapter(ev.target.dataset.v772ChapterBook);return;}if(ev.target.id==='page-chapter-filter'){if($('page-filter')?.value==='none')$('page-filter').value='all';filterBookPages($('page-filter')?.value||'all');return;}if(ev.target.matches('[data-tr71-page],[data-tr71-book],[data-tr71-chapter]'))return trainingSelectionChange(ev.target);if(ev.target.matches('[data-page-select]'))updateBookPageSelection();if(ev.target.id==='bchild')refreshBookSubjectSelect();if(ev.target.id==='btype'){const other=ev.target.value==='Inne';const a=$('v73-book-title'),b=$('v73-book-part');if(a)a.hidden=!other;if(b)b.hidden=other;}if(ev.target.id==='page-filter'){filterBookPages(ev.target.value);const old=v77BookViews.get(bookId)||{scroll:0,selected:[]};v77BookViews.set(bookId,{...old,filter:ev.target.value})}if(ev.target.id==='v74-report-child')v74UpdateReportFilter();if(ev.target.id==='booknumberlocation'){const b=data.books.find(x=>x.id===bookId);if(b){b.pageNumberPosition=ev.target.value;save().then(()=>note('✅ Zapisano położenie numeru strony.')).catch(err=>note('❌ '+err.message))}}if(ev.target.id==='replacefile'&&ev.target.files?.length)handle('page:replace');if(ev.target.id==='replacecamera'&&ev.target.files?.length)handle('page:replace-camera');if(ev.target.id==='bookcoverfile'&&ev.target.files?.length)handle('book:cover');if(ev.target.id==='pagefiles'&&ev.target.files?.length)handle('page:upload');if(ev.target.id==='pagecamera'&&ev.target.files?.length)handle('page:camera');if(ev.target.id==='trainingSubject')trainingChooseSubject(ev.target.value);if(ev.target.id==='kind')newExercise();if(ev.target.id==='booktrainingpage')bookExercise();if(ev.target.id==='tracechar')drawTrace();if(ev.target.id==='readerpage'){pageId=ev.target.value;render()}if(ev.target.id==='mentorstyle'){profile().mentor=ev.target.value;save()}});
 // V76_PANEL: zachowujemy kolejnosc Dodaj -> Biblioteka -> Trudnosci -> Baza poza.

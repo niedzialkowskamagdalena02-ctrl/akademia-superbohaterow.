@@ -96,11 +96,13 @@
 }
 @keyframes flight97-cheer { from { scale:.35; rotate:-19deg; opacity:0 } }
 
-.flight97-takeoff { display:flex; flex-direction:column; background:#14355c; min-height:0 }
+.flight97-takeoff { display:flex; flex-direction:column; background:#14355c; min-height:0; border-color:#9bd9ed }
+#missions93-cockpit .flight97-takeoff .flight97-pilot-call{background:linear-gradient(#75c8ed,#559cbd 68%,#4e829e)}
+#missions93-cockpit .flight97-takeoff .flight97-bubble{background:linear-gradient(#f4fdff,#d9f3fa);border-color:#91d1e6}
 .flight97-window { position:relative; flex:1; min-height:clamp(265px,44dvh,410px); overflow:hidden; overflow:clip; isolation:isolate; touch-action:none }
 .flight97-window [hidden] { display:none }
 .flight97-sky {
-  position:absolute; inset:-9%; z-index:-6; background:#58c4ec url('flight95/day.webp') center/cover;
+  position:absolute; inset:-9%; z-index:-6; background:#2394eb url('flight95/day.webp') center top/cover;
   transform:translateX(calc(var(--cloud-slide,0px)*.1)) rotate(var(--turn,0deg)) scale(1.09);
 }
 .flight97-airflow {

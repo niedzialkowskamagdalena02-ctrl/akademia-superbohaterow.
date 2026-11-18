@@ -13,7 +13,7 @@ function microphone(className = '') {
 
 const testBanner = () => `<div class="academy102-test" role="note" aria-label="Tryb mamy — bezpłatny test. Postępy nie są zapisywane.">${art('test')}</div>`;
 
-export function academy102Shell(scene, {title, content, voice='', release, test, status, sound, exit, base}) {
+export function academy102Shell(scene, {title, content, menu='', voice='', release, test, status, sound, exit, base}) {
   const profiles = test ? exit : `<button type="button" class="academy102-profiles" data-action="exit">
     ${art('avatar')}<span aria-hidden="true">←</span><b>Profile</b></button>`;
   const regular = scene==='section';
@@ -29,7 +29,7 @@ export function academy102Shell(scene, {title, content, voice='', release, test,
         <div class="academy102-header-actions">${sound}${profiles}</div>
       </div>
     </header>
-    ${voice}${test ? testBanner() : ''}
+    ${voice}${test ? testBanner() : ''}${menu}
     ${regular||scene==='missions'?`<div class="academy104-section-body">${content}</div>`:content}
     ${scene==='knowledge'?'':microphone()}
   </main>`;
@@ -64,10 +64,10 @@ const destinations = [
   ['headquarters','Baza Avengersów i gry','base']
 ];
 
-export function academy102DashboardNav(preschool, speak) {
+export function academy102DashboardNav(preschool, speak, current) {
   return `<nav class="academy102-destinations${preschool?' academy102-preschool':''}" aria-label="Menu Akademii">${destinations.map(([picture,label,tab])=>{
-    const link = `<button type="button" class="academy104-destination academy104-${picture}" data-action="child:${tab}">
-      ${art('icon-'+picture)}<span>${label}</span></button>`;
+    const link = `<button type="button" class="academy104-destination academy104-${picture}" data-action="child:${tab}"${tab===current?' aria-current="page"':''}>
+      <span class="academy105-face">${art('icon-'+picture)}<span>${label}</span></span></button>`;
     return preschool ? `<div class="academy102-voiced">${link}${speak(label)}</div>` : link;
   }).join('')}</nav>`;
 }
