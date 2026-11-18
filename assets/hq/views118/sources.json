@@ -1,0 +1,74 @@
+[
+  {
+    "id": "plants",
+    "source": "1000058767.png",
+    "asset": "assets/hq/views118/plants.png",
+    "width": 709,
+    "height": 1536,
+    "sha256": "b1be6d412d821ed1641f6d49b0d3d84f23b8d6a19d7cbca451ce276e7ee727c5"
+  },
+  {
+    "id": "vault",
+    "source": "1000058758.png",
+    "asset": "assets/hq/views118/vault.png",
+    "width": 709,
+    "height": 1536,
+    "sha256": "e526c2c5811cf593303a81241e900367cb08ca5d06e588f1d288d7ad93564d64"
+  },
+  {
+    "id": "shop",
+    "source": "1000058757.png",
+    "asset": "assets/hq/views118/shop.png",
+    "width": 709,
+    "height": 1536,
+    "sha256": "18de5df172f0dc0a610cdb2daad1a97f8024e78e8f906cfc022bc76c9bbddaeb"
+  },
+  {
+    "id": "training",
+    "source": "1000058756.png",
+    "asset": "assets/hq/views118/training.png",
+    "width": 709,
+    "height": 1536,
+    "sha256": "0dd5d04e503c25c3b0ba4d7cfee37574e73964d5c5386883450bccc883a40ab1"
+  },
+  {
+    "id": "armory",
+    "source": "1000058755.png",
+    "asset": "assets/hq/views118/armory.png",
+    "width": 709,
+    "height": 1536,
+    "sha256": "52f295df033049973993614bc0146fbf3168a1e5ee8121e38c190f8ed874975a"
+  },
+  {
+    "id": "pet",
+    "source": "1000058754.png",
+    "asset": "assets/hq/views118/pet.png",
+    "width": 709,
+    "height": 1536,
+    "sha256": "cbaf9104f13f77dbd071bb014d7e7845deb0157ff856e1d017030e6a0751d2f6"
+  },
+  {
+    "id": "hangar",
+    "source": "1000058753.png",
+    "asset": "assets/hq/views118/hangar.png",
+    "width": 711,
+    "height": 1536,
+    "sha256": "45cdac182afcc6587354b151c88cea834af28dab8143abc5ec0c0cb4c2e6ccba"
+  },
+  {
+    "id": "hall",
+    "source": "1000058752.png",
+    "asset": "assets/hq/views118/hall.png",
+    "width": 709,
+    "height": 1536,
+    "sha256": "85706787f7612139f863cd22e0c070e1f819ea8861944930405230204e7d2a3a"
+  },
+  {
+    "id": "arcade",
+    "source": "1000058751.png",
+    "asset": "assets/hq/views118/arcade.png",
+    "width": 709,
+    "height": 1536,
+    "sha256": "35e531852e05f66595afafa54b69fa4699a79b5a39ff884dcb650f51e693f04d"
+  }
+]
