@@ -2,10 +2,10 @@ import {flightPreview99} from './game-art99.js?v=99';
 import {captainMissions93, aceMissions93, flightMathInstructions93, missionDeck93} from './missions93-data.js?v=103';
 import {gameGroup92, shuffle92} from './learning-games92.js?v=92';
 import {paintWorld} from './missions93.js?v=103';
-import {airMarkup95, flightStyles95, mountAir95, plane95, shape95, surface95, voice95} from './hangar-flight95.js?v=103';
-import {digitWord96} from './hangar-art96.js?v=97';
-import {boardingTrip101, boardingFlightCount101, boardingFlightLabel101, boardingRoundCount97, boardingSlots98, boardingMarkup97, boardingTransfer97, canBoard97, finishBoarding98, pilotCall97, syncBoarding97} from './hangar-boarding97.js?v=101';
-import {mountTakeoff97, takeoffMarkup97} from './hangar-takeoff97.js?v=103';
+import {airMarkup95, flightStyles95, mountAir95, plane95, shape95, surface95, voice95} from './hangar-flight95.js?v=104';
+import {digitWord96} from './hangar-art96.js?v=104';
+import {boardingTrip101, boardingFlightCount101, boardingFlightLabel101, boardingRoundCount97, boardingSlots98, boardingMarkup97, boardingTransfer97, canBoard97, finishBoarding98, pilotCall97, syncBoarding97} from './hangar-boarding97.js?v=104';
+import {mountTakeoff97, takeoffMarkup97} from './hangar-takeoff97.js?v=104';
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -74,7 +74,7 @@ export function mountHangar95(root,{grade,legacy=false,preview=false,profileKey=
   const group = gameGroup92(grade), preschool = group === 'preschool';
   const games = preschool ? captainMissions93 : group==='school'
     ? [...captainMissions93.filter(([key])=>released.has(key)),...aceMissions93] : [];
-  const canPlay = key => games.some(([game])=>game===key) && (preview||released.has(key));
+  const canPlay = key => games.some(([game])=>game===key) && (preview||released.has(key)||key==='engine'&&group==='school');
   const canPlayClassic = preview && legacy;
   const controller = new AbortController(), {signal} = controller;
   let id = '', deck = [], round = 0, state, gesture, air, transfer, delayed = 0, swallowClick = 0;

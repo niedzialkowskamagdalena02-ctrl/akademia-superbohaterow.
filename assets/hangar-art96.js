@@ -1,8 +1,8 @@
 const art = 'assets/flight96/';
-const digits = ['zero', 'jeden', 'dwa', 'trzy', 'cztery', 'pięć', 'sześć'];
+const digits = ['zero', 'jeden', 'dwa', 'trzy', 'cztery', 'pięć', 'sześć', 'siedem', 'osiem', 'dziewięć'];
 const confetti = '<span class="flight96-confetti" aria-hidden="true"></span>';
 
-export const digitWord96 = digit => digits[digit];
+export const digitWord96 = digit => digits[digit] ?? String(digit ?? '');
 export const picture96 = (name, cls = '') =>
   `<img class="${cls}" src="${art}${name}.webp" draggable="false" alt="">`;
 

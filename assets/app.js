@@ -1,5 +1,5 @@
 import {gamePreview99, hangarPaint99} from './game-art99.js?v=99';
-import {academy102Shell,academy102Choices,academy102Player,academy102DashboardNav,academy102DashboardVoice,academy102FamilyHeading,academy102Knowledge,academy102MissionsHeader,academy102MissionZone} from './interface102.js?v=102';
+import {academy102Shell,academy102Choices,academy102Player,academy102DashboardNav,academy102DashboardVoice,academy102FamilyHeading,academy102Knowledge,academy102MissionsHeader,academy102MissionZone} from './interface102.js?v=104';
 // V48_AI_RESPONSE_DIAGNOSTICS
 // V44_BULK_CHAPTERS
 // V42_CHAPTERS
@@ -20,9 +20,9 @@ import {petQuiz88} from './pet-quiz88.js?v=88';
 import {gameGroup92,recordGameAward92} from './learning-games92.js?v=92';
 import {mountLearningGames92} from './learning-play92.js?v=95';
 import {mountMissions93,missionNote93} from './missions93.js?v=103';
-import {mountHangar95} from './hangar95.js?v=103';
+import {mountHangar95} from './hangar95.js?v=104';
 import {trainingCatalog95,trainingSubject95,trainingGroupName95,trainingSequence95,outsideDeck95} from './training95.js?v=95';
-import {mountPreschoolAudio93} from './preschool-audio93.js?v=102';
+import {mountPreschoolAudio93} from './preschool-audio93.js?v=104';
 import {MASTER_PRIZES86,MASTER_SCORE86,recordEnergy86,trainingRound86,trainingConsole86,unlockMaster86} from './base-training86.js?v=87';
 import {affordable82,purchase82,credit82} from './wallet82.js?v=82';
 import {REVEAL_OFFER82,consent82,requestedAnswer82,solutions82,leaks82,parseTutor82,promptTutor82} from './tutor82.js?v=82';
@@ -78,7 +78,7 @@ const select=(id,label,options,value)=>`<label for="${id}">${label}</label><sele
 const grades=[['P','Przedszkole'],...Array.from({length:12},(_,i)=>[String(i+1),`Klasa ${i+1}`])];
 const people=[['pawel','Paweł'],['patryk','Patryk']];
 const note=t=>{const n=$('hq85-notice')||$('notice');if(!n){console.warn('Powiadomienie:',t);return}n.textContent=t;n.classList.add('visible');setTimeout(()=>{if(n.isConnected)n.classList.remove('visible')},4500)};
-const ACADEMY_RELEASE=103;
+const ACADEMY_RELEASE=104;
 async function checkAcademyUpdate(button){
  if(!button||button.disabled)return;
  const label=button.textContent,controller=new AbortController();
@@ -747,10 +747,10 @@ const grant=async(child,points,reason,key)=>{
  return true;
 };
 function layout(title,content,scene='',voice=''){stopMission95();stopMission95=()=>{};mountLearningGames92(null);mountMissions93(null);mountHangar95(null);mountPreschoolAudio93(null);if(typeof mountNounFlight88==='function')mountNounFlight88(null);if(typeof mountBaseScene84==='function')mountBaseScene84(null);if(typeof mountBaseWalk==='function')mountBaseWalk(null);cancelAIRequests();stopVoice();closeMicBubble();
- const illustrated=['choice','dashboard','knowledge','missions'].includes(scene);
- app.innerHTML=illustrated?academy102Shell(scene,{
-  title:e(title),content,voice,release:ACADEMY_RELEASE,test:testMode,status:sync78StatusMarkup(true),
-  sound:scene==='dashboard'?trainingSoundControl():'',exit:button('← Zakończ test','exit','gold')
+ const illustrated=role==='child'&&scene!=='walk';
+ app.innerHTML=illustrated?academy102Shell(scene||'section',{
+  title:e('Akademia '+profile().name),content,voice,release:ACADEMY_RELEASE,test:testMode,status:sync78StatusMarkup(true),
+  sound:trainingSoundControl(),exit:button('← Zakończ test','exit','gold'),base:tab==='base'||hqViews84.get(who)==='walk'
  }):scene==='walk'?'<main class="hq86-main">'+content+'</main>':`<main class="wrap${role==='child'&&(tab==='base'||hqViews84.get(who)==='walk')?' hq88-base-page':''}"><header class="head"><div><div class="brand">⚡ AKADEMIA SUPERBOHATERÓW <span style="display:inline-block;font-size:0.72em;border:1px solid currentColor;border-radius:8px;padding:2px 7px;vertical-align:middle">V${ACADEMY_RELEASE}</span></div><div class="sub">${e(title)}</div>${sync78StatusMarkup()}</div>${role==='child'&&scene!=='choice'?trainingSoundControl():''}${role?button(testMode?'← Zakończ test':'← Profile','exit','alt'):''}</header>${testMode?'<div class="test-banner">🧪 TRYB MAMY — BEZPŁATNY TEST • POSTĘPY NIE SĄ ZAPISYWANE</div>':''}${content}</main>${role==='child'&&scene!=='choice'?'<button class="mic" data-action="mic" aria-label="Sterowanie głosowe">🎙️</button>':''}`;document.querySelectorAll('[data-speak]').forEach(b=>b.addEventListener('click',()=>speak(b.dataset.speak,b.dataset.lang,role==='child'?profile().mentor:'tech',data.settings.rate||1)));hydrateImages();v76AfterRender();if(role==='child'&&profile().grade==='P')mountPreschoolAudio93(app,text=>speak(text,'pl-PL',profile().mentor,data.settings.rate||1));if(role==='child'&&scene!=='knowledge'&&(tab==='learn'||tab==='subjectmissions'))installMicDrag()}
 async function hydrateImages(){for(const el of document.querySelectorAll('[data-image]')){const src=await img(el.dataset.image);if(el.isConnected&&src){el.src=src;el.onload=()=>URL.revokeObjectURL(src)}}}
 function nav(){return role==='admin'?`<div class="tabs">${[['home','Przegląd'],['books','📚 Książki'],['missions','📋 Misje'],['settings','⚙️ Ustawienia'],['test','🧪 Testuj wszystko'],['sync','📱 Telefony'],['backup','💾 Kopia']].map(([k,n])=>button(n,'admin:'+k,adminTab===k?'gold':'alt')).join('')}</div>`:`<div class="tabs">${[['missions-board','🎯 Misje'],['books','📚 Książki'],['learn','🧠 Trening'],['academy','📖 Sala odkrywców'],['mentor','🤖 Mentor'],['base','🏙️ Baza Avengersów i gry']].map(([k,n])=>button(n,'child:'+k,tab===k?'gold':'alt')).join('')}</div>`}
@@ -1606,7 +1606,7 @@ function childRender(){
  if(tab==='missions-board'||tab==='home'&&walking){
   const audio=p.grade==='P'?interfaceVoice('Twoje misje. Alerty bohatera, misje szkolne i misje domowe.','Odsłuchaj'): '';
   const head=academy102MissionsHeader({
-   name:e(p.name),audio,back:`<button type="button" data-action="${walking?'hq:back':'child:home'}" aria-label="Wróć">←</button>`
+   audio,back:`<button type="button" class="alt" data-action="${walking?'hq:back':'child:home'}" aria-label="Wróć">←</button>`
   });
   const history=data.history.filter(h=>h.child===who).slice(0,5);
   const latest=history.length?`<details class="card academy102-latest"><summary>Ostatnie osiągnięcia</summary>
@@ -1622,7 +1622,7 @@ function childRender(){
  }
  if(tab==='learn'&&!v37Classic&&trainingStep==='train-options'&&trainingSubject95(trainingSelectedSubject)==='all'){
   const back=(walking||hqReturn84?button('← Wróć do bazy','hq:back'):'')+button('← Wybór trybu','training:back:source');
-  return layout('Wiedza ogólna',academy102Knowledge(trainingPageItems().length>0,back,button(testMode?'← Zakończ test':'← Profile','exit')),'knowledge');
+  return layout('Wiedza ogólna',academy102Knowledge(trainingPageItems().length>0,back),'knowledge');
  }
  if(tab==='missions93'){
   layout('Akademia '+p.name,`<section class="sq93-shell">${button('‹ Gry edukacyjne','learning-games:more-back','alt')}
@@ -2927,7 +2927,7 @@ async function sync78Init(){
   const changed=JSON.stringify(data)!==JSON.stringify(state);if(!changed)return;
   if(testMode){sync78Adopt(testSnapshot,state);return;}sync78Adopt(data,state);
   if(!role||role==='child'&&tab==='home'||role==='admin'&&adminTab==='home')render();
-  else{sync78HasUpdates=true;let update=$('sync78-new');if(!update){update=document.createElement('div');update.id='sync78-new';update.className='card';update.innerHTML='📥 Są nowe dane. '+button('Pokaż','sync78:show','alt');document.querySelector('.wrap')?.prepend(update);}}
+  else{sync78HasUpdates=true;let update=$('sync78-new');if(!update){update=document.createElement('div');update.id='sync78-new';update.className='card';update.innerHTML='📥 Są nowe dane. '+button('Pokaż','sync78:show','alt');const header=app.querySelector('.academy102-header');if(header)header.after(update);else document.querySelector('.wrap')?.prepend(update);}}
  }});
 }
 function sync78Adopt(target,source){

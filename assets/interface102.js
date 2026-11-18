@@ -13,25 +13,25 @@ function microphone(className = '') {
 
 const testBanner = () => `<div class="academy102-test" role="note" aria-label="Tryb mamy — bezpłatny test. Postępy nie są zapisywane.">${art('test')}</div>`;
 
-export function academy102Shell(scene, {title, content, voice='', release, test, status, sound, exit}) {
-  if (scene === 'knowledge') {
-    return `<main class="academy102-screen academy102-knowledge" data-preschool-screen-skip>${test ? testBanner() : ''}${content}</main>`;
-  }
-  if (scene === 'missions') return `<main class="academy102-screen academy102-mission-screen" data-preschool-screen-skip>${test ? testBanner() : ''}${content}${microphone()}</main>`;
-  const profiles = test ? exit : tile('profiles','← Profile','exit');
-  return `<main class="academy102-screen academy102-${scene}" data-preschool-screen-skip>
-    ${voice}
+export function academy102Shell(scene, {title, content, voice='', release, test, status, sound, exit, base}) {
+  const profiles = test ? exit : `<button type="button" class="academy102-profiles" data-action="exit">
+    ${art('avatar')}<span aria-hidden="true">←</span><b>Profile</b></button>`;
+  const regular = scene==='section';
+  const screen = scene==='missions'?'mission-screen':scene;
+  return `<main class="academy102-screen academy102-${screen}${base?' hq88-base-page':''}" ${regular?'':'data-preschool-screen-skip'}>
     <header class="academy102-header">
       <div class="academy102-masthead">
-        <span class="academy102-sr">Akademia Superbohaterów</span>${art('masthead')}
-        <span class="academy102-version">V${release}</span>
+        <span class="academy104-bolt" aria-hidden="true"></span>
+        <div class="academy104-wordmark">Akademia<br>Superbohaterów</div><span class="academy102-version">V${release}</span>
       </div>
       <div class="academy102-identity">
         <div class="academy102-status"><h1>${title}</h1>${status}</div>
         <div class="academy102-header-actions">${sound}${profiles}</div>
       </div>
     </header>
-    ${test ? testBanner() : ''}${content}${microphone()}
+    ${voice}${test ? testBanner() : ''}
+    ${regular||scene==='missions'?`<div class="academy104-section-body">${content}</div>`:content}
+    ${scene==='knowledge'?'':microphone()}
   </main>`;
 }
 
@@ -50,37 +50,35 @@ export function academy102Player({name, child, coins, grade, level, progress}) {
     </div>
     <p>${grade} · Baza poziom ${level}</p>
     <div class="academy102-progress" role="progressbar" aria-label="Postęp do następnego poziomu" aria-valuenow="${progress}">
-      <div style="width:${progress}%">${art('progress')}</div>
+      <div style="width:${progress}%"></div>
     </div>
   </section>`;
 }
 
 const destinations = [
-  ['missions','🎯 Misje','home'],
-  ['books','📚 Książki','books'],
-  ['training','🧠 Trening','learn'],
-  ['explorers','📖 Sala odkrywców','academy'],
-  ['mentor','🤖 Mentor','mentor'],
-  ['headquarters','🏙️ Baza Avengersów i gry','base']
+  ['missions','Misje','missions-board'],
+  ['books','Książki','books'],
+  ['training','Trening','learn'],
+  ['explorers','Sala odkrywców','academy'],
+  ['mentor','Mentor','mentor'],
+  ['headquarters','Baza Avengersów i gry','base']
 ];
 
 export function academy102DashboardNav(preschool, speak) {
-  const entries = preschool ? [...destinations.slice(0,4).map(([picture,label,tab])=>['patryk-'+picture,label,tab]),...destinations.slice(3)] : destinations;
-  return `<nav class="academy102-destinations${preschool?' academy102-preschool':''}" aria-label="Menu Akademii">${entries.map(([picture,label,tab])=>{
-    const action = tab==='home'?'missions-board':tab;
-    const link = tile(picture,label,`child:${action}`);
-    return preschool ? `<div class="academy102-voiced${picture.startsWith('patryk-')?' academy102-printed-speaker':''}">${link}${speak(label.slice(label.indexOf(' ')+1))}</div>` : link;
+  return `<nav class="academy102-destinations${preschool?' academy102-preschool':''}" aria-label="Menu Akademii">${destinations.map(([picture,label,tab])=>{
+    const link = `<button type="button" class="academy104-destination academy104-${picture}" data-action="child:${tab}">
+      ${art('icon-'+picture)}<span>${label}</span></button>`;
+    return preschool ? `<div class="academy102-voiced">${link}${speak(label)}</div>` : link;
   }).join('')}</nav>`;
 }
 
 export function academy102DashboardVoice(name, speak) {
-  return `<div class="academy102-screen-voice">${speak('Akademia '+name+'. Wybierz: Misje, Książki, Trening, Sala odkrywców, Mentor albo Baza Avengersów i gry.', 'Odsłuchaj ekran')}${art('patryk-listen')}</div>`;
+  return `<div class="academy102-screen-voice">${speak('Akademia '+name+'. Wybierz: Misje, Książki, Trening, Sala odkrywców, Mentor albo Baza Avengersów i gry.', 'Odsłuchaj ekran')}</div>`;
 }
 
-export function academy102MissionsHeader({name, back, audio}) {
+export function academy102MissionsHeader({back, audio}) {
   return `<header class="academy102-mission-header">
-    <h1>${art('mission-title')}Twoje misje</h1>${audio}
-    <div class="academy102-mission-person"><strong>${name}</strong>${art('avatar')}${back}</div>
+    <h2>${art('icon-missions')}Twoje misje</h2>${audio}${back}
   </header>`;
 }
 
@@ -96,14 +94,14 @@ export function academy102FamilyHeading(title) {
   return `<h2>${art('family')}${title}</h2>`;
 }
 
-export function academy102Knowledge(hasBookItems, back, exit) {
+export function academy102Knowledge(hasBookItems, back) {
   const mixed = hasBookItems ? 'Różne zadania z książki i spoza niej' : 'Losowe zadania spoza książki';
   return `<section class="academy102-knowledge-panel${hasBookItems ? '' : ' academy102-outside'}" aria-labelledby="academy102-knowledge-title">
-    <h1 id="academy102-knowledge-title" class="academy102-sr">Wiedza ogólna</h1>
+    <h2 id="academy102-knowledge-title" class="academy102-sr">Wiedza ogólna</h2>
     ${art('knowledge-backdrop','academy102-knowledge-backdrop')}
     ${tile('train','Trenuj','training:mixed:start', `<span class="academy102-mixed-label" aria-hidden="true">${mixed}</span>`,mixed)}
     ${tile('game','Wybierz grę','training:back:catalog')}
     ${tile('library','Tylko z książki','training:mode:game','','Cały materiał albo wybrane strony')}
     ${microphone('academy102-mic--knowledge')}
-  </section><nav class="academy102-return" aria-label="Powrót">${back}${exit}</nav>`;
+  </section><nav class="academy102-return" aria-label="Powrót">${back}</nav>`;
 }

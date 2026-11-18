@@ -46,6 +46,7 @@ function fixture(){
 
 (async()=>{
  const {mountHangar95,hangarDeck95}=await import(asset('hangar95.js'));
+ const {digitWord96}=await import(asset('hangar-art96.js'));
  const {captainMissions93,aceMissions93}=await import(asset('missions93-data.js'));
  const {boardingDeck97,boardingRoundCount97,boardingSlots98,boardingTransfer97,canBoard97}=await import(asset('hangar-boarding97.js'));
  const {trainingCatalog95,trainingSequence95,outsideDeck95}=await import(asset('training95.js'));
@@ -81,14 +82,22 @@ function fixture(){
 
  try{
   const published=['baggage','takeoff','airballs'];
+  assert.deepEqual([7,8,9].map(digitWord96),['siedem','osiem','dziewięć']);
   for(const grade of ['1','3','4']){
    const maths=grade!=='4';
    mountHangar95(root,{grade,legacy:true});
-   assert.deepEqual([...root.innerHTML.matchAll(/data-f95-action="mission:([a-z]+)"\s*>/g)].map(match=>match[1]),maths?published:[]);
+   assert.deepEqual([...root.innerHTML.matchAll(/data-f95-action="mission:([a-z]+)"\s*>/g)].map(match=>match[1]),maths?[...published,'engine']:[]);
    assert.match(root.innerHTML,/data-action="hq:flight" disabled/);
    root.click('mission:radar');
    assert.equal(root.dataset.fl95Mode,'menu');
    if(maths){
+    root.click('mission:engine');
+    root.click('start');
+    const {answer}=hangarDeck95('engine',grade)[0];
+    for(const digit of String(answer))root.click('key:'+digit);
+    root.click('key:✓');
+    won('engine');
+    root.click('catalog');
     root.click('mission:takeoff');
     assert.equal(root.dataset.fl95Mode,'brief');
    }
@@ -191,22 +200,32 @@ function fixture(){
      const progress=root.querySelector('[data-f97-board-progress]'),prompt=root.querySelector('[data-game-prompt]');
      const gate=(round,i)=>root.querySelector(`[data-f97-hoop="${round}:${i}"]`);
      const plane=root.querySelector('[data-f97-aircraft]');
+     const speed=()=>Number(root.querySelector('[data-f95-viewport]').style.get('--flight-speed'));
+     assert.equal(speed(),0);
      assert.equal(plane.style.get('--plane-y'),'60%');
      root.drag('[data-f95-lever]',[50,300],[50,330]);
      const stage=root.querySelector('.flight97-takeoff');
      assert.equal(stage.dataset.f97Phase,'roll');
      frames(1);
+     assert.ok(speed()>0);
      assert.notEqual(plane.style.get('--plane-y'),'60%');
      frames(.5);
      assert.equal(stage.dataset.f97Phase,'lift');
      frames(1.2);
      assert.equal(stage.dataset.f97Phase,'air');
+     const startSpeed=speed();
      assert.match(prompt.textContent,grade==='P'?/cyfrą/:/Ile to .*?\? Przeleć przez obręcz z wynikiem/);
      const positions={1:[[50,35]],2:[[29,36],[71,30]],3:[[21,38],[50,25],[79,38]]};
      const steer=(count,index)=>root.drag('[data-f95-viewport]',[200,240],positions[count][index].map(percent=>percent*4));
      for(const [round,gates] of t.gates.entries()){
       const correct=gates.indexOf(t.needed[round]);
       assert.ok(gates.every((_,i)=>gate(round,i).hidden===false));
+      if(grade==='P'){
+       assert.equal(prompt.textContent,`Przeleć przez obręcz z cyfrą ${t.needed[round]}.`);
+       root.click('read');
+       assert.equal(spoken.at(-1),`Przeleć przez obręcz z cyfrą ${digitWord96(t.needed[round])}.`);
+      }
+      if(round===7)assert.ok(speed()>startSpeed*1.3);
       if(round===1){
        steer(gates.length,1-correct);frames(2);
        assert.equal(progress.textContent,'1 / 11');
@@ -344,7 +363,7 @@ function fixture(){
  assert.ok(scope.some(turn=>turn.page?.number===12&&turn.key==='matematyka'));
  assert.deepEqual([...new Set(scope.map(turn=>turn.key))].sort(),['angielski','matematyka','polski','przyroda']);
  const manifest=vm.runInNewContext(fs.readFileSync(path.join(dir,'sw.js'),'utf8')+'\n({CACHE,ASSETS})',{self:{addEventListener(){}}});
- assert.equal(manifest.CACHE,'academy-v103');
+ assert.equal(manifest.CACHE,'academy-v104');
  for(const resource of manifest.ASSETS)assert.ok(fs.existsSync(path.resolve(dir,resource.split('?')[0])),resource);
- console.log('PASS V103 – tryb mamy i profile dzieci, matematyka i cyfry w balonach i obręczach, gesty, odprawa, pozostałe gry i cache.');
+ console.log('PASS V104 – Kokpit Matematyczny, cyfry i odsłuch, przyspieszanie, gesty, tryb mamy i cache.');
 })().catch(error=>{console.error(error);process.exitCode=1;});

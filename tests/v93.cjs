@@ -79,6 +79,17 @@ function board(){
  const {app,data}=require('./legacy/test.cjs');
  const view=app(),account=data();
  view.api.set(account,{role:'child',who:'patryk'});
+ await view.api.handle('child:home');
+ assert.equal((view.root.innerHTML.match(/class="academy104-destination /g)||[]).length,6);
+ assert.equal((view.root.innerHTML.match(/data-action="child:academy"/g)||[]).length,1);
+ assert.match(view.root.innerHTML,/icon-books\.webp[^>]*><span>Książki<\/span>/);
+ const header=markup=>markup.match(/<header class="academy102-header">[\s\S]*?<\/header>/)?.[0];
+ const dashboardHeader=header(view.root.innerHTML);
+ assert.match(dashboardHeader,/Akademia Patryk/);
+ for(const page of ['missions-board','books','academy','mentor','learn','base']){
+  await view.api.handle('child:'+page);
+  assert.equal(header(view.root.innerHTML),dashboardHeader,page);
+ }
  await view.api.handle('child:learn');
  await view.api.handle('learning-games:open');
  await view.api.handle('learning-games:more');

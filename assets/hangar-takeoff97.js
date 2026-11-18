@@ -1,5 +1,5 @@
-import {digitWord96, picture96, ring96} from './hangar-art96.js?v=97';
-import {pilotCall97} from './hangar-boarding97.js?v=101';
+import {digitWord96, picture96, ring96} from './hangar-art96.js?v=104';
+import {pilotCall97} from './hangar-boarding97.js?v=104';
 
 const positions = {1:[[50,35]],2:[[29,36],[71,30]],3:[[21,38],[50,25],[79,38]]};
 const clamp = (value, min, max) => Math.min(max,Math.max(min,value));
@@ -7,7 +7,7 @@ const ease = value => value*value*(3-2*value);
 const lerp = (start,end,ratio) => start+(end-start)*ratio;
 const launchPrompt = 'Pociągnij czerwoną dźwignię, aby ruszyć.';
 const finishPrompt = 'Wszystkie obręcze zaliczone! Wspaniale, kapitanie!';
-const gatePrompt = number => 'Przeleć przez obręcz z cyfrą '+digitWord96(number)+'.';
+const gatePrompt = digit => 'Przeleć przez obręcz z cyfrą '+digit+'.';
 
 function aircraft97() {
   return `<div class="flight97-aircraft" data-f97-aircraft aria-hidden="true">
@@ -24,6 +24,7 @@ export function takeoffMarkup97({needed,gates},button) {
     ${pilotCall97(launchPrompt,'0 / '+needed.length,button)}
     <div class="flight97-window" data-f95-viewport aria-label="Przeciągnij samolot palcem do wybranej obręczy. Na klawiaturze użyj strzałek." tabindex="0">
       <div class="flight97-sky" aria-hidden="true"></div>
+      <div class="flight97-airflow" aria-hidden="true"></div>
       <div class="flight97-flight-clouds" aria-hidden="true">
         ${Array.from({length:5},(_,i)=>`<i style="--cloud:${i}"></i>`).join('')}
       </div>
@@ -65,7 +66,7 @@ export function mountTakeoff97(root,{needed,gates,problems},{onLaunch,onGate,onF
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   let phase='ready', elapsed=0, skyClock=0, runwayTravel=0, crossing=0, passed=0, raf=0, stopped=false;
   let x=50,y=60,targetX=50,targetY=48, roll=0, scale=.70, engaged=false, approached=-1;
-  let wrong=-1, retryAt=0;
+  let wrong=-1, retryAt=0, speed=0;
   let last=performance.now();
   const style = (el,name,value) => el.style.setProperty(name,value);
 
@@ -76,9 +77,10 @@ export function mountTakeoff97(root,{needed,gates,problems},{onLaunch,onGate,onF
   }
   function announceGate(retry = false) {
     const problem=problems?.[passed];
+    const digit=needed[passed];
     const prefix=retry?'Spróbuj jeszcze raz. ':'';
-    const prompt=problem?`Ile to ${problem.expression}? Przeleć przez obręcz z wynikiem.`:gatePrompt(needed[passed]);
-    const speech=problem?`Ile to ${problem.speech}? Przeleć przez obręcz z wynikiem.`:prompt;
+    const prompt=problem?`Ile to ${problem.expression}? Przeleć przez obręcz z wynikiem.`:gatePrompt(digit);
+    const speech=problem?`Ile to ${problem.speech}? Przeleć przez obręcz z wynikiem.`:gatePrompt(digitWord96(digit));
     onGate(passed,prefix+prompt,retry,prefix+speech);
   }
   function showGate() {
@@ -90,6 +92,8 @@ export function mountTakeoff97(root,{needed,gates,problems},{onLaunch,onGate,onF
     const drift = inFlight&&!reduced ? Math.sin(time*1.65) : 0;
     const bank = reduced ? 0 : Math.round((roll+drift*2.1)*10)/10;
     style(view,'--turn',bank*.38+'deg');
+    style(view,'--flight-speed',speed.toFixed(3));
+    style(view,'--air-flow',(time*95%300)+'px');
     style(view,'--cloud-slide',(Math.sin(time/11)*43-bank*1.5)+'px');
     clouds.forEach((cloud,i)=>{
       const speed = reduced?.14:1.7+i*.75;
@@ -139,14 +143,15 @@ export function mountTakeoff97(root,{needed,gates,problems},{onLaunch,onGate,onF
     last=now; elapsed+=dt;
     if (phase==='roll') {
       const progress=clamp(elapsed/1.35,0,1);
-      skyClock+=dt*(.20+2.7*progress*progress);
-      runwayTravel+=dt*(20+220*progress*progress);
+      speed=lerp(.12,1,ease(progress));
+      skyClock+=dt*(.34+2.8*speed);
+      runwayTravel+=dt*(20+300*speed);
       x=50; y=lerp(60,49,ease(progress)); scale=lerp(.70,.48,progress);
       if (progress===1) setPhase('lift');
     } else if (phase==='lift') {
       const progress=clamp(elapsed/.92,0,1);
-      skyClock+=dt*2.6;
-      runwayTravel+=dt*240;
+      skyClock+=dt*3.2;
+      runwayTravel+=dt*320;
       y=lerp(49,48-8,ease(progress)); scale=lerp(.48,.74,ease(progress));
       project(skyClock,ease(progress));
       if (progress===1) {
@@ -155,7 +160,8 @@ export function mountTakeoff97(root,{needed,gates,problems},{onLaunch,onGate,onF
         showGate();
       }
     } else if (phase==='air') {
-      skyClock+=dt*(engaged?2.7:1);
+      speed=lerp(speed,1+passed*.065,Math.min(dt*2.8,1));
+      skyClock+=dt*(engaged?3.1:2.2)*speed;
       roll=lerp(roll,clamp((targetX-x)*1.45,-32,32),Math.min(dt*5,1));
       x=lerp(x,targetX,Math.min(dt*4,1));
       y=lerp(y,targetY,Math.min(dt*4,1));
@@ -166,7 +172,7 @@ export function mountTakeoff97(root,{needed,gates,problems},{onLaunch,onGate,onF
       const near=engaged&&wrong<0
         ? positions[gates[passed].length].findIndex(([gx,gy])=>Math.abs(x-gx)<7&&Math.abs(y-gy)<7) : -1;
       if (near!==approached) { crossing=0; approached=near; }
-      if (near>=0) crossing=clamp(crossing+dt*1.6,0,1);
+      if (near>=0) crossing=clamp(crossing+dt*1.6*speed,0,1);
       scale=.78-.24*crossing;
       if (crossing===1) crossGate(near);
     } else if (phase==='done') {

@@ -103,6 +103,14 @@
   position:absolute; inset:-9%; z-index:-6; background:#58c4ec url('flight95/day.webp') center/cover;
   transform:translateX(calc(var(--cloud-slide,0px)*.1)) rotate(var(--turn,0deg)) scale(1.09);
 }
+.flight97-airflow {
+  position:absolute; z-index:-3; inset:0; pointer-events:none;
+  opacity:clamp(0,calc((var(--flight-speed,0) - .24)*.33),.47);
+  background:repeating-linear-gradient(156deg,transparent 0 91px,#effdff60 92px,transparent 94px 150px)
+    0 var(--air-flow,0px)/100% 300px;
+  mask-image:radial-gradient(ellipse,#0000 38%,#000 92%);
+}
+@media(prefers-reduced-motion:reduce){.flight97-airflow{display:none}}
 .flight97-flight-clouds { position:absolute; z-index:-5; inset:0; transform:rotate(var(--turn,0deg)); pointer-events:none }
 .flight97-flight-clouds i {
   position:absolute; width:39%; height:13%; left:var(--cloud-x,calc(var(--cloud)*29% - 25%)); top:calc(8% + var(--cloud)*8%);
@@ -118,6 +126,7 @@
   background:repeating-linear-gradient(0deg,#7eb638 0px,#96c944 28px,#a0d04b 32px,#74a638 67px);
   border-top:3px solid #b0d458; transform:translateY(calc(var(--lift,0)*74%));
   opacity:calc(1 - var(--lift,0)*.91);
+  background-position:0 var(--runway-flow,0px);
 }
 .flight97-ground::before {
   content:""; position:absolute; top:0; left:6%; width:29%; height:7%; border-radius:40% 23% 0 0;
@@ -302,7 +311,8 @@
 .flight97-trail-left { left:29%; rotate:14deg }
 .flight97-trail-right { right:29%; rotate:-14deg }
 .flight97-takeoff:is([data-f97-phase="air"],[data-f97-phase="done"]) .flight97-trail {
-  display:block!important; animation:flight97-trail .88s ease-in-out infinite alternate;
+  display:block!important; height:calc(90% + 50%*var(--flight-speed,1));
+  animation:flight97-trail .88s ease-in-out infinite alternate;
 }
 @keyframes flight97-trail { to { opacity:.28; scale:.78 1.31 } }
 

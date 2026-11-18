@@ -1,5 +1,5 @@
 import {shuffle92} from './learning-games92.js?v=92';
-import {picture96} from './hangar-art96.js?v=97';
+import {picture96} from './hangar-art96.js?v=104';
 
 const letters = {K:'kot', M:'motyl', S:'sok', A:'arbuz', O:'oko', B:'banan', R:'rower', P:'pies', T:'tor'};
 const animals = {

@@ -45,7 +45,10 @@ export function mountPreschoolAudio93(root,speak=()=>{}){
   if(panel&&!panel.hasAttribute('data-preschool-screen-skip')&&!root.querySelector('.sq93')&&!panel.querySelector(':scope > [data-voice93="screen"]')){
    const speaker=voiceButton(doc,'screen');speaker.classList.add('pres93-screen');
    if(dialog&&panel.firstElementChild?.matches('[data-action="hq:close"]'))panel.firstElementChild.after(speaker);
-   else panel.prepend(speaker);
+   else {
+    const header=panel.querySelector(':scope > .academy102-header');
+    if(header)header.after(speaker);else panel.prepend(speaker);
+   }
   }
   for(const button of root.querySelectorAll(standalone)){
    if(button.matches(skip)||button.closest('.pres93-read-card')||companionButtons.has(button))continue;
