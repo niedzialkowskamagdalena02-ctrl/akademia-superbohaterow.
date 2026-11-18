@@ -122,8 +122,57 @@ function board(){
  const schoolView=app();
  schoolView.api.set(account,{role:'child',who:'pawel'});
  await schoolView.api.handle('child:home');
- assert.match(schoolView.root.innerHTML,/aria-label="Trening">\s*<img[^>]*interface106\/training\.webp/);
- assert.doesNotMatch(schoolView.root.innerHTML,/interface106\/patryk-training\.webp/);
+ assert.match(schoolView.root.innerHTML,/aria-label="Trening">\s*<img[^>]*interface106\/patryk-training\.webp/);
+ assert.match(schoolView.root.innerHTML,/data-speak="Książki"/);
+ assert.equal((schoolView.root.innerHTML.match(/academy107-wide-face/g)||[]).length,2);
+ await schoolView.api.handle('child:missions-board');
+ for(const icon of ['shield','icon-missions','alert','school','home']){
+  assert.ok(schoolView.root.innerHTML.includes('interface107/'+icon+'.webp'),icon);
+ }
+
+ const pinView=app(),pinAccount=data();
+ pinAccount.parentPin='1111';
+ pinView.api.set(pinAccount,{role:''});
+ pinView.api.render();
+ assert.match(pinView.root.innerHTML,/class="academy107-entry"/);
+ assert.match(pinView.root.innerHTML,/academy107-pair/);
+ await pinView.api.handle('enter:admin');
+ const pinMarkup=pinView.root.innerHTML;
+ assert.equal((pinMarkup.match(/parent-pin:cancel/g)||[]).length,1);
+ assert.equal((pinMarkup.match(/parent-pin:digit:/g)||[]).length,10);
+ assert.match(pinMarkup,/parent-pin:confirm">OK/);
+ await pinView.api.handle('parent-pin:cancel');
+ assert.match(pinView.root.innerHTML,/class="academy107-entry"/);
+ await pinView.api.handle('enter:admin');
+ const pinField=pinView.ids['academy107-pin-value']={value:'2222',maxLength:4};
+ const pinError=pinView.ids['academy107-pin-error']={textContent:''};
+ await pinView.api.handle('parent-pin:confirm');
+ assert.match(pinError.textContent,/Nieprawidłowy PIN/);
+ assert.equal(pinField.value,'');
+ const pinKey={dataset:{action:'parent-pin:digit:1'},isConnected:true,
+  closest(selector){return ['button,summary','[data-action]'].includes(selector)?this:null;},
+  matches(selector){return selector.includes('.academy107-pin-key');}};
+ for(let i=0;i<4;i++)pinView.listeners.click.forEach(listener=>listener({target:pinKey,detail:1,isTrusted:true}));
+ assert.equal(pinField.value,'1111');
+ assert.equal(pinKey.dataset.academyPressed,'true');
+ await pinView.api.handle('parent-pin:erase');
+ assert.equal(pinField.value,'111');
+ await pinView.api.handle('parent-pin:digit:1');
+ await pinView.api.handle('parent-pin:confirm');
+ assert.match(pinView.root.innerHTML,/data-action="admin:settings"/);
+ assert.equal(pinAccount.parentPin,'1111');
+ const setupView=app(),setupAccount=data();
+ setupAccount.parentPin='';
+ setupView.api.set(setupAccount,{role:''});
+ await setupView.api.handle('enter:admin');
+ assert.match(setupView.root.innerHTML,/Ustaw kod PIN/);
+ setupView.ids['academy107-pin-value']={value:'002468',maxLength:8};
+ setupView.ids['academy107-pin-error']={textContent:''};
+ let savedPinState;
+ setupView.ctx.put=async(key,value)=>{assert.equal(key,'state');savedPinState=value;};
+ await setupView.api.handle('parent-pin:confirm');
+ assert.equal(savedPinState.parentPin,'002468');
+ assert.match(setupView.root.innerHTML,/data-action="admin:settings"/);
  await view.api.handle('child:learn');
  await view.api.handle('learning-games:open');
  await view.api.handle('learning-games:more');

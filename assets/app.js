@@ -1,5 +1,5 @@
 import {gamePreview99, hangarPaint99} from './game-art99.js?v=99';
-import {academy102Shell,academy102Choices,academy102Player,academy102DashboardNav,academy102DashboardVoice,academy102FamilyHeading,academy102Knowledge,academy102MissionsHeader,academy102MissionZone} from './interface102.js?v=106';
+import {academy102Shell,academy102Choices,academy102Player,academy102DashboardNav,academy102DashboardVoice,academy102FamilyHeading,academy102Knowledge,academy102MissionsHeader,academy102MissionZone,academy107Entry,academy107PinScreen} from './interface102.js?v=107';
 // V48_AI_RESPONSE_DIAGNOSTICS
 // V44_BULK_CHAPTERS
 // V42_CHAPTERS
@@ -69,6 +69,7 @@ async function askMentorAI(question,mentor,history=[],signal){
 }
 
 let testMode=false,testSnapshot=null;let previewAll=false;let data,role='',who='',tab='home',adminTab='home',bookId='',pageId='',missionId='',practice=null,practiceAnswered=false,tracePoints=[],traceDown=false,traceMask=null;
+let parentPinOpen=false,parentPinSaving=false;
 const app=document.querySelector('#app'), $=id=>document.getElementById(id), e=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const date=()=>new Date().toISOString().slice(0,10), profile=()=>data.profiles[who], books=()=>data.books.filter(b=>v76Audience(b).includes(who)), pages=id=>data.books.length?null:null;
 const speakBtn=(s,lang='pl-PL')=>`<button class="listen" data-speak="${e(s)}" data-lang="${lang}" title="Odsłuchaj" aria-label="Odsłuchaj">🔊</button>`;
@@ -78,7 +79,7 @@ const select=(id,label,options,value)=>`<label for="${id}">${label}</label><sele
 const grades=[['P','Przedszkole'],...Array.from({length:12},(_,i)=>[String(i+1),`Klasa ${i+1}`])];
 const people=[['pawel','Paweł'],['patryk','Patryk']];
 const note=t=>{const n=$('hq85-notice')||$('notice');if(!n){console.warn('Powiadomienie:',t);return}n.textContent=t;n.classList.add('visible');setTimeout(()=>{if(n.isConnected)n.classList.remove('visible')},4500)};
-const ACADEMY_RELEASE=106;
+const ACADEMY_RELEASE=107;
 async function checkAcademyUpdate(button){
  if(!button||button.disabled)return;
  const label=button.textContent,controller=new AbortController();
@@ -757,18 +758,42 @@ function childMenu(p,scene){
  return academy102Player({name:e(p.name),child:who,coins:e(p.coins),grade:e(gradeName(p.grade)),
   level:1+Math.floor(p.xp/100),progress:p.xp%100})+academy102DashboardNav(p.grade==='P',interfaceVoice,current);
 }
-function layout(title,content,scene='',voice=''){stopMission95();stopMission95=()=>{};mountLearningGames92(null);mountMissions93(null);mountHangar95(null);mountPreschoolAudio93(null);if(typeof mountNounFlight88==='function')mountNounFlight88(null);if(typeof mountBaseScene84==='function')mountBaseScene84(null);if(typeof mountBaseWalk==='function')mountBaseWalk(null);cancelAIRequests();stopVoice();closeMicBubble();
+function resetScreen(){stopMission95();stopMission95=()=>{};mountLearningGames92(null);mountMissions93(null);mountHangar95(null);mountPreschoolAudio93(null);if(typeof mountNounFlight88==='function')mountNounFlight88(null);if(typeof mountBaseScene84==='function')mountBaseScene84(null);if(typeof mountBaseWalk==='function')mountBaseWalk(null);cancelAIRequests();stopVoice();closeMicBubble();}
+function layout(title,content,scene='',voice=''){resetScreen();
  const illustrated=role==='child'&&scene!=='walk';
  app.innerHTML=illustrated?academy102Shell(scene||'section',{
   title:e('Akademia '+profile().name),content,voice,menu:childMenu(profile(),scene),release:ACADEMY_RELEASE,test:testMode,status:sync78StatusMarkup(true),
   sound:trainingSoundControl(),exit:button('← Zakończ test','exit','gold'),base:tab==='base'||hqViews84.get(who)==='walk'
- }):scene==='walk'?'<main class="hq86-main">'+content+'</main>':`<main class="wrap${role==='child'&&(tab==='base'||hqViews84.get(who)==='walk')?' hq88-base-page':''}"><header class="head"><div><div class="brand">⚡ AKADEMIA SUPERBOHATERÓW <span style="display:inline-block;font-size:0.72em;border:1px solid currentColor;border-radius:8px;padding:2px 7px;vertical-align:middle">V${ACADEMY_RELEASE}</span></div><div class="sub">${e(title)}</div>${sync78StatusMarkup()}</div>${role==='child'&&scene!=='choice'?trainingSoundControl():''}${role?button(testMode?'← Zakończ test':'← Profile','exit','alt'):''}</header>${testMode?'<div class="test-banner">🧪 TRYB MAMY — BEZPŁATNY TEST • POSTĘPY NIE SĄ ZAPISYWANE</div>':''}${content}</main>${role==='child'&&scene!=='choice'?'<button class="mic" data-action="mic" aria-label="Sterowanie głosowe">🎙️</button>':''}`;document.querySelectorAll('[data-speak]').forEach(b=>b.addEventListener('click',()=>{
+ }):scene==='walk'?'<main class="hq86-main">'+content+'</main>':`<main class="wrap${role==='child'&&(tab==='base'||hqViews84.get(who)==='walk')?' hq88-base-page':''}"><header class="head"><div><div class="brand">⚡ AKADEMIA SUPERBOHATERÓW <span style="display:inline-block;font-size:0.72em;border:1px solid currentColor;border-radius:8px;padding:2px 7px;vertical-align:middle">V${ACADEMY_RELEASE}</span></div><div class="sub">${e(title)}</div>${sync78StatusMarkup()}</div>${role==='child'&&scene!=='choice'?trainingSoundControl():''}${role?button(testMode?'← Zakończ test':'← Profile','exit','alt'):''}</header>${testMode?'<div class="test-banner">🧪 TRYB MAMY — BEZPŁATNY TEST • POSTĘPY NIE SĄ ZAPISYWANE</div>':''}${content}</main>${role==='child'&&scene!=='choice'?'<button class="mic" data-action="mic" aria-label="Sterowanie głosowe">🎙️</button>':''}`;bindInterfaceSpeech();hydrateImages();v76AfterRender();if(role==='child'&&profile().grade==='P')mountPreschoolAudio93(app,text=>speak(text,'pl-PL',profile().mentor,data.settings.rate||1));if(role==='child'&&scene!=='knowledge'&&(tab==='learn'||tab==='subjectmissions'))installMicDrag()}
+function bindInterfaceSpeech(){
+ document.querySelectorAll('[data-speak]').forEach(b=>b.addEventListener('click',()=>{
  const read=()=>speak(b.dataset.speak,b.dataset.lang,role==='child'?profile().mentor:'tech',data.settings.rate||1);
  if(b.matches(academyPressControls))pressAcademyControl(b,read);else read();
- }));hydrateImages();v76AfterRender();if(role==='child'&&profile().grade==='P')mountPreschoolAudio93(app,text=>speak(text,'pl-PL',profile().mentor,data.settings.rate||1));if(role==='child'&&scene!=='knowledge'&&(tab==='learn'||tab==='subjectmissions'))installMicDrag()}
+ }));
+}
 async function hydrateImages(){for(const el of document.querySelectorAll('[data-image]')){const src=await img(el.dataset.image);if(el.isConnected&&src){el.src=src;el.onload=()=>URL.revokeObjectURL(src)}}}
 function nav(){return `<div class="tabs">${[['home','Przegląd'],['books','📚 Książki'],['missions','📋 Misje'],['settings','⚙️ Ustawienia'],['test','🧪 Testuj wszystko'],['sync','📱 Telefony'],['backup','💾 Kopia']].map(([k,n])=>button(n,'admin:'+k,adminTab===k?'gold':'alt')).join('')}</div>`}
-function render(){if(tab!=='arcade')stopArcade();if(!role){layout('Wybierz swoją bazę',`<section class="card"><h1>Witaj w Akademii! 🛡️</h1><p>Każdy bohater ma własne misje i nagrody.</p></section><div class="grid">${people.filter(([id])=>!syncAdapter.device?.()||syncAdapter.device().role!=='child'||syncAdapter.device().child===id).map(([id,name])=>`<button class="tile" data-action="enter:${id}"><img class="profile-hero" src="assets/art/${data.profiles[id].hero||(id==='pawel'?'iron':'spider')}.svg" alt=""><h2>${name}</h2><small>${gradeName(data.profiles[id].grade)} · ${data.profiles[id].coins} złotych</small></button>`).join('')}</div><section class="card">${syncAdapter.device?.()?.role==='child'?'':button('🔐 Centrum dowodzenia mamy','enter:admin','gold')}<p class="muted">${syncAdapter.status()}</p></section>${!syncAdapter.device?.()?sync78Markup():''}${globalThis.AKADEMIA_TEST80?'':`<footer class="academy-update">${button('🔄 Aktualizuj Akademię','academy:update','line')}</footer>`}`);return}if(role==='admin')adminRender();else childRender()}
+function render(){
+ if(tab!=='arcade')stopArcade();
+ if(role==='admin')return adminRender();
+ if(role==='child')return childRender();
+ resetScreen();
+ if(parentPinOpen){
+  app.innerHTML=academy107PinScreen(data.parentPin?.length||0);
+  $('academy107-pin-value')?.focus?.({preventScroll:true});
+  return;
+ }
+ const device=syncAdapter.device?.();
+ const profiles=people.filter(([id])=>device?.role!=='child'||device.child===id).map(([id,name])=>{
+  const p=data.profiles[id], defaultHero=id==='pawel'?'iron':'spider';
+  return {id,name:e(name),grade:e(gradeName(p.grade)),coins:e(p.coins),progress:p.xp%100||0,
+   hero:p.hero&&p.hero!==defaultHero?hero(p.hero)[0]:'',audio:id==='patryk'?interfaceVoice(name,'Odsłuchaj'):''};
+ });
+ app.innerHTML=academy107Entry({release:ACADEMY_RELEASE,profiles,linked:!!device,
+  status:device?e(syncAdapter.status()):'Połączenie telefonów nie jest jeszcze włączone.',
+  parent:device?.role!=='child',pair:device?'':sync78Markup(true),update:!globalThis.AKADEMIA_TEST80});
+ bindInterfaceSpeech();
+}
 const DEFAULT_SUBJECTS=['Polski','Matematyka','Angielski','Przyroda','Plastyka','Muzyka','Informatyka','Wychowanie fizyczne','Etyka','Religia','Przedszkole'];
 function subjectChecks(id){const current=data.profiles[id].subjects||[],items=[...new Set([...DEFAULT_SUBJECTS,...current])];return `<label>Przedmioty — zaznacz właściwe</label><div class="subject-list">${items.map(x=>`<label class="subject-chip"><input type="checkbox" data-subject-for="${id}" value="${e(x)}" ${current.includes(x)?'checked':''}> ${e(x)}</label>`).join('')}</div>`}
 const VOCAB_ASSETS={apple:'apple',cat:'cat',dog:'dog',house:'house',book:'book',sun:'sun',tree:'tree',car:'car',bird:'bird',fish:'fish',ball:'ball',milk:'milk',school:'school',water:'water',flower:'flower'};
@@ -787,7 +812,7 @@ if(adminTab==='question-review'){const b=data.books.find(x=>x.id===bookId);if(v7
 if(adminTab==='page'){const p=data.bookPages.find(p=>p.id===pageId);if(!p){adminTab='book';return render()}html+=v74PageMarkup(p)}
 if(adminTab==='sync')html+=sync78Markup();
 if(adminTab==='missions')html+=`<section class="card"><h2>Nowa misja</h2>${select('mchild','Dla kogo',people,'pawel')}${select('mtype','Rodzaj',[['homework','🎒 Misja szkolna'],['chore','🏠 Misja domowa'],['test','🚨 Sprawdzian / ważny termin']],'homework')}${input('mtitle','Opis / zadania')}${input('msubject','Przedmiot / kategoria','Polski')}${select('mbook','Podręcznik (opcjonalnie)',[['','Bez książki'],...data.books.map(b=>[b.id,b.title])],'')}${input('mpage','Numer strony','', 'number')}${input('mdue','Termin','', 'date')}${select('mrepeat','Powtarzanie',[['none','Jednorazowo'],['daily','Codziennie'],['weekly','Co tydzień']],'none')}${input('mpoints','Pieniążki po zatwierdzeniu','20','number')}<label><input id="mphoto" type="checkbox" checked> Wymagaj zdjęcia wykonanej pracy</label><p class='muted'>Przy typie „Test / sprawdzian” wybierz przedmiot, podręcznik i stronę lub pozostaw książkę pustą, aby utworzyć test losowy z wybranego przedmiotu.</p>${button('➕ Dodaj misję','mission:add','gold')}</section><section class="card"><h2>Wszystkie misje</h2>${data.missions.slice().reverse().map(m=>missionCard(m,true)).join('')||'Brak misji.'}</section>`;
-if(adminTab==='settings')html+=`<section class="card"><h2>Profile i poziomy</h2><h3>🧪 Podgląd całej Bazy Avengersów</h3><p>Tryb testowy pokazuje wszystkie piętra i wyposażenie, bez kupowania i bez zmiany postępów dzieci.</p>${button('🏙️ Zobacz całą bazę — podgląd','admin:preview','gold')}${people.map(([id,name])=>`<div class="item"><h3>${name}</h3></div>${select('grade_'+id,'Etap edukacji',grades,data.profiles[id].grade)}${subjectChecks(id)}${input('newsubject_'+id,'Dodaj nowy przedmiot (opcjonalnie)')}${input('pin_'+id,'PIN profilu (opcjonalny)',data.profiles[id].pin,'password')}<h4>Wybierz bohatera</h4>${heroPicker(id)}${button('Zapisz '+name,'profile:save:'+id)}</section><section class="card">`).join('')}<h2>PIN mamy</h2>${input('parentpin','Nowy PIN (min. 4 cyfry)','','password')}${button('Zmień PIN','pin:change')}<h3>Nagrody za trening</h3>${input('xpPractice','XP za poprawne ćwiczenie',data.settings.xpPractice,'number')}${input('dailyLimit','Dzienny limit nagród',data.settings.dailyPracticeLimit,'number')}${input('rate','Tempo czytania',data.settings.rate||1,'number')}${button('Zapisz ustawienia','settings:save')}<h3>Muzyczne nagrody</h3>${input('songtitle','Nazwa piosenki')}${input('songurl','Link YouTube')}<label for="songlyrics">Tekst piosenki (wklej lub wpisz)</label><textarea id="songlyrics" rows="8" placeholder="Każdy wers w osobnej linii"></textarea>${select('songchild','Misja dla',people,'pawel')}${button('🎵 Zapisz piosenkę i utwórz misję','song:add','gold')}<p>${data.settings.songs.map((s,i)=>`${e(s.title)} ${button('Usuń','song:delete:'+i,'line')}`).join('<br>')}</p><p class="muted">PIN-y chronią tylko przed przypadkowym wejściem. Pełne uprawnienia wymagają kont serwerowych.</p></section>`;
+if(adminTab==='settings')html+=`<section class="card"><h2>Profile i poziomy</h2><h3>🧪 Podgląd całej Bazy Avengersów</h3><p>Tryb testowy pokazuje wszystkie piętra i wyposażenie, bez kupowania i bez zmiany postępów dzieci.</p>${button('🏙️ Zobacz całą bazę — podgląd','admin:preview','gold')}${people.map(([id,name])=>`<div class="item"><h3>${name}</h3></div>${select('grade_'+id,'Etap edukacji',grades,data.profiles[id].grade)}${subjectChecks(id)}${input('newsubject_'+id,'Dodaj nowy przedmiot (opcjonalnie)')}${input('pin_'+id,'PIN profilu (opcjonalny)',data.profiles[id].pin,'password')}<h4>Wybierz bohatera</h4>${heroPicker(id)}${button('Zapisz '+name,'profile:save:'+id)}</section><section class="card">`).join('')}<h2>PIN mamy</h2>${input('parentpin','Nowy PIN (4–8 cyfr)','','password')}${button('Zmień PIN','pin:change')}<h3>Nagrody za trening</h3>${input('xpPractice','XP za poprawne ćwiczenie',data.settings.xpPractice,'number')}${input('dailyLimit','Dzienny limit nagród',data.settings.dailyPracticeLimit,'number')}${input('rate','Tempo czytania',data.settings.rate||1,'number')}${button('Zapisz ustawienia','settings:save')}<h3>Muzyczne nagrody</h3>${input('songtitle','Nazwa piosenki')}${input('songurl','Link YouTube')}<label for="songlyrics">Tekst piosenki (wklej lub wpisz)</label><textarea id="songlyrics" rows="8" placeholder="Każdy wers w osobnej linii"></textarea>${select('songchild','Misja dla',people,'pawel')}${button('🎵 Zapisz piosenkę i utwórz misję','song:add','gold')}<p>${data.settings.songs.map((s,i)=>`${e(s.title)} ${button('Usuń','song:delete:'+i,'line')}`).join('<br>')}</p><p class="muted">PIN-y chronią tylko przed przypadkowym wejściem. Pełne uprawnienia wymagają kont serwerowych.</p></section>`;
 if(adminTab==='test')html+=`<section class="card"><h2>🧪 Centrum testów mamy</h2><p>Uruchom dowolny profil w trybie testowym. Wszystkie gry, pomieszczenia, bohaterowie i przedmioty są odblokowane. Nic nie kosztuje złotych i żadne zmiany nie zostaną zapisane.</p><div class="grid">${people.map(([id,name])=>button('🎮 Testuj jako '+name,'test:enter:'+id,'gold')).join('')}</div><p class="muted">Po zakończeniu wybierz „Zakończ test”. Dane dzieci pozostaną takie jak przed testem.</p></section>`;
 if(adminTab==='preview')html+=`<section class='card'>${button('← Wróć do ustawień','admin:settings')}<h2>🧪 Pełna Baza Avengersów — tryb testowy</h2><p class='muted'>Ten podgląd nie wydaje złotych ani nie odblokowuje elementów na stałe.</p>${baseMarkup({...data.profiles.pawel,coins:9999,base:{version:1,owned:BASE_ITEMS.map(x=>x.id)}},button,true)}</section>`;if(adminTab==='backup')html+=`<section class="card"><h2>Pełna kopia danych</h2><p>Eksport obejmuje zdjęcia stron, zdjęcia prac, profile, XP i misje. Przy dużej bibliotece plik będzie duży.</p>${button('⬇️ Pobierz kopię JSON','backup:export','gold')}<label>Przywróć kopię JSON</label><input type="file" id="backupfile" accept=".json,application/json">${button('Przywróć kopię','backup:import')}<p class="muted">Nie odinstalowuj aplikacji ani nie czyść danych witryny bez kopii. Stan połączenia sprawdzisz w zakładce Telefony.</p></section>`;
 layout('Centrum dowodzenia mamy',html)}
@@ -1926,6 +1951,11 @@ async function handle(action,target){
  if(action.startsWith('hq:')){try{return await hqAction84(action,target);}catch(error){return note('Nie udało się zapisać zmiany: '+error.message);}}
  if(action.startsWith('sync78:'))return sync78Action(action,target);
  const linked=syncAdapter.device?.();if(linked?.role==='child'&&(action.startsWith('admin:')||action.startsWith('test:enter')||action.startsWith('enter:')&&action!=='enter:'+linked.child))return note('Ten telefon jest połączony z profilem dziecka.');
+ if(action==='enter:admin'&&!role){parentPinOpen=true;window.scrollTo(0,0);return render();}
+ if(action.startsWith('parent-pin:')){
+  if(parentPinOpen&&!role&&linked?.role!=='child')return parentPinAction(action);
+  return;
+ }
  if(action.startsWith('test:start:'))return sync78AssignedTest(action.slice(11));
  if(action.startsWith('mission:')){try{return await sync78MissionAction(action);}catch(err){return note(err.message);}}
 if(action.startsWith('book:chapters:'))return v77ChapterAction(action,target);
@@ -2067,7 +2097,7 @@ if(action==='av36:next'&&avengersRun&&avengersRun.done){
  }
  return render();
 }
-const [a,b,c]=action.split(':');try{if(action==='exit'){hqSessions84.delete(who);hqReturn84=false;hqPanel84='';if(testMode){data=testSnapshot;testSnapshot=null;testMode=false;role='admin';who='';tab='home';adminTab='test';return render()}role='';who='';tab='home';return render()}if(a==='enter'){if(b==='admin'){if(!data.parentPin){const pin=prompt('Ustaw PIN mamy (minimum 4 cyfry)');if(!/^\d{4,8}$/.test(pin||''))return note('Wymagany PIN od 4 do 8 cyfr');data.parentPin=pin;await save()}else if(prompt('PIN mamy')!==data.parentPin)return note('Nieprawidłowy PIN');role='admin';adminTab='home'}else{const p=data.profiles[b];if(p.pin&&prompt('PIN profilu '+p.name)!==p.pin)return note('Nieprawidłowy PIN');role='child';who=b;tab='view-choice';hqPanel84='';hqReturn84=false;hqViews84.set(who,'classic')}return render()}if(a==='test'&&b==='enter'){if(role!=='admin'||!['pawel','patryk'].includes(c))return;testSnapshot=data;data=structuredClone(data);testMode=true;for(const id of ['pawel','patryk']){const p=data.profiles[id];p.coins=99999;p.arcadeUnlocked=ARCADE_GAMES.map(g=>g.id);const base=migrateBase(p);base.owned=BASE_ITEMS.map(i=>i.id)}role='child';who=c;tab='base';return render()}if(a==='admin'){adminTab=b;return render()}if(a==='child'){if(b==='base')return hqShow84();hqSessions84.delete(who);hqReturn84=false;tab=b;if(b==='learn'){v37Classic=false;avengersRun=null;trainingStep='subject';trainingSelectedPages=new Set()}return render()}if(action==='book:add')return runAdminAction(target,'Dodaje ksiazke…',async()=>{
+const [a,b,c]=action.split(':');try{if(action==='exit'){hqSessions84.delete(who);hqReturn84=false;hqPanel84='';if(testMode){data=testSnapshot;testSnapshot=null;testMode=false;role='admin';who='';tab='home';adminTab='test';return render()}role='';who='';tab='home';return render()}if(a==='enter'){const p=data.profiles[b];if(!p)return;if(p.pin&&prompt('PIN profilu '+p.name)!==p.pin)return note('Nieprawidłowy PIN');role='child';who=b;tab='view-choice';hqPanel84='';hqReturn84=false;hqViews84.set(who,'classic');return render()}if(a==='test'&&b==='enter'){if(role!=='admin'||!['pawel','patryk'].includes(c))return;testSnapshot=data;data=structuredClone(data);testMode=true;for(const id of ['pawel','patryk']){const p=data.profiles[id];p.coins=99999;p.arcadeUnlocked=ARCADE_GAMES.map(g=>g.id);const base=migrateBase(p);base.owned=BASE_ITEMS.map(i=>i.id)}role='child';who=c;tab='base';return render()}if(a==='admin'){adminTab=b;return render()}if(a==='child'){if(b==='base')return hqShow84();hqSessions84.delete(who);hqReturn84=false;tab=b;if(b==='learn'){v37Classic=false;avengersRun=null;trainingStep='subject';trainingSelectedPages=new Set()}return render()}if(action==='book:add')return runAdminAction(target,'Dodaje ksiazke…',async()=>{
  if(!$('bsubject')?.value)throw Error('Najpierw zaznacz przedmioty w profilu dziecka.');
  const chosenKind=$('btype')?.value||'Podręcznik';const chosenSubject=$('bsubject')?.value||'Materiał';const chosenPart=$('bpart')?.value||'1';const title=chosenKind==='Inne'?$('btitle')?.value.trim():chosenSubject+' — '+chosenKind+' — część '+chosenPart;if(!title)return note('Wpisz nazwę materiału.');
  const child=$('bchild').value,subject=$('bsubject').value,part=$('bpart').value;
@@ -2191,7 +2221,7 @@ if(action==='page:prev'||action==='page:next')return runAdminAction(target,'Zapi
  if(!next){note(delta>0?'To ostatnia strona.':'To pierwsza strona.');return}
  pageId=next.id;render();note('✅ Zapisano zmiany. Strona '+next.number+'.');
 });if(action==='page:delete'){if(!confirm('Usunąć tę stronę?'))return;const pages=sortedBookPages(bookId),pos=pages.findIndex(x=>x.id===pageId),p=pages[pos];if(!p)return;await del('image:'+p.imageId);data.bookPages=data.bookPages.filter(x=>x.id!==pageId);const next=pages[pos+1]||pages[pos-1];await save();if(next){pageId=next.id;adminTab='page'}else adminTab='book';return render()}if(action==='page:replace'||action==='page:replace-camera'){const f=$(action==='page:replace-camera'?'replacecamera':'replacefile')?.files?.[0];if(!f)return note('Wybierz zdjęcie');const p=data.bookPages.find(p=>p.id===pageId);await put('image:'+p.imageId,await compress(f));p.reviewed=false;await save();return render()}if(action==='page:ai'){const p=data.bookPages.find(p=>p.id===pageId);if(!p)return note('Nie znaleziono strony');try{const b=data.books.find(x=>x.id===p.bookId);if(!await ensureNumberLocation(b))return;await saveEditedPage();await recognizePageAI(p,$('ocrlang')?.value||languageOfBook(b),true);render();note('✅ Odczyt AI gotowy. Sprawdź tekst i numer strony.')}catch(err){note('❌ Nie udało się odczytać zdjęcia. Wcześniejszy tekst zachowano. '+err.message)}return}if(action==='page:ocr'){const p=data.bookPages.find(p=>p.id===pageId);if(!p)return note('Nie znaleziono strony');const lang=$('ocrlang')?.value||'pol';try{await recognizePage(p,lang);render();note('Tekst odczytany. Sprawdź go i zapisz poprawki.')}catch(err){note(err.message)}return}
-if(action.startsWith('profile:save:')){const p=data.profiles[c],pin=$('pin_'+c).value;if(pin&&!/^\d{4,8}$/.test(pin))return note('PIN musi mieć 4–8 cyfr');p.grade=$('grade_'+c).value;p.subjects=[...document.querySelectorAll('[data-subject-for="'+c+'"]:checked')].map(x=>x.value);const extra=$('newsubject_'+c).value.trim();if(extra&&!p.subjects.some(x=>x.toLowerCase()===extra.toLowerCase()))p.subjects.push(extra);p.pin=pin;await save();return note('Zapisano profil')}if(a==='hero'&&b==='set'){const id=c,selected=action.split(':')[3];if(!HEROES.some(h=>h[0]===selected))return;data.profiles[id].hero=selected;await save();return render()}if(action==='pin:change'){const pin=$('parentpin').value;if(!/^\d{4,8}$/.test(pin))return note('PIN musi mieć 4–8 cyfr');data.parentPin=pin;await save();return note('Zmieniono PIN')}if(action==='settings:save'){data.settings.xpPractice=Math.max(0,Math.min(30,Number($('xpPractice').value)));data.settings.dailyPracticeLimit=Math.max(0,Math.min(20,Number($('dailyLimit').value)));data.settings.rate=Math.max(.5,Math.min(1.5,Number($('rate').value)));await save();return note('Zapisano ustawienia')}if(action.startsWith('song:open:')){missionId=action.slice(10);tab='song';return render()}if(action.startsWith('song:line:')){const lines=[...document.querySelectorAll('.song-line')];lines.forEach((x,i)=>x.classList.toggle('active',i===Number(c)));return}if(action==='song:add'){const title=$('songtitle').value,url=$('songurl').value;if(!/^https:\/\/(www\.)?(youtube\.com|youtu\.be)\//.test(url))return note('Podaj prawidłowy link YouTube');const lyrics=$('songlyrics')?.value||'';const id=youtubeId(url);if(!id)return note('Podaj prawidłowy adres filmu YouTube');data.settings.songs.push({id:uid(),title,url,lyrics});const song=data.settings.songs.at(-1);data.missions.push({id:uid(),child:$('songchild').value,type:'song',songId:song.id,title:'🎵 Naucz się piosenki: '+title,subject:'Muzyka',status:'todo',points:20,requirePhoto:false,repeat:'none',created:date()});await save();return render()}if(action.startsWith('song:delete:')){data.settings.songs.splice(Number(c),1);await save();return render()}if(action==='backup:export')return exportBackup();if(action==='backup:import')return importBackup();if(action.startsWith('reader:')&&action!=='reader:ocr'){bookId=b;pageId='';tab='reader';return render()}if(action==='reader:ai'){const pg=data.bookPages.find(p=>p.id===($('readerpage')?.value||pageId));if(!pg)return note('Wybierz stronę');try{await recognizePageAI(pg,$('ocrlang')?.value||'pol');pageId=pg.id;render();note('Odczyt AI gotowy. Sprawdź tekst.')}catch(err){note(err.message)}return}if(action==='reader:ocr'){const pg=data.bookPages.find(p=>p.id===($('readerpage')?.value||pageId));if(!pg)return note('Wybierz stronę');try{await recognizePage(pg,$('ocrlang')?.value||'pol');pageId=pg.id;render();note('Tekst rozpoznany — możesz go teraz odsłuchać.')}catch(err){note(err.message)}return}
+if(action.startsWith('profile:save:')){const p=data.profiles[c],pin=$('pin_'+c).value;if(pin&&!/^\d{4,8}$/.test(pin))return note('PIN musi mieć 4–8 cyfr');p.grade=$('grade_'+c).value;p.subjects=[...document.querySelectorAll('[data-subject-for="'+c+'"]:checked')].map(x=>x.value);const extra=$('newsubject_'+c).value.trim();if(extra&&!p.subjects.some(x=>x.toLowerCase()===extra.toLowerCase()))p.subjects.push(extra);p.pin=pin;await save();return note('Zapisano profil')}if(a==='hero'&&b==='set'){const id=c,selected=action.split(':')[3];if(!HEROES.some(h=>h[0]===selected))return;data.profiles[id].hero=selected;await save();return render()}if(action==='pin:change'){if(role!=='admin')return;const field=$('parentpin'),pin=field.value;if(!/^\d{4,8}$/.test(pin))return note('PIN musi mieć 4–8 cyfr');await storeParentPin(pin);field.value='';return note('Zmieniono PIN')}if(action==='settings:save'){data.settings.xpPractice=Math.max(0,Math.min(30,Number($('xpPractice').value)));data.settings.dailyPracticeLimit=Math.max(0,Math.min(20,Number($('dailyLimit').value)));data.settings.rate=Math.max(.5,Math.min(1.5,Number($('rate').value)));await save();return note('Zapisano ustawienia')}if(action.startsWith('song:open:')){missionId=action.slice(10);tab='song';return render()}if(action.startsWith('song:line:')){const lines=[...document.querySelectorAll('.song-line')];lines.forEach((x,i)=>x.classList.toggle('active',i===Number(c)));return}if(action==='song:add'){const title=$('songtitle').value,url=$('songurl').value;if(!/^https:\/\/(www\.)?(youtube\.com|youtu\.be)\//.test(url))return note('Podaj prawidłowy link YouTube');const lyrics=$('songlyrics')?.value||'';const id=youtubeId(url);if(!id)return note('Podaj prawidłowy adres filmu YouTube');data.settings.songs.push({id:uid(),title,url,lyrics});const song=data.settings.songs.at(-1);data.missions.push({id:uid(),child:$('songchild').value,type:'song',songId:song.id,title:'🎵 Naucz się piosenki: '+title,subject:'Muzyka',status:'todo',points:20,requirePhoto:false,repeat:'none',created:date()});await save();return render()}if(action.startsWith('song:delete:')){data.settings.songs.splice(Number(c),1);await save();return render()}if(action==='backup:export')return exportBackup();if(action==='backup:import')return importBackup();if(action.startsWith('reader:')&&action!=='reader:ocr'){bookId=b;pageId='';tab='reader';return render()}if(action==='reader:ai'){const pg=data.bookPages.find(p=>p.id===($('readerpage')?.value||pageId));if(!pg)return note('Wybierz stronę');try{await recognizePageAI(pg,$('ocrlang')?.value||'pol');pageId=pg.id;render();note('Odczyt AI gotowy. Sprawdź tekst.')}catch(err){note(err.message)}return}if(action==='reader:ocr'){const pg=data.bookPages.find(p=>p.id===($('readerpage')?.value||pageId));if(!pg)return note('Wybierz stronę');try{await recognizePage(pg,$('ocrlang')?.value||'pol');pageId=pg.id;render();note('Tekst rozpoznany — możesz go teraz odsłuchać.')}catch(err){note(err.message)}return}
 if(action==='homework:create'){const p=data.bookPages.find(p=>p.id===$('readerpage').value),b=data.books.find(b=>b.id===bookId),tasks=$('tasks').value.trim();if(!p||!tasks)return note('Wybierz stronę i wpisz zadania');data.missions.push({id:uid(),child:who,type:'homework',title:'Zadania '+tasks,subject:b.subject,bookId:b.id,page:p.number,status:'todo',points:20,requirePhoto:true,repeat:'none',created:date()});await save();tab='home';return render()}if(action==='academy:subjects'){academySubject='';tab='academy';return render()}if(action.startsWith('academy:subject:')){academySubject=c;tab='academy';return render()}if(action.startsWith('lesson:open:')){lessonIndex=Number(c);hqLessonAttempts84.delete(who+':'+lessonIndex);tab='lesson';return render()}
 if(action.startsWith('discovery:start:'))return discoveryStart(c);if(action==='discovery:restart')return discoveryStart(discoveryGame?.mode||'match');if(action.startsWith('discovery:match:'))return discoveryAnswer(discoveryGame?.items[discoveryGame.index]?.[1]===discoveryGame?.items[Number(c)]?.[1]?discoveryGame.items[discoveryGame.index][1]:'');if(action==='discovery:quick')return discoveryAnswer(target.dataset.answer);if(action.startsWith('lesson:answer:')){const l=LESSONS[lessonIndex],ok=Number(c)===l.correct,el=$('lesson-feedback');if(!el)return;el.textContent=ok?'🎉 Świetnie! '+l.why:'💡 Spróbuj ponownie. '+l.rule;el.className=ok?'answer-ok':'answer-retry';speak(el.textContent,'pl-PL',profile().mentor);
  const id=who+':'+lessonIndex,subject=l.subject==='english'?'angielski':lessonIndex<5?'polski':'matematyka';
@@ -2370,15 +2400,70 @@ document.addEventListener('toggle',ev=>{
   image.dataset.v75Loading='1';img(id).then(url=>{if(image.isConnected&&url){image.src=url;image.onload=()=>URL.revokeObjectURL(url)}}).catch(err=>console.warn('Nie udało się wyświetlić zdjęcia strony',err));
  }
 },true);
-const academyPressControls = '.academy102-destinations button,.academy102-header-actions button,.academy102-screen-voice button,.academy102-choices button,.academy102-mic:not(.academy102-mic--knowledge)';
-function pressAcademyControl(control,complete){
- if(control.disabled||control.dataset.academyPressed)return;
+async function storeParentPin(pin){
+ await put('state',{...data,parentPin:pin});
+ data.parentPin=pin;
+}
+function updateParentPinDisplay(input){
+ input.value=input.value.replace(/\D/g,'').slice(0,input.maxLength);
+ const length=Math.max(data.parentPin?.length||4,input.value.length);
+ document.querySelectorAll('.academy107-pin-cell').forEach((cell,index)=>{
+  cell.hidden=index>=length;
+  cell.classList.toggle('is-filled',index<input.value.length);
+ });
+}
+async function parentPinAction(action){
+ if(parentPinSaving)return;
+ if(action==='parent-pin:cancel'){
+  parentPinOpen=false;
+  render();
+  app.querySelector('[data-action="enter:admin"]')?.focus();
+  return;
+ }
+ const input=$('academy107-pin-value'),error=$('academy107-pin-error');
+ if(!input||!error)return;
+ const [,type,digit]=action.split(':');
+ error.textContent='';
+ if(type==='digit'&&/^\d$/.test(digit)){
+  input.value+=digit;
+ }else if(type==='erase'){
+  input.value=input.value.slice(0,-1);
+ }else if(type==='confirm'){
+  const pin=input.value,expected=data.parentPin;
+  if(expected&&pin!==expected){
+   input.value='';
+   error.textContent='Nieprawidłowy PIN.';
+  }else if(!/^\d{4,8}$/.test(pin)){
+   error.textContent='Wpisz od 4 do 8 cyfr.';
+  }else{
+   if(!expected){
+    parentPinSaving=true;
+    try{await storeParentPin(pin);}
+    catch{error.textContent='Nie udało się zapisać PIN-u. Spróbuj ponownie.';return;}
+    finally{parentPinSaving=false;}
+   }
+   parentPinOpen=false;
+   role='admin';
+   adminTab='home';
+   return render();
+  }
+ }
+ updateParentPinDisplay(input);
+}
+const academyPressControls = '.academy102-destinations button,.academy102-header-actions button,.academy102-screen-voice button,.academy102-choices button,.academy102-mic:not(.academy102-mic--knowledge),.academy107-entry button,.academy107-pin-key';
+const academyPressTimers=new WeakMap();
+function pressAcademyControl(control,complete,immediate=false){
+ const pending=academyPressTimers.get(control);
+ if(control.disabled||(pending&&!immediate))return;
+ if(pending)clearTimeout(pending);
  control.dataset.academyPressed='true';
  trainingTapSound(true,true);
- setTimeout(()=>{
+ academyPressTimers.set(control,setTimeout(()=>{
+  academyPressTimers.delete(control);
   delete control.dataset.academyPressed;
-  if(control.isConnected&&!control.disabled)complete();
- },190);
+  if(!immediate&&control.isConnected&&!control.disabled)complete();
+ },190));
+ if(immediate)complete();
 }
 const baseButtonClicks88=new WeakMap();
 document.addEventListener('pointerdown',event=>{
@@ -2398,11 +2483,36 @@ document.addEventListener('click',event=>{
  baseButtonClicks88.set(control,{at:now,trusted:event.isTrusted});
  trainingTapSound(true);
 },true);
-document.addEventListener('click',ev=>{const btn=ev.target.closest('[data-action]');if(btn){if(ev.target.closest('[data-speak]'))return;
+document.addEventListener('click',ev=>{
+ const summary=ev.target.closest('.academy107-pair > summary');
+ if(summary){
+  ev.preventDefault();
+  pressAcademyControl(summary,()=>{summary.parentElement.open=!summary.parentElement.open});
+  return;
+ }
+ const btn=ev.target.closest('[data-action]');if(btn){if(ev.target.closest('[data-speak]'))return;
  if(btn.dataset.action==='mic'&&micDragIgnoreClick){ev.preventDefault();ev.stopPropagation();return}
- if(btn.matches?.(academyPressControls)){pressAcademyControl(btn,()=>handle(btn.dataset.action,btn));return;}
+ if(btn.matches?.(academyPressControls)){
+  const action=btn.dataset.action;
+  pressAcademyControl(btn,()=>handle(action,btn),/^parent-pin:(digit:|erase$)/.test(action));
+  return;
+ }
  if(btn.classList.contains('tr72-subject-card')){if(btn.dataset.opening)return;btn.dataset.opening='1';btn.classList.add('tr72-selected');trainingTapSound();setTimeout(()=>{if(btn.isConnected)handle(btn.dataset.action,btn)},['matematyka','przyroda','wiedza'].includes(btn.dataset.theme)?1150:480);return}if(btn.closest('.tr71')&&/^training:(source|mode):/.test(btn.dataset.action||'')){if(btn.dataset.opening)return;btn.dataset.opening='1';btn.classList.add('v76-tile-pressed');btn.setAttribute('aria-busy','true');trainingTapSound();setTimeout(()=>{if(btn.isConnected)handle(btn.dataset.action,btn)},280);return}if(btn.closest('.tr71')&&btn.dataset.action?.startsWith('training:')&&btn.dataset.action!=='training:toggle-sound')trainingTapSound();handle(btn.dataset.action,btn)}});
-document.addEventListener('input',ev=>{const box=ev.target.closest('[data-v74-edit]');if(!box||!ev.target.matches('[data-v74-field],[data-v75-field]'))return;const key=decodeURIComponent(box.dataset.v74Edit||'');const btn=box.querySelector('[data-action^="book:save-question:"]');if(btn)btn.disabled=!v74QuestionModified(box,key);});
+document.addEventListener('keydown',ev=>{
+ if(!parentPinOpen||!ev.target.closest?.('#academy107-pin-form'))return;
+ const key=ev.key;
+ if(key!=='Escape'&&(key!=='Enter'||ev.target.id!=='academy107-pin-value'))return;
+ ev.preventDefault();
+ const action=key==='Escape'?'parent-pin:cancel':'parent-pin:confirm';
+ const control=app.querySelector('[data-action="'+action+'"]');
+ if(control)pressAcademyControl(control,()=>handle(action,control));
+});
+document.addEventListener('submit',ev=>{
+ if(ev.target.id==='academy107-pin-form'){ev.preventDefault();void handle('parent-pin:confirm');}
+});
+document.addEventListener('input',ev=>{
+ if(ev.target.id==='academy107-pin-value'){updateParentPinDisplay(ev.target);return;}
+ const box=ev.target.closest('[data-v74-edit]');if(!box||!ev.target.matches('[data-v74-field],[data-v75-field]'))return;const key=decodeURIComponent(box.dataset.v74Edit||'');const btn=box.querySelector('[data-action^="book:save-question:"]');if(btn)btn.disabled=!v74QuestionModified(box,key);});
 document.addEventListener('change',ev=>{if(ev.target.hasAttribute?.('data-v77-range-book')){v77ApplyRange(ev.target.dataset.v77RangeBook,false);return;}if(ev.target.hasAttribute?.('data-v772-chapter-book')){v772ApplyChapter(ev.target.dataset.v772ChapterBook);return;}if(ev.target.id==='page-chapter-filter'){if($('page-filter')?.value==='none')$('page-filter').value='all';filterBookPages($('page-filter')?.value||'all');return;}if(ev.target.matches('[data-tr71-page],[data-tr71-book],[data-tr71-chapter]'))return trainingSelectionChange(ev.target);if(ev.target.matches('[data-page-select]'))updateBookPageSelection();if(ev.target.id==='bchild')refreshBookSubjectSelect();if(ev.target.id==='btype'){const other=ev.target.value==='Inne';const a=$('v73-book-title'),b=$('v73-book-part');if(a)a.hidden=!other;if(b)b.hidden=other;}if(ev.target.id==='page-filter'){filterBookPages(ev.target.value);const old=v77BookViews.get(bookId)||{scroll:0,selected:[]};v77BookViews.set(bookId,{...old,filter:ev.target.value})}if(ev.target.id==='v74-report-child')v74UpdateReportFilter();if(ev.target.id==='booknumberlocation'){const b=data.books.find(x=>x.id===bookId);if(b){b.pageNumberPosition=ev.target.value;save().then(()=>note('✅ Zapisano położenie numeru strony.')).catch(err=>note('❌ '+err.message))}}if(ev.target.id==='replacefile'&&ev.target.files?.length)handle('page:replace');if(ev.target.id==='replacecamera'&&ev.target.files?.length)handle('page:replace-camera');if(ev.target.id==='bookcoverfile'&&ev.target.files?.length)handle('book:cover');if(ev.target.id==='pagefiles'&&ev.target.files?.length)handle('page:upload');if(ev.target.id==='pagecamera'&&ev.target.files?.length)handle('page:camera');if(ev.target.id==='trainingSubject')trainingChooseSubject(ev.target.value);if(ev.target.id==='kind')newExercise();if(ev.target.id==='booktrainingpage')bookExercise();if(ev.target.id==='tracechar')drawTrace();if(ev.target.id==='readerpage'){pageId=ev.target.value;render()}if(ev.target.id==='mentorstyle'){profile().mentor=ev.target.value;save()}});
 // V76_PANEL: zachowujemy kolejnosc Dodaj -> Biblioteka -> Trudnosci -> Baza poza.
 const v76OpenSections=new Set();
@@ -2929,12 +3039,13 @@ function sync81ChildConnectionMarkup(illustrated=false){
  return `<section class="${card}">${heading('Połączenie z rodziną')}<p>Ta instalacja jest połączona jako <strong>panel mamy</strong>.
   Ustawienia połączenia są w panelu mamy, w zakładce Telefony.</p></section>`;
 }
-function sync78Markup(){if(globalThis.AKADEMIA_TEST80)return '<p class="muted">Testowe dane pozostają na tym urządzeniu. Łączenie z rodziną jest wyłączone.</p>';
+function sync78Markup(entry=false){if(globalThis.AKADEMIA_TEST80)return '<p class="muted">Testowe dane pozostają na tym urządzeniu. Łączenie z rodziną jest wyłączone.</p>';
  const d=syncAdapter.device?.();
  if(d?.role==='parent')return '<section class="card"><h2>📱 Połączenie telefonów</h2><p>Udostępnione książki, zdjęcia, pytania i misje trafiają do dzieci. Ich postępy wracają do Ciebie.</p><p data-sync78-message role="status">'+e(syncAdapter.status())+'</p>'+button('🔄 Synchronizuj teraz','sync78:now','gold')+people.map(([id,name])=>'<div class="item"><strong>'+name+'</strong><div class="row">'+button('🔑 Kod dla '+(id==='pawel'?'Pawła':'Patryka'),'sync78:pair:'+id,'gold')+button('Odłącz telefon','sync78:revoke:'+id,'line')+'</div></div>').join('')+(sync78Pair?'<div class="card"><h3>Kod dla '+e(sync78Pair.child==='pawel'?'Pawła':'Patryka')+'</h3><p style="font-size:2rem;font-weight:bold;letter-spacing:.15em;user-select:all">'+e(sync78Pair.code)+'</p><p>Na telefonie dziecka otwórz ten sam link → Połącz z mamą. Kod jest jednorazowy i ważny 10 minut.</p></div>':'')+sync78ConflictMarkup()+'</section>';
  if(d?.role==='child')return '<section class="card"><p data-sync78-message role="status">'+e(syncAdapter.status())+'</p>'+button('🔄 Pobierz od mamy','sync78:now','gold')+sync78ConflictMarkup()+'</section>';
  if(role==='admin')return '<section class="card"><h2>📱 Połącz telefony</h2><p>Najpierw włącz udostępnianie na swoim telefonie. Twoje zapisane materiały zostaną wysłane do prywatnej bazy rodziny. Potem pokażemy kod do wpisania u Pawła.</p><p data-sync78-message role="status">'+e(syncAdapter.status())+'</p>'+button('☁️ Włącz udostępnianie','sync78:create','gold')+'</section>';
- return '<section class="card"><details><summary>📱 Połącz z mamą</summary><p>Wpisz kod pokazany na telefonie mamy. Materiały tej instalacji zostaną zastąpione udostępnioną biblioteką dziecka.</p><label for="sync78-code">Jednorazowy kod</label><input id="sync78-code" autocomplete="off" autocapitalize="characters" maxlength="12" placeholder="8 znaków">'+button('Połącz i pobierz materiały','sync78:join','gold')+'<p data-sync78-message role="status">'+e(syncAdapter.status())+'</p></details></section>';
+ const fields='<p>Wpisz kod pokazany na telefonie mamy. Materiały tej instalacji zostaną zastąpione udostępnioną biblioteką dziecka.</p><label for="sync78-code">Jednorazowy kod</label><input id="sync78-code" autocomplete="off" autocapitalize="characters" maxlength="12" placeholder="8 znaków">'+button('Połącz i pobierz materiały','sync78:join','gold')+'<p data-sync78-message role="status">'+e(syncAdapter.status())+'</p>';
+ return entry?`<details class="academy107-pair"><summary>Połącz z mamą</summary><div class="academy107-pair-fields">${fields}</div></details>`:`<section class="card"><details><summary>📱 Połącz z mamą</summary>${fields}</details></section>`;
 }
 function sync78ConflictMarkup(){return syncAdapter.debug?.().conflict?'<div role="alert"><p>Te same dane zmieniono jednocześnie. Twoje zmiany są zachowane na telefonie. Wybierz, którą wersję pozostawić.</p>'+button('Pobierz wersję z chmury','sync78:remote','alt')+button('Zachowaj moje zmiany','sync78:local','alt')+'</div>':'';}
 async function sync78Action(action,target){
@@ -2956,6 +3067,7 @@ async function sync78Init(){
  await syncAdapter.init({getState:()=>testMode?testSnapshot:data,defaults:initial,read:get,write:put,remove:del,applyState:async state=>{
   const changed=JSON.stringify(data)!==JSON.stringify(state);if(!changed)return;
   if(testMode){sync78Adopt(testSnapshot,state);return;}sync78Adopt(data,state);
+  if(!role&&parentPinOpen)return;
   if(!role||role==='child'&&tab==='home'||role==='admin'&&adminTab==='home')render();
   else{sync78HasUpdates=true;let update=$('sync78-new');if(!update){update=document.createElement('div');update.id='sync78-new';update.className='card';update.innerHTML='📥 Są nowe dane. '+button('Pokaż','sync78:show','alt');const header=app.querySelector('.academy102-header');if(header)header.after(update);else document.querySelector('.wrap')?.prepend(update);}}
  }});
