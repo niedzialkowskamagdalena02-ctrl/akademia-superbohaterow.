@@ -1181,7 +1181,12 @@ button:not(:disabled):not(.tr72-subject-card):not(.mic):active,label.v73-file-co
 .hq87-vault-panel dd{color:#ffe8ab}
 .hq87-shop-balance{display:flex;clear:both;flex-wrap:wrap;gap:8px;color:#caf8f5}
 .hq87-shop-balance span{background:#12394b;border:1px solid #6fcec99e;border-radius:10px;padding:5px 9px}
-.hq86-main .hq87-mic{right:max(9px,env(safe-area-inset-right));bottom:max(9px,env(safe-area-inset-bottom));width:66px!important;height:66px!important;min-height:66px!important}
+.hq86-main{
+ --hq-mic-right:max(9px,env(safe-area-inset-right));
+ --hq-mic-bottom:max(9px,env(safe-area-inset-bottom));
+ --hq-mic-size:66px;
+}
+.hq86-main .hq87-mic{right:var(--hq-mic-right);bottom:var(--hq-mic-bottom);width:var(--hq-mic-size)!important;height:var(--hq-mic-size)!important;min-height:var(--hq-mic-size)!important}
 .hq86-main .hq86-help{left:43%;max-width:56%}
 .hq86-main .hq85-dialog[open]{display:flex;flex-direction:column;overflow:hidden}
 .hq86-main .hq85-dialog .hq84-panel{min-height:0;overflow-y:auto;overscroll-behavior:contain}

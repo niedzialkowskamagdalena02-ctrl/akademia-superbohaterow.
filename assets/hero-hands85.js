@@ -70,33 +70,41 @@ function handMotion(power,side){
   (reduced ? .24 : smoothStep(age,55,151)*(1-smoothStep(age,173,409))) : 0;
  const lift=kind==='laser'&&side===1 ?
   (reduced ? .34 : smoothStep(age,0,173)*(1-smoothStep(age,376,HERO_POWER_TIME.laser))) : 0;
- return {closed,lean:.56*reach+.38*lift,length:1+.64*reach+.61*lift};
+ return {closed,lean:.56*reach,length:1+.64*reach,lift,zoom:1+.24*lift};
+}
+
+function poseHand(ctx,side,{lean,length,lift,zoom},scale,x,y,angle){
+ const size=scale*zoom;
+ ctx.transform(-side*size,0,side*lean*size,length*size,x,y);
+ ctx.rotate(angle+.09*lift);
+}
+
+function handPoint(ctx,x,y){
+ const {a,b,c,d,e,f}=ctx.getTransform();
+ return {x:a*x+c*y+e,y:b*x+d*y+f};
 }
 
 export function drawHeroHands(ctx,canvas,hero,step,moving,image=null,web=null,power=null,fistImage=null){
  const {width,height}=canvas;
  ctx.clearRect(0,0,width,height);
  const needsFist=handMotion(power,-1).closed;
+ let laserOrigin;
  if(image&&(!needsFist||fistImage)){
   const art=needsFist?fistImage:image;
   const scale=Math.min(width*.35/image.naturalWidth,height*.25/image.naturalHeight)*(hero==='hulk'?1.1:1);
   const h=image.naturalHeight*scale,w=h*art.naturalWidth/art.naturalHeight;
-  let webOrigin,laserOrigin;
+  let webOrigin;
   for(const side of [-1,1]){
-   const {lean,length}=handMotion(power,side);
-   const sway=moving&&!lean?Math.sin(step+side*Math.PI/2):0;
+   const motion=handMotion(power,side);
+   const sway=moving&&!motion.lean&&!motion.lift?Math.sin(step+side*Math.PI/2):0;
    ctx.save();
    const reach=web?.side===side?Math.max(0,1-web.age/330):0;
    const x=width*(side<0?.022:.978)-side*reach*w*.19,y=height+h*(.035+sway*.037-reach*.25);
-   ctx.transform(-side,0,side*lean,length,x,y);
-   ctx.rotate(sway*.04);
+   poseHand(ctx,side,motion,1,x,y,sway*.04);
    if(needsFist)ctx.filter='brightness(.78) saturate(.84)';
    ctx.drawImage(art,0,-h,w,h);
    if(web?.side===side)webOrigin={startX:x-side*w*.52,startY:y-h*.51};
-   if(power?.kind==='laser'&&side===1){
-    const palmY=-h*.53;
-    laserOrigin={x:x-w*.63+lean*palmY,y:y+length*palmY};
-   }
+   if(power?.kind==='laser'&&side===1)laserOrigin=handPoint(ctx,w*.63,-h*.60);
    ctx.restore();
   }
   if(web)paintWeb93(ctx,width,height,{...web,...webOrigin});
@@ -106,12 +114,13 @@ export function drawHeroHands(ctx,canvas,hero,step,moving,image=null,web=null,po
  const [base,light,shade,cuff,accent,kind]=costumes[hero]??costumes.iron;
  const p=geometry(),scale=Math.min(width*.00315,height*.00132)*(kind==='skin'?1.15:1);
  for(const side of [-1,1]){
-  const {lean,length}=handMotion(power,side);
-  const sway=moving&&!lean?Math.sin(step+side*Math.PI/2):0;
+  const motion=handMotion(power,side);
+  const sway=moving&&!motion.lean&&!motion.lift?Math.sin(step+side*Math.PI/2):0;
   ctx.save();
-  ctx.transform(-side*scale,0,side*lean*scale,length*scale,
-   width*(side<0?.084:.916)-side*lean*130*scale,height+(sway*5-130*length)*scale);
-  ctx.rotate(-.13-sway*.048);
+  const x=width*(side<0?.084:.916)-side*motion.lean*130*scale;
+  const y=height+(sway*5-130*motion.length*motion.zoom)*scale;
+  poseHand(ctx,side,motion,scale,x,y,-.13-sway*.048);
+  if(power?.kind==='laser'&&side===1)laserOrigin=handPoint(ctx,54,63);
   ctx.shadowColor='#070a17cc';ctx.shadowBlur=9*scale;ctx.shadowOffsetY=4*scale;
   ctx.lineJoin='round';ctx.lineWidth=1.25;ctx.strokeStyle=shade;
   const sleeve=ctx.createLinearGradient(0,121,61,140);
@@ -148,7 +157,7 @@ export function drawHeroHands(ctx,canvas,hero,step,moving,image=null,web=null,po
   ctx.restore();
  }
  if(web)paintWeb93(ctx,width,height,web);
- if(power?.kind==='laser')paintLaser(ctx,width,height,power.age,{x:width*.71,y:height*.76});
+ if(laserOrigin)paintLaser(ctx,width,height,power.age,laserOrigin);
 }
 
 function paintLaser(ctx,width,height,age,palm){

@@ -34,8 +34,18 @@ button.pres93-screen{display:block;margin:0 0 9px;font-size:.86rem;line-height:1
  border:1px solid #ade6a9;border-radius:14px;color:#f4fff1;
  background:linear-gradient(160deg,#28503d,#132635);touch-action:manipulation;
 }
-[data-hero="iron"] .hq112-power-controls > button{
- border-color:#ffdc85;color:#fff6dc;background:linear-gradient(160deg,#8e3c27,#54262c);
+.hq114-laser-controls{
+ right:var(--hq-mic-right);bottom:calc(var(--hq-mic-bottom) + var(--hq-mic-size) + 12px);
+ left:auto;transform:none;
+}
+.hq86-main .hq114-laser-controls > button:not(:disabled){
+ --hq-button-lift:inset 0 2px 2px #c1f9ff80,inset 0 -3px 5px #29206480,0 4px 0 #15244d,0 0 14px #6dd9ff80;
+ border:2px solid #a5f1ff;color:#fff;
+ background:radial-gradient(ellipse at 20% 0,#85f2ff7a,transparent 69%),linear-gradient(155deg,#1385a8,#274d9f 50%,#7539a7);
+ text-shadow:0 1px 3px #142953;
+}
+.hq114-laser-controls > button > span{
+ color:#fff28a;text-shadow:0 0 6px #ffd474;
 }
 .hq112-power-controls > button:focus-visible{outline:2px solid #fff278;outline-offset:2px}
 .arc93-hud{display:flex;justify-content:space-between;align-items:center;gap:4px;flex-wrap:wrap;max-width:390px;margin:0 auto 10px}

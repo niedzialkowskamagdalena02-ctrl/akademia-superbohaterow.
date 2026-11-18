@@ -80,30 +80,49 @@ function board(){
  const hulkWalk=baseWalkMarkup(spider,'test','hulk',112,'');
  assert.match(hulkWalk,/data-walk-power="-1" aria-label="Cios lewą pięścią"/);
  assert.match(hulkWalk,/data-walk-power="1" aria-label="Cios prawą pięścią"/);
- assert.match(baseWalkMarkup(spider,'test','iron',112,''),/data-walk-power="1" aria-label="Strzel laserem z prawej dłoni"/);
+ const ironWalk=baseWalkMarkup(spider,'test','iron',114,'');
+ assert.match(ironWalk,/class="hq112-power-controls hq114-laser-controls"[^>]*>\s*<button[^>]*data-walk-power="1" aria-label="Strzel laserem z prawej dłoni"/);
  assert.doesNotMatch(baseWalkMarkup(spider,'test','captain',112,''),/data-walk-power/);
  const hand={naturalWidth:621,naturalHeight:627},fist={naturalWidth:289,naturalHeight:420};
  const handsFrame=(hero,power)=>{
-  const poses=[],images=[],beam=[];
+  const poses=[],images=[],beam=[],beamStart=[],glow=[];
+  let matrix;
   const ctx={
-   clearRect(){},save(){},restore(){},rotate(){},beginPath(){},arc(){},fill(){},moveTo(){},stroke(){},
-   transform(...pose){poses.push(pose);},drawImage(image){images.push(image);},lineTo(x,y){beam.push([x,y]);}
+   clearRect(){},save(){},restore(){},beginPath(){},fill(){},stroke(){},
+   transform(a,b,c,d,e,f){matrix={a,b,c,d,e,f};},
+   rotate(turn){
+    const {a,b,c,d,e,f}=matrix,cos=Math.cos(turn),sin=Math.sin(turn);
+    matrix={a:a*cos+c*sin,b:b*cos+d*sin,c:c*cos-a*sin,d:d*cos-b*sin,e,f};
+   },
+   getTransform(){return matrix;},
+   drawImage(image){images.push(image);poses.push(matrix);},
+   arc(x,y){glow.push([x,y]);},moveTo(x,y){beamStart.push([x,y]);},
+   lineTo(x,y){beam.push([x,y]);}
   };
   drawHeroHands(ctx,{width:360,height:740},hero,0,false,hand,null,power,fist);
-  return {poses,images,beam};
+  return {poses,images,beam,beamStart,glow};
  };
  for(const side of [-1,1]){
   const frame=handsFrame('hulk',{kind:'punch',side,age:160});
   assert.deepEqual(frame.images,[fist,fist]);
-  assert.ok(frame.poses[(side+1)/2][3]>1);
-  assert.equal(frame.poses[(1-side)/2][3],1);
+  assert.ok(frame.poses[(side+1)/2].d>1);
+  assert.equal(frame.poses[(1-side)/2].d,1);
  }
  assert.deepEqual(handsFrame('hulk',null).images,[hand,hand]);
  assert.equal(handsFrame('iron',{kind:'laser',side:1,age:110}).beam.length,0);
- const blast=handsFrame('iron',{kind:'laser',side:1,age:240});
- assert.equal(blast.poses[0][3],1);
- assert.ok(blast.poses[1][3]>1);
- assert.deepEqual(blast.beam,[[180,740*.37]]);
+ const idle=handsFrame('iron',null);
+ for(const age of [65,173,240,410,590]){
+  const blast=handsFrame('iron',{kind:'laser',side:1,age});
+  assert.deepEqual(blast.poses[0],idle.poses[0]);
+  const {a,b,c,d}=blast.poses[1];
+  assert.ok(Math.abs(Math.hypot(a,b)-Math.hypot(c,d))<1e-10,'right glove keeps its proportions');
+  assert.ok(Math.abs(a*c+b*d)<1e-10,'right glove is never sheared');
+  if(age===240){
+   assert.ok(Math.hypot(a,b)>1);
+   assert.deepEqual(blast.beamStart,blast.glow);
+   assert.deepEqual(blast.beam,[[180,740*.37]]);
+  }
+ }
 
  const {app,data}=require('./legacy/test.cjs');
  const view=app(),account=data();

@@ -1,6 +1,6 @@
 import {hqPet,hqPlaced,hqRead} from './headquarters84.js?v=91';
 import {baseArt88} from './base-art88.js?v=91';
-import {drawHeroHands,loadHeroHands88,loadHulkFist,HERO_POWER_TIME} from './hero-hands85.js?v=112';
+import {drawHeroHands,loadHeroHands88,loadHulkFist,HERO_POWER_TIME} from './hero-hands85.js?v=114';
 import {walkRooms,FLOOR_DEPTH,FULL_TURN,PHOTO_FOV,VERTICAL_SCALE,advance86,cameraBasis86,clamp86,roomAnchor86,wrapAngle} from './base-map86.js?v=95';
 import {energy86} from './base-training86.js?v=87';
 import {petSprite86} from './pet-care86.js?v=90';
@@ -22,8 +22,8 @@ const powerControls={
   <button type="button" data-walk-power="-1" aria-label="Cios lewą pięścią" aria-keyshortcuts="F">👊 Lewa</button>
   <button type="button" data-walk-power="1" aria-label="Cios prawą pięścią" aria-keyshortcuts="G">👊 Prawa</button>
  </div>`,
- iron:`<div class="hq112-power-controls">
-  <button type="button" data-walk-power="1" aria-label="Strzel laserem z prawej dłoni" aria-keyshortcuts="F">⚡ Laser</button>
+ iron:`<div class="hq112-power-controls hq114-laser-controls">
+  <button type="button" data-walk-power="1" aria-label="Strzel laserem z prawej dłoni" aria-keyshortcuts="F"><span aria-hidden="true">⚡</span> Laser</button>
  </div>`
 };
 
