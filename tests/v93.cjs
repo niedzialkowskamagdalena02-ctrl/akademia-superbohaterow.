@@ -132,15 +132,27 @@ function board(){
 
  const pinView=app(),pinAccount=data();
  pinAccount.parentPin='1111';
+ pinAccount.profiles.pawel.hero='hulk';
  pinView.api.set(pinAccount,{role:''});
  pinView.api.render();
  assert.match(pinView.root.innerHTML,/class="academy107-entry"/);
  assert.match(pinView.root.innerHTML,/academy107-pair/);
+ assert.match(pinView.root.innerHTML,/class="academy107-profile-card academy107-profile-pawel" data-action="enter:pawel">\s*<img[^>]*assets\/art\/hulk\.svg/);
+ assert.match(pinView.root.innerHTML,/assets\/interface108\/hero-patryk\.webp/);
+ assert.match(pinView.root.innerHTML,/data-action="enter:admin" aria-label="Centrum dowodzenia mamy"><\/button>/);
+ assert.match(pinView.root.innerHTML,/data-action="academy:update" aria-label="Aktualizuj Akademię"><\/button>/);
+ const choices=pinView.ctx.academy102Choices();
+ assert.match(choices,/data-action="hq:view:classic"[\s\S]*interface108\/classic\.webp[\s\S]*data-action="hq:view:walk"[\s\S]*interface108\/walk\.webp/);
  await pinView.api.handle('enter:admin');
  const pinMarkup=pinView.root.innerHTML;
  assert.equal((pinMarkup.match(/parent-pin:cancel/g)||[]).length,1);
  assert.equal((pinMarkup.match(/parent-pin:digit:/g)||[]).length,10);
- assert.match(pinMarkup,/parent-pin:confirm">OK/);
+ for(const [action,label] of [['confirm','OK'],['cancel','Anuluj'],['erase','Usuń ostatnią cyfrę']]){
+  assert.ok(pinMarkup.includes(`parent-pin:${action}" aria-label="${label}"></button>`),action);
+ }
+ for(let digit=0;digit<=9;digit++){
+  assert.ok(pinMarkup.includes(`parent-pin:digit:${digit}" aria-label="${digit}">${digit}</button>`),digit);
+ }
  await pinView.api.handle('parent-pin:cancel');
  assert.match(pinView.root.innerHTML,/class="academy107-entry"/);
  await pinView.api.handle('enter:admin');

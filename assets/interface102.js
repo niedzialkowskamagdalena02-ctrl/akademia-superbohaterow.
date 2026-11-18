@@ -4,41 +4,44 @@ const dashboardArt = (name) =>
   `<img class="academy102-art" src="assets/interface106/${name}.webp" alt="" draggable="false">`;
 const detailArt = (name) =>
   `<img class="academy102-art" src="assets/interface107/${name}.webp" alt="" draggable="false">`;
+const refinedArt = (name) =>
+  `<img class="academy102-art" src="assets/interface108/${name}.webp" alt="" draggable="false">`;
 
 export function academy107Entry({release, profiles, status, linked, parent, pair, update}) {
   return `<main class="academy107-entry">
     <header class="academy107-entry-header">
-      <h1>${detailArt('entry-logo')}<span class="academy102-sr">Akademia Superbohaterów</span><span>V${release}</span></h1>
+      <h1>${refinedArt('entry-logo')}<span class="academy102-sr">Akademia Superbohaterów</span><span>V${release}</span></h1>
       <p>Wybierz swoją bazę</p>
     </header>
-    <section class="academy107-welcome">${detailArt('entry-welcome')}
+    <section class="academy107-welcome">${refinedArt('entry-welcome')}
       <h2 class="academy102-sr">Witaj w Akademii!</h2>
       <p class="academy102-sr">Każdy bohater ma własne misje i nagrody.</p>
     </section>
     <div class="academy107-profiles">${profiles.map(({id, name, grade, coins, progress, hero, audio})=>`
       <div class="academy107-profile">
-        <button type="button" class="academy107-profile-card academy107-profile-${id}${hero?' academy107-custom-hero':''}" data-action="enter:${id}">
-          ${hero ? `<img class="academy107-profile-hero" src="assets/art/${hero}.svg" alt="">` : ''}
+        <button type="button" class="academy107-profile-card academy107-profile-${id}" data-action="enter:${id}">
+          ${hero ? `<img class="academy107-profile-hero academy108-selected-hero" src="assets/art/${hero}.svg" alt="" draggable="false">`
+            : `<img class="academy107-profile-hero" src="assets/interface108/hero-${id}.webp" alt="" draggable="false">`}
           <span class="academy107-profile-name">${name}</span>
           <span class="academy107-profile-grade">${grade} · ${coins} złotych</span>
           <span class="academy107-profile-progress" aria-label="Postęp ${progress}%"><span style="width:${progress}%"></span></span>
         </button>${audio}
       </div>`).join('')}</div>
     <section class="academy107-link-panel">
-      ${parent ? `<button type="button" class="academy107-entry-art academy107-entry-parent" data-action="enter:admin">Centrum dowodzenia mamy</button>` : ''}
+      ${parent ? `<button type="button" class="academy107-entry-art academy107-entry-parent" data-action="enter:admin" aria-label="Centrum dowodzenia mamy"></button>` : ''}
       <p${linked?' data-sync78-message role="status"':''}>${status}</p>
     </section>
     ${pair}
-    ${update ? `<footer><button type="button" class="academy107-entry-art academy107-update" data-action="academy:update">Aktualizuj Akademię</button></footer>` : ''}
+    ${update ? `<footer><button type="button" class="academy107-entry-art academy107-update" data-action="academy:update" aria-label="Aktualizuj Akademię"></button></footer>` : ''}
   </main>`;
 }
 
 export function academy107PinScreen(length) {
   const pinKey = (action, label, extra='') =>
-    `<button type="button" class="academy107-pin-key ${extra}" data-action="parent-pin:${action}">${label}</button>`;
+    `<button type="button" class="academy107-pin-key ${extra}" data-action="parent-pin:${action}" aria-label="${label}">${action.startsWith('digit:')?label:''}</button>`;
   return `<main class="academy107-pin-screen">
     <section class="academy107-pin-card" aria-labelledby="academy107-pin-title">
-      <h1 id="academy107-pin-title">${detailArt('pin-heading')}<span class="academy102-sr">Centrum dowodzenia rodzica</span></h1>
+      <h1 id="academy107-pin-title">${refinedArt('pin-heading')}<span class="academy102-sr">Centrum dowodzenia rodzica</span></h1>
       <p id="academy107-pin-instruction">${length ? 'Podaj kod PIN, aby wejść do bazy!' : 'Ustaw kod PIN mamy (od 4 do 8 cyfr)'}</p>
       <form id="academy107-pin-form" class="academy107-pin-grid">
         <div class="academy107-pin-keypad">
@@ -62,10 +65,10 @@ export function academy107PinScreen(length) {
   </main>`;
 }
 
-function tile(name, label, action, content = '', description = '') {
+function tile(name, label, action, {content='',description='',artwork=art(name)} = {}) {
   return `<button type="button" class="academy102-tile academy102-${name}" data-action="${action}" aria-label="${label}"
     ${description ? `aria-description="${description}"` : ''}>
-    ${art(name)}${content}</button>`;
+    ${artwork}${content}</button>`;
 }
 
 function microphone(className = '') {
@@ -98,8 +101,8 @@ export function academy102Shell(scene, {title, content, menu='', voice='', relea
 
 export function academy102Choices() {
   return `<nav class="academy102-choices" aria-label="Wybór widoku">
-    ${tile('classic','☰ Widok klasyczny','hq:view:classic')}
-    ${tile('walk','🚶 Spacer po bazie','hq:view:walk')}
+    ${tile('classic','Widok klasyczny','hq:view:classic',{artwork:refinedArt('classic')})}
+    ${tile('walk','Spacer po bazie','hq:view:walk',{artwork:refinedArt('walk')})}
   </nav>`;
 }
 
@@ -161,9 +164,9 @@ export function academy102Knowledge(hasBookItems, back) {
   return `<section class="academy102-knowledge-panel${hasBookItems ? '' : ' academy102-outside'}" aria-labelledby="academy102-knowledge-title">
     <h2 id="academy102-knowledge-title" class="academy102-sr">Wiedza ogólna</h2>
     ${art('knowledge-backdrop','academy102-knowledge-backdrop')}
-    ${tile('train','Trenuj','training:mixed:start', `<span class="academy102-mixed-label" aria-hidden="true">${mixed}</span>`,mixed)}
+    ${tile('train','Trenuj','training:mixed:start',{content:`<span class="academy102-mixed-label" aria-hidden="true">${mixed}</span>`,description:mixed})}
     ${tile('game','Wybierz grę','training:back:catalog')}
-    ${tile('library','Tylko z książki','training:mode:game','','Cały materiał albo wybrane strony')}
+    ${tile('library','Tylko z książki','training:mode:game',{description:'Cały materiał albo wybrane strony'})}
     ${microphone('academy102-mic--knowledge')}
   </section><nav class="academy102-return" aria-label="Powrót">${back}</nav>`;
 }
