@@ -80,7 +80,6 @@ function petPiece(item, pose) {
           <span class="flight98-muzzle"><i></i><b></b></span>
         </span>
       </span>
-      ${item.value==='bear'?'<img class="flight99-teddy" src="assets/flight96/bear.webp" alt="" draggable="false">':''}
     </span>
   </span>`;
 }

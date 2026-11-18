@@ -246,7 +246,7 @@ function fixture(){
  assert.ok(scope.some(turn=>turn.page?.number===12&&turn.key==='matematyka'));
  assert.deepEqual([...new Set(scope.map(turn=>turn.key))].sort(),['angielski','matematyka','polski','przyroda']);
  const manifest=vm.runInNewContext(fs.readFileSync(path.join(dir,'sw.js'),'utf8')+'\n({CACHE,ASSETS})',{self:{addEventListener(){}}});
- assert.equal(manifest.CACHE,'academy-v99');
+ assert.equal(manifest.CACHE,'academy-v100');
  for(const resource of manifest.ASSETS)assert.ok(fs.existsSync(path.resolve(dir,resource.split('?')[0])),resource);
- console.log('PASS V99 – 14 misji, odprawa i kabina, obręcze, slalom, karmnik, katalog, trening i cache.');
+ console.log('PASS V100 – 14 misji, odprawa i kabina, obręcze, slalom, karmnik, katalog, trening i cache.');
 })().catch(error=>{console.error(error);process.exitCode=1;});

@@ -198,21 +198,6 @@
   background: #12568a;
   border: 1px solid #a0ddff;
 }
-.flight97-board .flight99-teddy {
-  display: block;
-  position: absolute;
-  inset: 1% 0 1%;
-  width: 100%;
-  height: 98%;
-  object-fit: contain;
-  filter: drop-shadow(0 2px 2px #23130b53);
-}
-.flight98-pet[data-f98-species="bear"] .flight98-pet-body:has(.flight99-teddy)>span {
-  opacity: 0;
-}
-.flight98-pet[data-f98-species="bear"][data-f98-pose="walk"] .flight98-pet-body>span { opacity: 1 }
-.flight98-pet[data-f98-species="bear"][data-f98-pose="walk"] .flight99-teddy { opacity: 0 }
-.flight98-pet[data-f98-species="bear"][data-f98-color="1"] .flight99-teddy { filter: saturate(.86) brightness(.88) }
 .flight98-pet[data-f98-species="dog"] .flight98-head { --fur: #d49860 }
 .flight98-pet[data-f98-species="dog"] .flight98-ear {
   width: 31%;

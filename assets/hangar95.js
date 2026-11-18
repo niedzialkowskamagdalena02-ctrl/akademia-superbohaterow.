@@ -4,7 +4,7 @@ import {gameGroup92, shuffle92} from './learning-games92.js?v=92';
 import {paintWorld} from './missions93.js?v=99';
 import {airMarkup95, flightStyles95, mountAir95, plane95, shape95, surface95, voice95} from './hangar-flight95.js?v=97';
 import {digitWord96} from './hangar-art96.js?v=97';
-import {boardingDeck97, boardingRoundCount97, boardingSlots98, boardingMarkup97, boardingTransfer97, canBoard97, finishBoarding98, syncBoarding97} from './hangar-boarding97.js?v=99';
+import {boardingDeck97, boardingRoundCount97, boardingSlots98, boardingMarkup97, boardingTransfer97, canBoard97, finishBoarding98, syncBoarding97} from './hangar-boarding97.js?v=100';
 import {mountTakeoff97, takeoffMarkup97} from './hangar-takeoff97.js?v=99';
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({

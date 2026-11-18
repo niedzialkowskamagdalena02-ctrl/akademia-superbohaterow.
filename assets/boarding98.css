@@ -44,14 +44,15 @@
 
 /* Each character has a head, ears, torso, front paws, hind paws, and a tail. */
 .flight98-pet {
-  --fur:#bf7a43; --light-fur:#f5c78e; --shade:#83492f; --cream:#ffe5b9;
-  --inner-ear:#f5af82; --mark:#9c572e;
+  --fur:#bd8053; --light-fur:#edbf8e; --shade:#754633; --cream:#ffe7bc;
+  --inner-ear:#e7ac85;
   position:relative; display:block; width:min(98%,112px); aspect-ratio:1; pointer-events:none;
   transform-origin:50% 87%; transform:scaleX(var(--facing,1));
   filter:drop-shadow(0 2px 2px #12234182);
 }
 .flight98-pet[data-f98-species="bear"][data-f98-color="1"] {
-  --fur:#aa603d; --light-fur:#e9b777; --shade:#743e29; --cream:#fbe1ad;
+  --fur:#ac7457; --light-fur:#d9ae90; --shade:#684334; --cream:#fae3c7;
+  --inner-ear:#d39a80;
 }
 .flight98-pet[data-f98-species="cat"] {
   --fur:#ed9437; --light-fur:#ffd77c; --shade:#ab551c; --cream:#fff1cd; --mark:#bd641f;
@@ -126,6 +127,19 @@
 }
 .flight98-ear-left { left:1%; rotate:-14deg }
 .flight98-ear-right { right:1%; rotate:14deg; animation-direction:reverse }
+.flight98-pet[data-f98-species="bear"] .flight98-ear {
+  top:-12%; width:31%; height:40%; border-radius:50%;
+  background:radial-gradient(circle at 50% 48%,var(--inner-ear) 0 43%,var(--light-fur) 46%,var(--fur) 76%);
+}
+.flight98-pet[data-f98-species="bear"] .flight98-ear-left { left:-3% }
+.flight98-pet[data-f98-species="bear"] .flight98-ear-right { right:-3% }
+.flight98-pet[data-f98-species="bear"][data-f98-pose="sit"] .flight98-leg i {
+  background:radial-gradient(circle at 26% 30%,var(--cream) 0 6%,transparent 10%),
+    radial-gradient(circle at 50% 23%,var(--cream) 0 7%,transparent 11%),
+    radial-gradient(circle at 74% 30%,var(--cream) 0 6%,transparent 10%),
+    radial-gradient(ellipse at 50% 69%,var(--cream) 0 28%,transparent 32%),
+    linear-gradient(var(--light-fur),var(--fur));
+}
 .flight98-pet[data-f98-species="cat"] .flight98-ear {
   top:-14%; height:62%; width:35%; border-radius:34%;
   clip-path:polygon(9% 3%,88% 52%,100% 100%,0 100%);
