@@ -1,4 +1,4 @@
-import {shuffle92} from './learning-games92.js?v=92';
+import {gameGroup92,shuffle92} from './learning-games92.js?v=92';
 
 export const schoolMissions93=[
  ['monster','👾','Głodne Potworki i Koszyki','Policz owoce w równych koszykach i nakarm potworka.'],
@@ -48,6 +48,30 @@ const times=(a,b)=>a+' × '+b;
 const timesVoice=(a,b)=>a+' razy '+b;
 const mathChoices=(a,b,random)=>multiple(a*b,[a*b-a,a*b+b,a*b+1,a*b+2,a*b-1].filter(v=>v>0),random);
 
+export const flightMathInstructions93={
+ takeoff:'Pociągnij czerwoną dźwignię. Oblicz wynik i przeleć przez właściwą obręcz.',
+ airballs:'Oblicz wynik, wleć w odpowiedni balon i omiń burzę.'
+};
+
+function mathFlightDeck(id,random){
+ const small=numberList(8), factors=numberList(5).slice(1);
+ const operations=shuffle92([
+  small.flatMap(a=>small.map(b=>({expression:`${a} + ${b}`,speech:`${a} plus ${b}`,answer:a+b}))),
+  small.flatMap(a=>small.filter(b=>b<=a).map(b=>({expression:`${a} − ${b}`,speech:`${a} minus ${b}`,answer:a-b}))),
+  factors.flatMap(a=>factors.filter(b=>a*b<=20).map(b=>({expression:times(a,b),speech:timesVoice(a,b),answer:a*b})))
+ ].map(pool=>shuffle92(pool,random)),random);
+ const count=id==='takeoff'?11:6;
+ const problems=Array.from({length:count},(_,i)=>operations[i%operations.length][Math.floor(i/operations.length)]);
+ const needed=problems.map(problem=>problem.answer);
+ const gates=needed.map((answer,i)=>{
+  const choices=[answer-2,answer-1,answer+1,answer+2].filter(value=>value>=0&&value<=20);
+  const distractors=shuffle92(choices,random).slice(0,id==='takeoff'&&i>=5?2:1);
+  return shuffle92([answer,...distractors],random);
+ });
+ const prompt=flightMathInstructions93[id];
+ return [{kind:'flightSequence',prompt,speech:prompt,needed,gates,problems}];
+}
+
 function takeoffDeck(random){
  const digits=numberList(9);
  const first=shuffle92(digits,random).slice(0,5);
@@ -64,6 +88,7 @@ function takeoffDeck(random){
 }
 
 export function missionDeck93(id,grade,random=Math.random){
+ if(Object.hasOwn(flightMathInstructions93,id)&&gameGroup92(grade)==='school')return mathFlightDeck(id,random);
  if(id==='takeoff')return takeoffDeck(random);
  const cap=Number(grade)===1?25:50;
  const factors=numberList(Number(grade)===1?5:10).slice(1);

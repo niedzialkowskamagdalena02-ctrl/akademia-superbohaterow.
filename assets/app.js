@@ -15,12 +15,12 @@ import {mountBaseScene84} from './base-scene84.js?v=88';
 import {baseWalkMarkup,mountBaseWalk,resetBaseWalk,openWalkRoom87,focusWalkCase88,walkRoomId93} from './base-walk85.js?v=102';
 import {HQ_SLOTS,hqItems,hqRead,hqBalances,hqEarnToken,hqSpendToken,hqRecordCrystals,hqBuyWithGems,hqPlaced,hqPlace,hqDisplayPurchase88,hqPet,hqChoosePet88,hqPaint,hqEarnFood,hqMarkup,hqWallet,hqShop,hqFoodQuiz88} from './headquarters84.js?v=91';
 import {petRoom86,petCareMarkup86,petPicker88,mountPetCare86,setPetCare86,servePet87} from './pet-care86.js?v=90';
-import {flightMarkup88,mountNounFlight88} from './noun-flight88.js?v=90';
+import {flightMarkup88,mountNounFlight88} from './noun-flight88.js?v=103';
 import {petQuiz88} from './pet-quiz88.js?v=88';
 import {gameGroup92,recordGameAward92} from './learning-games92.js?v=92';
 import {mountLearningGames92} from './learning-play92.js?v=95';
-import {mountMissions93,missionNote93} from './missions93.js?v=102';
-import {mountHangar95} from './hangar95.js?v=102';
+import {mountMissions93,missionNote93} from './missions93.js?v=103';
+import {mountHangar95} from './hangar95.js?v=103';
 import {trainingCatalog95,trainingSubject95,trainingGroupName95,trainingSequence95,outsideDeck95} from './training95.js?v=95';
 import {mountPreschoolAudio93} from './preschool-audio93.js?v=102';
 import {MASTER_PRIZES86,MASTER_SCORE86,recordEnergy86,trainingRound86,trainingConsole86,unlockMaster86} from './base-training86.js?v=87';
@@ -78,7 +78,7 @@ const select=(id,label,options,value)=>`<label for="${id}">${label}</label><sele
 const grades=[['P','Przedszkole'],...Array.from({length:12},(_,i)=>[String(i+1),`Klasa ${i+1}`])];
 const people=[['pawel','Paweł'],['patryk','Patryk']];
 const note=t=>{const n=$('hq85-notice')||$('notice');if(!n){console.warn('Powiadomienie:',t);return}n.textContent=t;n.classList.add('visible');setTimeout(()=>{if(n.isConnected)n.classList.remove('visible')},4500)};
-const ACADEMY_RELEASE=102;
+const ACADEMY_RELEASE=103;
 async function checkAcademyUpdate(button){
  if(!button||button.disabled)return;
  const label=button.textContent,controller=new AbortController();
@@ -1297,7 +1297,9 @@ function hqRoomPanel84(p){
    button(won?'Zagraj jeszcze raz':'Rozpocznij próbę','hq:exercise:master','gold');
  }
  if(hqPanel84==='cockpit')return '<section class="hq95-cockpit-panel" id="hq84-panel"><section class="sq93" id="missions93-cockpit"></section></section>';
- if(hqPanel84==='flight')body=button('‹ Kokpit','hq:cockpit','alt')+flightMarkup88(button,speakBtn,{child:who,preview:testMode});
+ if(hqPanel84==='flight')return '<section class="hq95-cockpit-panel hq103-classic-panel" id="hq84-panel"><header class="hq103-classic-top">'+
+  button('‹ Kokpit','hq:cockpit','alt')+'<h2>Klasyczny lot Quinjetem</h2><button type="button" data-action="hq:close" aria-label="Wysiądź z samolotu">✕</button></header>'+
+  flightMarkup88(button,speakBtn,{child:who,preview:testMode})+'</section>';
  if(hqPanel84==='hangar'){
   const jet=p.base?.owned?.includes('quinjet');
   const board=gameGroup92(p.grade);
@@ -1405,7 +1407,7 @@ async function hqAction84(action,target){
  }
  if(what==='cockpit'&&tab==='base'&&hqPanel84==='flight')return hqShow84('cockpit');
  if(what==='flight'){
-  if(!id&&hqPanel84==='cockpit'&&p.base?.owned?.includes('quinjet'))return hqShow84('flight');
+  if(!id&&testMode&&hqPanel84==='cockpit'&&p.base?.owned?.includes('quinjet'))return hqShow84('flight');
   return;
  }
  if(what==='room'&&id==='shop'){
@@ -1558,7 +1560,7 @@ function mountMissionsView93(p,flight=false){
  const region=$(flight?'missions93-cockpit':'missions93-training');
  if(!region)return;
  (flight?mountHangar95:mountMissions93)(region,{
-  grade:p.grade,profileKey:who,legacy:flight&&p.base?.owned?.includes('quinjet'),
+  grade:p.grade,profileKey:who,preview:testMode,legacy:flight&&p.base?.owned?.includes('quinjet'),
   speak:(text,lang='pl-PL')=>speak(text,lang,p.mentor,data.settings.rate||1),
   tap:()=>trainingTapSound(true),tone:missionNote93
  });
@@ -1642,24 +1644,26 @@ function childRender(){
   });
   return;
  }
- if(tab==='base'&&!walking&&hqPanel84==='cockpit'){
-  layout('Kokpit samolotu','<dialog class="hq85-dialog hq95-cockpit-dialog" aria-label="Kokpit samolotu">'+hqRoomPanel84(p)+'</dialog>','walk');
+ const flightPanel=hqPanel84==='cockpit'||hqPanel84==='flight';
+ const flightTitle=hqPanel84==='flight'?'Klasyczny lot Quinjetem':'Kokpit samolotu';
+ if(tab==='base'&&!walking&&flightPanel){
+  layout(flightTitle,'<dialog class="hq85-dialog hq95-cockpit-dialog" aria-label="'+flightTitle+'">'+hqRoomPanel84(p)+'</dialog>','walk');
   const dialog=app.querySelector('.hq95-cockpit-dialog');
   if(dialog){
    if(dialog.showModal)dialog.showModal();else dialog.setAttribute('open','');
    dialog.addEventListener('cancel',event=>{event.preventDefault();void handle('hq:close');});
   }
-  mountMissionsView93(p,true);
+  if(hqPanel84==='cockpit')mountMissionsView93(p,true);
+  else mountNounFlight88(app,hqRead(p).paint,{child:who,preview:testMode});
   return;
  }
  if(tab==='base'&&walking){
   const panel=hqRoomPanel84(p);
   const care=['pet','pet-select','pet-quiz'].includes(hqPanel84);
   const mic='<button type="button" class="mic hq87-mic" data-action="mic" aria-label="Zadaj pytanie">🎙️</button>';
-  const cockpit=hqPanel84==='cockpit';
   const paintPicker=hqPanel84==='hangar'&&p.base?.owned?.includes('quinjet');
-  const dialog=panel?'<dialog class="hq85-dialog'+(cockpit?' hq95-cockpit-dialog':care?' hq86-pet-dialog':'')+'" aria-label="'+(cockpit?'Kokpit samolotu':care?'Kącik zwierzaka':'Interakcja w bazie')+'">'+panel+
-   (cockpit?'':'<div id="hq85-notice" role="status"></div><div class="hq87-dialog-mic">'+(paintPicker?'':mic)+'</div>')+'</dialog>':'';
+  const dialog=panel?'<dialog class="hq85-dialog'+(flightPanel?' hq95-cockpit-dialog':care?' hq86-pet-dialog':'')+'" aria-label="'+(flightPanel?flightTitle:care?'Kącik zwierzaka':'Interakcja w bazie')+'">'+panel+
+   (flightPanel?'':'<div id="hq85-notice" role="status"></div><div class="hq87-dialog-mic">'+(paintPicker?'':mic)+'</div>')+'</dialog>':'';
   const walk=baseWalkMarkup(p,who,hero(p.hero||(who==='pawel'?'iron':'spider'))[0],ACADEMY_RELEASE,dialog,mic);
   layout('Spacer po bazie',walk,'walk');
   mountBaseWalk(document.querySelector('[data-hq86-walk]'));mountPetCare86(app,careGesture);
@@ -1696,7 +1700,7 @@ if(tab==='learn'){
    html+=trainingFlowMarkup();
   }
   if(avengersRun)html+=avengersPanel();
- }layout('Akademia '+p.name,html);if(tab==='base'){mountBaseScene84(document.querySelector('[data-hq84-scene]'));mountPetCare86(app,careGesture);if(hqPanel84==='cockpit')mountMissionsView93(p,true);if(hqPanel84==='flight')mountNounFlight88(app,hqRead(p).paint,{child:who,preview:testMode});}if(tab==='arcade')hqMountArcade84();if(tab==='learn'&&v37Classic)newExercise();if(tab==='learn'&&['mixed','chosen'].includes(trainingStep))mountTraining95(p);if(tab==='trace')drawTrace()}
+ }layout('Akademia '+p.name,html);if(tab==='base'){mountBaseScene84(document.querySelector('[data-hq84-scene]'));mountPetCare86(app,careGesture);}if(tab==='arcade')hqMountArcade84();if(tab==='learn'&&v37Classic)newExercise();if(tab==='learn'&&['mixed','chosen'].includes(trainingStep))mountTraining95(p);if(tab==='trace')drawTrace()}
 const CROSSWORDS=[
  {word:'KOT',clue:'Miauczy i mruczy',r:0,c:2,dir:'v'},
  {word:'DOM',clue:'Mieszkamy w nim',r:1,c:1,dir:'h'},
@@ -2046,7 +2050,7 @@ if(action==='av36:next'&&avengersRun&&avengersRun.done){
  }
  return render();
 }
-const [a,b,c]=action.split(':');try{if(action==='exit'){hqSessions84.delete(who);hqReturn84=false;hqPanel84='';if(testMode){data=testSnapshot;testSnapshot=null;testMode=false;role='admin';who='';tab='home';adminTab='test';return render()}role='';who='';tab='home';return render()}if(a==='enter'){if(b==='admin'){if(!data.parentPin){const pin=prompt('Ustaw PIN mamy (minimum 4 cyfry)');if(!/^\d{4,8}$/.test(pin||''))return note('Wymagany PIN od 4 do 8 cyfr');data.parentPin=pin;await save()}else if(prompt('PIN mamy')!==data.parentPin)return note('Nieprawidłowy PIN');role='admin';adminTab='home'}else{const p=data.profiles[b];if(p.pin&&prompt('PIN profilu '+p.name)!==p.pin)return note('Nieprawidłowy PIN');role='child';who=b;tab='view-choice';hqPanel84='';hqReturn84=false;hqViews84.set(who,'classic')}return render()}if(a==='test'&&b==='enter'){if(!['pawel','patryk'].includes(c))return;testSnapshot=data;data=structuredClone(data);testMode=true;for(const id of ['pawel','patryk']){const p=data.profiles[id];p.coins=99999;p.arcadeUnlocked=ARCADE_GAMES.map(g=>g.id);const base=migrateBase(p);base.owned=BASE_ITEMS.map(i=>i.id)}role='child';who=c;tab='base';return render()}if(a==='admin'){adminTab=b;return render()}if(a==='child'){if(b==='base')return hqShow84();hqSessions84.delete(who);hqReturn84=false;tab=b;if(b==='learn'){v37Classic=false;avengersRun=null;trainingStep='subject';trainingSelectedPages=new Set()}return render()}if(action==='book:add')return runAdminAction(target,'Dodaje ksiazke…',async()=>{
+const [a,b,c]=action.split(':');try{if(action==='exit'){hqSessions84.delete(who);hqReturn84=false;hqPanel84='';if(testMode){data=testSnapshot;testSnapshot=null;testMode=false;role='admin';who='';tab='home';adminTab='test';return render()}role='';who='';tab='home';return render()}if(a==='enter'){if(b==='admin'){if(!data.parentPin){const pin=prompt('Ustaw PIN mamy (minimum 4 cyfry)');if(!/^\d{4,8}$/.test(pin||''))return note('Wymagany PIN od 4 do 8 cyfr');data.parentPin=pin;await save()}else if(prompt('PIN mamy')!==data.parentPin)return note('Nieprawidłowy PIN');role='admin';adminTab='home'}else{const p=data.profiles[b];if(p.pin&&prompt('PIN profilu '+p.name)!==p.pin)return note('Nieprawidłowy PIN');role='child';who=b;tab='view-choice';hqPanel84='';hqReturn84=false;hqViews84.set(who,'classic')}return render()}if(a==='test'&&b==='enter'){if(role!=='admin'||!['pawel','patryk'].includes(c))return;testSnapshot=data;data=structuredClone(data);testMode=true;for(const id of ['pawel','patryk']){const p=data.profiles[id];p.coins=99999;p.arcadeUnlocked=ARCADE_GAMES.map(g=>g.id);const base=migrateBase(p);base.owned=BASE_ITEMS.map(i=>i.id)}role='child';who=c;tab='base';return render()}if(a==='admin'){adminTab=b;return render()}if(a==='child'){if(b==='base')return hqShow84();hqSessions84.delete(who);hqReturn84=false;tab=b;if(b==='learn'){v37Classic=false;avengersRun=null;trainingStep='subject';trainingSelectedPages=new Set()}return render()}if(action==='book:add')return runAdminAction(target,'Dodaje ksiazke…',async()=>{
  if(!$('bsubject')?.value)throw Error('Najpierw zaznacz przedmioty w profilu dziecka.');
  const chosenKind=$('btype')?.value||'Podręcznik';const chosenSubject=$('bsubject')?.value||'Materiał';const chosenPart=$('bpart')?.value||'1';const title=chosenKind==='Inne'?$('btitle')?.value.trim():chosenSubject+' — '+chosenKind+' — część '+chosenPart;if(!title)return note('Wpisz nazwę materiału.');
  const child=$('bchild').value,subject=$('bsubject').value,part=$('bpart').value;

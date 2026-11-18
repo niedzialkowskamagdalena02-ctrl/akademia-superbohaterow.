@@ -11,18 +11,17 @@ const laneSpacing=1.38;
 export function flightMarkup88(button,voice,{child='',preview=false}={}){
  const mission=flightMission89(readFlightMission89(child,preview));
  return `<section class="hq88-flight" data-flight-phase="ready">
-  <h3>✈️ Lot Quinjetem</h3>
   <div class="hq89-flight-round"><b data-flight-topic>Misja 1</b><span data-flight-round>${flightSky89(0).name}</span></div>
   <h4 class="hq90-flight-goal" data-flight-goal>${mission.goal}</h4>
   <p class="hq88-flight-rules"><span data-flight-instruction>${mission.instruction}</span> ${voice(mission.goal+' '+mission.instruction)}</p>
   <div class="hq88-flight-controls">
-   ${button('◀','hq:flight:left','alt')}${button('Start','hq:flight:start','gold')}${button('▶','hq:flight:right','alt')}
+   ${button('Start','hq:flight:start','gold')}
+   <div class="hq89-flight-fire" hidden>${button('✦ Strzał','hq:flight:fire','gold')}</div>
   </div>
   <div class="hq88-flight-score"><span data-flight-score>Trafienia 0</span><span data-flight-hearts>Osłony 3</span></div>
   <div class="hq88-flight-gates" aria-label="Najbliższe bramki: lewa, środkowa i prawa"><span>—</span><span>—</span><span>—</span></div>
-  <canvas class="hq88-flight-view" tabindex="0" aria-label="Pas lotu. Steruj strzałkami lub dotknij pasa. W rundzie z literówkami strzelasz spacją."></canvas>
-  <div class="hq89-flight-fire" hidden>${button('✦ Strzał','hq:flight:fire','gold')}</div>
   <p class="hq88-flight-status" data-flight-status role="status" aria-live="polite"></p>
+  <canvas class="hq88-flight-view" tabindex="0" aria-label="Pas lotu. Przeciągnij palec lub użyj strzałek. W rundzie z literówkami strzelasz spacją."></canvas>
  </section>`;
 }
 
@@ -37,7 +36,7 @@ export function mountNounFlight88(root,paint,{child='',preview=false}={}){
  const status=game.querySelector('[data-flight-status]'),start=game.querySelector('[data-action="hq:flight:start"]');
  const topic=game.querySelector('[data-flight-topic]'),round=game.querySelector('[data-flight-round]');
  const goal=game.querySelector('[data-flight-goal]'),instruction=game.querySelector('[data-flight-instruction]');
- const voice=game.querySelector('.hq88-flight-rules [data-speak]'),panel=game.closest('.hq84-panel');
+ const voice=game.querySelector('.hq88-flight-rules [data-speak]'),panel=game.closest('.hq95-cockpit-panel');
  const fireControl=game.querySelector('.hq89-flight-fire'),fireButton=fireControl.querySelector('button');
  const lanes=[...game.querySelectorAll('.hq88-flight-gates span')];
  const controller=new AbortController(),{signal}=controller;
@@ -127,8 +126,6 @@ export function mountNounFlight88(root,paint,{child='',preview=false}={}){
    if(run?.phase==='flying'||run?.phase==='done')brief();
    else begin();
   }
-  if(action==='hq:flight:left')steer(lane-1);
-  if(action==='hq:flight:right')steer(lane+1);
   if(action==='hq:flight:fire')fire();
  },{signal});
  const pointer=event=>{

@@ -1,7 +1,7 @@
 import {gamePreview99} from './game-art99.js?v=99';
 import {gameGroup92,shuffle92} from './learning-games92.js?v=92';
 import {mountTrace92} from './learning-trace92.js?v=95';
-import {schoolMissions93,preschoolMissions93,captainMissions93,aceMissions93,missionDeck93} from './missions93-data.js?v=102';
+import {schoolMissions93,preschoolMissions93,captainMissions93,aceMissions93,missionDeck93} from './missions93-data.js?v=103';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const button=(text,action,attributes='')=>`<button type="button" data-mission93="${action}" ${attributes}>${text}</button>`;

@@ -55,16 +55,11 @@ export function airMarkup95(id, task, options, { turn, preschool, complete, last
     : id === 'fuel' ? '<span class="flight95-hose" aria-hidden="true"></span>' : '';
   const dashboard = id === 'fuel'
     ? '<div class="flight95-fuel"><span>PALIWO</span><progress max="100" value="100" data-f95-fuel aria-label="Paliwo"></progress><b data-f95-percent>100%</b></div>' : '';
-  const controls = [
-    ['move:up', '▲', 'Wyżej'], ['move:hold', '●', 'Utrzymaj kurs'], ['move:down', '▼', 'Niżej']
-  ].map(([action, arrow, label]) => `<div class="flight95-paired">
-    <button type="button" data-f95-action="${action}" aria-label="${label}"><span aria-hidden="true">${arrow}</span> ${label}</button>
-    ${preschool ? voice95(label, 'pl-PL', 'Odsłuchaj: ' + label) : ''}</div>`).join('');
   const speech = preschool && !slalom && !feeder;
   const targets = complete ? '' : options.map((item, i) =>
     target95(item, i, target, targetAltitudes(options.length)[i], speech)).join('');
   const reward = complete && feeder ? feederReward96(esc(task.answer),esc(task.word),lastRound)
-    : complete && slalom ? '<div class="flight96-slalom-win"><strong>6 / 6</strong><span aria-hidden="true">★</span></div>' : '';
+    : complete && slalom ? `<div class="flight96-slalom-win"><strong>${task.needed.length} / ${task.needed.length}</strong><span aria-hidden="true">★</span></div>` : '';
   return surface95(theme, `
     <div class="flight95-viewport" data-f95-viewport tabindex="0"
         aria-label="Tor lotu. Przeciągnij w górę lub w dół albo użyj strzałek.">
@@ -72,7 +67,7 @@ export function airMarkup95(id, task, options, { turn, preschool, complete, last
       ${targets}
       <div class="flight95-player" data-f95-player>${feeder?feederPlane96(complete):attachment+plane95()}</div>
       ${dashboard}${reward}
-    </div>${complete ? '' : `<div class="flight95-steering">${controls}</div>`}`,
+    </div>`,
     `flight95-air${feeder?' flight96-feeder':slalom?' flight96-slalom':''}${complete?' flight96-air-win':''}`);
 }
 

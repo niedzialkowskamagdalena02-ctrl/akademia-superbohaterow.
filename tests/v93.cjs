@@ -92,8 +92,21 @@ function board(){
  assert.doesNotMatch(view.root.innerHTML,/missions93-cockpit/);
  await view.api.handle('hq:board');
  assert.match(view.root.innerHTML,/missions93-cockpit/);
+ account.profiles.patryk.base={owned:['quinjet']};
+ await view.api.handle('hq:flight');
+ assert.doesNotMatch(view.root.innerHTML,/hq88-flight/);
+ await view.api.handle('test:enter:pawel');
+ assert.match(view.root.innerHTML,/missions93-cockpit/);
  await view.api.handle('hq:close');
  assert.doesNotMatch(view.root.innerHTML,/missions93-cockpit/);
+ view.api.set(account,{role:'admin'});
+ view.ctx.flightMarkup88=(await import(url('noun-flight88.js'))).flightMarkup88;
+ view.ctx.mountNounFlight88=()=>{};
+ await view.api.handle('test:enter:patryk');
+ await view.api.handle('hq:hangar');
+ await view.api.handle('hq:board');
+ await view.api.handle('hq:flight');
+ assert.match(view.root.innerHTML,/hq88-flight/);
 
  const originals=[setTimeout,clearTimeout,setInterval,clearInterval,Date.now,Math.random];
  let now=0,nextId=0;

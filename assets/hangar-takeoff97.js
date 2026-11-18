@@ -55,7 +55,7 @@ export function takeoffMarkup97({needed,gates},button) {
   </div>`;
 }
 
-export function mountTakeoff97(root,{needed,gates},{onLaunch,onGate,onFinish}) {
+export function mountTakeoff97(root,{needed,gates,problems},{onLaunch,onGate,onFinish}) {
   const stage = root.querySelector('.flight97-takeoff');
   const view = root.querySelector('[data-f95-viewport]');
   const aircraft = root.querySelector('[data-f97-aircraft]');
@@ -74,9 +74,16 @@ export function mountTakeoff97(root,{needed,gates},{onLaunch,onGate,onFinish}) {
     elapsed=0;
     stage.dataset.f97Phase=value;
   }
+  function announceGate(retry = false) {
+    const problem=problems?.[passed];
+    const prefix=retry?'Spróbuj jeszcze raz. ':'';
+    const prompt=problem?`Ile to ${problem.expression}? Przeleć przez obręcz z wynikiem.`:gatePrompt(needed[passed]);
+    const speech=problem?`Ile to ${problem.speech}? Przeleć przez obręcz z wynikiem.`:prompt;
+    onGate(passed,prefix+prompt,retry,prefix+speech);
+  }
   function showGate() {
     hoops[passed].forEach(ring=>{ ring.hidden=false; });
-    onGate(passed,gatePrompt(needed[passed]));
+    announceGate();
   }
   function project(time, progress) {
     const inFlight = phase==='air'||phase==='done';
@@ -110,7 +117,7 @@ export function mountTakeoff97(root,{needed,gates},{onLaunch,onGate,onFinish}) {
       wrong=index;
       retryAt=elapsed+.6;
       hoops[passed][index].dataset.f97Gate='wrong';
-      onGate(passed,'Spróbuj jeszcze raz. '+gatePrompt(needed[passed]),true);
+      announceGate(true);
       return;
     }
     const lastRound=passed+1===needed.length;

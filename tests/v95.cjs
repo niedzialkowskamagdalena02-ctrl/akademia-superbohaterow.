@@ -69,33 +69,58 @@ function fixture(){
  }
 
  const root=fixture(), spoken=[];
- const pass=label=>{
+ const pass=(label,touch=false)=>{
   const choices=[...root.innerHTML.matchAll(/data-f95-action="aim:(\d+)" class="flight95-target" aria-label="([^"]+)"/g)];
   const target=choices.find(item=>item[2]===String(label));
   assert.ok(target,'Brak celu '+label);
-  root.click('aim:'+target[1]);
+  if(touch)root.drag('[data-f95-viewport]',[50,10],[190,[96,196,296][Number(target[1])]]);
+  else root.click('aim:'+target[1]);
   frames(10);
  };
  const won=name=>assert.ok(root.querySelector(name==='baggage'?'.flight97-board':'.flight95-surface').dataset.f95Win,name);
 
  try{
+  const published=['baggage','takeoff','airballs'];
   for(const grade of ['1','3','4']){
-   mountHangar95(root,{grade});
-   assert.equal(root.innerHTML.includes('data-f95-action="mission:baggage"'),grade!=='4');
+   const maths=grade!=='4';
+   mountHangar95(root,{grade,legacy:true});
+   assert.deepEqual([...root.innerHTML.matchAll(/data-f95-action="mission:([a-z]+)"\s*>/g)].map(match=>match[1]),maths?published:[]);
+   assert.match(root.innerHTML,/data-action="hq:flight" disabled/);
+   root.click('mission:radar');
+   assert.equal(root.dataset.fl95Mode,'menu');
+   if(maths){
+    root.click('mission:takeoff');
+    assert.equal(root.dataset.fl95Mode,'brief');
+   }
   }
-  const boardingMission=captainMissions93.find(([id])=>id==='baggage');
-  for(const [grade,missions] of [['P',captainMissions93],['2',[...aceMissions93,boardingMission]]]){
-   mountHangar95(root,{grade,profileKey:grade,legacy:grade==='P',speak:message=>spoken.push(message)});
+  mountHangar95(root,{grade:'P'});
+  assert.deepEqual([...root.innerHTML.matchAll(/data-f95-action="mission:([a-z]+)"\s*>/g)].map(match=>match[1]),published);
+  const school=[...captainMissions93.filter(([id])=>published.includes(id)),...aceMissions93];
+  for(const [grade,missions] of [['P',captainMissions93],['2',school]]){
+   mountHangar95(root,{grade,profileKey:grade,preview:true,legacy:true,speak:message=>spoken.push(message)});
    assert.equal((root.innerHTML.match(/data-f95-action="mission:/g)||[]).length,missions.length);
    assert.equal((root.innerHTML.match(/class="flight95-card"/g)||[]).length,missions.length+1);
-   assert.match(root.innerHTML,/data-action="hq:flight"[^>]*>[\s\S]*?<i aria-hidden="true">8<\/i>/);
-   assert.equal(/data-action="hq:flight" disabled/.test(root.innerHTML),grade!=='P');
+   assert.match(root.innerHTML,/data-action="hq:flight"\s*>/);
+   assert.doesNotMatch(root.innerHTML,/data-f95-locked/);
    for(const [id] of missions){
     root.click('mission:'+id);
     assert.match(root.innerHTML,/Rozpocznij misję/);
     root.click('start');
+    assert.equal(root.dataset.f95Screen,'play');
+    assert.doesNotMatch(root.innerHTML,/flight95-bottom|flight95-steering|data-f95-action="move:/);
     const t=hangarDeck95(id,grade)[0];
     assert.ok(t.prompt,id);
+    if(grade==='2'&&['airballs','takeoff'].includes(id)){
+     assert.equal(t.problems.length,id==='takeoff'?11:6);
+     assert.deepEqual(new Set(t.problems.map(problem=>problem.expression.split(' ')[1])),new Set(['+','−','×']));
+     t.problems.forEach(({expression,answer},i)=>{
+      const [a,op,b]=expression.split(' '), aNum=Number(a), bNum=Number(b);
+      assert.equal(answer,{'+':aNum+bNum,'−':aNum-bNum,'×':aNum*bNum}[op]);
+      assert.equal(t.needed[i],answer);
+      assert.ok(t.gates[i].includes(answer));
+      assert.equal(new Set(t.gates[i]).size,t.gates[i].length);
+     });
+    }
     if(id==='baggage'){
      function load(task){
       const board=root.querySelector('.flight97-board');
@@ -160,7 +185,7 @@ function fixture(){
     if(id==='takeoff'){
      assert.match(root.innerHTML,/flight97-dashboard[\s\S]*data-f95-lever/);
      assert.doesNotMatch(root.innerHTML,/flight97-joystick|move:hold/);
-     assert.deepEqual(t.gates.map(gates=>gates.length),[1,2,2,2,2,3,3,3,3,3,3]);
+     assert.deepEqual(t.gates.map(gates=>gates.length),[grade==='P'?1:2,2,2,2,2,3,3,3,3,3,3]);
      assert.ok(t.gates.every((gates,i)=>gates.includes(t.needed[i])&&new Set(gates).size===gates.length));
      assert.notDeepEqual(t.needed,hangarDeck95(id,grade,()=>.77)[0].needed);
      const progress=root.querySelector('[data-f97-board-progress]'),prompt=root.querySelector('[data-game-prompt]');
@@ -176,7 +201,7 @@ function fixture(){
      assert.equal(stage.dataset.f97Phase,'lift');
      frames(1.2);
      assert.equal(stage.dataset.f97Phase,'air');
-     assert.match(prompt.textContent,/cyfrą/);
+     assert.match(prompt.textContent,grade==='P'?/cyfrą/:/Ile to .*?\? Przeleć przez obręcz z wynikiem/);
      const positions={1:[[50,35]],2:[[29,36],[71,30]],3:[[21,38],[50,25],[79,38]]};
      const steer=(count,index)=>root.drag('[data-f95-viewport]',[200,240],positions[count][index].map(percent=>percent*4));
      for(const [round,gates] of t.gates.entries()){
@@ -186,6 +211,11 @@ function fixture(){
        steer(gates.length,1-correct);frames(2);
        assert.equal(progress.textContent,'1 / 11');
        assert.match(prompt.textContent,/Spróbuj jeszcze raz/);
+       if(t.problems){
+        assert.ok(prompt.textContent.includes(t.problems[round].expression));
+        root.click('read');
+        assert.ok(spoken.at(-1).includes(t.problems[round].speech));
+       }
       }
       steer(gates.length,correct);frames(2);
       assert.equal(progress.textContent,(round+1)+' / 11');
@@ -196,15 +226,25 @@ function fixture(){
     }
     if(id==='airballs'){
      assert.doesNotMatch(root.innerHTML,/Odsłuchaj: Chmura burzowa|Odsłuchaj: [0-9]/);
-     pass('Chmura burzowa');
+     pass('Chmura burzowa',true);
      assert.match(root.innerHTML,/0 \/ 6/);
-     for(const value of t.needed){
-      if(value===5){
+     for(const [i,value] of t.needed.entries()){
+      if(t.problems){
+       assert.ok(root.innerHTML.includes(t.problems[i].expression));
+       root.click('read');
+       assert.ok(spoken.at(-1).includes(t.problems[i].speech));
+       if(i===1){
+        pass(t.gates[i].find(answer=>answer!==value),true);
+        assert.match(root.innerHTML,/1 \/ 6/);
+        assert.match(root.innerHTML,/Oblicz wynik i spróbuj jeszcze raz/);
+        assert.ok(root.innerHTML.includes(t.problems[i].expression));
+       }
+      }else if(value===5){
        assert.match(root.innerHTML,/Następna cyfra <strong>pięć<\/strong>/);
        root.click('read');
        assert.match(spoken.at(-1),/^Następna cyfra pięć\./);
       }
-      pass(value);
+      pass(value,true);
      }
     }
     if(id==='feeder'){
@@ -230,7 +270,11 @@ function fixture(){
      for(const i of [0,1,2]){root.click('crate:'+i);root.click('load');}
      root.click('depart');root.click('hangar:'+t.options.findIndex(item=>item.value===t.answer));root.click('cargo-drop');
     }
-    if(id==='radio'){root.click('dir:'+t.direction);if(t.color)root.click('island:'+t.color);}
+    if(id==='radio'){
+     const end={up:[200,60],down:[200,340],left:[60,200],right:[340,200]}[t.direction];
+     root.drag('[data-f95-radio-swipe]',[200,200],end);
+     if(t.color)root.click('island:'+t.color);
+    }
     if(id==='airport'){root.click('arrive');arrival();root.click('reply:'+t.options.findIndex(item=>item.value===t.answer));}
     won(id);
     root.click('catalog');
@@ -300,7 +344,7 @@ function fixture(){
  assert.ok(scope.some(turn=>turn.page?.number===12&&turn.key==='matematyka'));
  assert.deepEqual([...new Set(scope.map(turn=>turn.key))].sort(),['angielski','matematyka','polski','przyroda']);
  const manifest=vm.runInNewContext(fs.readFileSync(path.join(dir,'sw.js'),'utf8')+'\n({CACHE,ASSETS})',{self:{addEventListener(){}}});
- assert.equal(manifest.CACHE,'academy-v102');
+ assert.equal(manifest.CACHE,'academy-v103');
  for(const resource of manifest.ASSETS)assert.ok(fs.existsSync(path.resolve(dir,resource.split('?')[0])),resource);
- console.log('PASS V102 – 14 gier, trasa pięciu lotów w obu kokpitach, obręcze, slalom, karmnik, trening i cache.');
+ console.log('PASS V103 – tryb mamy i profile dzieci, matematyka i cyfry w balonach i obręczach, gesty, odprawa, pozostałe gry i cache.');
 })().catch(error=>{console.error(error);process.exitCode=1;});

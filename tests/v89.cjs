@@ -142,6 +142,8 @@ function fakeNode(){
  assert.equal(readFlightMission89('patryk'),0);
  const button=(label,action)=>`<button data-action="${action}">${label}</button>`;
  assert.match(flightMarkup88(button,()=>'',{child:'pawel'}),/Złap wyrazy z poprawnym h lub ch/);
+ assert.doesNotMatch(flightMarkup88(button,()=>''),/hq:flight:(?:left|right)/);
+ assert.match(flightMarkup88(button,()=>''),/hq:flight:fire[\s\S]*<canvas/);
  assert.match(flightMarkup88(button,()=>'',{child:'pawel',preview:true}),/Złap wszystkie rzeczowniki/);
  saveFlightMission89('adjectives',false,1);
  assert.match(flightMarkup88(button,()=>'',{child:'adjectives'}),/Misja 1[\s\S]*Złap wszystkie przymiotniki/);
