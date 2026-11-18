@@ -82,7 +82,7 @@ function board(){
  await view.api.handle('child:home');
  assert.equal((view.root.innerHTML.match(/class="academy104-destination"/g)||[]).length,6);
  assert.equal((view.root.innerHTML.match(/data-action="child:academy"/g)||[]).length,1);
- assert.match(view.root.innerHTML,/aria-label="Książki">\s*<img[^>]*interface106\/patryk-books\.webp/);
+ assert.match(view.root.innerHTML,/data-destination="books"[\s\S]*?aria-label="Książki">\s*<span[^>]*>\s*<img[^>]*interface102\/icon-books\.webp/);
  assert.match(view.root.innerHTML,/data-speak="Książki"/);
  const header=markup=>markup.match(/<header class="academy102-header">[\s\S]*?<\/header>/)?.[0];
  const dashboardHeader=header(view.root.innerHTML);
@@ -94,6 +94,22 @@ function board(){
   assert.equal((view.root.innerHTML.match(/class="academy104-destination"/g)||[]).length,6,page);
   assert.equal((view.root.innerHTML.match(/class="academy102-player"/g)||[]).length,1,page);
   assert.match(view.root.innerHTML,new RegExp(`data-action="child:${page}" aria-current="page"`));
+  if(page==='mentor'){
+   for(const portrait of ['hero-pawel','hero-patryk'])assert.match(view.root.innerHTML,new RegExp(`class="mentor-choice-portrait" src="assets/interface108/${portrait}\\.webp"`));
+   const current=account.profiles.patryk.mentor==='fun'?'hero-patryk':'hero-pawel';
+   assert.match(view.root.innerHTML,new RegExp(`class="mentor-figure" src="assets/interface108/${current}\\.webp"`));
+   await view.api.handle('mentor:choose:fun');
+   assert.match(view.root.innerHTML,/class="mentor-figure" src="assets\/interface108\/hero-patryk\.webp"/);
+  }
+  if(page==='learn'){
+   assert.match(view.root.innerHTML,/class="academy111-board"/);
+   assert.match(view.root.innerHTML,/class="academy111-mic-slot"/);
+   assert.equal((view.root.innerHTML.match(/data-action="mic"/g)||[]).length,1);
+   for(const subject of ['Chemia','Fizyka']){
+    assert.ok(view.root.innerHTML.includes(`class="academy111-subject" disabled aria-label="${subject} — w przygotowaniu"`));
+    assert.ok(!view.root.innerHTML.includes('training:subject:'+subject));
+   }
+  }
  }
  let clicks=0;
  const audioParam={setValueAtTime(){},exponentialRampToValueAtTime(){}};
@@ -122,9 +138,28 @@ function board(){
  const schoolView=app();
  schoolView.api.set(account,{role:'child',who:'pawel'});
  await schoolView.api.handle('child:home');
- assert.match(schoolView.root.innerHTML,/aria-label="Trening">\s*<img[^>]*interface106\/patryk-training\.webp/);
+ assert.match(schoolView.root.innerHTML,/aria-label="Trening">\s*<span[^>]*>\s*<img[^>]*interface102\/icon-training\.webp/);
  assert.match(schoolView.root.innerHTML,/data-speak="Książki"/);
- assert.equal((schoolView.root.innerHTML.match(/academy107-wide-face/g)||[]).length,2);
+ assert.equal((schoolView.root.innerHTML.match(/academy107-wide-face/g)||[]).length,6);
+ await schoolView.api.handle('child:learn');
+ assert.match(schoolView.root.innerHTML,/academy111-globe/);
+ assert.match(schoolView.root.innerHTML,/academy111-butterfly/);
+ assert.match(schoolView.root.innerHTML,/academy111-numbers/);
+ schoolView.ctx.window.AudioContext=view.ctx.window.AudioContext;
+ const mathCard={
+  dataset:{action:'training:subject:Matematyka',theme:'matematyka'},isConnected:true,
+  classList:new Set(['tr72-subject-card']),
+  closest(selector){return ['button,summary','[data-action]'].includes(selector)?this:null;},
+  matches(){return false;}
+ };
+ mathCard.classList.contains=mathCard.classList.has;
+ for(const listener of schoolView.listeners.click)listener({target:mathCard,detail:1,isTrusted:true});
+ assert.equal(clicks,2);
+ assert.ok(mathCard.classList.has('tr72-selected'));
+ assert.match(schoolView.root.innerHTML,/data-v77-step="subject"/);
+ [...schoolView.timers.values()].find(timer=>timer.ms===1150).fn();
+ assert.match(schoolView.root.innerHTML,/data-v77-step="source"/);
+ assert.match(schoolView.root.innerHTML,/data-action="training:mode:train"/);
  await schoolView.api.handle('child:missions-board');
  for(const icon of ['shield','icon-missions','alert','school','home']){
   assert.ok(schoolView.root.innerHTML.includes('interface107/'+icon+'.webp'),icon);

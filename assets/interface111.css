@@ -1,0 +1,133 @@
+.academy111-board {
+  --training-art:url(interface111/training-art.webp);
+  position:relative;
+  aspect-ratio:1422 / 1536;
+  background:#101b42 url(interface111/training-frame.webp) center / 100% 100% no-repeat;
+  border-radius:clamp(10px,4cqi,25px);
+  overflow:hidden;
+}
+.academy111-board :is(.academy111-subject,.academy111-piece,.academy111-voice-slot,.academy111-mic-slot) {
+  position:absolute;
+  inset:var(--top) auto auto var(--left);
+  width:var(--width);
+  height:var(--height);
+}
+.academy111-board :is(.academy111-subject,.academy111-piece,.academy111-voice-slot > button) {
+  background:var(--training-art) var(--crop-position) / var(--crop-size) no-repeat!important;
+}
+.academy111-board button.academy111-subject,
+.academy111-board .academy111-voice-slot > button.listen {
+  display:block;
+  min-width:0;
+  min-height:0;
+  margin:0;
+  border:0!important;
+  border-radius:clamp(4px,1.4cqi,10px);
+  padding:0!important;
+  box-shadow:none!important;
+  opacity:1;
+  overflow:visible;
+}
+.academy111-board button.academy111-subject::before,
+.academy111-board button.academy111-subject::after { content:none; }
+.academy111-board button.academy111-subject:disabled { cursor:default; }
+.academy111-board button.academy111-subject:not(:disabled):is(:hover,:focus-visible) { filter:brightness(1.05); }
+.academy111-board button.academy111-subject:not(:disabled):is(:active,.tr72-selected) {
+  transform:translateY(clamp(2px,.8cqi,5px)) scale(.976);
+  filter:brightness(1.1);
+  z-index:2;
+}
+.academy111-board :is(.academy111-voice-slot > button,.academy111-mic-slot > button) {
+  width:100%!important;
+  height:100%!important;
+}
+.academy111-board .academy111-voice-slot > button.listen {
+  font-size:0;
+  color:transparent;
+}
+.academy111-board .academy111-voice-slot > button.listen:is(:active,[data-academy-pressed]) {
+  transform:translateY(3px) scale(.95);
+  filter:brightness(.86);
+}
+.academy102-screen .academy111-mic-slot .mic.academy111-mic {
+  position:static;
+  border-radius:50%;
+  background:var(--training-art) var(--crop-position) / var(--crop-size) no-repeat!important;
+  mask-image:none;
+}
+.academy111-mic .v76-mic-label {
+  overflow-wrap:anywhere;
+  max-width:94%;
+}
+.academy111-motion {
+  position:absolute;
+  inset:0;
+  display:none;
+  background:var(--motion-art) center / 100% 100% no-repeat;
+  pointer-events:none;
+}
+.academy111-subject.tr72-selected .academy111-motion { display:block; }
+.academy111-board .academy111-piece {
+  pointer-events:none;
+  mask-image:radial-gradient(ellipse closest-side,#000 76%,transparent 108%);
+}
+.academy111-rocket { animation:v75-rocket 7s ease-in-out infinite; }
+.academy111-globe { animation:v76-globe-turn 1.1s ease-in-out; }
+.academy111-leaf { animation:v76-tile-hop .9s ease-in-out; }
+.academy111-bulb { animation:v76-bulb-light 1.1s ease-in-out; }
+.academy111-letter {
+  --dx:8cqi;
+  --dy:-7cqi;
+  animation:v76-letter-flight 1.1s ease-in-out;
+}
+.academy111-letter:nth-child(2n) { --dx:-12cqi; --dy:6cqi; }
+.academy111-motion .academy111-illustration { mask-image:radial-gradient(ellipse closest-side,#000 86%,transparent 122%); }
+.academy111-subject[data-theme="polski"] .academy111-illustration { animation:v73-write .48s ease-in-out both; }
+.academy111-subject[data-theme="matematyka"] .academy111-illustration { animation:v73-fall .48s ease-in both; }
+.academy111-subject[data-theme="angielski"] .academy111-illustration { animation:v73-talk .48s ease-in-out both; }
+.academy111-subject[data-theme="przyroda"] .academy111-illustration { animation:v73-fly .48s ease-in-out both; }
+.academy111-numbers, .academy111-butterfly {
+  position:absolute;
+  z-index:2;
+  font-weight:900;
+  text-shadow:0 2px 4px #081332;
+}
+.academy111-numbers {
+  inset:32% 0 auto;
+  color:#ffe477;
+  font-size:clamp(.78rem,4.1cqi,1.65rem);
+  animation:v75-digits 1.15s ease-out both;
+}
+.academy111-butterfly {
+  top:28%;
+  left:-18%;
+  font-size:clamp(1.15rem,6cqi,2.8rem);
+  animation:academy111-butterfly 1.15s ease-out both;
+}
+@keyframes academy111-butterfly {
+  0% { opacity:0; transform:rotate(-15deg); }
+  18%,72% { opacity:1; }
+  100% { left:106%; opacity:0; transform:translateY(-50%) rotate(18deg); }
+}
+.academy111-extra-subjects { margin:12px 4% 0; }
+.mentor-room .mentor-choice {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+}
+.mentor-choice .mentor-choice-portrait {
+  width:100%;
+  height:clamp(48px,17cqi,94px);
+  object-fit:contain;
+}
+.mentor-room .mentor-choice:is(:active,[data-academy-pressed]) {
+  translate:0 5px;
+  scale:.97;
+  filter:brightness(.87);
+}
+@media (prefers-reduced-motion:reduce) {
+  .academy111-board .academy111-rocket { animation:none; }
+  .academy111-subject.tr72-selected .academy111-motion { display:none; }
+}
