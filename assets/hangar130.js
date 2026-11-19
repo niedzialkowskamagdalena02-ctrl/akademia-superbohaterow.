@@ -2,9 +2,10 @@ import {captainMissions93,aceMissions93} from './missions93-data.js?v=103';
 import {gameGroup92} from './learning-games92.js?v=92';
 import {mountHangar95 as mountLegacy95} from './hangar95.js?v=130';
 import {gameIds130,modeNames130,createProgress130} from './hangar130-data.js?v=130';
-import {mountRings130,mountEngine130} from './hangar130-flight.js?v=130';
-import {mountBalloons130} from './hangar130-balloons.js?v=130';
-import {mountBaggage130} from './hangar130-baggage.js?v=130';
+import {mountEngine130} from './hangar130-flight.js?v=131';
+import {mountRings131} from './rings131.js?v=131';
+import {mountBalloons130} from './hangar130-balloons.js?v=131';
+import {mountBaggage130} from './hangar130-baggage.js?v=131';
 
 export const art130='assets/hangar130/';
 export const esc130=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -14,14 +15,14 @@ const tiles={baggage:'01_odprawa_bagazowa',takeoff:'02_lot_przez_obrecze',airbal
 const intros={
  baggage:'Pięć lotów, pięć pieczątek! Wybieraj walizkę lub pasażera, potem miejsce. Możesz także przeciągać elementy. Bez pośpiechu.',
  takeoff:'Pociągnij dźwignię. Oblicz wynik i steruj w lewo lub w prawo, aby przelecieć przez otwór właściwej obręczy. Każda runda czeka na twój pierwszy ruch.',
- airballs:'Steruj samolotem w górę i w dół. Strzelaj w balon z właściwą liczbą. Omijaj burzową chmurę! Błędny balon odpowie strzałem.',
+ airballs:'Steruj samolotem w górę i w dół. Stuknij samolot, aby strzelić w balon z właściwą liczbą. Omijaj burzową chmurę! Błędny balon odpowie strzałem.',
  engine:'Wpisz sześć kodów. Używaj klawiatury na ekranie albo cyfr, Backspace i Enter. Zapalone kontrolki pozostają włączone. Nie ma limitu czasu.'
 };
 let dispose130=()=>{};
 // Only decode the selected game's resources. No animated reference films or mockups are shipped.
 const prepared=new Map();
 async function prepare130(game){
- const map={baggage:['terminal.jpg','kabina.jpg','walizka.png','walizka_zielona.png','walizka_czerwona.png','walizka_niebieska.png','mis.png','kot.png','pies.png','fotel.png','bilet.png','pas.jpg','samolot.png','paszport.png','nowy_jork.jpg'],takeoff:['dzwignia.png','obrecz.png','obrecz_poprawna.png','obrecz_bledna.png','niebo.jpg','samolot_tyl.png','kokpit_i_pas.jpg','odznaka.png'],engine:['kokpit.jpg','pas.jpg','samolot.png','kontrolka.png','wskaznik.png','odznaka.png'],airballs:['balon_rozowy.png','balon_pomaranczowy.png','samolot.png','chmura.png','piorun.png','pocisk.png','pekniecie_balonu.png','blysk_trafienia.png','niebo.jpg']};
+ const map={baggage:['terminal.jpg','kabina.jpg','walizka.png','walizka_zielona.png','walizka_czerwona.png','walizka_niebieska.png','mis.png','kot.png','pies.png','fotel.png','bilet.png','pas.jpg','samolot.png','paszport.png','nowy_jork.jpg'],takeoff:['instruments.webp','odznaka.png'],engine:['kokpit.jpg','pas.jpg','samolot.png','kontrolka.png','wskaznik.png','odznaka.png'],airballs:['balon_rozowy.png','balon_pomaranczowy.png','samolot.png','chmura.png','piorun.png','pocisk.png','pekniecie_balonu.png','blysk_trafienia.png']};
  const dir={takeoff:'rings',airballs:'balloons'}[game]||game;
  if(!prepared.has(game))prepared.set(game,Promise.all(map[game].map(name=>new Promise((resolve,reject)=>{
   const image=new Image();image.onload=()=>image.decode?.().catch(()=>{}).then(()=>resolve())??resolve();image.onerror=()=>reject(Error('Nie udało się wczytać '+name));image.src=art130+dir+'/'+name;
@@ -35,7 +36,7 @@ export function mountHangar130(root,options={}){
  const available=[...captainMissions93,...aceMissions93];
  const catalogGames=group==='preschool'?[...captainMissions93,aceMissions93[0]]:group==='school'?[...captainMissions93.slice(0,3),...aceMissions93]:[];
  const playable=key=>catalogGames.some(r=>r[0]===key)&&(gameIds130.includes(key)||preview);
- const abort=new AbortController();let context=null,oldGame=null,serial=0,current='',disposed=false;
+ const abort=new AbortController();let context=null,oldGame=null,serial=0,current='',disposed=false,pointerTicket=false;
  root.classList.add('h130');root.tabIndex=-1;
  const title=id=>available.find(r=>r[0]===id)?.[2]||'As Przestworzy';
  const speakTask=text=>speak(String(text),'pl-PL');
@@ -100,10 +101,16 @@ export function mountHangar130(root,options={}){
   try{await prepare130(id);}catch(e){if(token===serial){if(status)status.textContent=e.message;root.querySelectorAll('[data-h130^="play:"]').forEach(el=>el.disabled=false);}return;}
   if(token!==serial||disposed||!root.isConnected)return;
   context=makeContext(id,mode);
-  ({baggage:mountBaggage130,takeoff:mountRings130,airballs:mountBalloons130,engine:mountEngine130}[id])(context);
+ ({baggage:mountBaggage130,takeoff:mountRings131,airballs:mountBalloons130,engine:mountEngine130}[id])(context);
  }
+ // A release/click that entered the airplane cannot also choose a tile underneath.
+ // Keyboard and assistive-technology clicks have detail=0 and remain available.
+ root.addEventListener('pointerdown',()=>{pointerTicket=true;},{signal:abort.signal,capture:true});
+ root.addEventListener('pointercancel',()=>{pointerTicket=false;},{signal:abort.signal});
  root.addEventListener('click',e=>{
   const button=e.target.closest('[data-h130]');if(!button||button.disabled)return;
+  if(e.detail>0&&!pointerTicket){e.preventDefault();e.stopImmediatePropagation();return;}
+  pointerTicket=false;
   const [action,arg]=button.dataset.h130.split(':');
   if(['menu','exit','game','play','classic','speak'].includes(action)){e.stopPropagation();tap();}
   if(action==='menu')menu();

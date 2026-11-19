@@ -1,14 +1,17 @@
 import {boarding130,bagAllowed130,baggageValid130,seatsValid130,cities130,destinations130,modeNames130} from './hangar130-data.js?v=130';
-import {img130,btn130,esc130} from './hangar130.js?v=130';
-import {status130,bindRead130} from './hangar130-flight.js?v=130';
+import {img130,btn130,esc130} from './hangar130.js?v=131';
+import {status130,bindRead130} from './hangar130-flight.js?v=131';
 
 const colorNames={purple:'fioletowa',green:'zielona',red:'CZERWONA',blue:'niebieska'};
 const files={purple:'walizka.png',green:'walizka_zielona.png',red:'walizka_czerwona.png',blue:'walizka_niebieska.png'};
 const bagArt=item=>`${img130('baggage/'+files[item.color])}<b>${esc130(item.label)}</b>${item.color==='red'?'<small>CZERWONA</small>':''}`;
 export function mountBaggage130(c){
  let flight=c.progress.unlocked(),task=boarding130(c.mode,flight),phase='brief',placed=[],people={},pick=null,hold=0,busy=false,gesture=null,swallow=0;
- const get=s=>c.root.querySelector(s),selected=()=>task.people.find(p=>p.id===pick),saved=()=>c.progress.read().stamps||{};
- const text=()=>phase==='cabin'?task.people.map(p=>p.name+': '+p.ticket).join('. '):task.prompt;
+ const get=s=>c.root.querySelector(s),saved=()=>c.progress.read().stamps||{};
+ const roster=()=>[...task.people,...[['mis','Miś'],['kot','Kot'],['pies','Pies']].filter(([id])=>!task.people.some(p=>p.id===id)).map(([sprite,name])=>({id:'guest-'+sprite,sprite,name,guest:true}))];
+ const selected=()=>roster().find(p=>p.id===pick);
+ const ticketText=person=>person.guest?'Ten pasażer czeka na inny lot.':/^\d+$/.test(person.ticket)?`${person.name} powinien siedzieć na miejscu numer ${person.ticket}.`:`${person.name}. Zadanie z biletu: ${person.ticket}`;
+ const text=()=>phase==='cabin'?'Sprawdź kartę pokładową pasażera. Wybierz pasażera, aby zobaczyć jego miejsce.':task.prompt;
  const steps=()=>`<nav class="h130-steps" aria-label="Etapy lotu"><strong>Lot ${flight+1} / 5 · ${esc130(task.city)}</strong><span>${['baggage','cabin','launch'].map((s,i)=>`<b ${phase===s?'aria-current="step"':''}>${['Bagaż','Kabina','Start'][i]}</b>`).join(' → ')}</span></nav>`;
  function heading(prompt){return steps()+`<section class="h130-task"><div><small>${esc130(modeNames130[c.mode])}</small><h3>${esc130(prompt)}</h3></div>${btn130('read-task','🔊','aria-label="Powtórz polecenie pilota"')}${btn130('hint','Podpowiedź')}</section>`;}
  function bind(){
@@ -18,7 +21,6 @@ export function mountBaggage130(c){
    const [a,arg]=b.dataset.h130.split(':');
    if(a==='hint'){c.status(task.hint);c.speak(task.hint);}
    if(a==='flight'&&Number(arg)<=c.progress.unlocked()){flight=Number(arg);task=boarding130(c.mode,flight);brief();}
-   if(a==='difficulty'&&phase==='brief'&&modeNames130[arg]){c.mode=arg;task=boarding130(c.mode,flight);brief();}
    if(a==='load'){placed=[];people={};pick=null;phase='baggage';draw();c.speak(task.prompt);}
    if(a==='bag')selectBag(Number(arg));
    if(a==='hold-tab'){hold=Number(arg);draw();}
@@ -28,7 +30,8 @@ export function mountBaggage130(c){
     if(!baggageValid130(task,placed)){c.status(task.rule==='equal'?'Każdy luk ma mieć tyle samo walizek. Możesz je przełożyć.':task.rule==='fill'?'Sprawdź wolne miejsca we wszystkich lukach.':'Sprawdź walizki i ich kolejność.');return;}
     busy=true;get('.h130-holds').classList.add('is-closing');c.status('Bagaż sprawdzony. Zamykamy luki.');c.later(()=>{busy=false;phase='cabin';pick=null;draw();c.speak(text());},c.reduced?150:650);
    }
-   if(a==='person'){pick=arg;draw('Wskaż miejsce zgodne z biletem.');}
+   if(a==='person'){pick=arg;draw('Wskaż miejsce zgodne z biletem.');const person=selected();if(person)c.speak(ticketText(person));}
+   if(a==='read-ticket'&&selected())c.speak(ticketText(selected()));
    if(a==='seat')placePerson(pick,arg);
    if(a==='depart'&&seatsValid130(task,people)){phase='launch';c.takeoff({label:'Start do '+destinations130[flight],onFinish:arrive});}
    if(a==='continue'){if(flight<4){flight++;task=boarding130(c.mode,flight);brief();}else passport();}
@@ -57,7 +60,7 @@ export function mountBaggage130(c){
  function brief(){
   phase='brief';busy=false;pick=null;hold=0;
   const stamps=saved(),unlock=c.progress.unlocked();
-  c.view(steps()+`<section class="h130-flight-card">${flight===0?img130('baggage/nowy_jork.jpg','h130-city'):''}<div class="h130-ticket-head">${img130('baggage/bilet.png')}<h3>Karta pokładowa · ${esc130(task.city)}</h3></div><div class="h130-modes" aria-label="Poziom tego lotu">${Object.entries(modeNames130).map(([m,name])=>btn130('difficulty:'+m,name,`aria-pressed="${c.mode===m}"`)).join('')}</div><p>${esc130(task.prompt)}</p><p>${esc130(task.people.map(p=>p.name+': '+p.ticket).join(' · '))}</p>${btn130('read-task','🔊 Polecenie pilota')}${btn130('load','Załaduj walizki','class="h130-primary"')}</section><nav class="h130-flight-select" aria-label="Wybierz odblokowany lot">${cities130.map((name,i)=>btn130('flight:'+i,`${i+1}. ${esc130(name)}${stamps['young:'+i]||stamps['captain:'+i]?' ✓':''}`,`${i>unlock?'disabled':''} aria-current="${i===flight?'true':'false'}"`)).join('')}</nav>${btn130('passport','Paszport i pieczątki')}${status130()}`);
+  c.view(steps()+`<section class="h130-flight-card">${flight===0?img130('baggage/nowy_jork.jpg','h130-city'):''}<div class="h130-ticket-head">${img130('baggage/bilet.png')}<h3>Karta pokładowa · ${esc130(task.city)}</h3></div><p>${esc130(task.prompt)}</p><p>Sprawdź karty pokładowe pasażerów przed wybraniem miejsc.</p>${btn130('read-task','🔊 Polecenie pilota')}${btn130('load','Załaduj walizki','class="h130-primary"')}</section><nav class="h130-flight-select" aria-label="Wybierz odblokowany lot">${cities130.map((name,i)=>btn130('flight:'+i,`${i+1}. ${esc130(name)}${stamps['young:'+i]||stamps['captain:'+i]?' ✓':''}`,`${i>unlock?'disabled':''} aria-current="${i===flight?'true':'false'}"`)).join('')}</nav>${btn130('passport','Paszport i pieczątki')}${status130()}`);
   bind();c.speak('Lot '+(flight+1)+'. Lecimy do '+destinations130[flight]+'. '+task.prompt);
  }
  function selectBag(index){pick=index;c.root.querySelectorAll('[data-bag-drag]').forEach(el=>el.setAttribute('aria-pressed',String(Number(el.dataset.bagDrag)===index)));c.status('Wskaż luk dla walizki '+task.pool[index].label+'.');}
@@ -79,8 +82,8 @@ export function mountBaggage130(c){
     return btn130('seat:'+s.id,`<b>${esc130(s.id)}</b>${img130('baggage/fotel.png','h130-seat-art')}${passenger?img130('baggage/'+passenger.id+'.png','h130-seated')+'<i class="h130-belt" aria-label="Pas zapięty"></i>':''}`,`class="h130-seat" data-seat="${esc130(s.id)}" aria-label="Fotel ${esc130(s.id)}, rząd ${s.row}, ${s.side==='left'?'lewa':'prawa'} strona${passenger?', '+passenger.name:''}"`);
    };
    c.view(heading('Kabina — posadź pasażerów zgodnie z biletami')+`<section class="h130-cabin" style="background-image:url('${c.art}baggage/kabina.jpg')"><div class="h130-seat-rows">${rows.map(row=>`<div class="h130-seat-row"><small>Rząd ${row}</small><div>${seatMarkup(task.seats.find(s=>s.row===row&&s.side==='left'&&s.pos===0))}${seatMarkup(task.seats.find(s=>s.row===row&&s.side==='left'&&s.pos===1))}<span class="h130-aisle" aria-label="Przejście">⋮</span>${seatMarkup(task.seats.find(s=>s.row===row&&s.side==='right'&&s.pos===0))}${seatMarkup(task.seats.find(s=>s.row===row&&s.side==='right'&&s.pos===1))}</div></div>`).join('')}</div>
-    <div class="h130-passengers">${task.people.map(p=>btn130('person:'+p.id,`${img130('baggage/'+p.id+'.png')}<span>${esc130(p.name)}</span>`,`data-person-drag="${p.id}" aria-pressed="${pick===p.id}" ${people[p.id]?'disabled':''}`)).join('')}</div></section>
-    <div class="h130-boarding-ticket">${img130('baggage/bilet.png')}<p>${selected()?esc130(selected().name+' · Miejsce: '+selected().ticket):'Wybierz pasażera, aby zobaczyć jego bilet.'}</p></div>
+    <div class="h130-passengers">${roster().map(p=>btn130('person:'+p.id,`${img130('baggage/'+(p.sprite||p.id)+'.png')}<span>${esc130(p.name)}</span>`,`data-person-drag="${p.id}" aria-pressed="${pick===p.id}" ${people[p.id]?'disabled':''}`)).join('')}</div></section>
+    <div class="h130-boarding-ticket">${img130('baggage/bilet.png')}<p>${selected()?esc130(ticketText(selected())):'Wybierz pasażera, aby zobaczyć jego miejsce.'}</p>${selected()?btn130('read-ticket','🔊','aria-label="Odczytaj kartę pokładową pasażera"'):''}</div>
     ${btn130('depart','Start do '+destinations130[flight],`class="h130-primary" ${seatsValid130(task,people)?'':'disabled'}`)}${status130()}`);
    bind();c.status(message||'Wybierz pasażera i fotel albo przeciągnij go na miejsce z biletu.');
   }
@@ -108,7 +111,7 @@ export function mountBaggage130(c){
  }
  function placePerson(id,seat,point){
   if(busy||phase!=='cabin')return;const person=task.people.find(p=>p.id===id);
-  if(!person){c.status('Najpierw wybierz pasażera.');return;}
+  if(!person){c.status(selected()?.guest?'Ten pasażer czeka na inny lot.':'Najpierw wybierz pasażera.');return;}
   if(person.target!==seat||Object.values(people).includes(seat)){c.status('Sprawdź bilet. '+person.name+': '+person.ticket);c.speak(person.name+'. '+person.ticket);c.animate(get('[data-person-drag="'+id+'"]'),[{transform:'translateY(0)'},{transform:'translateY(-6px)'},{transform:'translateY(0)'}],{duration:300});return;}
   transfer(get('[data-person-drag="'+id+'"]'),get('[data-seat="'+seat+'"]'),point,()=>{people[id]=seat;pick=null;c.tone(3);draw(person.name+' siedzi na miejscu '+seat+'. Pas zapięty.');c.animate(get('[data-seat="'+seat+'"] .h130-seated'),[{transform:'translateY(0)'},{transform:'translateY(-8px)'},{transform:'translateY(0)'}],{duration:450});});
  }

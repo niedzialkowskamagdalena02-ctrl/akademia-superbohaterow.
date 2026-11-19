@@ -1,6 +1,6 @@
 import {heroAssets127 as ART} from './hero-assets127.js?v=129';
 import {heroResources129} from './hero-resources129.js?v=129';
-import {fistPoint130,paintWind130} from './hero-wind130.js?v=130';
+import {fistPoint130,paintWind130,windAngle131,paintContact131} from './hero-wind130.js?v=131';
 import {panoramaTriangle119} from './panorama-software119.js?v=126';
 import {FLOOR_DEPTH} from './base-map86.js?v=95';
 
@@ -222,16 +222,21 @@ export function heroPlayer127(hero,changed=()=>{},{resources=heroResources129}={
    const wanted=active.frames[index],complete=frameKeys127(wanted).every(key=>pool.peek(key));
    if(complete)active.lastIndex=index;
    const frame=active.frames[active.lastIndex],loaded=new Map(frameKeys127(frame).map(key=>[key,pool.peek(key)]));
+   const box=frameRect127(width,height),fist=active.effect==='punch'?fistPoint130(frame,active.side,box):null;
+   if(fist){active.windAngle=windAngle131(active.windPoint,fist,active.side,active.windAngle||0);active.windPoint=fist;}
    if(active.windKey&&!reduced&&delta>-.28&&delta<.10){
-    const wind=pool.peek(active.windKey),box=frameRect127(width,height);
-    if(wind)paintWind130(ctx,active.windKey,wind,fistPoint130(frame,active.side,box),box,Math.sin((delta+.28)/.38*Math.PI)*.85);
+    const wind=pool.peek(active.windKey);
+    if(wind)paintWind130(ctx,active.windKey,wind,fist,box,Math.sin((delta+.28)/.38*Math.PI)*.85,active.windAngle);
    }
    if(active.preserveOther&&idle){
     ctx.save();ctx.beginPath();ctx.rect(active.side<0?0:width/2,0,width/2,height);ctx.clip();drawFrame127(ctx,width,height,frame,loaded);ctx.restore();
     const image=pool.peek(idle);if(image){ctx.save();ctx.beginPath();ctx.rect(active.side<0?width/2:0,0,width/2,height);ctx.clip();drawFrame127(ctx,width,height,idle,new Map([[idle,image]]));ctx.restore();}
    }else drawFrame127(ctx,width,height,frame,loaded);
    if(active.tipKey&&delta>=-.05&&delta<.10){const tip=pool.peek(active.tipKey);if(tip)fitFlash127(ctx,tip,width*.5,height*.47,Math.min(width,height)*.23,reduced?.35:.85);}
-   if(active.flashKey&&delta>=0&&delta<.25){const flash=pool.peek(active.flashKey);if(flash)fitFlash127(ctx,flash,width*.5,height*.47,Math.min(width,height)*.42,(1-delta/.25)*(reduced?.45:1));}
+   if(active.flashKey&&delta>=0&&delta<.25){
+    const flash=pool.peek(active.flashKey),alpha=(1-delta/.25)*(reduced?.45:1);
+    if(flash){if(fist)paintContact131(ctx,active.flashKey,flash,fist,box,alpha);else fitFlash127(ctx,flash,width*.5,height*.47,Math.min(width,height)*.42,alpha);}
+   }
   }else if(equipping){
    const t=Math.min(1,(now-equipping.at)/equipping.duration),from=pool.peek(equipping.from),to=pool.peek(equipping.to);
    if(from){ctx.save();ctx.beginPath();ctx.rect(0,0,width/2,height);ctx.clip();drawFrame127(ctx,width,height,equipping.from,new Map([[equipping.from,from]]));ctx.restore();}

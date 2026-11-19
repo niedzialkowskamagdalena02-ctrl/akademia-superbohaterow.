@@ -4,8 +4,9 @@ import {panoramaSoftware119} from './panorama-software119.js?v=128';
 import {hqPet,hqPlaced,hqRead} from './headquarters84.js?v=117';
 import {baseArt88} from './base-art88.js?v=119';
 import {drawHeroHands} from './hero-hands85.js?v=127';
-import {heroPlayer127,powerMarkup127} from './hero-animation127.js?v=130';
-import {heroAbility130,gestureModes130,handAction130,handAt130,createHandGestures130} from './hero-gestures130.js?v=130';
+import {heroPlayer127,powerMarkup127} from './hero-animation127.js?v=131';
+import {heroAbility130,gestureModes130,handAction130,handAt130,createHandGestures130} from './hero-gestures130.js?v=131';
+import {walkHelpHidden131,hideWalkHelp131} from './walk-ui131.js?v=131';
 import {walkRooms,FLOOR_DEPTH,FULL_TURN,PHOTO_FOV,VERTICAL_SCALE,advance86,cameraBasis86,clamp86,roomAnchor86,wrapAngle} from './base-map86.js?v=95';
 import {energy86} from './base-training86.js?v=117';
 import {petSprite86} from './pet-care86.js?v=117';
@@ -35,7 +36,7 @@ export function baseWalkMarkup(profile,child,hero,release,panel,mic=''){
   prop('shop',.905,.391,true,baseArt88('thorhammer'),'shop-hammer','','hq88-shop-display')+
   prop('shop',.892,.507,true,baseArt88('boots'),'shop-boots','','hq88-shop-display');
  const {crystals,charged,capacity,level}=energy86(profile);
- return `<section class="hq86-walk" data-hq84-scene data-hq86-walk data-child="${child}" data-hero="${hero}" data-hand-attribute="${heroAbility130(hero,profile.base?.owned??[])?1:0}" data-jet="${jet?paint:school?'blue':''}">
+ return `<section class="hq86-walk" data-hq84-scene data-hq86-walk data-child="${child}" data-hero="${hero}" data-hand-attribute="${heroAbility130(hero,profile.base?.owned??[],child)?1:0}" data-jet="${jet?paint:school?'blue':''}">
   <div class="hq86-stage" tabindex="0" aria-label="Przesuń palcem poza dłońmi, aby się rozejrzeć. Przytrzymaj ekran poza dłońmi, żeby iść. Stuknij dłoń: cios. Dwa szybkie stuknięcia w tę samą dłoń: moc. Przesuń prawą dłoń w górę, żeby wyjąć przedmiot; w dół, żeby go schować. Klawiatura: strzałki i spacja, F — lewa, G — prawa dłoń.">
    <div class="hq86-fallback" aria-hidden="true"></div>
    <canvas class="hq119-software" aria-hidden="true"></canvas>
@@ -56,8 +57,8 @@ export function baseWalkMarkup(profile,child,hero,release,panel,mic=''){
    })).join('')}
    ${Object.entries(casePositions).map(([slot,[u,v]])=>trophy(slot,'armory',u,v)).join('')+trophy('lab','polish',labShelf.u,labShelf.v-.041,false)+pet+shop}
    <header class="hq86-top">
-    <button type="button" data-action="hq:view:menu">‹ Wybór widoku</button>
-    <button type="button" data-walk-back hidden>‹ Wróć</button>
+    <div class="hq131-walk-nav"><button type="button" data-action="hq:view:menu">‹ Wybór widoku</button>
+    <button type="button" data-walk-back hidden>‹ Wróć do poprzedniego pokoju</button></div>
     <div class="hq86-energy" title="${crystals} zdobytych kryształów energii">
      <div><b>Energia bohatera</b><span>poz. ${level}</span></div>
      <meter min="0" max="${capacity}" value="${charged}" aria-label="Energia superbohatera" aria-valuetext="${crystals} zdobytych kryształów energii"></meter>
@@ -66,7 +67,7 @@ export function baseWalkMarkup(profile,child,hero,release,panel,mic=''){
    </header>
    ${powerMarkup127(hero)}
    <div class="hq86-location" role="status">${scene.name}</div><small class="hq86-release">V${release}</small>
-   <p class="hq86-help">Przesuń poza dłońmi, żeby się rozejrzeć. Przytrzymaj, żeby iść. Dłoń: stuknij — cios, dwa razy — moc.</p>
+   <aside class="hq86-help" data-walk-help ${walkHelpHidden131(child)?'hidden':''}><p>Przesuń poza dłońmi, żeby się rozejrzeć. Przytrzymaj, żeby iść. Dłoń: stuknij — cios, dwa razy — moc.</p><button type="button" data-walk-hide-help aria-label="Ukryj instrukcję">×</button></aside>
    ${panel?'':'<div class="hq86-notice" id="hq85-notice" role="status"></div>'}
   </div>${panel}${panel?'':mic}</section>`;
 }
@@ -318,7 +319,7 @@ export function mountBaseWalk(root){
   const selected=room();
   busy=true;stage.setAttribute('aria-busy','true');
   location.textContent=selected.name;stage.dataset.room=state().room;
-  back.hidden=stack.length===1;menu.hidden=stack.length!==1;
+  back.hidden=stack.length===1;menu.hidden=false;stage.dataset.canBack=String(stack.length>1);
   greeting=null;sceneMarkers=[];markers.forEach(marker=>marker.hidden=true);
   jetBounds=null;
   gestures.cancel();powerQueue=[];heroPlayer.stop();syncPowerControls();
@@ -468,7 +469,7 @@ export function mountBaseWalk(root){
  }
  on(stage,'pointerdown',event=>{
   ignoreClickUntil=0;
-  if(event.button!==0||pointer||busy||transition||dialog||event.target.closest('.hq86-top,[data-walk-controls],.pres93-speaker'))return;
+  if(event.button!==0||pointer||busy||transition||dialog||event.target.closest('.hq86-top,[data-walk-controls],[data-walk-help],.pres93-speaker'))return;
   if(gestures.down(event)){event.preventDefault();event.stopPropagation();stage.setPointerCapture(event.pointerId);return;}
   const point=event.target.closest('.hq86-point')||jetTarget(event);
   pointer={id:event.pointerId,time:performance.now(),x:event.clientX,y:event.clientY,drag:false,walk:false,point};
@@ -493,6 +494,9 @@ export function mountBaseWalk(root){
  on(window,'blur',()=>{gestures.cancel();powerQueue=[];stop();});
  on(stage,'contextmenu',event=>event.preventDefault());
  on(stage,'click',event=>{
+  if(event.target.closest('[data-walk-hide-help]')){
+   event.preventDefault();event.stopPropagation();const help=stage.querySelector('[data-walk-help]');if(help)help.hidden=true;hideWalkHelp131(child);return;
+  }
   if(forwarding)return;
   if(event.detail&&(performance.now()<ignoreClickUntil||gestures.suppressClick())){
    event.preventDefault();event.stopPropagation();return;

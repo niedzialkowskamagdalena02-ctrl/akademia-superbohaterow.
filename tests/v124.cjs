@@ -64,7 +64,7 @@ const url=n=>pathToFileURL(path.join(root,'assets',n));
  const other=ui.entry124({...p,parent:false,profiles:[{...p.profiles[0],hero:'captain'}]});assert.ok(other.includes(menu.heroPortrait('captain')));assert.doesNotMatch(other,/enter:patryk|enter:admin/);imagesExist(other);
  const choices=ui.choices124();for(const key of ['classic','walk'])assert.ok(choices.includes('hq:view:'+key));imagesExist(choices);
  const empty=ui.training124Material({subject:'Fizyka',hasPages:false});assert.equal((empty.match(/ disabled/g)||[]).length,2);
- const sw=vm.runInNewContext(fs.readFileSync(path.join(root,'sw.js'),'utf8')+'\n({CACHE,ASSETS})',{self:{addEventListener(){}}});assert.equal(sw.CACHE,'academy-v130');
+ const sw=vm.runInNewContext(fs.readFileSync(path.join(root,'sw.js'),'utf8')+'\n({CACHE,ASSETS})',{self:{addEventListener(){}}});assert.equal(sw.CACHE,'academy-v131');
  for(const file of fs.readdirSync(path.join(root,'assets/interface124')).filter(n=>n.endsWith('.webp')))assert.ok(sw.ASSETS.includes('./assets/interface124/'+file),file+' offline');
  for(const asset of sw.ASSETS)if(asset!=='./')assert.ok(fs.existsSync(path.join(root,asset.replace(/^\.\//,'').split('?')[0])),asset+' exists');
  console.log('PASS V124: supplied assets, unchanged subjects/animations and V118 menu, both children, live book photos/counts, full-book/chapter/range selection, invalid range guard, navigation, profiles, one microphone and offline assets.');

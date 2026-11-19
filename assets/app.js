@@ -8,13 +8,13 @@ import {academy102Shell,academy102Choices,academy102Player,academy102DashboardNa
 import {mountMissionGame} from './mission-game.js?v=116';
 import { initHeadquarters3D } from './headquarters3d.js?v=119';
 import {initial,get,put,del,allRecords,replaceRecords,compress,uid,gradeName} from './data.js';
-import {speak,listen,stopVoice,getVoiceState,setVoiceState,spellEnglish77} from './voice.js?v=81';
+import {speak,listen,stopVoice,getVoiceState,setVoiceState,spellEnglish77} from './voice.js?v=131';
 import {vocabulary,readings,explanation} from './learning.js';
 import {syncAdapter} from './sync.js?v=81';
 import {BASE_ITEMS,baseMarkup,migrateBase} from './base.js?v=119';
 import {mountArcade,stopArcade} from './arcade.js?v=93';
 import {mountBaseScene84} from './base-scene84.js?v=117';
-import {baseWalkMarkup,mountBaseWalk,resetBaseWalk,openWalkRoom87,focusWalkCase88,walkRoomId93} from './base-walk85.js?v=130';
+import {baseWalkMarkup,mountBaseWalk,resetBaseWalk,openWalkRoom87,focusWalkCase88,walkRoomId93} from './base-walk85.js?v=131';
 import {HQ_SLOTS,hqItems,hqRead,hqBalances,hqEarnToken,hqSpendToken,hqRecordCrystals,hqBuyWithGems,hqPlaced,hqPlace,hqDisplayPurchase88,hqPet,hqChoosePet88,hqPaint,hqEarnFood,hqMarkup,hqWallet,hqShop,hqFoodQuiz88} from './headquarters84.js?v=117';
 import {petRoom86,petCareMarkup86,petPicker88,mountPetCare86,setPetCare86,servePet87} from './pet-care86.js?v=117';
 import {flightMarkup88,mountNounFlight88} from './noun-flight88.js?v=103';
@@ -22,7 +22,7 @@ import {petQuiz88} from './pet-quiz88.js?v=88';
 import {gameGroup92,recordGameAward92} from './learning-games92.js?v=92';
 import {mountLearningGames92} from './learning-play92.js?v=95';
 import {mountMissions93,missionNote93} from './missions93.js?v=103';
-import {mountHangar130 as mountHangar95} from './hangar130.js?v=130';
+import {mountHangar130 as mountHangar95} from './hangar130.js?v=131';
 import {trainingCatalog95,trainingSubject95,trainingGroupName95,outsideDeck95,trainingAssessment115,outsideMix115} from './training95.js?v=115';
 import {mountPreschoolAudio93} from './preschool-audio93.js?v=116';
 import {MASTER_PRIZES86,MASTER_SCORE86,recordEnergy86,trainingRound86,trainingConsole86,unlockMaster86} from './base-training86.js?v=117';
@@ -81,7 +81,7 @@ const select=(id,label,options,value)=>`<label for="${id}">${label}</label><sele
 const grades=[['P','Przedszkole'],...Array.from({length:12},(_,i)=>[String(i+1),`Klasa ${i+1}`])];
 const people=[['pawel','Paweł'],['patryk','Patryk']];
 const note=t=>{const n=$('hq85-notice')||$('notice');if(!n){console.warn('Powiadomienie:',t);return}n.textContent=t;n.classList.add('visible');setTimeout(()=>{if(n.isConnected)n.classList.remove('visible')},4500)};
-const ACADEMY_RELEASE=130;
+const ACADEMY_RELEASE=131;
 async function checkAcademyUpdate(button){
  if(!button||button.disabled)return;
  const label=button.textContent,controller=new AbortController();

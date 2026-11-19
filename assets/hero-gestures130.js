@@ -1,8 +1,10 @@
-import {frameRect127} from './hero-animation127.js?v=130';
+import {frameRect127} from './hero-animation127.js?v=131';
 
 export const DOUBLE_TAP130=250;
 // Existing inventory IDs, including the older training-web item.
-export function heroAbility130(hero,owned=[]){
+export const freeHandPowers131=Object.freeze(['pawel','patryk']);
+export function heroAbility130(hero,owned=[],child=''){
+ if(['iron','spider'].includes(hero)&&freeHandPowers131.includes(child))return true;
  const has=id=>owned.includes(id);
  return hero==='hulk'||hero==='captain'&&has('shield')||hero==='thor'&&has('thorhammer')||hero==='iron'&&has('arc')||hero==='spider'&&(has('spiderweb')||has('web'));
 }

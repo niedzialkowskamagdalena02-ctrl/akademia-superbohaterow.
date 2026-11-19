@@ -8,7 +8,7 @@ import {GAME_TITLES81,buildGames81,renderGame81,gameAction81,mountGame81,stopAud
 import {cardArt81} from './art81.js?v=81';
 const GAME_TITLES_ALL81={...GAME_TITLES80,...GAME_TITLES81};
 const allGames81=(pool,round)=>[...buildGames80(pool,round),...buildGames81(pool,round)];
-import {speakSequence,stopVoice,setVoiceState,spellEnglish77} from './voice.js?v=81';
+import {speakSequence,stopVoice,setVoiceState,spellEnglish77} from './voice.js?v=131';
 import {cleanEnglish76,vocabulary76,checkedVocabulary76,englishInstruction76,makeVocabularyTasks76,spokenMatch76,englishTaskSafe76,englishCue774,englishRecall774,simplifyEnglish774,englishExplanation774,englishAudioAllowed774,polishText774,normalizeListening79,listeningVocabulary79,readingProgress79,acceptReading79} from './english76.js?v=81';
 // V53_TEST_FIXES_01
 // V53_CONSOLIDATED_CROSSING_CHAPTERS

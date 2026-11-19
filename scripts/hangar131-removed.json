@@ -1,0 +1,50 @@
+[
+  {
+    "path": "assets/hangar130/rings/dzwignia.png",
+    "bytes": 207179,
+    "sha256": "3d2899ee11de50c470b8e0a4d931d899db46eddd957b96b9ec926d1bca9a0f71",
+    "reason": "Zastąpiony widok obręczy V130; na życzenie przywrócono poprzedni mechanizm i kokpit."
+  },
+  {
+    "path": "assets/hangar130/rings/obrecz.png",
+    "bytes": 267475,
+    "sha256": "e278aad553de4b31fa31fb3e88dacefc755e6744e9b48b4e2a225459984ccd5b",
+    "reason": "Zastąpiony widok obręczy V130; na życzenie przywrócono poprzedni mechanizm i kokpit."
+  },
+  {
+    "path": "assets/hangar130/rings/obrecz_poprawna.png",
+    "bytes": 262611,
+    "sha256": "c0be213ea349222fa728d37eb1d86783cecb741519b2bcde22a8a3c96fa2048a",
+    "reason": "Zastąpiony widok obręczy V130; na życzenie przywrócono poprzedni mechanizm i kokpit."
+  },
+  {
+    "path": "assets/hangar130/rings/obrecz_bledna.png",
+    "bytes": 260152,
+    "sha256": "69fbb70f887d69a0ce88eaae3a57ef929cebba00e0c57e327aa7318065e35a81",
+    "reason": "Zastąpiony widok obręczy V130; na życzenie przywrócono poprzedni mechanizm i kokpit."
+  },
+  {
+    "path": "assets/hangar130/rings/niebo.jpg",
+    "bytes": 284790,
+    "sha256": "002f20be41f7006ef7e466042707fb39b602c08f387a5fa441e7750d4d2dc49f",
+    "reason": "Zastąpiony widok obręczy V130; na życzenie przywrócono poprzedni mechanizm i kokpit."
+  },
+  {
+    "path": "assets/hangar130/rings/samolot_tyl.png",
+    "bytes": 209967,
+    "sha256": "f801b8690f2a87d5d9cebc85842f3e49c3488affb2f6c88749cdee356958a0ba",
+    "reason": "Zastąpiony widok obręczy V130; na życzenie przywrócono poprzedni mechanizm i kokpit."
+  },
+  {
+    "path": "assets/hangar130/rings/kokpit_i_pas.jpg",
+    "bytes": 419966,
+    "sha256": "36d58c333a5c267baabd349be943b06a1b3130e6a4b98df33403e604a906238c",
+    "reason": "Zastąpiony widok obręczy V130; na życzenie przywrócono poprzedni mechanizm i kokpit."
+  },
+  {
+    "path": "assets/hangar130/balloons/niebo.jpg",
+    "bytes": 42094,
+    "sha256": "f59c19a14920008494e7781f6989ded84aba465e43c3b9834d9ae867d45e3aab",
+    "reason": "Tło z dużą chmurą zastąpione małymi ruchomymi chmurami poprzedniego kokpitu."
+  }
+]

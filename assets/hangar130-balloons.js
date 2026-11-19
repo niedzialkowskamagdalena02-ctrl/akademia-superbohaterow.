@@ -1,24 +1,25 @@
 import {tasks130,choices130,clamp130,balloonHit130,cloudHit130} from './hangar130-data.js?v=130';
-import {img130,btn130} from './hangar130.js?v=130';
-import {taskBar130,status130,bindRead130,pointerPosition130} from './hangar130-flight.js?v=130';
+import {img130,btn130} from './hangar130.js?v=131';
+import {taskBar130,status130,bindRead130,pointerPosition130} from './hangar130-flight.js?v=131';
 
 export function mountBalloons130(c){
  const tasks=tasks130('airballs',c.mode),saved=c.progress.read()['airballs:'+c.mode];
- let round=saved?.complete?0:clamp130(saved?.round||0,0,tasks.length-1),phase='play',y=.53,aim=.53,held=0,drag=null,time=0,active=false,bullet=null,counter=null,cloud,balloons=[],fall=0,lightning=0,hitTimer=0,transition=false;
- const get=s=>c.root.querySelector(s), planeX=.16, planeWidth=.21;
+ let round=saved?.complete?0:clamp130(saved?.round||0,0,tasks.length-1),phase='play',y=.53,aim=.53,held=0,drag=null,time=0,active=false,bullet=null,counter=null,cloud,balloons=[],fall=0,lightning=0,hitTimer=0,transition=false,ignoreClick=0;
+ const get=s=>c.root.querySelector(s), planeX=.18, planeWidth=.26;
  function render(){
   phase='play';active=false;bullet=null;counter=null;hitTimer=0;lightning=0;fall=0;time=0;held=0;transition=false;aim=y=.53;
   const values=choices130(tasks[round].answer,3);
   balloons=values.map((value,i)=>({value,x:.78+i*.09,y:.2+i*.28,w:.13,h:.25,alive:true,shake:0}));
   cloud={x:.6,y:.37};
   c.view(taskBar130(c,tasks[round],round,tasks.length)+`<div class="h130-balloon-board" data-h130-board tabindex="0" aria-label="Steruj samolotem w górę lub w dół i strzelaj do balonów">
-   ${img130('balloons/samolot.png','h130-side-plane')}
+   <div class="h131-flying-clouds" aria-hidden="true">${Array.from({length:5},(_,i)=>`<i style="--cloud:${i}"></i>`).join('')}</div>
+   ${btn130('plane-fire',img130('balloons/samolot.png','h130-side-plane'),'class="h131-plane-target" aria-label="Stuknij samolot, aby strzelić"')}
    ${balloons.map((b,i)=>`<div class="h130-balloon" data-balloon="${i}">${img130('balloons/'+(i%2?'balon_pomaranczowy':'balon_rozowy')+'.png')}<strong>${b.value}</strong></div>`).join('')}
    ${img130('balloons/chmura.png','h130-storm')}${img130('balloons/pocisk.png','h130-projectile h130-outgoing')}${img130('balloons/pocisk.png','h130-projectile h130-countershot')}
    ${img130('balloons/piorun.png','h130-lightning')}${img130('balloons/pekniecie_balonu.png','h130-burst')}${img130('balloons/blysk_trafienia.png','h130-contact')}
-  </div><div class="h130-controls">${btn130('up','↑','aria-label="Leć w górę"')}${btn130('fire','Strzel','class="h130-primary" aria-label="Strzel w balon"')}${btn130('down','↓','aria-label="Leć w dół"')}</div>${status130()}<div data-retry></div>`);
-  c.status('Ustaw wysokość i strzel w balon z właściwą liczbą. Omijaj chmurę.');bindRead130(c,()=>tasks[round].prompt);c.speak(tasks[round].prompt);
-  const board=get('[data-h130-board]'),plane=get('.h130-side-plane'),storm=get('.h130-storm'),out=get('.h130-outgoing'),back=get('.h130-countershot'),bolt=get('.h130-lightning'),burst=get('.h130-burst'),contact=get('.h130-contact');
+  </div>${status130()}<div data-retry></div>`);
+  c.status('Przeciągaj palcem, żeby sterować. Stuknij samolot, żeby strzelić. Omijaj burzową chmurę.');bindRead130(c,()=>tasks[round].prompt);c.speak(tasks[round].prompt);
+  const board=get('[data-h130-board]'),plane=get('.h131-plane-target'),storm=get('.h130-storm'),out=get('.h130-outgoing'),back=get('.h130-countershot'),bolt=get('.h130-lightning'),burst=get('.h130-burst'),contact=get('.h130-contact');
   const nodes=balloons.map((_,i)=>get('[data-balloon="'+i+'"]'));
   function position(node,x,y){node.style.left=(x*100)+'%';node.style.top=(y*100)+'%';}
   function flash(x,y,bursting=false){position(contact,x,y);contact.style.opacity='1';if(bursting){position(burst,x,y);burst.style.opacity='1';}hitTimer=.38;}
@@ -29,21 +30,24 @@ export function mountBalloons130(c){
     bolt.style.height=Math.hypot(dx,dy)+'px';bolt.style.transform=`translate(-50%,0) rotate(${-Math.atan2(dx,dy)*180/Math.PI}deg)`;
    }
    flash(planeX,y);c.status(kind==='storm'?'Uderzenie pioruna! Samolot opada.':'Balon odpowiedział strzałem. Samolot opada.');
-   c.root.querySelectorAll('.h130-controls button').forEach(b=>b.disabled=true);
+   plane.disabled=true;
   }
   function fire(){if(phase!=='play'||bullet||counter||transition)return;active=true;bullet={x:planeX+planeWidth*.46,y};c.tap();}
-  function steer(direction){if(phase!=='play'||counter||transition)return;active=true;aim=clamp130(aim+direction*.12,.12,.85);}
-  c.on(c.root,'click',e=>{const b=e.target.closest('[data-h130]');if(!b||b.disabled)return;const a=b.dataset.h130;if(a==='fire')fire();if(a==='up'&&e.detail===0)steer(-1);if(a==='down'&&e.detail===0)steer(1);if(a==='retry')render();});
+  c.on(c.root,'click',e=>{const b=e.target.closest('[data-h130]');if(!b||b.disabled)return;const a=b.dataset.h130;if(a==='plane-fire'&&(e.detail===0||performance.now()>=ignoreClick))fire();if(a==='retry')render();});
   c.on(c.root,'keydown',e=>{if(['ArrowUp','ArrowDown',' '].includes(e.key)&&!e.target.closest('button')){e.preventDefault();if(e.key===' '){if(!e.repeat)fire();}else{held=e.key==='ArrowUp'?-1:1;active=true;}}});
   c.on(c.root.ownerDocument,'keyup',e=>{if(['ArrowUp','ArrowDown'].includes(e.key))held=0;});
   c.on(c.root,'pointerdown',e=>{
    if(e.button!==0||phase!=='play'||counter||transition)return;
-   const b=e.target.closest('[data-h130="up"],[data-h130="down"]');
-   if(b){e.preventDefault();held=b.dataset.h130==='up'?-1:1;active=true;return;}
-   if(!e.target.closest('[data-h130-board]'))return;e.preventDefault();drag=e.pointerId;board.setPointerCapture?.(e.pointerId);aim=clamp130(pointerPosition130(e,board).y,.12,.85);active=true;
+   if(!e.target.closest('[data-h130-board]'))return;
+   e.preventDefault();const p=pointerPosition130(e,board),fromPlane=!!e.target.closest('[data-h130="plane-fire"]');
+   drag={id:e.pointerId,x:e.clientX,y:e.clientY,moved:false,fromPlane,offset:fromPlane?p.y-y:0};board.setPointerCapture?.(e.pointerId);
+   if(!fromPlane)aim=clamp130(p.y,.12,.85);active=true;
   });
-  c.on(board,'pointermove',e=>{if(drag===e.pointerId&&phase==='play'&&!counter&&!transition){aim=clamp130(pointerPosition130(e,board).y,.12,.85);active=true;}});
-  for(const type of ['pointerup','pointercancel'])c.on(c.root.ownerDocument,type,()=>{held=0;drag=null;});
+  c.on(board,'pointermove',e=>{if(drag?.id===e.pointerId&&phase==='play'&&!counter&&!transition){if(Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>8)drag.moved=true;aim=clamp130(pointerPosition130(e,board).y-drag.offset,.12,.85);active=true;}});
+  for(const type of ['pointerup','pointercancel'])c.on(c.root.ownerDocument,type,e=>{
+   held=0;if(drag?.id!==e.pointerId)return;const gesture=drag;drag=null;
+   if(gesture.fromPlane){ignoreClick=performance.now()+400;if(type==='pointerup'&&!gesture.moved)fire();}
+  });
   c.on(c.root.ownerDocument.defaultView,'blur',()=>{held=0;drag=null;});
   c.loop(dt=>{
    if(active)time+=dt;

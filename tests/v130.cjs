@@ -3,7 +3,7 @@ const {fixture,context}=require('./hangar130-dom.cjs');
 const root=path.resolve(__dirname,'..'),url=n=>require('node:url').pathToFileURL(path.join(root,'assets',n));
 Object.defineProperty(global,'performance',{value:{now:()=>global.__testTime130||0},configurable:true});
 (async()=>{
- const d=await import(url('hangar130-data.js')),flight=await import(url('hangar130-flight.js')),bags=await import(url('hangar130-baggage.js')),balloons=await import(url('hangar130-balloons.js'));
+ const d=await import(url('hangar130-data.js')),flight=await import(url('hangar130-flight.js')),bags=await import(url('hangar130-baggage.js')),balloons=await import(url('hangar130-balloons.js')),rings=await import(url('rings131.js'));
  const makeProgress=(stored={})=>{let p=stored,writes=0;const map=new Map();return {...d.createProgress130({getProgress:()=>p,onProgress:next=>{p=next;writes++;},storage:{getItem:k=>map.get(k),setItem:(k,v)=>map.set(k,v)}}),get writes(){return writes;}};};
  assert.equal(d.tasks130('takeoff','young').length,11);assert.equal(d.tasks130('takeoff','captain')[6].answer,7);assert.equal(d.tasks130('takeoff','captain')[7].answer,6);assert.equal(d.tasks130('takeoff','captain')[10].answer,100);
  for(const answer of [0,1,7,48,100])for(const count of [2,3]){const choices=d.choices130(answer,count);assert.equal(new Set(choices).size,count);assert.equal(choices.filter(v=>v===answer).length,1);}
@@ -51,46 +51,46 @@ Object.defineProperty(global,'performance',{value:{now:()=>global.__testTime130|
   const c=context('baggage','captain',makeProgress({stamps:{'young:0':true}})),controller=bags.mountBaggage130(c);c.click('load');c.click('bag:0');c.click('hold:0');c.advance(250);c.click('bag:0');c.click('hold:1');c.advance(250);assert.equal(controller.snapshot().placed[0].hold,1);c.click('unload:0');assert.equal(controller.snapshot().placed.length,0);
  }
  {
-  const c=context('baggage','young',makeProgress()),controller=bags.mountBaggage130(c);c.click('difficulty:captain');assert.equal(controller.snapshot().task.count,6);c.click('difficulty:young');assert.equal(controller.snapshot().task.count,3);
+  const c=context('baggage','young',makeProgress()),controller=bags.mountBaggage130(c);assert(!c.root.querySelector('[data-h130^="difficulty:"]'));assert.equal(controller.snapshot().task.count,3);
  }
+
  // Drag-and-drop uses the release point, and cancellation does not place anything.
  {
   const c=context('baggage','young',makeProgress()),controller=bags.mountBaggage130(c);c.click('load');const el=c.root.querySelector('[data-bag-drag="0"]');c.doc.under=c.root.querySelector('[data-hold="0"]');
   c.event('pointerdown',el,{clientX:70,clientY:360});c.event('pointermove',el,{clientX:200,clientY:150});c.event('pointerup',el,{clientX:200,clientY:150});c.advance(250);assert.equal(controller.snapshot().placed.length,1);
   c.advance(500);const next=c.root.querySelector('[data-bag-drag="1"]');c.event('pointerdown',next,{clientX:80,clientY:360});c.event('pointermove',next,{clientX:210,clientY:150});c.event('pointercancel',next,{clientX:210,clientY:150});c.advance(250);assert.equal(controller.snapshot().placed.length,1);
  }
- // All 22 gates: waiting, correct opening, reaction lock and final skip.
+ // The restored pre-V130 free-flight approach still covers all 22 arithmetic rounds.
  for(const mode of ['young','captain']){
-  const p=makeProgress(),c=context('takeoff',mode,p),controller=flight.mountRings130(c);c.click('lever');c.advance(1700);
-  c.advance(10000);assert.equal(controller.snapshot().approach,0,'No approach before steering');
+  const p=makeProgress(),c=context('takeoff',mode,p),controller=rings.mountRings131(c);
+  assert(c.root.querySelector('.flight97-dashboard [data-f95-lever]'),'Lever belongs to the dashboard');c.click('lever');c.advance(2500);
+  c.advance(5000);assert.equal(controller.snapshot().passed,0,'No answer before choosing a route');
   for(let i=0;i<11;i++){
-   const snapshot=controller.snapshot(),target=snapshot.gates.find(g=>g.value===d.tasks130('takeoff',mode)[i].answer),board=c.root.querySelector('[data-h130-board]');
-   c.event('pointerdown',board,{clientX:target.x*800,clientY:320});c.event('pointerup',board,{clientX:target.x*800,clientY:320});c.advance(6800);
-   c.advance(1300);assert.equal(p.read()['takeoff:'+mode].round,i+1);testRounds++;
+   const values=controller.snapshot().gates[i],index=values.indexOf(d.tasks130('takeoff',mode)[i].answer);controller.aim(index);c.advance(2000);
+   assert.equal(p.read()['takeoff:'+mode].round,i+1);testRounds++;
   }
-  c.click('skip');assert.equal(c.completion.label,'Mistrz obręczy · 11 / 11');
+  if(!c.completion)c.advance(1300);assert.equal(c.completion.label,'Mistrz obręczy · 11 / 11');
  }
- // Wrong gate and a miss keep the same arithmetic task; a second wrong offers a hint.
  {
-  const c=context('takeoff','young',makeProgress()),controller=flight.mountRings130(c);c.click('lever');c.advance(1700);
-  for(let i=0;i<2;i++){const target=controller.snapshot().gates.find(g=>g.value!==3),board=c.root.querySelector('[data-h130-board]');c.event('pointerdown',board,{clientX:target.x*800,clientY:300});c.event('pointerup',board);c.advance(8000);assert.equal(controller.snapshot().round,0);}
-  assert(c.root.querySelector('[data-h130="hint"]'));const board=c.root.querySelector('[data-h130-board]');c.event('pointerdown',board,{clientX:40,clientY:300});c.event('pointerup',board);c.advance(8000);assert.equal(controller.snapshot().round,0);
+  const c=context('takeoff','young',makeProgress()),controller=rings.mountRings131(c);c.click('lever');c.advance(2500);
+  for(let i=0;i<2;i++){const wrong=controller.snapshot().gates[0].findIndex(n=>n!==3);controller.aim(wrong);c.advance(2000);assert.equal(controller.snapshot().passed,0);}
+  const board=c.root.querySelector('[data-f95-viewport]');c.event('pointerdown',board,{clientX:40,clientY:20});c.event('pointerup',board);c.advance(5000);assert.equal(controller.snapshot().passed,0);
  }
  function aimBalloon(c,index){const board=c.root.querySelector('[data-h130-board]');const clientY=(.155+index*.28)*450;c.event('pointerdown',board,{clientX:130,clientY});c.event('pointerup',board);c.advance(400);}
  let balloonRounds=0;
  for(const mode of ['young','captain']){
   const p=makeProgress(),c=context('airballs',mode,p),controller=balloons.mountBalloons130(c);
   for(let i=0;i<6;i++){
-   const correct=controller.snapshot().balloons.findIndex(b=>b.value===d.tasks130('airballs',mode)[i].answer);aimBalloon(c,correct);c.click('fire');
+   const correct=controller.snapshot().balloons.findIndex(b=>b.value===d.tasks130('airballs',mode)[i].answer);aimBalloon(c,correct);c.click('plane-fire');
    assert(controller.snapshot().bullet,'A visible projectile must leave the nose');
    c.advance(1800);assert.equal(p.read()['airballs:'+mode].round,i+1);balloonRounds++;
   }
   assert(c.completion.label.includes('Slalom ukończony'));
  }
  {
-  const p=makeProgress(),c=context('airballs','young',p),controller=balloons.mountBalloons130(c);const wrong=controller.snapshot().balloons.findIndex(b=>b.value!==1);aimBalloon(c,wrong);c.click('fire');
+  const p=makeProgress(),c=context('airballs','young',p),controller=balloons.mountBalloons130(c);const wrong=controller.snapshot().balloons.findIndex(b=>b.value!==1);aimBalloon(c,wrong);c.click('plane-fire');
   let sawCounter=false;for(let i=0;i<200;i++){c.advance(16);if(controller.snapshot().counter)sawCounter=true;if(controller.snapshot().phase==='falling')break;}
-  assert(sawCounter,'Wrong balloon returns a separate reversed projectile');assert.equal(controller.snapshot().phase,'falling');assert(c.root.querySelector('[data-h130="fire"]').disabled);assert(controller.snapshot().balloons.every(b=>b.alive),'Wrong balloon remains');
+  assert(sawCounter,'Wrong balloon returns a separate reversed projectile');assert.equal(controller.snapshot().phase,'falling');assert(c.root.querySelector('[data-h130="plane-fire"]').disabled);assert(controller.snapshot().balloons.every(b=>b.alive),'Wrong balloon remains');
   c.advance(2500);assert.equal(controller.snapshot().phase,'failed');assert(controller.snapshot().y>1);c.click('retry');assert.equal(controller.snapshot().round,0);assert.equal(controller.snapshot().phase,'play');
  }
  {
@@ -99,8 +99,8 @@ Object.defineProperty(global,'performance',{value:{now:()=>global.__testTime130|
   assert.equal(controller.snapshot().phase,'falling','Moving cloud can actually reach the plane');assert.equal(c.root.querySelector('.h130-lightning').style.opacity,'1');
  }
  // Full resource and release check, including original bytes and deleted paths.
- const assets=JSON.parse(fs.readFileSync(path.join(root,'scripts/hangar130-assets.json')));assert.equal(assets.length,47);
- for(const a of assets){const bytes=fs.readFileSync(path.join(root,a.runtime));assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),a.sha256);assert.deepEqual(bytes,fs.readFileSync(path.join(root,'../hangar130_sources',a.source)));}
+ const assets=JSON.parse(fs.readFileSync(path.join(root,'scripts/hangar131-assets.json')));assert.equal(assets.length,40);
+ for(const a of assets){const bytes=fs.readFileSync(path.join(root,a.runtime));assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),a.sha256);if(!a.source.startsWith('git:'))assert.deepEqual(bytes,fs.readFileSync(path.join(root,'../hangar130_sources',a.source)));}
  // Exercise the actual menu wrapper and its lifecycle, not just isolated game rules.
  {
   const frames=new Set();let frameID=0,exit=0,classic=0,loads=[];
@@ -116,7 +116,7 @@ Object.defineProperty(global,'performance',{value:{now:()=>global.__testTime130|
    for(const game of d.gameIds130){f.click('game:'+game);assert(f.root.querySelector('.h130-modes'));f.click('play:young');await new Promise(setImmediate);assert.equal(f.root.dataset.f95Screen,'play');f.click('menu');assert(f.root.querySelector('.h130-panorama'));assert.equal(frames.size,0,'Returning to cockpit cancels animation loops');}
    f.click('exit');assert.equal(f.root.querySelector('.h130-panorama')!==null,true);ui.stop();
   }
-  assert.equal(exit,2);assert.equal(classic,0);assert(loads.length>=38);
+  assert.equal(exit,2);assert.equal(classic,0);assert.equal(loads.length,31);
   const f=fixture();mountHangar130(f.root,{grade:'P',preview:true,legacy:true,onExit:()=>exit++});f.click('game:feeder');assert(f.root.querySelector('[data-f95-action="start"]'));const control=f.root.querySelector('[data-f95-action="catalog"]');f.event('click',control);assert(f.root.querySelector('.h130-panorama'),'Existing preview missions also return to the new cockpit');
  }
  // App integration: both explicit exit and dialog close return to the hangar.
@@ -128,9 +128,9 @@ Object.defineProperty(global,'performance',{value:{now:()=>global.__testTime130|
    assert.deepEqual(calls,view==='walk'?[['room','hangar'],['show',undefined]]:[['show','hangar']]);
   }
  }
- const sw=vm.runInNewContext(fs.readFileSync(path.join(root,'sw.js'))+'\n({CACHE,ASSETS})',{self:{addEventListener(){}}});assert.equal(sw.CACHE,'academy-v130');
+ const sw=vm.runInNewContext(fs.readFileSync(path.join(root,'sw.js'))+'\n({CACHE,ASSETS})',{self:{addEventListener(){}}});assert.equal(sw.CACHE,'academy-v131');
  for(const entry of sw.ASSETS)assert(fs.existsSync(path.join(root,entry.split('?')[0])),entry);
  for(const a of assets)assert(sw.ASSETS.includes('./'+a.runtime));
- const removed=JSON.parse(fs.readFileSync(path.join(root,'scripts/hangar130-removed.json')));for(const a of removed)assert(!fs.existsSync(path.join(root,a.path)),a.path);
- console.log(`PASS V130: ${testRounds} engine/ring rounds, ${balloonRounds} balloon rounds, ${flights} complete boarding flights in both modes; countershot/cloud/fall/retry, wrong answers, hints, editable holds, drag/cancel, stamps/replay/resume; real menu lifecycle and app exit routes; 47 byte-identical assets and ${removed.length} deleted files.`);
+ const removed=[...JSON.parse(fs.readFileSync(path.join(root,'scripts/hangar130-removed.json'))),...JSON.parse(fs.readFileSync(path.join(root,'scripts/hangar131-removed.json')))];for(const a of removed)assert(!fs.existsSync(path.join(root,a.path)),a.path);
+ console.log(`PASS V130: ${testRounds} engine/ring rounds, ${balloonRounds} balloon rounds, ${flights} complete boarding flights in both modes; countershot/cloud/fall/retry, wrong answers, hints, editable holds, drag/cancel, stamps/replay/resume; real menu lifecycle and app exit routes; 40 original assets and ${removed.length} deleted files.`);
 })().catch(e=>{console.error(e);process.exitCode=1;});

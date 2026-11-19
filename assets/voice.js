@@ -15,8 +15,13 @@ export function stopVoice(){
  stopSpeech();
  if(typeof document!=='undefined')document.dispatchEvent(new CustomEvent('academy:voice-stop'));
 }
+export function speechText131(text,lang='pl-PL'){
+ let clean=String(text).replace(/\*\*|__|[`#]/g,'').replace(/\[(.*?)\]\([^)]*\)/g,'$1').replace(/["“”]/g,'');
+ if(/^pl(?:-|$)/i.test(lang))clean=clean.replace(/[×⋅·]/g,' razy ').replace(/(\d)\s*[xX*]\s*(?=\d)/g,'$1 razy ');
+ return clean.replace(/\s+/g,' ').trim();
+}
 function utterance(text,lang,style,rate){
- const u=new SpeechSynthesisUtterance(String(text).replace(/\*\*|__|[`#]/g,'').replace(/\[(.*?)\]\([^)]*\)/g,'$1').replace(/["“”]/g,'').replace(/\s+/g,' ').trim());
+ const u=new SpeechSynthesisUtterance(speechText131(text,lang));
  u.lang=lang;u.rate=Math.max(.55,Math.min(1.1,Number(rate)||.92));u.pitch=style==='fun'?1.02:.98;
  const voices=window.speechSynthesis.getVoices().filter(v=>v.lang.toLowerCase().startsWith(String(lang).slice(0,2).toLowerCase()));
  if(voices.length)u.voice=style==='fun'?voices[voices.length-1]:voices[0];

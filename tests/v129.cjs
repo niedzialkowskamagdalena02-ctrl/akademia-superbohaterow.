@@ -104,7 +104,7 @@ global.Image=class extends native.Image{
  }
  for(const [w,h]of [[393,852],[709,1384],[1200,600],[2400,1080]]){const r=frameRect127(w,h);assert.ok(Math.abs(r.w/r.h-1280/720)<1e-9);assert.equal(r.y+r.h,h);}
  const floor=hitSurface127({x:0,z:0},basis,.48,.94,[.5,.73],[7,3.2,6.3],true);assert.equal(floor.axis,1);assert.ok(Math.abs(floor.point[1]+1.58)<.002);
- const sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');assert.match(sw,/academy-v130/);
+ const sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');assert.match(sw,/academy-v131/);
  assert.ok(!sw.includes('hands90-hulk.webp'));assert.ok(!sw.includes('hands127/'),'Do not force all heroes PNGs to download during app update');
  const removed=JSON.parse(fs.readFileSync(path.join(root,'V127_REMOVED.json')));assert.equal(removed.length,12);for(const file of removed)assert.ok(!fs.existsSync(path.join(root,file)));
  fs.writeFileSync(path.join(review,'sequences.json'),JSON.stringify(sequences,null,2));
