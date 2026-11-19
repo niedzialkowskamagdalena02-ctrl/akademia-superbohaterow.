@@ -1,5 +1,6 @@
-import {hallPoint120,hallDoor120,hallSurface120,hallOutline120,placeHallHit120} from './base-panorama120.js?v=120';
-import {panoramaSoftware119} from './panorama-software119.js?v=119';
+import {hallPoint120,hallDoor120,hallSurface120,hallOutline120,placeHallHit120,hallDensity125} from './base-panorama125.js?v=125';
+import {hallDetails125} from './hall-details125.js?v=125';
+import {panoramaSoftware119} from './panorama-software119.js?v=125';
 import {hqPet,hqPlaced,hqRead} from './headquarters84.js?v=117';
 import {baseArt88} from './base-art88.js?v=119';
 import {drawHeroHands,loadHeroHands88,loadHulkFist,HERO_POWER_TIME} from './hero-hands85.js?v=117';
@@ -11,7 +12,7 @@ import {gameGroup92} from './learning-games92.js?v=92';
 
 const routes=new Map(),images=new Map();
 const skyHD=['training86','polish86','english86','explorer87','annex86','hall88','workshop91','armory','arcade','nook86','hangar','hangar95','shop87','vault87'];
-const roomImage93=file=>file==='hall88.webp'?'panorama120/hall.webp':(skyHD.includes(file.replace('.webp',''))?'hd93/':'')+file;
+const roomImage93=file=>file==='hall88.webp'?'panorama125/hall.webp':(skyHD.includes(file.replace('.webp',''))?'hd93/':'')+file;
 const pose=room=>({room,x:0,z:0,yaw:((walkRooms[room].heading??(room==='hall'?.62:.5))-.5)*FULL_TURN,pitch:0});
 const current=child=>routes.get(child)?.at(-1)??pose('hall');
 const casePositions={a:[.194,.567],b:[.81,.567],c:[.5,.574]};
@@ -115,9 +116,20 @@ function image86(file){
  return images.get(file);
 }
 
-function panoramaWorld(canvas){
+export function panoramaWorld(canvas){
  const gl=canvas.getContext('webgl',{alpha:false,antialias:false,depth:false,powerPreference:'low-power'});
  if(!gl)return null;
+ // WebGL 1 guarantees only 16 fragment vectors. On a small GPU retain the
+ // most important native detail; larger GPUs also sample the seven signs.
+ const detailCount=Math.min(hallDetails125.length,Math.max(1,Math.floor((gl.getParameter(gl.MAX_FRAGMENT_UNIFORM_VECTORS)-14)/2)));
+ const detailShader=Array.from({length:detailCount},(_,i)=>`
+   if(hasDetails>0.5){
+    vec2 local=(uv-detailUV[${i}].xy)/detailUV[${i}].zw;
+    if(min(local.x,local.y)>=0.&&max(local.x,local.y)<=1.){
+     vec4 tile=texture2D(details,detailAtlas[${i}].xy+local*detailAtlas[${i}].zw);
+     bg=bg*(1.-tile.a)+tile.rgb;
+    }
+   }`).join('');
  const program=gl.createProgram();
  function attach(type,source){
   const shader=gl.createShader(type);
@@ -138,8 +150,9 @@ function panoramaWorld(canvas){
   uniform mat3 basis;
   uniform vec3 eye, bounds, tint;
   uniform vec2 fov, photoFov;
-  uniform float squish;
-  uniform sampler2D panorama, portrait;
+  uniform float squish, hasDetails;
+  uniform sampler2D panorama, portrait, details;
+  uniform vec4 detailUV[${detailCount}], detailAtlas[${detailCount}];
   const float pi=3.14159265;
   void main(){
    vec3 ray=basis*vec3(screen*fov,1.);
@@ -152,7 +165,11 @@ function panoramaWorld(canvas){
    uv.y=clamp(uv.y,.002,.998);
    vec3 bg=texture2D(panorama,uv).rgb;
    float seam=1.-smoothstep(0.,.023,min(uv.x,1.-uv.x));
-   bg=mix(bg,texture2D(panorama,vec2(1.-uv.x,uv.y)).rgb,seam*.5)*tint;
+   // Other room panoramas retain their original edge treatment. The new hall
+   // uses one continuous photograph, without the old 8-degree mirror smear.
+   if(abs(hasDetails)<0.5)bg=mix(bg,texture2D(panorama,vec2(1.-uv.x,uv.y)).rgb,seam*.5);
+   ${detailShader}
+   bg*=tint;
    if(photoFov.x>0.&&dir.z>.02){
     vec2 photo=vec2(.5)+vec2(dir.x,-dir.y)/dir.z/(2.*photoFov);
     vec2 edge=min(photo,1.-photo);
@@ -172,32 +189,40 @@ function panoramaWorld(canvas){
  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
  const position=gl.getAttribLocation(program,'position');
  gl.enableVertexAttribArray(position);gl.vertexAttribPointer(position,2,gl.FLOAT,false,0,0);
- const textures=['panorama','portrait'].map((name,i)=>{
+ const textures=['panorama','portrait','details'].map((name,i)=>{
   const texture=gl.createTexture();
   gl.activeTexture(gl.TEXTURE0+i);gl.bindTexture(gl.TEXTURE_2D,texture);
   for(const axis of [gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T])gl.texParameteri(gl.TEXTURE_2D,axis,gl.CLAMP_TO_EDGE);
   for(const filter of [gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER])gl.texParameteri(gl.TEXTURE_2D,filter,gl.LINEAR);
   gl.uniform1i(gl.getUniformLocation(program,name),i);
-  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,1,1,0,gl.RGB,gl.UNSIGNED_BYTE,new Uint8Array([28,45,70]));
+  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([28,45,70,255]));
   return texture;
  });
- const uniform=Object.fromEntries(['basis','eye','bounds','tint','fov','photoFov','squish'].map(name=>[name,gl.getUniformLocation(program,name)]));
+ const uniform=Object.fromEntries(['basis','eye','bounds','tint','fov','photoFov','squish','hasDetails'].map(name=>[name,gl.getUniformLocation(program,name)]));
+ for(let i=0;i<detailCount;i++){
+  gl.uniform4fv(gl.getUniformLocation(program,`detailUV[${i}]`),hallDetails125[i].uv);
+  gl.uniform4fv(gl.getUniformLocation(program,`detailAtlas[${i}]`),hallDetails125[i].atlas);
+ }
  return {
-  load(image,front,room){
+  load(image,front,room,detailImage){
    const limit=gl.getParameter(gl.MAX_TEXTURE_SIZE);
-   [image,front].forEach((texture,i)=>{
+   [image,front,detailImage].forEach((texture,i)=>{
     if(!texture)return;
     if(Math.max(texture.naturalWidth,texture.naturalHeight)>limit){
      const resized=document.createElement('canvas');
      const ratio=limit/Math.max(texture.naturalWidth,texture.naturalHeight);
      resized.width=Math.round(texture.naturalWidth*ratio);resized.height=Math.round(texture.naturalHeight*ratio);
-     resized.getContext('2d').drawImage(texture,0,0,resized.width,resized.height);texture=resized;
+     const context=resized.getContext('2d');context.imageSmoothingQuality='high';
+     context.drawImage(texture,0,0,resized.width,resized.height);texture=resized;
     }
     gl.activeTexture(gl.TEXTURE0+i);
-    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,texture);
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,i===2);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,texture);
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,false);
    });
    gl.uniform3fv(uniform.bounds,room.bounds);
    gl.uniform3fv(uniform.tint,room.tint??[1,1,1]);
+   gl.uniform1f(uniform.hasDetails,detailImage?1:room.art==='hall88.webp'?-1:0);
    gl.uniform2f(uniform.photoFov,front?PHOTO_FOV*front.naturalWidth/front.naturalHeight:0,PHOTO_FOV);
   },
   draw(state,basis,fx,fy,squish){
@@ -260,11 +285,12 @@ export function mountBaseWalk(root){
   const rect=stage.getBoundingClientRect();
   width=rect.width;height=rect.height;
   if(!width||!height)return;
-  const density=Math.min(window.devicePixelRatio||1,2.45,Math.sqrt(2_500_000/(width*height)));
+  const density=hallDensity125(width,height,window.devicePixelRatio);
   for(const surface of [canvas,hands]){
    surface.width=Math.round(width*density);surface.height=Math.round(height*density);
   }
-  software.width=Math.round(width);software.height=Math.round(height);
+  const softDensity=hallDensity125(width,height,window.devicePixelRatio,true);
+  software.width=Math.round(width*softDensity);software.height=Math.round(height*softDensity);
   renderSoon();
  }
  function setMarkers(){
@@ -290,10 +316,11 @@ export function mountBaseWalk(root){
   fallback.style.backgroundImage=`url("assets/hq/${roomImage93(selected.portrait??selected.art)}")`;
   fallback.classList.toggle('has-portrait',!!selected.portrait);
   try{
-   const [image,front]=await Promise.all([image86(roomImage93(selected.art)),selected.portrait?image86(roomImage93(selected.portrait)):null]);
+   const [image,front,detailImage]=await Promise.all([image86(roomImage93(selected.art)),selected.portrait?image86(roomImage93(selected.portrait)):null,
+    selected===walkRooms.hall?image86('panorama125/details.webp').catch(()=>null):null]);
    if(signal.aborted)return;
    portraitRatio=front?front.naturalWidth/front.naturalHeight:.73;
-   world?.load(image,front,selected);
+   world?.load(image,front,selected,detailImage);
    stage.classList.toggle('has-depth',!!world);
   }catch{
    if(signal.aborted)return;
