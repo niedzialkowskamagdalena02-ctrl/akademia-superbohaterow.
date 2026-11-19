@@ -1,0 +1,237 @@
+[
+  {
+    "source": "pkg_4/Panorama_kokpitu.png",
+    "runtime": "assets/hangar130/menu/panorama.png",
+    "sha256": "f4754f7f9adbc89404a67d1956c3e81a6141cf0fb5376faeceb29897ca6cf5ed"
+  },
+  {
+    "source": "pkg_4/kafelki/01_odprawa_bagazowa.png",
+    "runtime": "assets/hangar130/menu/01_odprawa_bagazowa.png",
+    "sha256": "50bbb743c26d6af82b07cd6139da06fe859cc4cf0cf6fa5a76be46f7da10b17f"
+  },
+  {
+    "source": "pkg_4/kafelki/02_lot_przez_obrecze.png",
+    "runtime": "assets/hangar130/menu/02_lot_przez_obrecze.png",
+    "sha256": "d873bd3d38312cb4d4a91f3c469c17471e5bdaa949ff37131d260f5d3c8646b7"
+  },
+  {
+    "source": "pkg_4/kafelki/03_slalom_z_balonami.png",
+    "runtime": "assets/hangar130/menu/03_slalom_z_balonami.png",
+    "sha256": "ee36ef9c45d3e5901449d1f3ad245c8d76bf20cd1844d6e3a9ea09c73b1c563f"
+  },
+  {
+    "source": "pkg_4/kafelki/04_kokpit_matematyczny.png",
+    "runtime": "assets/hangar130/menu/04_kokpit_matematyczny.png",
+    "sha256": "72e937237f591f435bbdafc7db2782e8c28cd3a0e5f7790d5c9a205fa23612db"
+  },
+  {
+    "source": "pkg_4/kafelki/05_balony_ortograficzne.png",
+    "runtime": "assets/hangar130/menu/05_balony_ortograficzne.png",
+    "sha256": "4d9a73faefd9499f64593d22e13bf4c29fb08d4801643afe19d582bf80ad6f4a"
+  },
+  {
+    "source": "pkg_4/kafelki/06_tankowanie_w_locie.png",
+    "runtime": "assets/hangar130/menu/06_tankowanie_w_locie.png",
+    "sha256": "79a725946f3ece94b9380e968175204589982bcf841b5870167179ddd700f25e"
+  },
+  {
+    "source": "pkg_4/kafelki/07_radar_i_geometria.png",
+    "runtime": "assets/hangar130/menu/07_radar_i_geometria.png",
+    "sha256": "162f47512fe537f28abc745c9ba42ad06872f52300f34c7d466a6bb927077e03"
+  },
+  {
+    "source": "pkg_4/kafelki/08_sortownia_ladunkow.png",
+    "runtime": "assets/hangar130/menu/08_sortownia_ladunkow.png",
+    "sha256": "e0937fe55b2f43cabdacd9f7361fd9e90a9349f762287bc64fb23e02af6caa22"
+  },
+  {
+    "source": "pkg_1/grafiki/dzwignia.png",
+    "runtime": "assets/hangar130/rings/dzwignia.png",
+    "sha256": "3d2899ee11de50c470b8e0a4d931d899db46eddd957b96b9ec926d1bca9a0f71"
+  },
+  {
+    "source": "pkg_1/grafiki/kokpit_i_pas.jpg",
+    "runtime": "assets/hangar130/rings/kokpit_i_pas.jpg",
+    "sha256": "36d58c333a5c267baabd349be943b06a1b3130e6a4b98df33403e604a906238c"
+  },
+  {
+    "source": "pkg_1/grafiki/niebo.jpg",
+    "runtime": "assets/hangar130/rings/niebo.jpg",
+    "sha256": "002f20be41f7006ef7e466042707fb39b602c08f387a5fa441e7750d4d2dc49f"
+  },
+  {
+    "source": "pkg_1/grafiki/obrecz.png",
+    "runtime": "assets/hangar130/rings/obrecz.png",
+    "sha256": "e278aad553de4b31fa31fb3e88dacefc755e6744e9b48b4e2a225459984ccd5b"
+  },
+  {
+    "source": "pkg_1/grafiki/obrecz_bledna.png",
+    "runtime": "assets/hangar130/rings/obrecz_bledna.png",
+    "sha256": "69fbb70f887d69a0ce88eaae3a57ef929cebba00e0c57e327aa7318065e35a81"
+  },
+  {
+    "source": "pkg_1/grafiki/obrecz_poprawna.png",
+    "runtime": "assets/hangar130/rings/obrecz_poprawna.png",
+    "sha256": "c0be213ea349222fa728d37eb1d86783cecb741519b2bcde22a8a3c96fa2048a"
+  },
+  {
+    "source": "pkg_1/grafiki/odznaka.png",
+    "runtime": "assets/hangar130/rings/odznaka.png",
+    "sha256": "c9d6c3ac5dbe3f740bd9e87f5413b7dfa712f42ad7e533ed3c5abc4e980f65e1"
+  },
+  {
+    "source": "pkg_1/grafiki/samolot_tyl.png",
+    "runtime": "assets/hangar130/rings/samolot_tyl.png",
+    "sha256": "f801b8690f2a87d5d9cebc85842f3e49c3488affb2f6c88749cdee356958a0ba"
+  },
+  {
+    "source": "pkg_2/grafiki/kokpit.jpg",
+    "runtime": "assets/hangar130/engine/kokpit.jpg",
+    "sha256": "bc397cbe37056d72f17e0385b273dfaefa1dab30f880ce50dbb82cfa36f578d2"
+  },
+  {
+    "source": "pkg_2/grafiki/kontrolka.png",
+    "runtime": "assets/hangar130/engine/kontrolka.png",
+    "sha256": "c6950ee189267f730d74da8a92e4d2fde9579007612c7f2a15b11fecd16e909c"
+  },
+  {
+    "source": "pkg_2/grafiki/odznaka.png",
+    "runtime": "assets/hangar130/engine/odznaka.png",
+    "sha256": "c9cc75d267680ba156a93d15d091b60317f45b92a262a87e2f7fbcecdf4db0a7"
+  },
+  {
+    "source": "pkg_2/grafiki/pas.jpg",
+    "runtime": "assets/hangar130/engine/pas.jpg",
+    "sha256": "f21fe4c3e88025221c1aa7a8e61c8edfe12ed4e0ffaeb4c639516e184dd50686"
+  },
+  {
+    "source": "pkg_2/grafiki/samolot.png",
+    "runtime": "assets/hangar130/engine/samolot.png",
+    "sha256": "3714a986611d48990837282f631ed93683c6061258084e741c35fe34f39d0534"
+  },
+  {
+    "source": "pkg_2/grafiki/wskaznik.png",
+    "runtime": "assets/hangar130/engine/wskaznik.png",
+    "sha256": "0051b06f53591e670b6fed36f7abd5b8ef4b853c74077f5b34c83c1e6644c631"
+  },
+  {
+    "source": "pkg_5/grafiki/bilet.png",
+    "runtime": "assets/hangar130/baggage/bilet.png",
+    "sha256": "0735253074d4ee937acb06b7c456c821e7f9ca9c4c674a42178bf588eb39570f"
+  },
+  {
+    "source": "pkg_5/grafiki/fotel.png",
+    "runtime": "assets/hangar130/baggage/fotel.png",
+    "sha256": "66f9bcc7616a3497c53e448e32253f3bb9a8f7bafb1ee96c38b0e6511f9b7cbe"
+  },
+  {
+    "source": "pkg_5/grafiki/kabina.jpg",
+    "runtime": "assets/hangar130/baggage/kabina.jpg",
+    "sha256": "58b4c4990b05244ca153c4429ec9db64e06f00ac6d87f01cf754ff278f963815"
+  },
+  {
+    "source": "pkg_5/grafiki/kot.png",
+    "runtime": "assets/hangar130/baggage/kot.png",
+    "sha256": "68fd0f696427d82b5fbc1e960cdbac3c43c09e07f044dc70b10ace118dbd1f75"
+  },
+  {
+    "source": "pkg_5/grafiki/mis.png",
+    "runtime": "assets/hangar130/baggage/mis.png",
+    "sha256": "291dc8c8bfd8606e2b059ea9980464f468670dc7695d059327f1ab3f78088e04"
+  },
+  {
+    "source": "pkg_5/grafiki/nowy_jork.jpg",
+    "runtime": "assets/hangar130/baggage/nowy_jork.jpg",
+    "sha256": "9f985eaebb6a5fb6e11cad4eb6f4d5d072f9d8a45ac1e678d72367a09a1095b0"
+  },
+  {
+    "source": "pkg_5/grafiki/pas.jpg",
+    "runtime": "assets/hangar130/baggage/pas.jpg",
+    "sha256": "4871d6b6224b67f72fab12ff6d18d8c3d5b726e2e4d3321710708cf747f358cc"
+  },
+  {
+    "source": "pkg_5/grafiki/paszport.png",
+    "runtime": "assets/hangar130/baggage/paszport.png",
+    "sha256": "44db934dbeedbf9e482fdb2c68c7088a9d8e65132fe9388d970ea34988e2ec49"
+  },
+  {
+    "source": "pkg_5/grafiki/pies.png",
+    "runtime": "assets/hangar130/baggage/pies.png",
+    "sha256": "80d1e3b9554143efa8eba1deb497d2ad9f00e3667dd5c02157bc18333a1694ef"
+  },
+  {
+    "source": "pkg_5/grafiki/samolot.png",
+    "runtime": "assets/hangar130/baggage/samolot.png",
+    "sha256": "f7ec949b23b11ee7ef35408c51d77a2c5d22b3a386c22643fee4e20a92e5bd30"
+  },
+  {
+    "source": "pkg_5/grafiki/terminal.jpg",
+    "runtime": "assets/hangar130/baggage/terminal.jpg",
+    "sha256": "8ba4aebb92f817a3235c62c1ff49a0216c11313b31d602bb81c738b6e3250678"
+  },
+  {
+    "source": "pkg_5/grafiki/walizka.png",
+    "runtime": "assets/hangar130/baggage/walizka.png",
+    "sha256": "64c572e70c0e5451dd52305206f541a162d6ed1d351c471b1b40c2da2205e053"
+  },
+  {
+    "source": "pkg_5/grafiki/walizka_czerwona.png",
+    "runtime": "assets/hangar130/baggage/walizka_czerwona.png",
+    "sha256": "d9fcb073034d8b86e7b104e55f384ba8209bb54d2ca169cbf2f30fd8ed8b0a8d"
+  },
+  {
+    "source": "pkg_5/grafiki/walizka_niebieska.png",
+    "runtime": "assets/hangar130/baggage/walizka_niebieska.png",
+    "sha256": "49b274aacc9b3697d9270dc65fd9472a69aa86d9030442aac409bb1eba89a19f"
+  },
+  {
+    "source": "pkg_5/grafiki/walizka_zielona.png",
+    "runtime": "assets/hangar130/baggage/walizka_zielona.png",
+    "sha256": "9412f9d514d9f50becce1e9b76057df975ac31d4a9ef99431c444881b8ce1f62"
+  },
+  {
+    "source": "pkg_3/grafiki/balon_rozowy.png",
+    "runtime": "assets/hangar130/balloons/balon_rozowy.png",
+    "sha256": "67ed40f5751dd36b6f6826c98057d65d5d1c192d6fbf2be6bd545e3a9f6ba0be"
+  },
+  {
+    "source": "pkg_3/grafiki/balon_pomaranczowy.png",
+    "runtime": "assets/hangar130/balloons/balon_pomaranczowy.png",
+    "sha256": "eefaf53ccbd9e01bfa64209a7e3f2c236eeac6c7a5844447e8827b8d6d650432"
+  },
+  {
+    "source": "pkg_3/grafiki/samolot.png",
+    "runtime": "assets/hangar130/balloons/samolot.png",
+    "sha256": "b85167314dc2f60447dbe64da267a35c3599f41599485dd5210a73ddead79eb7"
+  },
+  {
+    "source": "pkg_3/grafiki/chmura.png",
+    "runtime": "assets/hangar130/balloons/chmura.png",
+    "sha256": "b7ac332ee4eea11fd1d584187ab7b8556376734f615bf6d73bdf909099c5cb14"
+  },
+  {
+    "source": "pkg_3/grafiki/piorun.png",
+    "runtime": "assets/hangar130/balloons/piorun.png",
+    "sha256": "ede96d1b122fc4e159d2b9332b5bfc7287cf31aea7926cb8212eaf1cdf7221c0"
+  },
+  {
+    "source": "pkg_3/grafiki/pocisk.png",
+    "runtime": "assets/hangar130/balloons/pocisk.png",
+    "sha256": "c780ebfe48dfce1444c66517b0262d2273bd2462ead8844fde99d107864c07e1"
+  },
+  {
+    "source": "pkg_3/grafiki/pekniecie_balonu.png",
+    "runtime": "assets/hangar130/balloons/pekniecie_balonu.png",
+    "sha256": "32f2ab49ce6cf3f60150971feccb04c2b1e1643215da6a9c9fe6ddab9f3416a7"
+  },
+  {
+    "source": "pkg_3/grafiki/blysk_trafienia.png",
+    "runtime": "assets/hangar130/balloons/blysk_trafienia.png",
+    "sha256": "bce3ee49ddcf9428bb5ec2033b0dc2044d911f2ee0bc92e5cbdb5bef76a88e0f"
+  },
+  {
+    "source": "pkg_3/grafiki/niebo.jpg",
+    "runtime": "assets/hangar130/balloons/niebo.jpg",
+    "sha256": "f59c19a14920008494e7781f6989ded84aba465e43c3b9834d9ae867d45e3aab"
+  }
+]

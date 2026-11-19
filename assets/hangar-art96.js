@@ -1,17 +1,10 @@
-const art = 'assets/flight96/';
+const pictures={chick:'assets/flight96/chick.webp',bowl:'assets/flight96/bowl.webp','feeder-plane':'assets/flight96/feeder-plane.webp'};
 const digits = ['zero', 'jeden', 'dwa', 'trzy', 'cztery', 'pięć', 'sześć', 'siedem', 'osiem', 'dziewięć'];
 const confetti = '<span class="flight96-confetti" aria-hidden="true"></span>';
 
 export const digitWord96 = digit => digits[digit] ?? String(digit ?? '');
 export const picture96 = (name, cls = '') =>
-  `<img class="${cls}" src="${art}${name}.webp" draggable="false" alt="">`;
-
-export function ring96() {
-  return `<span class="flight96-ring-puffs" aria-hidden="true">${Array.from({length:18},(_,i)=>{
-    const angle=i*2*Math.PI/18;
-    return `<i style="left:${(50+42*Math.cos(angle)).toFixed(1)}%;top:${(50+42*Math.sin(angle)).toFixed(1)}%"></i>`;
-  }).join('')}</span>`;
-}
+  `<img class="${cls}" src="${pictures[name]}" draggable="false" alt="">`;
 
 export const storm96 = '<span class="flight96-storm" aria-hidden="true"><i></i><i></i><i></i><span>⚡</span></span>';
 

@@ -66,8 +66,8 @@ const root=path.resolve(__dirname,'..'),url=n=>pathToFileURL(path.join(root,'ass
  delete global.document;
  if(process.env.V125_GPU_CAPTURE)fs.writeFileSync(process.env.V125_GPU_CAPTURE,JSON.stringify({captures,tiles:hallDetails125,bounds:walkRooms.hall.bounds}));
  const sw=vm.runInNewContext(fs.readFileSync(path.join(root,'sw.js'),'utf8')+'\n({CACHE,ASSETS})',{self:{addEventListener(){}}});
- assert.equal(sw.CACHE,'academy-v129');
- for(const entry of ['base-panorama125.js?v=125','hall-details125.js?v=125','hq/panorama125/hall.webp','hq/panorama125/details.webp','base-walk85.js?v=129','panorama-software119.js?v=128','app.js?v=129'])assert.ok(sw.ASSETS.includes('./assets/'+entry));
+ assert.equal(sw.CACHE,'academy-v130');
+ for(const entry of ['base-panorama125.js?v=125','hall-details125.js?v=125','hq/panorama125/hall.webp','hq/panorama125/details.webp','base-walk85.js?v=129','panorama-software119.js?v=128','app.js?v=130'])assert.ok(sw.ASSETS.includes('./assets/'+entry));
  assert.ok(!sw.ASSETS.includes('./assets/hq/panorama120/hall.webp'),'Old 6K upsample is no longer cached');
  for(const asset of sw.ASSETS)assert.ok(fs.existsSync(path.join(root,asset.split('?')[0])),asset);
  console.log(`PASS V125: ${poses} walking poses, ${samples} texture/touch projections, 7 entrances, native GPU/software tiles, low-uniform GPU variant, DPR budget, offline cache.`);

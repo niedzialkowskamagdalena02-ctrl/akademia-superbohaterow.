@@ -1,0 +1,116 @@
+[
+  {
+    "path": "assets/hangar-boarding97.js",
+    "bytes": 11518,
+    "sha256": "0c04a2692fc1ad1ca3f3430c5b59e9787568cdcd2132c7ab782e9637af0b2f49",
+    "reason": "Zastąpiony moduł lub arkusz czterech aktualizowanych gier; brak importów w aplikacji."
+  },
+  {
+    "path": "assets/hangar-takeoff97.js",
+    "bytes": 9455,
+    "sha256": "8fa2fac24d480ae261d1956d0ca9eec6ba96525f8b23c76d1bc1489c978f74c5",
+    "reason": "Zastąpiony moduł lub arkusz czterech aktualizowanych gier; brak importów w aplikacji."
+  },
+  {
+    "path": "assets/flight97.css",
+    "bytes": 20993,
+    "sha256": "f3377d53492ce9797dbe6ebf09033e28943d4b20713722c992e2c52521b42045",
+    "reason": "Zastąpiony moduł lub arkusz czterech aktualizowanych gier; brak importów w aplikacji."
+  },
+  {
+    "path": "assets/boarding98.css",
+    "bytes": 14450,
+    "sha256": "ee84fdc28301af403722fc08b2293f7d133b54b189ced6253eab7b0a085002ee",
+    "reason": "Zastąpiony moduł lub arkusz czterech aktualizowanych gier; brak importów w aplikacji."
+  },
+  {
+    "path": "assets/flight97/pilot.webp",
+    "bytes": 7754,
+    "sha256": "92d1f4aea77fc9e3fd43e27f0401a2b757b28ba718847044d309cefd417f04d7",
+    "reason": "Grafika zastąpionej odprawy/obręczy; sprawdzono źródła, CSS, konfigurację i dynamiczny picture96()."
+  },
+  {
+    "path": "assets/flight96/bear.webp",
+    "bytes": 7684,
+    "sha256": "13e112d8585d9633d0b68535c05f3ce521718d919c28394862c3e2f7cb550fa2",
+    "reason": "Grafika zastąpionej odprawy/obręczy; sprawdzono źródła, CSS, konfigurację i dynamiczny picture96()."
+  },
+  {
+    "path": "assets/flight96/suitcase.webp",
+    "bytes": 3580,
+    "sha256": "9e66593a893b2cb6b08b2aeb86eda5818d6691a610855052c4946d688721769a",
+    "reason": "Grafika zastąpionej odprawy/obręczy; sprawdzono źródła, CSS, konfigurację i dynamiczny picture96()."
+  },
+  {
+    "path": "assets/flight96/aircraft-nose.webp",
+    "bytes": 6980,
+    "sha256": "ed4d24b0b6df8a8784c5e01cebd32a346d8c819688ba03119bd487b26b857ae2",
+    "reason": "Grafika zastąpionej odprawy/obręczy; sprawdzono źródła, CSS, konfigurację i dynamiczny picture96()."
+  },
+  {
+    "path": "assets/flight96/runway-window.webp",
+    "bytes": 7130,
+    "sha256": "fd0b63eba747da863192e5872cee530336a84863c6b86c7b336edb08783ad901",
+    "reason": "Grafika zastąpionej odprawy/obręczy; sprawdzono źródła, CSS, konfigurację i dynamiczny picture96()."
+  },
+  {
+    "path": "assets/flight96/instruments.webp",
+    "bytes": 11616,
+    "sha256": "39f602ddd4d4bc62b5294f05ef7fba1881c6f3c79ed1fbb7e7253ca824f2b418",
+    "reason": "Grafika zastąpionej odprawy/obręczy; sprawdzono źródła, CSS, konfigurację i dynamiczny picture96()."
+  },
+  {
+    "path": "assets/flight96/lever.webp",
+    "bytes": 4346,
+    "sha256": "2969df46fc0f959fe617a0c3f8dd1226628a395965c84c138fc7eb7c4c42f977",
+    "reason": "Grafika zastąpionej odprawy/obręczy; sprawdzono źródła, CSS, konfigurację i dynamiczny picture96()."
+  },
+  {
+    "path": "assets/flight96/baggage-preview.webp",
+    "bytes": 5328,
+    "sha256": "d6bca17b0c36a517d8129a73207e2e02ffd2273a33d506a3592091721ea2f893",
+    "reason": "Grafika zastąpionej odprawy/obręczy; sprawdzono źródła, CSS, konfigurację i dynamiczny picture96()."
+  },
+  {
+    "path": "assets/flight96/takeoff-preview.webp",
+    "bytes": 13190,
+    "sha256": "9442bb1f3dd35fe1b6f162443a64e988390be488b4f6c60d4a019f82cd8d7600",
+    "reason": "Grafika zastąpionej odprawy/obręczy; sprawdzono źródła, CSS, konfigurację i dynamiczny picture96()."
+  },
+  {
+    "path": "assets/art99/baggage-cover.webp",
+    "bytes": 6558,
+    "sha256": "cd40b9f63e999506edaaa5a104b5fc1579fe1e89f2583ec382750562afa58a5c",
+    "reason": "Grafika zastąpionej odprawy/obręczy; sprawdzono źródła, CSS, konfigurację i dynamiczny picture96()."
+  },
+  {
+    "path": "assets/art99/boarding-cover.webp",
+    "bytes": 19136,
+    "sha256": "68b1d8076e09a964c20c7d11bd2f818ff81ee42b40d9546c9c57914d397dd31d",
+    "reason": "Grafika zastąpionej odprawy/obręczy; sprawdzono źródła, CSS, konfigurację i dynamiczny picture96()."
+  },
+  {
+    "path": "assets/art99/takeoff-cover.webp",
+    "bytes": 20018,
+    "sha256": "b5a22040d35c29db85b93c9116bd198c2a2e0ab42c0c33869c3b875e685dd526",
+    "reason": "Grafika zastąpionej odprawy/obręczy; sprawdzono źródła, CSS, konfigurację i dynamiczny picture96()."
+  },
+  {
+    "path": "assets/art99/terminal-reference.webp",
+    "bytes": 2108,
+    "sha256": "7c5b5a95c2eee182b90bf1bb329d1ed2a5e125bdba61d3900b239a8b1e093ac6",
+    "reason": "Grafika zastąpionej odprawy/obręczy; sprawdzono źródła, CSS, konfigurację i dynamiczny picture96()."
+  },
+  {
+    "path": "assets/art99/cabin-reference.webp",
+    "bytes": 43512,
+    "sha256": "8859acf947b0a6cd5c55c3c0bd677f2c51dd7c3ba225bb947ab54f6dd8058935",
+    "reason": "Grafika zastąpionej odprawy/obręczy; sprawdzono źródła, CSS, konfigurację i dynamiczny picture96()."
+  },
+  {
+    "path": "assets/flight96/feeder-preview.webp",
+    "bytes": 5066,
+    "sha256": "1e3a92cd766869552d9eebc5d4a03994662df34b204ff26968a077934743193e",
+    "reason": "Nieużywany dawny podgląd karmnika; menu używa feeder-cover.webp, gra osobnych grafik."
+  }
+]

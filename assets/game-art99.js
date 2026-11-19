@@ -10,8 +10,6 @@ export function gamePreview99(kind, fallback) {
 }
 
 export const flightPreview99 = {
-  baggage:'assets/art99/baggage-cover.webp',
-  takeoff:'assets/art99/takeoff-cover.webp',
   feeder:'assets/art99/feeder-cover.webp'
 };
 

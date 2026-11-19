@@ -1,6 +1,6 @@
 import {training124Picker,voice124,art124,pageCount124} from './interface124.js?v=124';
 import {training119Range} from './interface119.js?v=124';
-import {gamePreview99, hangarPaint99} from './game-art99.js?v=99';
+import {gamePreview99, hangarPaint99} from './game-art99.js?v=130';
 import {academy102Shell,academy102Choices,academy102Player,academy102DashboardNav,academy102DashboardVoice,academy102FamilyHeading,academy115TrainingPanel,academy102MissionsHeader,academy102MissionZone,academy107Entry,academy107PinScreen,heroPortrait,academy111Training} from './interface102.js?v=124';
 // V48_AI_RESPONSE_DIAGNOSTICS
 // V44_BULK_CHAPTERS
@@ -22,7 +22,7 @@ import {petQuiz88} from './pet-quiz88.js?v=88';
 import {gameGroup92,recordGameAward92} from './learning-games92.js?v=92';
 import {mountLearningGames92} from './learning-play92.js?v=95';
 import {mountMissions93,missionNote93} from './missions93.js?v=103';
-import {mountHangar95} from './hangar95.js?v=104';
+import {mountHangar130 as mountHangar95} from './hangar130.js?v=130';
 import {trainingCatalog95,trainingSubject95,trainingGroupName95,outsideDeck95,trainingAssessment115,outsideMix115} from './training95.js?v=115';
 import {mountPreschoolAudio93} from './preschool-audio93.js?v=116';
 import {MASTER_PRIZES86,MASTER_SCORE86,recordEnergy86,trainingRound86,trainingConsole86,unlockMaster86} from './base-training86.js?v=117';
@@ -81,7 +81,7 @@ const select=(id,label,options,value)=>`<label for="${id}">${label}</label><sele
 const grades=[['P','Przedszkole'],...Array.from({length:12},(_,i)=>[String(i+1),`Klasa ${i+1}`])];
 const people=[['pawel','Paweł'],['patryk','Patryk']];
 const note=t=>{const n=$('hq85-notice')||$('notice');if(!n){console.warn('Powiadomienie:',t);return}n.textContent=t;n.classList.add('visible');setTimeout(()=>{if(n.isConnected)n.classList.remove('visible')},4500)};
-const ACADEMY_RELEASE=129;
+const ACADEMY_RELEASE=130;
 async function checkAcademyUpdate(button){
  if(!button||button.disabled)return;
  const label=button.textContent,controller=new AbortController();
@@ -1523,6 +1523,10 @@ async function hqAction84(action,target){
   if(id==='polish'||id==='english-training')return openBaseTraining86('source',id==='polish'?'Polski':'Angielski');
   if(id==='english'){trainingMode='vocab';return openBaseTraining86('range','Angielski');}
  }
+ if(what==='disembark'||what==='close'&&['cockpit','flight'].includes(hqPanel84)){
+  if(hqViews84.get(child)==='walk'){openWalkRoom87(child,'hangar');return hqShow84();}
+  return hqShow84('hangar');
+ }
  if(what==='close')return hqShow84(hqPanel84==='pet-quiz'||hqPanel84==='pet-select'&&hqPet(p)?'pet':'');
  if(what==='pet-select')return hqShow84('pet-select');
  if(what==='pet'||what==='bowl'||what==='pet-room'){
@@ -1646,7 +1650,12 @@ function mountMissionsView93(p,flight=false){
  (flight?mountHangar95:mountMissions93)(region,{
   grade:p.grade,profileKey:who,preview:testMode,legacy:flight&&p.base?.owned?.includes('quinjet'),
   speak:(text,lang='pl-PL')=>speak(text,lang,p.mentor,data.settings.rate||1),
-  tap:()=>trainingTapSound(true),tone:missionNote93
+  tap:()=>trainingTapSound(true),tone:missionNote93,
+  ...(flight?{
+   getProgress:()=>p.base?.headquarters?.hangar130??{},
+   onProgress:next=>{if(testMode)return;const base=p.base??={version:1,owned:[]};(base.headquarters??={}).hangar130=next;save().catch(error=>note('Nie udało się zapisać postępu lotu: '+error.message));},
+   onExit:()=>handle('hq:disembark'),onClassic:()=>handle('hq:flight')
+  }:{})
  });
 }
 

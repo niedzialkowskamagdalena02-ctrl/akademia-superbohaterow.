@@ -32,20 +32,6 @@
 }
 .flight95-card strong small { line-height:1.15; font-size:.65em; color:#2b5681 }
 .flight96-card-art { position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
-.flight95-card-image>.flight96-slalom-tile { display:flex; align-items:center; gap:7px }
-.flight96-slalom-tile>i {
-  width:clamp(23px,7vw,43px); aspect-ratio:.74; display:block; border-radius:51% 51% 49% 49%;
-  background:radial-gradient(ellipse at 28% 22%,white 0%,#ffb5ec 14%,#ed4ca4 44%,#88276f 100%);
-  box-shadow:0 2px 5px #174c7c8c; rotate:-9deg;
-}
-.flight96-slalom-tile>i:nth-child(2) {
-  translate:0 -12%; rotate:4deg;
-  background:radial-gradient(ellipse at 28% 22%,white 0%,#baf8ff 14%,#32bafa 44%,#23569f 100%);
-}
-.flight96-slalom-tile>i:nth-child(3) {
-  translate:0 18%; rotate:13deg;
-  background:radial-gradient(ellipse at 28% 22%,white 0%,#fff2b0 14%,#ffcc42 44%,#c96423 100%);
-}
 .flight96-intro-art { padding-top:0; gap:10px }
 .flight96-brief-art {
   display:block; object-fit:cover; width:min(100%,510px); margin:auto; border:2px solid #dcf5fe; border-radius:14px;
@@ -57,99 +43,10 @@
 #missions93-cockpit:is([data-fl95-mode="airballs"],[data-fl95-mode="baggage"],[data-fl95-mode="takeoff"],[data-fl95-mode="feeder"]) .flight95-task p { color:#16426e }
 #missions93-cockpit:is([data-fl95-mode="airballs"],[data-fl95-mode="baggage"],[data-fl95-mode="takeoff"],[data-fl95-mode="feeder"]) .flight95-task small { color:#25577f; font-weight:850 }
 #missions93-cockpit[data-fl95-mode="airballs"] .flight95-task p { color:#1f579b; font-size:clamp(1.12rem,4.8vw,1.8rem); font-weight:900 }
-#missions93-cockpit[data-fl95-mode="airballs"] .flight95-task strong { color:#972976; font-size:1.21em }
-
-.flight96-baggage { min-height:clamp(340px,60dvh,580px); background:#58adf0 url('flight95/runway.webp') center 44%/cover }
-.flight96-baggage[data-f96-scene="cabin"] { background-image:url('flight95/cabin.webp'); background-position:center 25% }
-.flight96-baggage::before {
-  content:""; position:absolute; z-index:-1; inset:0;
-  background:linear-gradient(transparent 51%,#12264935 75%,#0d2d547d);
-}
-.flight96-airframe { position:absolute; inset:19% 0 auto; height:clamp(163px,48vw,280px); isolation:isolate }
-.flight96-airframe::before {
-  content:""; position:absolute; z-index:-1; inset:9% -2% 14% 27%;
-  border-radius:14% 14% 33% 16%/14% 40% 40% 39%;
-  background:linear-gradient(#f4fbff,#e2edf6 51%,#5392b8 52% 60%,#b6c9d7 61%,#748ba2);
-  box-shadow:inset 0 5px 12px #fff8,0 17px 14px #1b2f5652;
-}
-.flight96-nose { position:absolute; left:0; top:3%; width:35%; height:90%; object-fit:contain; object-position:right bottom }
-.flight96-hatch {
-  display:grid; align-items:end; position:absolute; top:13%; bottom:22%; left:32%; width:62%;
-  border:clamp(4px,1.3vw,10px) solid #708398; border-radius:14px 14px 10px 10px;
-  background:linear-gradient(#172733,#385063 72%,#182c3e);
-  box-shadow:inset 0 6px 11px #070e19bd,0 3px 2px #354d66;
-}
-.flight96-hatch::before {
-  content:""; position:absolute; inset:auto -4% 100%; height:27%; border:2px solid #96a9b6;
-  border-radius:8px 8px 4px 4px; background:linear-gradient(#c2d6e4,#667e95); transform:skewX(-8deg);
-}
-.flight96-hold { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:3px; padding:3px 3px 6px; border-bottom:5px solid #94a8ba }
-#missions93-cockpit .flight96-hold .flight96-slot {
-  min-width:0; min-height:clamp(58px,13vw,96px); padding:0; border:2px dashed #acdafa;
-  border-radius:9px; background:#6195a72e; box-shadow:none; color:#f1fbff; font-size:1.06rem;
-}
-#missions93-cockpit .flight96-hold .flight96-slot[data-f95-filled] { border-color:transparent; opacity:1; background:transparent }
-.flight96-pieces {
-  position:absolute; inset:auto 2% 2%; display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:4px;
-  padding:5px 3px; border:1px solid #c6eaff; border-radius:13px;
-  background:linear-gradient(#19456ad0,#15335bed); box-shadow:0 4px 8px #11355c5e;
-}
-.flight96-piece { display:grid; justify-items:center; min-width:0; gap:3px }
-#missions93-cockpit .flight96-piece .flight96-pick {
-  display:grid; place-items:center; width:100%; min-height:clamp(48px,13vw,102px); padding:0;
-  border:0; border-radius:8px; background:transparent; box-shadow:none;
-}
-#missions93-cockpit .flight96-piece .flight95-voice { min-width:34px; min-height:38px; font-size:.9rem }
-.flight96-case {
-  position:relative; display:inline-grid; place-items:center; width:min(100%,98px); aspect-ratio:119/113; --case-skin:#a15bba;
-  filter:drop-shadow(0 3px 2px #12234189); pointer-events:none;
-}
-.flight96-case img { display:block; width:100%; height:auto; filter:hue-rotate(var(--case-hue,0deg)) }
-.flight96-case[data-f96-color="blue"] { --case-hue:287deg; --case-skin:#547ac6 }
-.flight96-case[data-f96-color="green"] { --case-hue:180deg; --case-skin:#5e9d54 }
-.flight96-case[data-f96-color="red"] { --case-hue:70deg; --case-skin:#c35d6f }
-.flight96-case[data-f96-color="amber"] { --case-hue:118deg; --case-skin:#bc7738 }
-.flight96-case[data-f96-color="teal"] { --case-hue:250deg; --case-skin:#358eaa }
-.flight96-case[data-f96-color="pink"] { --case-hue:41deg; --case-skin:#b658a5 }
-.flight96-case b {
-  position:absolute; display:grid; place-items:center; inset:32% 24% 12% 25%;
-  border-radius:12%; background:linear-gradient(115deg,var(--case-skin),color-mix(in srgb,var(--case-skin),black 22%));
-  box-shadow:0 0 4px 3px var(--case-skin); color:#fff9f2; font-size:clamp(1rem,5vw,2rem);
-  text-shadow:0 2px 2px #28193e70;
-}
-.flight96-cabin-seats {
-  position:absolute; inset:auto 2% 32%; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:clamp(5px,2vw,25px);
-  width:min(95%,690px); margin:auto;
-}
-#missions93-cockpit .flight96-cabin-seats .flight96-slot {
-  position:relative; display:grid; place-items:center; width:100%; min-height:clamp(78px,18vw,152px); padding:3px;
-  border:2px solid #fff4c3; border-radius:19% 19% 12% 12%; color:#fff;
-  background:linear-gradient(var(--seat-top),var(--seat-bottom));
-  box-shadow:inset 0 -12px 0 #79371430,inset 0 5px 5px #fff8,0 8px 0 #435469,0 12px 10px #10233c9e;
-}
-#missions93-cockpit .flight96-cabin-seats .flight96-slot:nth-child(2) { margin-right:4px }
-.flight96-slot[data-f96-color="orange"] { --seat-top:#ffc085; --seat-bottom:#e97827 }
-.flight96-slot[data-f96-color="yellow"] { --seat-top:#fff39a; --seat-bottom:#ddb12a }
-.flight96-slot[data-f96-color="red"] { --seat-top:#ff9a95; --seat-bottom:#c84546 }
-.flight96-slot[data-f96-color="blue"] { --seat-top:#84ddfa; --seat-bottom:#2e79cc }
-#missions93-cockpit .flight96-cabin-seats .flight96-slot[data-f95-filled] { opacity:1 }
-.flight96-cabin-seats .flight96-slot>b {
-  border:2px dashed #fff3de; display:grid; place-items:center; width:69%; height:70%; border-radius:25%;
-  color:white; text-shadow:0 2px 3px #583621; font-size:clamp(1.35rem,6vw,2.7rem);
-}
-.flight96-bear { display:block; width:min(90%,104px); max-height:100%; object-fit:contain; filter:drop-shadow(1px 3px 2px #2d235b60); pointer-events:none }
-.flight96-decoy { display:block; font-size:clamp(1.25rem,5vw,2.9rem); pointer-events:none }
-.flight96-ready,.flight96-ring-win,.flight96-feeder-reward,.flight96-slalom-win {
+#missions93-cockpit[data-fl95-mode="airballs"] .flight95-task strong { color:#972976; font-size:1.21em }.flight96-feeder-reward{
   position:absolute; isolation:isolate; z-index:6; top:7%; left:50%; translate:-50% 0;
   width:max-content; max-width:94%; text-align:center; pointer-events:none;
-}
-.flight96-baggage[data-f96-scene="cabin"][data-f95-win="baggage"] .flight96-pieces { visibility:hidden }
-.flight96-baggage[data-f96-scene="cabin"][data-f95-win="baggage"] .flight96-cabin-seats { bottom:19% }
-.flight96-ready>span:not(.flight96-confetti),.flight96-slalom-win>span {
-  display:block; font-size:clamp(2.2rem,11vw,5.5rem); line-height:1; font-weight:950;
-  color:#ffde53; -webkit-text-stroke:2px #97750c; text-shadow:0 0 16px #fffb81;
-}
-.flight96-ready>strong,.flight96-ring-win>strong,.flight96-feeder-reward>strong,.flight96-feeder-reward>span:last-child {
+}.flight96-feeder-reward>strong,.flight96-feeder-reward>span:last-child {
   display:table; margin:auto; padding:4px 9px; border:2px solid #ffe57a; border-radius:12px;
   color:#28335b; background:linear-gradient(#fff8bd,#ffc856); box-shadow:0 3px 8px #18345880;
   font-size:clamp(.8rem,3.7vw,1.22rem);
@@ -162,75 +59,7 @@
   animation:flight96-confetti .85s both ease-out;
 }
 @keyframes flight96-confetti { from { scale:.2; opacity:0 } to { scale:1.1; opacity:1 } }
-
-.flight96-takeoff .flight95-viewport,.flight96-start-runway { min-height:clamp(330px,58dvh,580px) }
-.flight96-start-runway { background:#92dcf9 }
-.flight96-windshield {
-  position:absolute; z-index:2; inset:0; pointer-events:none;
-  border-radius:inherit; box-shadow:inset 0 6px 0 #162f48;
-  background:linear-gradient(66deg,#20364e 0 12%,#4c637c 12.2% 14.8%,transparent 15.1%) left center/53% 100% no-repeat,
-             linear-gradient(-66deg,#20364e 0 12%,#4c637c 12.2% 14.8%,transparent 15.1%) right center/53% 100% no-repeat;
-}
-.flight96-takeoff .flight95-drift { animation:none; background-size:cover; background-position:center calc(52% + var(--pitch,0px)) }
-.flight96-start-runway .flight96-windshield {
-  background-image:linear-gradient(65deg,#20364e 0 14%,#4c637c 14.4% 17%,transparent 17.4%),
-    linear-gradient(-65deg,#20364e 0 14%,#4c637c 14.4% 17%,transparent 17.4%),url('flight96/runway-window.webp');
-  background-repeat:no-repeat;
-  background-size:53% 100%,53% 100%,100% 64%;
-  background-position:left center,right center,center top;
-}
-.flight96-instruments {
-  position:absolute; z-index:5; inset:auto 0 0; width:100%; height:28%; object-fit:cover;
-  object-position:50% 58%; border-top:3px solid #527695; border-radius:34% 34% 0 0/17% 17% 0 0;
-  pointer-events:none; box-shadow:0 -6px 9px #103b5b45;
-}
-.flight96-start-runway .flight96-instruments { height:45% }
-.flight96-throttle { position:absolute; z-index:6; bottom:7%; left:50%; translate:-50%; touch-action:none }
-#missions93-cockpit .flight96-throttle button {
-  display:grid; justify-items:center; gap:6px; padding:6px 9px; background:#183451de;
-  border:2px solid #ffde79; box-shadow:0 0 18px #ffe3589e; white-space:nowrap;
-}
-.flight96-lever-art {
-  display:block; width:clamp(68px,16vw,118px); filter:drop-shadow(0 0 12px #ffdc4e);
-  translate:0 clamp(0px,var(--drag-y,0px),25px); pointer-events:none;
-}
-.flight96-takeoff .flight95-player { display:none }
-.flight96-takeoff .flight95-object { left:var(--ring-x); top:var(--ring-y); z-index:4 }
-.flight96-takeoff [data-f96-lane="0"] { --ring-x:29%; --ring-y:22%; --ring-light:#a9efff }
-.flight96-takeoff [data-f96-lane="1"] { --ring-x:50%; --ring-y:38%; --ring-light:#dffaff }
-.flight96-takeoff [data-f96-lane="2"] { --ring-x:71%; --ring-y:53%; --ring-light:#adabff }
-#missions93-cockpit .flight96-takeoff .flight95-target,.flight96-ring {
-  position:relative; display:grid; place-items:center; isolation:isolate; aspect-ratio:1;
-  width:clamp(85px,25vw,195px); height:auto; padding:0; background:#9ceaff21;
-  border:0; border-radius:50%; box-shadow:0 0 16px var(--ring-light),inset 0 0 16px var(--ring-light);
-  color:#ffe35e; paint-order:stroke fill; -webkit-text-stroke:2px #945a22;
-  font-size:clamp(2rem,9vw,4.6rem); font-weight:950; text-shadow:0 3px 0 #934e2e,0 0 16px white;
-}
-.flight96-ring-puffs { position:absolute; z-index:-1; inset:0; pointer-events:none }
-.flight96-ring-puffs i {
-  position:absolute; width:24%; aspect-ratio:1; border-radius:50%; translate:-50% -50%;
-  background:radial-gradient(circle at 40% 31%,#fff,#f0fdff 31%,var(--ring-light) 55%,transparent 73%);
-}
-.flight96-ring-win { top:14%; --ring-light:#ffd042 }
-.flight96-ring-win .flight96-ring { width:clamp(130px,38vw,240px); margin:0 auto 7px; animation:flight96-ring-finish .65s ease-out both }
 @keyframes flight96-ring-finish { from { scale:.45; opacity:.45 } to { scale:1; opacity:1 } }
-#missions93-cockpit .flight96-slalom [data-f95-type="balloon"] .flight95-target {
-  width:clamp(87px,23vw,149px); height:auto; aspect-ratio:.78;
-  border:1px solid #ffffffbb; border-radius:50% 50% 46% 46%/45% 45% 55% 55%;
-  background:radial-gradient(ellipse at 23% 24%,#ffffffdf 0% 5%,transparent 17%),
-     radial-gradient(ellipse at 34% 29%,var(--target-a) 7%,var(--target-b) 53%,#3b154e 100%);
-  box-shadow:inset -7px -9px 14px #270d563f,inset 1px 2px 5px #fff8,0 6px 14px #143c7780;
-  font-size:clamp(1.8rem,8vw,3.8rem); text-shadow:0 3px 3px #232a69;
-}
-#missions93-cockpit .flight96-slalom [data-f95-type="balloon"] .flight95-target::before {
-  content:""; position:absolute; top:99%; left:50%; width:13%; height:10px; translate:-50% 0;
-  clip-path:polygon(50% 0,100% 100%,0 100%); background:var(--target-b);
-}
-#missions93-cockpit .flight96-slalom [data-f95-type="balloon"] .flight95-target::after { top:calc(100% + 9px) }
-#missions93-cockpit .flight96-slalom [data-f95-type="storm"] .flight95-target {
-  width:clamp(106px,26vw,170px); height:auto; aspect-ratio:1.19;
-  border:0; padding:0; background:transparent; box-shadow:none;
-}
 .flight96-storm {
   position:absolute; inset:21% 4% 11%; isolation:isolate; border-radius:49% 45% 46% 44%;
   background:radial-gradient(ellipse at 34% 18%,#a4b9d1,#526886 54%,#263958 88%);
@@ -249,10 +78,7 @@
 .flight96-storm>span {
   position:absolute; bottom:-44%; left:43%; color:#fff572; rotate:-9deg;
   filter:drop-shadow(0 0 5px #ffdf2c); font-size:clamp(1.65rem,6vw,3.4rem);
-}
-.flight96-slalom-win { top:25%; color:white; text-shadow:0 3px 8px #25578d; font-size:clamp(1.4rem,6vw,2.85rem) }
-
-.flight96-slalom .flight95-drift,.flight96-feeder .flight95-drift { background-size:cover; background-repeat:no-repeat }
+}.flight96-feeder .flight95-drift { background-size:cover; background-repeat:no-repeat }
 .flight96-feeder .flight95-player { width:clamp(120px,37%,275px); left:23% }
 .flight96-feeder-jet { display:block; width:100%; filter:drop-shadow(1px 4px 4px #335f8270); rotate:9deg }
 .flight96-chick {
@@ -290,8 +116,6 @@
 @media (max-width:390px) {
   #missions93-cockpit .flight95-hero { padding-inline:46px }
   #missions93-cockpit .flight95-card strong { padding-inline:6px; font-size:.84rem }
-  #missions93-cockpit .flight96-piece .flight95-voice { min-width:30px }
-  .flight96-ready { top:5% }
 }
 
 .flight96-hangar,.hq84-panel .flight96-paints,.flight96-hangar-entry,.flight96-hangar-help {

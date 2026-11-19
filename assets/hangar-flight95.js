@@ -1,4 +1,4 @@
-import {feederPlane96, feederReward96, storm96} from './hangar-art96.js?v=104';
+import {feederPlane96, feederReward96, storm96} from './hangar-art96.js?v=130';
 
 const altitude = [24, 49, 74];
 const targetAltitudes = length => length === 2 ? [altitude[0], altitude[2]] : altitude;

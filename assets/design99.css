@@ -160,58 +160,6 @@
 }
 #missions93-cockpit .flight99-classic-card { background-image: url('missions93/cockpit.webp') }
 #missions93-cockpit .flight96-brief-art { object-fit: cover }
-#missions93-cockpit .flight97-board {
-  background: #78c8e8;
-  border: 2px solid #effbff;
-}
-.flight97-board .flight97-board-world {
-  inset: 0;
-  background-position: center;
-}
-.flight97-board[data-f96-scene="hold"] .flight97-board-world::after {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  width: 60%;
-  height: 25%;
-  left: 0;
-  top: 13%;
-  mask-image: linear-gradient(#000 38%, transparent 96%);
-  background: url('art99/terminal-reference.webp') left top / cover no-repeat;
-}
-.flight97-board[data-f96-scene="cabin"] .flight97-board-world {
-  background-image: url('art99/cabin-reference.webp');
-  background-position: center;
-}
-.flight97-board .flight96-pieces {
-  border: 0;
-  background: linear-gradient(transparent, #081f3b44 30%, #09274ab0);
-}
-.flight97-board .flight97-pilot-call,.flight97-takeoff .flight97-pilot-call {
-  border-bottom-color: transparent;
-  background: linear-gradient(180deg,#73c6ef,#60b7e199);
-}
-.flight97-board .flight97-bubble p,.flight97-takeoff .flight97-bubble p {
-  font-family: 'Barlow Condensed','Roboto Condensed',system-ui,sans-serif;
-  text-transform: uppercase;
-}
-.flight97-board .flight97-bubble small,.flight97-takeoff .flight97-bubble small {
-  color: white;
-  background: #12568a;
-  border: 1px solid #a0ddff;
-}
-.flight98-pet[data-f98-species="dog"] .flight98-head { --fur: #d49860 }
-.flight98-pet[data-f98-species="dog"] .flight98-ear {
-  width: 31%;
-  height: 64%;
-  z-index: 2;
-  background: linear-gradient(120deg,#a96b43,#592c21);
-  border-radius: 49% 47% 61% 62%;
-}
-.flight98-pet[data-f98-species="dog"] .flight98-ear-left { left: -9%; rotate: 18deg }
-.flight98-pet[data-f98-species="dog"] .flight98-ear-right { right: -9%; rotate: -18deg }
-.flight99-brief-scenes { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100% }
-.flight99-brief-scenes>img { width: 100%; height: auto; aspect-ratio: 1.6; border-radius: 8px }
 
 .game99-thumb { display: block; width: 100%; height: auto; object-fit: cover }
 .game99-catalog .sq93-game-card:has(.game99-thumb)>button:first-child {
