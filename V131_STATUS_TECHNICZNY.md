@@ -1,4 +1,4 @@
-# V131 — stan roboczy, bez publikacji
+# V131 — zakres przygotowany do publikacji
 
 ## Zastosowane poprawki
 
@@ -9,6 +9,9 @@
 - Zabezpieczenie przed przejściem z wejścia do samolotu od razu na kafelek gry przez ten sam gest. Najpierw otwiera się menu kokpitu.
 - Usunięty powtórny wybór poziomu na karcie lotu; dane wyboru z wcześniejszego ekranu pozostają aktywne.
 - Karta pasażera pokazuje pełne zdanie i czyta je po wybraniu postaci. Na ekranie są także pozostałe istniejące grafiki zwierząt jako opcje wyboru.
+- Bilet znajduje się nad fotelami, a wybór pasażera nad rzędami miejsc. Dodano cofanie ostatniego przeniesienia walizki lub posadzenia pasażera, bez cofania zaakceptowanego etapu i zapisanego postępu.
+- Podczas przeciągania podświetla się obszar pod palcem. Zaznaczenie wybranego elementu jest wyraźniejsze, a przyciski wyjmowania walizki mają większe pola dotyku.
+- Komunikat po błędnym wyborze fotela również używa pełnego zdania z biletu.
 - W obręczach przywrócony mechanizm lotu sprzed V130; dźwignia jest częścią dolnego panelu kokpitu.
 - W balonach lekko większy samolot, niewielkie ruchome chmury w tle i brak dolnych przycisków sterowania. Stuknięcie samolotu strzela, przeciąganie steruje bez oddania przypadkowego strzału.
 - Polski syntezator otrzymuje tekst „razy” zamiast znaku mnożenia. Zmiana dotyczy odczytu; wyświetlane działania zachowują symbole.
@@ -18,13 +21,14 @@
 
 Jedna operacja zmieniająca nazewnictwo oraz reguły i zakres zadań odprawy została zablokowana przez filtr narzędzia. Nie podano powodu. Ta operacja nie została powtórzona ani zastosowana inną drogą. Plik danych zadań pozostaje identyczny jak w V130. W szczególności nie należy traktować żądanych zmian tej części jako ukończonych.
 
-Zgodnie z prośbą użytkowniczki nie przygotowano tej częściowo ukończonej aktualizacji jako gotowej paczki do publikacji i nie opublikowano jej na GitHubie.
+Użytkowniczka zaakceptowała publikację gotowego zakresu z pozostawieniem obecnych danych ćwiczeń. Wersja zawiera krótką zachętę do samodzielnego rozwiązania zadania i korzystania z przycisku podpowiedzi dopiero w razie potrzeby. Sam dopisek nie zmienia logiki ani nie usuwa liczników pojemności luków. Liczniki podpowiadające wynik, nazwy poziomów i zakres miejsc pozostają jak w danych V130.
 
-Do przeglądu przygotowano osobną paczkę roboczą. Zawiera wyłącznie zastosowany kod, ten raport oraz weryfikator kompletności. Nie zawiera polecenia publikacji ani instalatora zmieniającego projekt w telefonie.
+Wcześniejsza paczka `AKADEMIA_V131_ROBOCZA.zip` pozostaje historycznym zapisem do przeglądu; nie jest instalatorem tej wersji.
 
 ## Testy
 
 - `node tests/v131.cjs` — odczyt mnożenia w prawdziwej funkcji syntezy, uprawnienia profili, pamięć zamykania instrukcji, zabezpieczenie wejścia do kokpitu, brak powtórnego wyboru poziomu, karta i odczyt pasażera, odróżnienie tapnięcia samolotu od przeciągania.
+- `node tests/v131-baggage-ui.cjs` — cofanie ładowania, wyjmowania i sadzania; odcięcie cofania między etapami; bilet nad fotelami; pełny odczyt po błędzie; podświetlenie celu i anulowanie przeciągania; zachowanie istniejących danych ćwiczeń.
 - `node tests/v130.cjs` — oba poziomy czterech gier, zapis postępu, poprawne/błędne odpowiedzi, sterowanie, powroty, 40 aktualnych zasobów i usunięte pliki.
 - `node tests/v130-gestures.cjs` — rozpoznawanie pojedynczego/podwójnego stuknięcia i gestów dłoni.
 - `node tests/v130-wind.cjs` — 208 ustawień w pionie i poziomie, w każdym kontrola pikseli smugi i błysku przy pięści.

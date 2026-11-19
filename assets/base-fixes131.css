@@ -18,3 +18,17 @@
 @keyframes h131-cloud-flight{to{left:-40%;transform:translateY(9px)}}
 @media(prefers-reduced-motion:reduce){#missions93-cockpit.h130 .h131-flying-clouds i{animation:none;left:calc(var(--cloud)*24% - 15%)}}
 .hq86-main:has(.hq86-stage[data-can-back="true"])>.pres93-screen{top:146px}
+/* Workspace changes keep all existing exercise data and original artwork. */
+#missions93-cockpit.h130 .h131-solving-note{font-size:.82rem;line-height:1.35;color:#c1deee;padding:0 4px}
+#missions93-cockpit.h130 :is(.h130-suitcase,.h130-passengers button)[aria-pressed="true"]{outline:4px solid #ffe16c;outline-offset:3px;background-color:#0a345b77;border-radius:10px}
+#missions93-cockpit.h130 .h131-drop-target{outline:4px solid #7df4ff;outline-offset:1px;box-shadow:0 0 16px #30d9ee99}
+#missions93-cockpit.h130 .h130-packed [data-h130^="unload:"]{min-height:44px;min-width:44px}
+#missions93-cockpit.h130 button.h131-undo{min-height:44px}
+#missions93-cockpit.h130 .h130-boarding-ticket{flex-shrink:0}
+#missions93-cockpit.h130 .h130-boarding-ticket p{flex:1;min-width:0}
+#missions93-cockpit.h130 .h130-boarding-ticket button{min-width:44px;min-height:44px;flex-shrink:0}
+#missions93-cockpit.h130 .h131-cabin-workspace{min-height:0;gap:12px}
+#missions93-cockpit.h130 .h131-cabin-workspace .h130-passengers{flex-wrap:wrap;gap:12px;padding:3px}
+#missions93-cockpit.h130 .h131-cabin-workspace .h130-passengers button{width:clamp(80px,18vw,100px);height:112px}
+#missions93-cockpit.h130 .h131-cabin-workspace .h130-passengers img{height:76px}
+#missions93-cockpit.h130 .h131-cabin-workspace .h130-seat-rows{margin:0;max-height:min(48dvh,480px);overflow-y:auto;padding:4px;scrollbar-width:thin;overscroll-behavior-y:contain}
