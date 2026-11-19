@@ -1007,7 +1007,7 @@ button:not(:disabled):not(.tr72-subject-card):not(.mic):active,label.v73-file-co
 .hq86-stage{position:relative;margin:auto;overflow:hidden;isolation:isolate;background:#1f3156;touch-action:none;user-select:none;-webkit-touch-callout:none;outline:none}
 .hq86-stage:focus-visible{outline:2px solid #8affed;outline-offset:-2px}
 .hq86-fallback,.hq86-world,.hq86-hands{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.hq86-fallback{background:#102039}
+.hq86-fallback{background:url("hq/hall86.webp") 50% 50% / auto 128% repeat-x}
 .hq86-fallback.has-portrait{background-size:cover;background-repeat:no-repeat}
 .hq86-stage canvas{display:block;background:transparent;border:0;border-radius:0}
 .hq86-world{opacity:0}

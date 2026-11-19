@@ -1,3 +1,4 @@
+import {hallDetails125} from './hall-details125.js?v=125';
 // Canvas renderer for devices where WebGL is unavailable. Uses the same rays,
 // room bounds and camera as the WebGL renderer and the entrance hit areas.
 const smooth=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);};
@@ -25,8 +26,16 @@ function triangle(ctx,image,source,destination,alpha=1,repeat=false){
 export function panoramaSoftware119(canvas){
  const ctx=canvas?.getContext('2d',{alpha:false});
  if(!ctx)return null;
- let image=null,front=null,room=null;
- return {kind:'software',load(background,portrait,selected){image=background;front=portrait;room=selected;},free(){image=front=room=null;},
+ let image=null,front=null,room=null,details=[];
+ return {kind:'software',load(background,portrait,selected,detailImage){
+   image=background;front=portrait;room=selected;
+   details=detailImage?hallDetails125.map(tile=>{
+    const layer=document.createElement('canvas');[layer.width,layer.height]=tile.native_size;
+    const [x,y,w,h]=tile.atlas.map(n=>n*2048);
+    layer.getContext('2d').drawImage(detailImage,x,y,w,h,0,0,w,h);
+    return {...tile,image:layer};
+   }):[];
+  },free(){image=front=room=null;details=[];},
   draw(state,basis,fx,fy,squish){
    if(!image||!room)return;
    const w=canvas.width,h=canvas.height,cell=Math.max(20,Math.ceil(w/36)),eye=[state.x,0,state.z],rows=[];
@@ -52,6 +61,12 @@ export function panoramaSoftware119(canvas){
      const nodes=indices.map(i=>quad[i]),wrap=Math.max(...nodes.map(n=>n.uv[0]))-Math.min(...nodes.map(n=>n.uv[0]))>.5;
      const uv=nodes.map(n=>[(n.uv[0]+(wrap&&n.uv[0]<.5?1:0))*image.naturalWidth,n.uv[1]*image.naturalHeight]);
      const screen=nodes.map(n=>n.screen);triangle(ctx,image,uv,screen,1,wrap);
+     for(const tile of details){
+      const [u,v,tw,th]=tile.uv;
+      // Clip at native alpha pixels, without a wide triangle-level crossfade.
+      if(wrap||nodes.every(n=>n.uv[0]<u)||nodes.every(n=>n.uv[0]>u+tw)||nodes.every(n=>n.uv[1]<v)||nodes.every(n=>n.uv[1]>v+th))continue;
+      triangle(ctx,tile.image,nodes.map(n=>[(n.uv[0]-u)/tw*tile.image.width,(n.uv[1]-v)/th*tile.image.height]),screen);
+     }
      if(front&&nodes.every(n=>n.photo)){
       const edge=Math.min(...nodes.flatMap(n=>[n.photo[0],1-n.photo[0],n.photo[1],1-n.photo[1]]));
       const alpha=smooth(0,.15,edge);
