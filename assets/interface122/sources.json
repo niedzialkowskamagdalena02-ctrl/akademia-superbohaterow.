@@ -1,0 +1,104 @@
+[
+  {
+    "file": "profile-pawel.webp",
+    "width": 646,
+    "height": 360,
+    "sha256": "5f409ed98a92ee578270d2d2e1379db8da10d36e1a36ad475bd9aca2551ff9c6"
+  },
+  {
+    "file": "profile-pawel-other.webp",
+    "width": 646,
+    "height": 360,
+    "sha256": "5f807e0f9c6274742f3df5d919115a56372be7f47c67884cb0948b1a30dabb09"
+  },
+  {
+    "file": "profile-patryk.webp",
+    "width": 646,
+    "height": 354,
+    "sha256": "db2dc809ec5f0979677302067774dca72d50de049cbadf454e7ba08bc000a076"
+  },
+  {
+    "file": "profile-patryk-other.webp",
+    "width": 646,
+    "height": 354,
+    "sha256": "e2bb167f5856051d3006f9d5a5e691fa96f58a32294143d7b4f25dc20221b940"
+  },
+  {
+    "file": "entry-scene.webp",
+    "width": 710,
+    "height": 1536,
+    "sha256": "b741415fe6f9a078c8acfbf6f100354d17f0e6089dee7dc01610349bc7ba7981"
+  },
+  {
+    "file": "entry-listen.webp",
+    "width": 201,
+    "height": 82,
+    "sha256": "8fd2ab672ec4e288d6d6bb4db0442eb7cb330a6aafc451772a77619365146409"
+  },
+  {
+    "file": "entry-parent.webp",
+    "width": 663,
+    "height": 164,
+    "sha256": "2b4c4b210eb2df3a14cf976305884910d42c6dc3b6fd8e9960818c22e897e708"
+  },
+  {
+    "file": "scope-all.webp",
+    "width": 670,
+    "height": 443,
+    "sha256": "b7c5d09ed8aa83ad897a41f8e1b5416ed6c4d3be6de7abc45bca774d0783abd5"
+  },
+  {
+    "file": "scope-pick.webp",
+    "width": 677,
+    "height": 450,
+    "sha256": "f8b2d6f47322eb487124f01191afbb059dacba2b5caec4ebd76f30edf854570f"
+  },
+  {
+    "file": "scope-scene.webp",
+    "width": 695,
+    "height": 1463,
+    "sha256": "6fa5ddf3f3a160ea20ea0924a0775cfc24fcdb79a81ede231415f07b6405d2e9"
+  },
+  {
+    "file": "scope-title.webp",
+    "width": 403,
+    "height": 86,
+    "sha256": "648d5b4ec7a45d316d1deabb10586eff416994243cee86e3056a7a424f13459a"
+  },
+  {
+    "file": "scope-back.webp",
+    "width": 225,
+    "height": 128,
+    "sha256": "609babba1dbed5d39c28d0e7f0cba6085797e63965fa9ffad9e5afc7156889b4"
+  },
+  {
+    "file": "back.webp",
+    "width": 225,
+    "height": 128,
+    "sha256": "1f57b5e3f1dce794d95636c9b9569b1d1b2301a4af785cba2a108ec862b60fdc"
+  },
+  {
+    "file": "scope-voice.webp",
+    "width": 150,
+    "height": 121,
+    "sha256": "22396c395ec9ef6e1dca7bece9577a753351188bdb32a7fda3e66f3fc6ca691f"
+  },
+  {
+    "file": "mode-practice.webp",
+    "width": 755,
+    "height": 908,
+    "sha256": "755b6bddaab0e9562db852ac4932884e0802f51e10cff986db7dc82fa886f0a1"
+  },
+  {
+    "file": "mode-choose.webp",
+    "width": 755,
+    "height": 908,
+    "sha256": "1ff2835d38a2fea08d59e88d66f030424ff261b1153bf52cd25eb20158f966eb"
+  },
+  {
+    "file": "mode-assessment.webp",
+    "width": 1413,
+    "height": 356,
+    "sha256": "554c4024156296e6cba637b220885088793566281254c1668249fc409f7f6c34"
+  }
+]

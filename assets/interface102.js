@@ -1,5 +1,5 @@
-import {entry121,dashboard121} from './interface121.js?v=121';
-import {training119Subjects,training119Options} from './interface119.js?v=121';
+import {entry122} from './interface122.js?v=122';
+import {training119Subjects,training119Options} from './interface119.js?v=122';
 const art = (name, className = '') =>
   `<img class="academy102-art ${className}" src="assets/interface102/${name}.webp" alt="" draggable="false">`;
 const dashboardArt = (name) =>
@@ -28,8 +28,7 @@ export function heroPortrait(key) {
 }
 
 export function academy107Entry(options){
- const portrait=key=>['hulk','spider'].includes(key)?'assets/interface121/hero-'+key+'.svg':heroPortrait(key);
- return entry121({...options,portrait});
+ return entry122({...options,portrait:heroPortrait});
 }
 
 export function academy107PinScreen(length) {
@@ -142,7 +141,14 @@ const destinations = [
   ['headquarters','Baza Avengersów i gry','base']
 ];
 
-export function academy102DashboardNav(preschool,speak,current){return dashboard121(destinations,speak,current);}
+export function academy102DashboardNav(preschool, speak, current) {
+  return `<nav class="academy102-destinations${preschool?' academy102-preschool':''}" aria-label="Menu Akademii">${destinations.map(([picture,label,tab])=>{
+    const artwork=referenceArt('nav-'+picture);
+    const link = `<button type="button" class="academy104-destination" data-action="child:${tab}"${tab===current?' aria-current="page"':''} aria-label="${label}">
+      <span class="academy107-wide-face">${artwork}<span>${label}</span></span></button>`;
+    return `<div class="academy102-voiced" data-destination="${picture}">${link}${speak(label)}</div>`;
+  }).join('')}</nav>`;
+}
 
 export function academy111Training(voice,extraSubjects='') { return training119Subjects(voice,extraSubjects); }
 
