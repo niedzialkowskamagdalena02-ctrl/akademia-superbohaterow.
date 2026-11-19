@@ -1,0 +1,2708 @@
+{
+  "version": 127,
+  "frame": [
+    1280,
+    720
+  ],
+  "heroes": {
+    "hulk": {
+      "idle": "48c073923f04961a2ce0.png",
+      "actions": {
+        "punch:-1": {
+          "frames": [
+            "c1dff7c022f01692c5c8.png",
+            "abc7d7f682c2abb75fde.png",
+            "e5d48fcafae6c179791f.png",
+            "17486b9adb44216c8dc6.png",
+            "17486b9adb44216c8dc6.png",
+            "b45369d32b1468bbfd36.png",
+            "e2cb785a741ec0eb5ed6.png",
+            "c1dff7c022f01692c5c8.png"
+          ],
+          "duration": 520,
+          "contact": 0.45,
+          "effect": "punch"
+        },
+        "punch:1": {
+          "frames": [
+            "c1dff7c022f01692c5c8.png",
+            "d748c70326fd6f9992d1.png",
+            "4e210c8c1fbef53caab5.png",
+            "7b6d9335ab705609944c.png",
+            "7b6d9335ab705609944c.png",
+            "1b6a5a07c0326a046225.png",
+            "b9c7310574df89599d5a.png",
+            "c1dff7c022f01692c5c8.png"
+          ],
+          "duration": 520,
+          "contact": 0.45,
+          "effect": "punch"
+        },
+        "slam:-1": {
+          "frames": [
+            "c1dff7c022f01692c5c8.png",
+            "f54c7dbe37d06f25a14d.png",
+            "a0a1e02b80a88377ead8.png",
+            "d09787b476811cc68fd5.png",
+            "3ed2eb8dffa12560403c.png",
+            "3e6947fc3b7d2d2fed11.png",
+            "1f5e6a3efc47340c01bd.png",
+            "1f5e6a3efc47340c01bd.png"
+          ],
+          "duration": 760,
+          "contact": 0.58,
+          "effect": "hulk-dent",
+          "defer": true
+        },
+        "slam:1": {
+          "frames": [
+            "c1dff7c022f01692c5c8.png",
+            "09453c0e0ae1ae52eff5.png",
+            "694ca4601d92becd56d6.png",
+            "4fa6c9a1b3efa488952c.png",
+            "2cff39c4920279e15d78.png",
+            "84fa7e66a8474f818ae6.png",
+            "8f08290dd81b5d8b4cfa.png",
+            "8f08290dd81b5d8b4cfa.png"
+          ],
+          "duration": 760,
+          "contact": 0.58,
+          "effect": "hulk-dent",
+          "defer": true
+        }
+      }
+    },
+    "captain": {
+      "idle": "93078722b34156af627c.png",
+      "actions": {
+        "punch:-1": {
+          "frames": [
+            "478b60a6ea98da7cbe01.png",
+            "6c4e19d35dbe34026221.png",
+            "badad9d3eb0e110150c2.png",
+            "5760f168aca47c7df8d7.png",
+            "5760f168aca47c7df8d7.png",
+            "d343df5570fdc43e78cf.png",
+            "41c5d504b4a85331f346.png",
+            "478b60a6ea98da7cbe01.png"
+          ],
+          "duration": 520,
+          "contact": 0.45,
+          "effect": "punch"
+        },
+        "punch:1": {
+          "frames": [
+            "478b60a6ea98da7cbe01.png",
+            "00643da664ffd0ac21cc.png",
+            "e75adc0a86da2753998d.png",
+            "14b0ae30c51b6795c366.png",
+            "14b0ae30c51b6795c366.png",
+            "d6c258da727b2554c734.png",
+            "4b432a43aa0bf6b208a9.png",
+            "478b60a6ea98da7cbe01.png"
+          ],
+          "duration": 520,
+          "contact": 0.45,
+          "effect": "punch"
+        },
+        "shield:1": {
+          "frames": [
+            "47502a163e5bf98075f9.png",
+            "72349e4b580f81104d53.png",
+            "ba25f8ab328553f2ead0.png",
+            "7336ab7570aecb0bbaf8.png",
+            "70b157b2455e45522f35.png",
+            "4b8ca6001eedb2545498.png",
+            "72349e4b580f81104d53.png",
+            "47502a163e5bf98075f9.png"
+          ],
+          "duration": 1180,
+          "contact": 0.52,
+          "effect": "shield-dent"
+        }
+      },
+      "shieldIdle": "646a5ecfe79aab4e1d7b.png"
+    },
+    "spider": {
+      "idle": "1918ad8b99d7e88d4142.png",
+      "actions": {
+        "punch:-1": {
+          "frames": [
+            "cc881896f444dbbe3d49.png",
+            "56c8404d9b2133642eb7.png",
+            "029f34fdc72e284b2a84.png",
+            "7ad011439edb6211df7e.png",
+            "7ad011439edb6211df7e.png",
+            "292e318a2ae8c7b357a7.png",
+            "2719142f9d55367003ae.png",
+            "cc881896f444dbbe3d49.png"
+          ],
+          "duration": 520,
+          "contact": 0.45,
+          "effect": "punch"
+        },
+        "punch:1": {
+          "frames": [
+            "cc881896f444dbbe3d49.png",
+            "bb1b32f3ba0306b741cb.png",
+            "cd78db990d42d7026268.png",
+            "0602a68f2164ac1a10c7.png",
+            "0602a68f2164ac1a10c7.png",
+            "4249214febb71a49b047.png",
+            "a941edbc7a0430b17f81.png",
+            "cc881896f444dbbe3d49.png"
+          ],
+          "duration": 520,
+          "contact": 0.45,
+          "effect": "punch"
+        },
+        "web:-1": {
+          "frames": [
+            "cc881896f444dbbe3d49.png",
+            "469ba62767c2cb09117a.png",
+            "0964adbc52cbc2115d05.png",
+            "d283e8ae67c3edf80040.png",
+            "abf8f9ecbdde8d566ac8.png",
+            "59f219d376bcc12512b3.png",
+            "49d3690be95b813af8c8.png",
+            "cc881896f444dbbe3d49.png"
+          ],
+          "duration": 700,
+          "contact": 0.58,
+          "effect": "web",
+          "defer": true
+        },
+        "web:1": {
+          "frames": [
+            "cc881896f444dbbe3d49.png",
+            "8b80896e27413b6af696.png",
+            "1973ea6d4a8bdd6833fd.png",
+            "6d5aff509bdc2b9b388a.png",
+            "a4a429d664847c5a131f.png",
+            "ce44af0d9b6b1190ac66.png",
+            "5e98a74982979a03fcce.png",
+            "cc881896f444dbbe3d49.png"
+          ],
+          "duration": 700,
+          "contact": 0.58,
+          "effect": "web",
+          "defer": true
+        }
+      }
+    },
+    "thor": {
+      "idle": "a7699d99f5d68a49182d.png",
+      "hammerIdle": "b8490af7d9a8391de271.png",
+      "actions": {
+        "punch:1": {
+          "frames": [
+            "a7699d99f5d68a49182d.png",
+            {
+              "layers": [
+                {
+                  "src": "b240756460b5de9a3ef8.png",
+                  "clip": [
+                    0,
+                    0.5,
+                    0.45,
+                    0.5
+                  ]
+                },
+                {
+                  "src": "ffe358169217b4ec96ee.png",
+                  "rect": [
+                    0.35,
+                    0.03,
+                    0.62,
+                    1.1022222222
+                  ]
+                }
+              ]
+            },
+            {
+              "layers": [
+                {
+                  "src": "b240756460b5de9a3ef8.png",
+                  "clip": [
+                    0,
+                    0.5,
+                    0.45,
+                    0.5
+                  ]
+                },
+                {
+                  "src": "565f6c6ccf5cfe24caf4.png",
+                  "rect": [
+                    0.35,
+                    0.03,
+                    0.62,
+                    1.1022222222
+                  ]
+                }
+              ]
+            },
+            {
+              "layers": [
+                {
+                  "src": "b240756460b5de9a3ef8.png",
+                  "clip": [
+                    0,
+                    0.5,
+                    0.45,
+                    0.5
+                  ]
+                },
+                {
+                  "src": "317323646b846d08b08c.png",
+                  "rect": [
+                    0.35,
+                    0.03,
+                    0.62,
+                    1.1022222222
+                  ]
+                }
+              ]
+            },
+            "b240756460b5de9a3ef8.png",
+            {
+              "layers": [
+                {
+                  "src": "b240756460b5de9a3ef8.png",
+                  "clip": [
+                    0,
+                    0.5,
+                    0.45,
+                    0.5
+                  ]
+                },
+                {
+                  "src": "565f6c6ccf5cfe24caf4.png",
+                  "rect": [
+                    0.35,
+                    0.03,
+                    0.62,
+                    1.1022222222
+                  ]
+                }
+              ]
+            },
+            {
+              "layers": [
+                {
+                  "src": "b240756460b5de9a3ef8.png",
+                  "clip": [
+                    0,
+                    0.5,
+                    0.45,
+                    0.5
+                  ]
+                },
+                {
+                  "src": "ffe358169217b4ec96ee.png",
+                  "rect": [
+                    0.35,
+                    0.03,
+                    0.62,
+                    1.1022222222
+                  ]
+                }
+              ]
+            },
+            "a7699d99f5d68a49182d.png"
+          ],
+          "duration": 600,
+          "contact": 0.48,
+          "effect": "punch"
+        },
+        "punch:-1": {
+          "frames": [
+            "a7699d99f5d68a49182d.png",
+            {
+              "layers": [
+                {
+                  "src": "218a66c9d8b3f1d83c05.png",
+                  "rect": [
+                    -0.05,
+                    0.08,
+                    1.05,
+                    1.05
+                  ]
+                }
+              ]
+            },
+            "218a66c9d8b3f1d83c05.png",
+            {
+              "layers": [
+                {
+                  "src": "218a66c9d8b3f1d83c05.png",
+                  "rect": [
+                    0,
+                    -0.03,
+                    1.03,
+                    1.03
+                  ]
+                }
+              ]
+            },
+            "218a66c9d8b3f1d83c05.png",
+            {
+              "layers": [
+                {
+                  "src": "218a66c9d8b3f1d83c05.png",
+                  "rect": [
+                    -0.03,
+                    0.04,
+                    1.03,
+                    1.03
+                  ]
+                }
+              ]
+            },
+            "218a66c9d8b3f1d83c05.png",
+            "a7699d99f5d68a49182d.png"
+          ],
+          "duration": 600,
+          "contact": 0.48,
+          "effect": "punch"
+        },
+        "hammer:1": {
+          "frames": [
+            "b8490af7d9a8391de271.png",
+            {
+              "layers": [
+                {
+                  "src": "1997d565bb4edd6dc8ba.png",
+                  "clip": [
+                    0,
+                    0.5,
+                    0.45,
+                    0.5
+                  ]
+                },
+                {
+                  "src": "6b2dcb9a1c6dbcad5871.png",
+                  "rect": [
+                    0.35,
+                    0.03,
+                    0.62,
+                    1.1022222222
+                  ]
+                }
+              ]
+            },
+            {
+              "layers": [
+                {
+                  "src": "1997d565bb4edd6dc8ba.png",
+                  "clip": [
+                    0,
+                    0.5,
+                    0.45,
+                    0.5
+                  ]
+                },
+                {
+                  "src": "7ebda49fdcdaa6ef51cc.png",
+                  "rect": [
+                    0.35,
+                    0.03,
+                    0.62,
+                    1.1022222222
+                  ]
+                }
+              ]
+            },
+            {
+              "layers": [
+                {
+                  "src": "1997d565bb4edd6dc8ba.png",
+                  "clip": [
+                    0,
+                    0.5,
+                    0.45,
+                    0.5
+                  ]
+                },
+                {
+                  "src": "95c3cfde9b679bd00a08.png",
+                  "rect": [
+                    0.35,
+                    0.03,
+                    0.62,
+                    1.1022222222
+                  ]
+                }
+              ]
+            },
+            "1997d565bb4edd6dc8ba.png",
+            {
+              "layers": [
+                {
+                  "src": "1997d565bb4edd6dc8ba.png",
+                  "clip": [
+                    0,
+                    0.5,
+                    0.45,
+                    0.5
+                  ]
+                },
+                {
+                  "src": "7ebda49fdcdaa6ef51cc.png",
+                  "rect": [
+                    0.35,
+                    0.03,
+                    0.62,
+                    1.1022222222
+                  ]
+                }
+              ]
+            },
+            {
+              "layers": [
+                {
+                  "src": "1997d565bb4edd6dc8ba.png",
+                  "clip": [
+                    0,
+                    0.5,
+                    0.45,
+                    0.5
+                  ]
+                },
+                {
+                  "src": "6b2dcb9a1c6dbcad5871.png",
+                  "rect": [
+                    0.35,
+                    0.03,
+                    0.62,
+                    1.1022222222
+                  ]
+                }
+              ]
+            },
+            "b8490af7d9a8391de271.png"
+          ],
+          "duration": 760,
+          "contact": 0.53,
+          "effect": "hammer-dent"
+        },
+        "throw:1": {
+          "frames": [
+            "58d42f9b669d6446308f.png",
+            "24551f6ab16ef7a16eb5.png",
+            "9001dc64e01837fc9169.png",
+            "d6bb7a98d3dc1a3f5c31.png",
+            "d7d19a7421e26956884a.png",
+            "0abbf63fdc5d96768773.png",
+            "19d38815670e0666af2f.png",
+            "58d42f9b669d6446308f.png"
+          ],
+          "duration": 1200,
+          "contact": 0.54,
+          "effect": "hammer-dent"
+        }
+      }
+    },
+    "iron": {
+      "idle": "a133f3c747fcbabc5509.png",
+      "laserIdle": "8992dbcb19386dba3228.png",
+      "actions": {
+        "punch:-1": {
+          "frames": [
+            "e91d16ae10a405177823.png",
+            "b5965b100ea10b62e907.png",
+            "03dd4ef6d3ffba7dceda.png",
+            "d1e53e18119c9fc6ef0d.png",
+            "d1e53e18119c9fc6ef0d.png",
+            "0421db33670dd71b59bf.png",
+            "2abbc72cc5046d3f3e69.png",
+            "e91d16ae10a405177823.png"
+          ],
+          "duration": 520,
+          "contact": 0.45,
+          "effect": "punch"
+        },
+        "laser:-1": {
+          "frames": [
+            "416e29fd169842a959c4.png",
+            "a532f2539b9d618202bd.png",
+            "a0c8c6202cbc5369e38f.png",
+            "569333320f43410dfdd9.png",
+            "4aa99a0314ce4bc15926.png",
+            "e57a0066b262e38719af.png",
+            "3a86e12e471907af30fb.png",
+            "416e29fd169842a959c4.png"
+          ],
+          "duration": 740,
+          "contact": 0.48,
+          "effect": "laser"
+        },
+        "punch:1": {
+          "frames": [
+            "e91d16ae10a405177823.png",
+            "d96b8bd94b3f78931297.png",
+            "bbd599a1a2de573a7d74.png",
+            "f0039bfd792771347f86.png",
+            "f0039bfd792771347f86.png",
+            "0240d70d2b86f1671509.png",
+            "ba9083c9582489ea3805.png",
+            "e91d16ae10a405177823.png"
+          ],
+          "duration": 520,
+          "contact": 0.45,
+          "effect": "punch"
+        },
+        "laser:1": {
+          "frames": [
+            "416e29fd169842a959c4.png",
+            "e2d75c9e0735bfabfc84.png",
+            "3099f1dc38a1db60931d.png",
+            "1a392a275646455a97e7.png",
+            "9bdeb23fd840293af965.png",
+            "949185c34d89a5e18289.png",
+            "e92f5d0870a207b9d78e.png",
+            "416e29fd169842a959c4.png"
+          ],
+          "duration": 740,
+          "contact": 0.48,
+          "effect": "laser"
+        }
+      }
+    }
+  },
+  "webs": {
+    "Wiszaca_duza": [
+      "66771f0c2a5429516e35.png",
+      "8e8d27f30d7a34b56060.png",
+      "049d53155053353f7cec.png",
+      "0277f8b47c45431e785b.png",
+      "1a1506be0328dfa74534.png",
+      "350a4cf62fdf3f3c1d0b.png",
+      "a31c03876da0b07d4f33.png",
+      "412f14a17aafe1ba1ac9.png"
+    ],
+    "Wiszaca_mala": [
+      "87f3260e8d7d6792d9d8.png",
+      "ebb1bcabe61400c8f8bb.png",
+      "4f91df1cbe5ced352abc.png",
+      "679cf7fe4b69062ffc4c.png",
+      "185df5336ccf6a74c7b1.png",
+      "03d18ba06cca8ec00ac3.png",
+      "09ecc2f3336da489f683.png",
+      "f4461c5e97a2b8390349.png"
+    ],
+    "Klasyczna_duza": [
+      "29ead40bdc6c27885f6c.png",
+      "7ac7afa841f344c7bccd.png",
+      "9d5c63973e4ee713475c.png",
+      "fe05c7828a5eaae2e2a5.png",
+      "8539f74854ab275cafd9.png",
+      "80301ae8348e6a7abdaf.png",
+      "f348d5229ee0d7806066.png",
+      "f8bbffe46b7905f8e75c.png"
+    ],
+    "Klasyczna_mala": [
+      "c05e272a00e31d7e60d3.png",
+      "a473e56b6f18f47e9e99.png",
+      "1ab53ec01106cebc298d.png",
+      "7b748f481c0960a76b86.png",
+      "19e5255162339a8e2a00.png",
+      "ceed152db2cdeffe9f58.png",
+      "add1ca2892b22a6508db.png",
+      "1d362b58bcd633f58f74.png"
+    ],
+    "Narozna": [
+      "263660bc01f35f4d4fce.png",
+      "50bfad1559bf3b812864.png",
+      "b540d25ef235c732f85e.png",
+      "caf4eca461b14b9fb62f.png",
+      "1f3fd19e19a7b1d50f3d.png",
+      "6d9067094b7f65fb7e76.png",
+      "19331a35df30bd7d18fa.png",
+      "d76f69a71b1cc4529d89.png"
+    ],
+    "Kokon": [
+      "28e3412dd9d356bd6b62.png",
+      "9fbf38f9a89670b077b0.png",
+      "7bcf46ff1b65a52477d9.png",
+      "b529de66fecad26cab1d.png",
+      "db7b54892cfc68560e0d.png",
+      "53381c1f2f5e44a19169.png",
+      "93fe190e5eec954c2666.png",
+      "9df64d787a8b1750f47c.png"
+    ]
+  },
+  "effects": {
+    "punch": [
+      "7fddafcd46e9c8648b1c.png",
+      "f7bfb9acfc28ba219b14.png",
+      "9cd7f7ab9c71903014fd.png",
+      "a9c4b7758911337d7df8.png"
+    ],
+    "wind": [
+      "03179ed3dfd90eb3cf01.png",
+      "9f2a3b098e48b73d7951.png",
+      "7872227dfced7951437e.png",
+      "a2179628028f9228e636.png"
+    ],
+    "hulk-dent": [
+      "4055148e61b1b3475c09.png",
+      "d1148b604c54ed9ef2c7.png",
+      "ffc8a4b582e12c30ecd0.png",
+      "3f847421c993e0418612.png"
+    ],
+    "shield-dent": [
+      "dbcb56aa67dbbecd2c3a.png"
+    ],
+    "shield-contact": [
+      "9fb9868a862f29f15d8b.png"
+    ],
+    "hammer-dent": [
+      "6c15ad39bd39ecca0e8d.png"
+    ],
+    "laser-contact": [
+      "96faa2bad821aa24c234.png",
+      "9273e1c40c4d5a0614c2.png",
+      "07cb5e68ce548a1e3897.png"
+    ],
+    "laser": [
+      "43d264e4c34dbbd86813.png",
+      "cee81157f86ea952eb8d.png",
+      "ea72cbc93bfc24aef046.png"
+    ],
+    "laser-tip": [
+      "2018ddafe525d6eed90e.png"
+    ]
+  },
+  "files": {
+    "c1dff7c022f01692c5c8.png": {
+      "sha256": "c1dff7c022f01692c5c889e03ab897a421f9ff12ceea6928146a3d50253d56b5",
+      "bytes": 494688,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "hulk/Cios_lewa/01.png",
+        "hulk/Cios_lewa/11.png",
+        "hulk/Cios_prawa/01.png",
+        "hulk/Cios_prawa/11.png",
+        "hulk/Uderzenie_w_dol_lewa/01.png",
+        "hulk/Uderzenie_w_dol_prawa/01.png"
+      ]
+    },
+    "abc7d7f682c2abb75fde.png": {
+      "sha256": "abc7d7f682c2abb75fde4e55fd0135c7fd3ffe008796b0f25f6e55dafe2098cf",
+      "bytes": 418004,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "hulk/Cios_lewa/02.png"
+      ]
+    },
+    "e5d48fcafae6c179791f.png": {
+      "sha256": "e5d48fcafae6c179791f1c2ec6545e6351e7a87a7cdc1ed93e2ef13c0b00238f",
+      "bytes": 492645,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "hulk/Cios_lewa/04.png"
+      ]
+    },
+    "17486b9adb44216c8dc6.png": {
+      "sha256": "17486b9adb44216c8dc6263ca2ef01acf31efbd421de885c31ee1c45897dbf5a",
+      "bytes": 543703,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "hulk/Cios_lewa/06.png",
+        "hulk/Cios_lewa/07.png"
+      ]
+    },
+    "b45369d32b1468bbfd36.png": {
+      "sha256": "b45369d32b1468bbfd365decbf8509bd510a790609be2c78686c840803d8e8ab",
+      "bytes": 460764,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "hulk/Cios_lewa/09.png"
+      ]
+    },
+    "e2cb785a741ec0eb5ed6.png": {
+      "sha256": "e2cb785a741ec0eb5ed6ae5c0b5a67f46fa22a6e7055630255cf1786e6d386cd",
+      "bytes": 424040,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "hulk/Cios_lewa/10.png"
+      ]
+    },
+    "d748c70326fd6f9992d1.png": {
+      "sha256": "d748c70326fd6f9992d18cef7981c25c0a8e46c1ee63fa44f5d39e7df4857927",
+      "bytes": 441175,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "hulk/Cios_prawa/02.png"
+      ]
+    },
+    "4e210c8c1fbef53caab5.png": {
+      "sha256": "4e210c8c1fbef53caab5c651368b5108f2eb29301991b541d822b55690f0321b",
+      "bytes": 518017,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "hulk/Cios_prawa/04.png"
+      ]
+    },
+    "7b6d9335ab705609944c.png": {
+      "sha256": "7b6d9335ab705609944c3ac6975853682bbfdb8215a109976d54e899ef7165ff",
+      "bytes": 571825,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "hulk/Cios_prawa/06.png",
+        "hulk/Cios_prawa/07.png"
+      ]
+    },
+    "1b6a5a07c0326a046225.png": {
+      "sha256": "1b6a5a07c0326a046225c4a926589855d7c15f9add87d8092cd3a28bd98d6c59",
+      "bytes": 485971,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "hulk/Cios_prawa/09.png"
+      ]
+    },
+    "b9c7310574df89599d5a.png": {
+      "sha256": "b9c7310574df89599d5a6085a63b47c67a7584a33aa13f9cc7902e198011a892",
+      "bytes": 447023,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "hulk/Cios_prawa/10.png"
+      ]
+    },
+    "48c073923f04961a2ce0.png": {
+      "sha256": "48c073923f04961a2ce0538eb364cea48bdf28012f0d1d04d295297587e300b0",
+      "bytes": 493985,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "hulk/Pozycje_bazowe/garda.png"
+      ]
+    },
+    "478b60a6ea98da7cbe01.png": {
+      "sha256": "478b60a6ea98da7cbe013e0b10afc8c5a4e440975daa65c515e4d7c95e9b1705",
+      "bytes": 474091,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "kapitan_ameryka/Cios_lewa/01.png",
+        "kapitan_ameryka/Cios_lewa/11.png",
+        "kapitan_ameryka/Cios_prawa/01.png",
+        "kapitan_ameryka/Cios_prawa/11.png"
+      ]
+    },
+    "6c4e19d35dbe34026221.png": {
+      "sha256": "6c4e19d35dbe3402622147945e81f042f252ae09c99f7bd7e7c6f6f4f808942a",
+      "bytes": 453962,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "kapitan_ameryka/Cios_lewa/02.png"
+      ]
+    },
+    "badad9d3eb0e110150c2.png": {
+      "sha256": "badad9d3eb0e110150c2e4b384e4af4f43b6bd08b5d4ad33ae4176670c56ed7b",
+      "bytes": 519178,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "kapitan_ameryka/Cios_lewa/04.png"
+      ]
+    },
+    "5760f168aca47c7df8d7.png": {
+      "sha256": "5760f168aca47c7df8d7903fe4daea5c138aeeb1610b4f8589f500b47d9da4a1",
+      "bytes": 565216,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "kapitan_ameryka/Cios_lewa/06.png",
+        "kapitan_ameryka/Cios_lewa/07.png"
+      ]
+    },
+    "d343df5570fdc43e78cf.png": {
+      "sha256": "d343df5570fdc43e78cfa8f6b82b879fdbd4ffe5862a2bdc03046983d455e678",
+      "bytes": 491624,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "kapitan_ameryka/Cios_lewa/09.png"
+      ]
+    },
+    "41c5d504b4a85331f346.png": {
+      "sha256": "41c5d504b4a85331f346aa0fd5f7a1eeab355bfdc19079a37f3f26cd43be04e3",
+      "bytes": 459098,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "kapitan_ameryka/Cios_lewa/10.png"
+      ]
+    },
+    "00643da664ffd0ac21cc.png": {
+      "sha256": "00643da664ffd0ac21cc6463daf7e3827eb5ba2a4d8ae423e7a0648d57e5a82b",
+      "bytes": 369001,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "kapitan_ameryka/Cios_prawa/02.png"
+      ]
+    },
+    "e75adc0a86da2753998d.png": {
+      "sha256": "e75adc0a86da2753998df11c289a868feb6c70b5d45f2394c6e3160a84e5f935",
+      "bytes": 448877,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "kapitan_ameryka/Cios_prawa/04.png"
+      ]
+    },
+    "14b0ae30c51b6795c366.png": {
+      "sha256": "14b0ae30c51b6795c36621fb1ad6b6654d824ce1fd2756dfe5fa3bdcaa4985e5",
+      "bytes": 504986,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "kapitan_ameryka/Cios_prawa/06.png",
+        "kapitan_ameryka/Cios_prawa/07.png"
+      ]
+    },
+    "d6c258da727b2554c734.png": {
+      "sha256": "d6c258da727b2554c7349daeff060df4dc7780214c0ef23fc763569480bcd098",
+      "bytes": 415249,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "kapitan_ameryka/Cios_prawa/09.png"
+      ]
+    },
+    "4b432a43aa0bf6b208a9.png": {
+      "sha256": "4b432a43aa0bf6b208a929109ca7963b925114ef057ee67545db160431866445",
+      "bytes": 374813,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "kapitan_ameryka/Cios_prawa/10.png"
+      ]
+    },
+    "93078722b34156af627c.png": {
+      "sha256": "93078722b34156af627cb3c1e41fea28d5ca5a36a846c5ee79c2e7f3378561eb",
+      "bytes": 474108,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "kapitan_ameryka/Pozycje_bazowe/garda.png"
+      ]
+    },
+    "cc881896f444dbbe3d49.png": {
+      "sha256": "cc881896f444dbbe3d4957386f38630b64de6c4ddd9f01b6752cbd20ec63015f",
+      "bytes": 456625,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "spider_man/Cios_lewa/01.png",
+        "spider_man/Cios_lewa/11.png",
+        "spider_man/Cios_prawa/01.png",
+        "spider_man/Cios_prawa/11.png",
+        "spider_man/Pajeczyna_lewa/01.png",
+        "spider_man/Pajeczyna_lewa/14.png",
+        "spider_man/Pajeczyna_prawa/01.png",
+        "spider_man/Pajeczyna_prawa/14.png"
+      ]
+    },
+    "56c8404d9b2133642eb7.png": {
+      "sha256": "56c8404d9b2133642eb77b3f5cae819d0db38de61afe5529c09668f9ad191573",
+      "bytes": 447315,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "spider_man/Cios_lewa/02.png"
+      ]
+    },
+    "029f34fdc72e284b2a84.png": {
+      "sha256": "029f34fdc72e284b2a84cf930984d9d6bf67af4c78b814fa6aac54a490353b3d",
+      "bytes": 517530,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "spider_man/Cios_lewa/04.png"
+      ]
+    },
+    "7ad011439edb6211df7e.png": {
+      "sha256": "7ad011439edb6211df7e48b8c9d5d265a8a58d1348fff6c88f800b744f447981",
+      "bytes": 568616,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "spider_man/Cios_lewa/06.png",
+        "spider_man/Cios_lewa/07.png"
+      ]
+    },
+    "292e318a2ae8c7b357a7.png": {
+      "sha256": "292e318a2ae8c7b357a70ec87972ac62602104e9f16a4d0adcb1c32e06e7d715",
+      "bytes": 487772,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "spider_man/Cios_lewa/09.png"
+      ]
+    },
+    "2719142f9d55367003ae.png": {
+      "sha256": "2719142f9d55367003ae666eacdb90f8bb403076333264d04591156fc19e4ea1",
+      "bytes": 452778,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "spider_man/Cios_lewa/10.png"
+      ]
+    },
+    "bb1b32f3ba0306b741cb.png": {
+      "sha256": "bb1b32f3ba0306b741cbd65ae5cf6e5338979e4f4bb65d92e4dc41b52cdc39fb",
+      "bytes": 348779,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "spider_man/Cios_prawa/02.png"
+      ]
+    },
+    "cd78db990d42d7026268.png": {
+      "sha256": "cd78db990d42d70262684b74a5867e9e1b24b5090623f8c5ee30cad6f143a27c",
+      "bytes": 425745,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "spider_man/Cios_prawa/04.png"
+      ]
+    },
+    "0602a68f2164ac1a10c7.png": {
+      "sha256": "0602a68f2164ac1a10c74a6b6468e03bc3a6e33ba20c095ae9f0b6a471d19602",
+      "bytes": 482283,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "spider_man/Cios_prawa/06.png",
+        "spider_man/Cios_prawa/07.png"
+      ]
+    },
+    "4249214febb71a49b047.png": {
+      "sha256": "4249214febb71a49b047eb1bc888b07362e4674c79c11ca92f847a55903b4b80",
+      "bytes": 392968,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "spider_man/Cios_prawa/09.png"
+      ]
+    },
+    "a941edbc7a0430b17f81.png": {
+      "sha256": "a941edbc7a0430b17f810796833c917cadea2edbb0628e3b415b72b671d9ba89",
+      "bytes": 354744,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "spider_man/Cios_prawa/10.png"
+      ]
+    },
+    "1918ad8b99d7e88d4142.png": {
+      "sha256": "1918ad8b99d7e88d41423bf6595995390eaf85f2a2078c07cacf1eb997a6a824",
+      "bytes": 456598,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "spider_man/Pozycje_bazowe/garda.png"
+      ]
+    },
+    "f54c7dbe37d06f25a14d.png": {
+      "sha256": "f54c7dbe37d06f25a14d7ae4c9c4173be12faa1a65c3a1d3c26a278471b5a40e",
+      "bytes": 689381,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "hulk/Uderzenie_w_dol_lewa/02.png"
+      ]
+    },
+    "a0a1e02b80a88377ead8.png": {
+      "sha256": "a0a1e02b80a88377ead8952c61c3b80716816a57d4d4a19b87f5c88f87a04cf4",
+      "bytes": 675687,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "hulk/Uderzenie_w_dol_lewa/04.png"
+      ]
+    },
+    "d09787b476811cc68fd5.png": {
+      "sha256": "d09787b476811cc68fd5c517a7ec6e8136a3a9b005f527c575cdf78ea9041bd3",
+      "bytes": 724268,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "hulk/Uderzenie_w_dol_lewa/06.png"
+      ]
+    },
+    "3ed2eb8dffa12560403c.png": {
+      "sha256": "3ed2eb8dffa12560403c10693dcfdcc32c453d4a768328da53ab3b52038be756",
+      "bytes": 788051,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "hulk/Uderzenie_w_dol_lewa/08.png"
+      ]
+    },
+    "3e6947fc3b7d2d2fed11.png": {
+      "sha256": "3e6947fc3b7d2d2fed11c77ec7117ddf15bfc43daafe27fcedb46e8d77ea553e",
+      "bytes": 780276,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "hulk/Uderzenie_w_dol_lewa/10.png"
+      ]
+    },
+    "1f5e6a3efc47340c01bd.png": {
+      "sha256": "1f5e6a3efc47340c01bd638f1b3ccab1092b74eed42e20f18bda841381a98521",
+      "bytes": 560128,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "hulk/Uderzenie_w_dol_lewa/12.png",
+        "hulk/Uderzenie_w_dol_lewa/13.png"
+      ]
+    },
+    "09453c0e0ae1ae52eff5.png": {
+      "sha256": "09453c0e0ae1ae52eff5bd00b80bcb6f41afd5e2dd5bd62903b93aa73f9da631",
+      "bytes": 684490,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "hulk/Uderzenie_w_dol_prawa/02.png"
+      ]
+    },
+    "694ca4601d92becd56d6.png": {
+      "sha256": "694ca4601d92becd56d6d7d16bce0b4b45dfebac5a1b53977d08d1afb75cec02",
+      "bytes": 671061,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "hulk/Uderzenie_w_dol_prawa/04.png"
+      ]
+    },
+    "4fa6c9a1b3efa488952c.png": {
+      "sha256": "4fa6c9a1b3efa488952c58ef4b08e881023e2acce3dd9075d7b787cc83ccf28e",
+      "bytes": 717974,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "hulk/Uderzenie_w_dol_prawa/06.png"
+      ]
+    },
+    "2cff39c4920279e15d78.png": {
+      "sha256": "2cff39c4920279e15d7878772cbb856adb17ccb2eded913794282b29f1ecadc6",
+      "bytes": 781215,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "hulk/Uderzenie_w_dol_prawa/08.png"
+      ]
+    },
+    "84fa7e66a8474f818ae6.png": {
+      "sha256": "84fa7e66a8474f818ae62819114c774d3eb7d73ccb90e8deaac02e5167a0a5a0",
+      "bytes": 774130,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "hulk/Uderzenie_w_dol_prawa/10.png"
+      ]
+    },
+    "8f08290dd81b5d8b4cfa.png": {
+      "sha256": "8f08290dd81b5d8b4cfa9cef1f4745dcebf3452211b68310e75b1ec88eea4b4d",
+      "bytes": 560053,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "hulk/Uderzenie_w_dol_prawa/12.png",
+        "hulk/Uderzenie_w_dol_prawa/13.png"
+      ]
+    },
+    "646a5ecfe79aab4e1d7b.png": {
+      "sha256": "646a5ecfe79aab4e1d7b1749208882a3b6fbd83b66a03e3255aba2f54c12a251",
+      "bytes": 579411,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "kapitan_ameryka/Pozycje_bazowe/chwyt-tarczy.png"
+      ]
+    },
+    "47502a163e5bf98075f9.png": {
+      "sha256": "47502a163e5bf98075f95d2b8516edbd453099b41885bd25aff1cd4556b40cb8",
+      "bytes": 579632,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "kapitan_ameryka/Rzut_trafienie_powrot/01.png",
+        "kapitan_ameryka/Rzut_trafienie_powrot/25.png"
+      ]
+    },
+    "72349e4b580f81104d53.png": {
+      "sha256": "72349e4b580f81104d53d1a912451d97b24280fc98e82c7d6179c0337ca36263",
+      "bytes": 419711,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "kapitan_ameryka/Rzut_trafienie_powrot/02.png",
+        "kapitan_ameryka/Rzut_trafienie_powrot/24.png"
+      ]
+    },
+    "ba25f8ab328553f2ead0.png": {
+      "sha256": "ba25f8ab328553f2ead01aa5234e1a1d12cf6caffa66d2ce408811de87f41346",
+      "bytes": 378698,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "kapitan_ameryka/Rzut_trafienie_powrot/05.png"
+      ]
+    },
+    "7336ab7570aecb0bbaf8.png": {
+      "sha256": "7336ab7570aecb0bbaf879aae4b445157cc12792f5517cfad9de61c893be2c89",
+      "bytes": 329447,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "kapitan_ameryka/Rzut_trafienie_powrot/09.png"
+      ]
+    },
+    "70b157b2455e45522f35.png": {
+      "sha256": "70b157b2455e45522f35b9ac9135946ae52e44c6ca600b5543bfdb40d37979e5",
+      "bytes": 361821,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "kapitan_ameryka/Rzut_trafienie_powrot/15.png"
+      ]
+    },
+    "4b8ca6001eedb2545498.png": {
+      "sha256": "4b8ca6001eedb25454982ed92b5a8e2f535bee5d16303a9d9faa5626a53f1928",
+      "bytes": 367776,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "kapitan_ameryka/Rzut_trafienie_powrot/20.png"
+      ]
+    },
+    "a7699d99f5d68a49182d.png": {
+      "sha256": "a7699d99f5d68a49182d8420a9530d073e2e00766a0dc88575ff2b045c33cc89",
+      "bytes": 617604,
+      "size": [
+        1678,
+        937
+      ],
+      "originals": [
+        "thor/Thor_PNG/rece-otwarte.png"
+      ]
+    },
+    "b8490af7d9a8391de271.png": {
+      "sha256": "b8490af7d9a8391de271e5b83916738db7f69f7db6eb2ed19cd494690d7fe85b",
+      "bytes": 935786,
+      "size": [
+        1678,
+        937
+      ],
+      "originals": [
+        "thor/Thor_PNG/mlot-chwyt.png"
+      ]
+    },
+    "218a66c9d8b3f1d83c05.png": {
+      "sha256": "218a66c9d8b3f1d83c053fd02afe7b825865221e12aff5ed68ee07953a2112b1",
+      "bytes": 766595,
+      "size": [
+        1672,
+        941
+      ],
+      "originals": [
+        "thor/Thor_PNG/rece-lewa.png"
+      ]
+    },
+    "b240756460b5de9a3ef8.png": {
+      "sha256": "b240756460b5de9a3ef8af4665bc1ff11056fd27ce5d90536e6b265e81cef3f1",
+      "bytes": 709997,
+      "size": [
+        1672,
+        941
+      ],
+      "originals": [
+        "thor/Thor_PNG/rece-prawa.png"
+      ]
+    },
+    "ffe358169217b4ec96ee.png": {
+      "sha256": "ffe358169217b4ec96eee2d4af6eb24698c7e5568e32045ebbd482d73c904058",
+      "bytes": 216303,
+      "size": [
+        724,
+        724
+      ],
+      "originals": [
+        "thor/Thor_PNG/Przejscia/Bez_mlota/01.png"
+      ]
+    },
+    "565f6c6ccf5cfe24caf4.png": {
+      "sha256": "565f6c6ccf5cfe24caf4fa128e008533fd4b8146b14b821f544b859c8478c120",
+      "bytes": 228297,
+      "size": [
+        724,
+        724
+      ],
+      "originals": [
+        "thor/Thor_PNG/Przejscia/Bez_mlota/02.png"
+      ]
+    },
+    "317323646b846d08b08c.png": {
+      "sha256": "317323646b846d08b08c541da2801398ff07042f237f4efdbe175b9d437bf516",
+      "bytes": 240334,
+      "size": [
+        724,
+        724
+      ],
+      "originals": [
+        "thor/Thor_PNG/Przejscia/Bez_mlota/03.png"
+      ]
+    },
+    "6b2dcb9a1c6dbcad5871.png": {
+      "sha256": "6b2dcb9a1c6dbcad58716876a2f10ddf18881829164ce51577953250d355c60c",
+      "bytes": 313341,
+      "size": [
+        724,
+        724
+      ],
+      "originals": [
+        "thor/Thor_PNG/Przejscia/Z_mlotem/01.png"
+      ]
+    },
+    "7ebda49fdcdaa6ef51cc.png": {
+      "sha256": "7ebda49fdcdaa6ef51cc864adf5667fabd56ee0d3abcd57ea3295ff038289349",
+      "bytes": 345458,
+      "size": [
+        724,
+        724
+      ],
+      "originals": [
+        "thor/Thor_PNG/Przejscia/Z_mlotem/02.png"
+      ]
+    },
+    "95c3cfde9b679bd00a08.png": {
+      "sha256": "95c3cfde9b679bd00a0882c982f49f0d1fda923d84da992a2c0ffab63d43d998",
+      "bytes": 354104,
+      "size": [
+        724,
+        724
+      ],
+      "originals": [
+        "thor/Thor_PNG/Przejscia/Z_mlotem/03.png"
+      ]
+    },
+    "1997d565bb4edd6dc8ba.png": {
+      "sha256": "1997d565bb4edd6dc8baf118bee1695367029df04274c6879cec6115907fae76",
+      "bytes": 1039140,
+      "size": [
+        1672,
+        941
+      ],
+      "originals": [
+        "thor/Thor_PNG/mlot-uderzenie-bez-smugi.png",
+        "thor/Thor_PNG/mlot-uderzenie-bez-smugi.png",
+        "thor/Thor_PNG/mlot-uderzenie-bez-smugi.png",
+        "thor/Thor_PNG/mlot-uderzenie-bez-smugi.png",
+        "thor/Thor_PNG/mlot-uderzenie-bez-smugi.png",
+        "thor/Thor_PNG/mlot-uderzenie-bez-smugi.png"
+      ]
+    },
+    "58d42f9b669d6446308f.png": {
+      "sha256": "58d42f9b669d6446308ff1836978f3e3aaad874bf0860740ab7d75446721158d",
+      "bytes": 1056876,
+      "size": [
+        1672,
+        941
+      ],
+      "originals": [
+        "thor/Thor_PNG/Klatki_lotu/01.png",
+        "thor/Thor_PNG/Klatki_lotu/38.png"
+      ]
+    },
+    "24551f6ab16ef7a16eb5.png": {
+      "sha256": "24551f6ab16ef7a16eb5a8fbf4a98b083de0ba90acfec9c95e8c33aac41fdabf",
+      "bytes": 741156,
+      "size": [
+        1672,
+        941
+      ],
+      "originals": [
+        "thor/Thor_PNG/Klatki_lotu/03.png"
+      ]
+    },
+    "9001dc64e01837fc9169.png": {
+      "sha256": "9001dc64e01837fc9169c11c806dc51684f1062130fa3b459138a9c2fc4fa375",
+      "bytes": 759284,
+      "size": [
+        1672,
+        941
+      ],
+      "originals": [
+        "thor/Thor_PNG/Klatki_lotu/08.png"
+      ]
+    },
+    "d6bb7a98d3dc1a3f5c31.png": {
+      "sha256": "d6bb7a98d3dc1a3f5c314f0305de8cb48f6292cc35f3b51fdc35346ba900d470",
+      "bytes": 726807,
+      "size": [
+        1672,
+        941
+      ],
+      "originals": [
+        "thor/Thor_PNG/Klatki_lotu/15.png"
+      ]
+    },
+    "d7d19a7421e26956884a.png": {
+      "sha256": "d7d19a7421e26956884a942b9b228b68c3b78d84b527e01b819b8af66748243f",
+      "bytes": 718909,
+      "size": [
+        1672,
+        941
+      ],
+      "originals": [
+        "thor/Thor_PNG/Klatki_lotu/21.png"
+      ]
+    },
+    "0abbf63fdc5d96768773.png": {
+      "sha256": "0abbf63fdc5d96768773fb13e5b2d3362079fc6f0b324217e4752b54b109bd47",
+      "bytes": 741392,
+      "size": [
+        1672,
+        941
+      ],
+      "originals": [
+        "thor/Thor_PNG/Klatki_lotu/29.png"
+      ]
+    },
+    "19d38815670e0666af2f.png": {
+      "sha256": "19d38815670e0666af2fc721eca80e7bdd59a016af6cfbbaf7e6e6ff59e284f6",
+      "bytes": 752776,
+      "size": [
+        1672,
+        941
+      ],
+      "originals": [
+        "thor/Thor_PNG/Klatki_lotu/35.png"
+      ]
+    },
+    "a133f3c747fcbabc5509.png": {
+      "sha256": "a133f3c747fcbabc5509aadc8417ea0969b341a2eebb154e8eff7a7a601788f7",
+      "bytes": 494684,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "iron_man/Bez_lasera_bez_podswietlenia/Pozycje_bazowe/garda.png"
+      ]
+    },
+    "8992dbcb19386dba3228.png": {
+      "sha256": "8992dbcb19386dba32285dc7dd5414d99ee1628a84194b3be710cc8398a7b568",
+      "bytes": 420933,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "iron_man/Z_laserem_i_podswietleniem/Pozycje_bazowe/otwarte-dlonie.png"
+      ]
+    },
+    "e91d16ae10a405177823.png": {
+      "sha256": "e91d16ae10a4051778233fdd9eeb39d334ea4b26aac8aa7a91a8c50efb9cdf08",
+      "bytes": 494705,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "iron_man/Bez_lasera_bez_podswietlenia/Cios_lewa/01.png",
+        "iron_man/Bez_lasera_bez_podswietlenia/Cios_lewa/11.png",
+        "iron_man/Bez_lasera_bez_podswietlenia/Cios_prawa/01.png",
+        "iron_man/Bez_lasera_bez_podswietlenia/Cios_prawa/11.png"
+      ]
+    },
+    "b5965b100ea10b62e907.png": {
+      "sha256": "b5965b100ea10b62e907c3785db6395374812307a6501b1ce3339cb5dc38701a",
+      "bytes": 425891,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "iron_man/Bez_lasera_bez_podswietlenia/Cios_lewa/02.png"
+      ]
+    },
+    "03dd4ef6d3ffba7dceda.png": {
+      "sha256": "03dd4ef6d3ffba7dceda9112f2f3d40f5cbe7783f63b729a2b5635312ee6cb87",
+      "bytes": 479532,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "iron_man/Bez_lasera_bez_podswietlenia/Cios_lewa/04.png"
+      ]
+    },
+    "d1e53e18119c9fc6ef0d.png": {
+      "sha256": "d1e53e18119c9fc6ef0d813a6b5f669c6fabfffde8e43eb14b002d66b8c3615a",
+      "bytes": 520935,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "iron_man/Bez_lasera_bez_podswietlenia/Cios_lewa/06.png",
+        "iron_man/Bez_lasera_bez_podswietlenia/Cios_lewa/07.png"
+      ]
+    },
+    "0421db33670dd71b59bf.png": {
+      "sha256": "0421db33670dd71b59bfec021b49042ae5656e6daad17c4ee9162a5976cceee0",
+      "bytes": 457057,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "iron_man/Bez_lasera_bez_podswietlenia/Cios_lewa/09.png"
+      ]
+    },
+    "2abbc72cc5046d3f3e69.png": {
+      "sha256": "2abbc72cc5046d3f3e699796df444588a7dd4a276ac89a47cb72ab477aa2d140",
+      "bytes": 429905,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "iron_man/Bez_lasera_bez_podswietlenia/Cios_lewa/10.png"
+      ]
+    },
+    "416e29fd169842a959c4.png": {
+      "sha256": "416e29fd169842a959c4c7de5b8729bf803fd124a7ba68add8d0d93628adcc2c",
+      "bytes": 421526,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "iron_man/Z_laserem_i_podswietleniem/Strzal_lewa/01.png",
+        "iron_man/Z_laserem_i_podswietleniem/Strzal_lewa/13.png",
+        "iron_man/Z_laserem_i_podswietleniem/Strzal_prawa/01.png",
+        "iron_man/Z_laserem_i_podswietleniem/Strzal_prawa/13.png"
+      ]
+    },
+    "a532f2539b9d618202bd.png": {
+      "sha256": "a532f2539b9d618202bd89fa5f4a2fecf8441518b3cf67b17b6df07c65d6203e",
+      "bytes": 411593,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "iron_man/Z_laserem_i_podswietleniem/Strzal_lewa/02.png"
+      ]
+    },
+    "a0c8c6202cbc5369e38f.png": {
+      "sha256": "a0c8c6202cbc5369e38f08664a26290269fefb47618f3c4403989891f1634566",
+      "bytes": 412074,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "iron_man/Z_laserem_i_podswietleniem/Strzal_lewa/04.png"
+      ]
+    },
+    "569333320f43410dfdd9.png": {
+      "sha256": "569333320f43410dfdd995306005788b3f00a9628a0ebe401be97c6132299111",
+      "bytes": 418463,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "iron_man/Z_laserem_i_podswietleniem/Strzal_lewa/06.png"
+      ]
+    },
+    "4aa99a0314ce4bc15926.png": {
+      "sha256": "4aa99a0314ce4bc1592628fea5112520586b0e3f2109ec9742cc1343f264b4cf",
+      "bytes": 425034,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "iron_man/Z_laserem_i_podswietleniem/Strzal_lewa/08.png"
+      ]
+    },
+    "e57a0066b262e38719af.png": {
+      "sha256": "e57a0066b262e38719afb428c1e21eedd92c49e605ff9e884db6c71843ec6d8e",
+      "bytes": 417884,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "iron_man/Z_laserem_i_podswietleniem/Strzal_lewa/10.png"
+      ]
+    },
+    "3a86e12e471907af30fb.png": {
+      "sha256": "3a86e12e471907af30fb8fb63f8d793bde86cdb31f9a49d9335cccbbde1ff395",
+      "bytes": 410924,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "iron_man/Z_laserem_i_podswietleniem/Strzal_lewa/12.png"
+      ]
+    },
+    "d96b8bd94b3f78931297.png": {
+      "sha256": "d96b8bd94b3f7893129717c9faf794136f129f9f55b0712d6fd3992e628a590f",
+      "bytes": 373355,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "iron_man/Bez_lasera_bez_podswietlenia/Cios_prawa/02.png"
+      ]
+    },
+    "bbd599a1a2de573a7d74.png": {
+      "sha256": "bbd599a1a2de573a7d74976df4d7e585bca6ce5ea1fa453a085145587d2d1770",
+      "bytes": 448381,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "iron_man/Bez_lasera_bez_podswietlenia/Cios_prawa/04.png"
+      ]
+    },
+    "f0039bfd792771347f86.png": {
+      "sha256": "f0039bfd792771347f8631f9628542f8327d0f29b6b4ab47455a31ec3636e93d",
+      "bytes": 501019,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "iron_man/Bez_lasera_bez_podswietlenia/Cios_prawa/06.png",
+        "iron_man/Bez_lasera_bez_podswietlenia/Cios_prawa/07.png"
+      ]
+    },
+    "0240d70d2b86f1671509.png": {
+      "sha256": "0240d70d2b86f1671509659406e37e1bfca953bcb51c95e4cb58c6ef2c5e70ce",
+      "bytes": 416193,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "iron_man/Bez_lasera_bez_podswietlenia/Cios_prawa/09.png"
+      ]
+    },
+    "ba9083c9582489ea3805.png": {
+      "sha256": "ba9083c9582489ea38050bb843ad43d9db8f729aca785a0daae58af8012bd2e9",
+      "bytes": 379099,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "iron_man/Bez_lasera_bez_podswietlenia/Cios_prawa/10.png"
+      ]
+    },
+    "e2d75c9e0735bfabfc84.png": {
+      "sha256": "e2d75c9e0735bfabfc84350328fa1f103865eaab24e370ceadb7396e021bd34e",
+      "bytes": 413352,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "iron_man/Z_laserem_i_podswietleniem/Strzal_prawa/02.png"
+      ]
+    },
+    "3099f1dc38a1db60931d.png": {
+      "sha256": "3099f1dc38a1db60931d006085f0b82042009515b9326cfaf35d39ca292b968c",
+      "bytes": 413827,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "iron_man/Z_laserem_i_podswietleniem/Strzal_prawa/04.png"
+      ]
+    },
+    "1a392a275646455a97e7.png": {
+      "sha256": "1a392a275646455a97e7110c21151ad9edc8a99cda3eed89c4a5969f87de0ca6",
+      "bytes": 420855,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "iron_man/Z_laserem_i_podswietleniem/Strzal_prawa/06.png"
+      ]
+    },
+    "9bdeb23fd840293af965.png": {
+      "sha256": "9bdeb23fd840293af965ffe5246069c4be1325b97e2807752db2a0ae0052afbe",
+      "bytes": 427989,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "iron_man/Z_laserem_i_podswietleniem/Strzal_prawa/08.png"
+      ]
+    },
+    "949185c34d89a5e18289.png": {
+      "sha256": "949185c34d89a5e182892d24ecc7ddb5fde41d05b5e1bbaa4416233d2d628402",
+      "bytes": 420413,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "iron_man/Z_laserem_i_podswietleniem/Strzal_prawa/10.png"
+      ]
+    },
+    "e92f5d0870a207b9d78e.png": {
+      "sha256": "e92f5d0870a207b9d78eea6dff5169b8d3917293e2e0c9a1a67dd6c4fb9dd249",
+      "bytes": 412796,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "iron_man/Z_laserem_i_podswietleniem/Strzal_prawa/12.png"
+      ]
+    },
+    "469ba62767c2cb09117a.png": {
+      "sha256": "469ba62767c2cb09117a4ab269d102aa95b58151e1fd521162f9c419f412d5e7",
+      "bytes": 602282,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "spider_man/Pajeczyna_lewa/02.png"
+      ]
+    },
+    "0964adbc52cbc2115d05.png": {
+      "sha256": "0964adbc52cbc2115d05ec1fcebe50d7bae2c50b61364989b9342f7fe3fdb7d2",
+      "bytes": 602400,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "spider_man/Pajeczyna_lewa/04.png"
+      ]
+    },
+    "d283e8ae67c3edf80040.png": {
+      "sha256": "d283e8ae67c3edf800405204d9ab44a4899da6a25e7372424fe3739ce3f24444",
+      "bytes": 603551,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "spider_man/Pajeczyna_lewa/06.png"
+      ]
+    },
+    "abf8f9ecbdde8d566ac8.png": {
+      "sha256": "abf8f9ecbdde8d566ac8f9c27154c324c4ffef7d7bebe7032b9e57f47e7c4c19",
+      "bytes": 605018,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "spider_man/Pajeczyna_lewa/08.png"
+      ]
+    },
+    "59f219d376bcc12512b3.png": {
+      "sha256": "59f219d376bcc12512b3dfd17967f94264fd9aeae4fd172fcacaf4cd2d11a3fb",
+      "bytes": 603588,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "spider_man/Pajeczyna_lewa/10.png"
+      ]
+    },
+    "49d3690be95b813af8c8.png": {
+      "sha256": "49d3690be95b813af8c8eceb680f4a5003af8dd485ce73ebb61eb41800f51259",
+      "bytes": 602241,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "spider_man/Pajeczyna_lewa/12.png"
+      ]
+    },
+    "8b80896e27413b6af696.png": {
+      "sha256": "8b80896e27413b6af696a9b939e2590545c094c9dc0a4177ad316afa453b08e6",
+      "bytes": 464324,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "spider_man/Pajeczyna_prawa/02.png"
+      ]
+    },
+    "1973ea6d4a8bdd6833fd.png": {
+      "sha256": "1973ea6d4a8bdd6833fdcf6bae3b0c29df5c1851fe67b58b63c80070d29389f3",
+      "bytes": 464076,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "spider_man/Pajeczyna_prawa/04.png"
+      ]
+    },
+    "6d5aff509bdc2b9b388a.png": {
+      "sha256": "6d5aff509bdc2b9b388a206a53aa9212b5d058965627ac2f64cdab401805ec62",
+      "bytes": 464847,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "spider_man/Pajeczyna_prawa/06.png"
+      ]
+    },
+    "a4a429d664847c5a131f.png": {
+      "sha256": "a4a429d664847c5a131fcb648f49bae903319563d1bc44fd8ee5463e7bb376ce",
+      "bytes": 466364,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "spider_man/Pajeczyna_prawa/08.png"
+      ]
+    },
+    "ce44af0d9b6b1190ac66.png": {
+      "sha256": "ce44af0d9b6b1190ac6656ef480acdfe741bddcca3dbd8510d14b0076c93c013",
+      "bytes": 464867,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "spider_man/Pajeczyna_prawa/10.png"
+      ]
+    },
+    "5e98a74982979a03fcce.png": {
+      "sha256": "5e98a74982979a03fcce33a507d2ea313dfce38c94511748dba9e50b34e7cd5d",
+      "bytes": 464212,
+      "size": [
+        1280,
+        720
+      ],
+      "originals": [
+        "spider_man/Pajeczyna_prawa/12.png"
+      ]
+    },
+    "66771f0c2a5429516e35.png": {
+      "sha256": "66771f0c2a5429516e35d2a7538f15014528f1a1eb633746942c64b17a416ab8",
+      "bytes": 3999,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Wiszaca_duza/01.png"
+      ]
+    },
+    "8e8d27f30d7a34b56060.png": {
+      "sha256": "8e8d27f30d7a34b560609f6b587b2b9af66b8ae5353812040ab8a0f69be67bbb",
+      "bytes": 10405,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Wiszaca_duza/02.png"
+      ]
+    },
+    "049d53155053353f7cec.png": {
+      "sha256": "049d53155053353f7cec6e71d9bb80980faf2d7abe635e3b26ca6e94412858f6",
+      "bytes": 25397,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Wiszaca_duza/03.png"
+      ]
+    },
+    "0277f8b47c45431e785b.png": {
+      "sha256": "0277f8b47c45431e785b86308903499af0250ce9df6eaf34665c9cc7d6143804",
+      "bytes": 95031,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Wiszaca_duza/05.png"
+      ]
+    },
+    "1a1506be0328dfa74534.png": {
+      "sha256": "1a1506be0328dfa74534d419ffffb7b21156475a5c8a19db6ff41e6e3fe54730",
+      "bytes": 172841,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Wiszaca_duza/07.png"
+      ]
+    },
+    "350a4cf62fdf3f3c1d0b.png": {
+      "sha256": "350a4cf62fdf3f3c1d0bc5bfb23edc6dcaadb1e5d8b919dd22cbb18de07b06c0",
+      "bytes": 187312,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Wiszaca_duza/08.png"
+      ]
+    },
+    "a31c03876da0b07d4f33.png": {
+      "sha256": "a31c03876da0b07d4f33bcb680c95ea04c74394dbd6fc2a44afa7cb911a8251e",
+      "bytes": 185880,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Wiszaca_duza/10.png"
+      ]
+    },
+    "412f14a17aafe1ba1ac9.png": {
+      "sha256": "412f14a17aafe1ba1ac909b9f4fc9088dc1e00bacb0db974b27f69ff871e3aec",
+      "bytes": 180406,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Wiszaca_duza/11.png"
+      ]
+    },
+    "87f3260e8d7d6792d9d8.png": {
+      "sha256": "87f3260e8d7d6792d9d8c31966d52093d0af5f15984db13657a88d397d04266c",
+      "bytes": 2487,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Wiszaca_mala/01.png"
+      ]
+    },
+    "ebb1bcabe61400c8f8bb.png": {
+      "sha256": "ebb1bcabe61400c8f8bba4acd73b861c4e0efc68bf5edfef4ac6ac8fe5d5e623",
+      "bytes": 5096,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Wiszaca_mala/02.png"
+      ]
+    },
+    "4f91df1cbe5ced352abc.png": {
+      "sha256": "4f91df1cbe5ced352abc0bfc35190a6ce079da9acd5a5cb484cf4d8652253bf6",
+      "bytes": 11106,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Wiszaca_mala/03.png"
+      ]
+    },
+    "679cf7fe4b69062ffc4c.png": {
+      "sha256": "679cf7fe4b69062ffc4c2b932ed4f2171f0c89aa732aa9bc33401b639a36676a",
+      "bytes": 37800,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Wiszaca_mala/05.png"
+      ]
+    },
+    "185df5336ccf6a74c7b1.png": {
+      "sha256": "185df5336ccf6a74c7b10543d5663634e73bcbf753109d275a5f100c81ef5d18",
+      "bytes": 65925,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Wiszaca_mala/07.png"
+      ]
+    },
+    "03d18ba06cca8ec00ac3.png": {
+      "sha256": "03d18ba06cca8ec00ac363b8f9de77c5245e09cffb0ff06c5e42cba6281ec725",
+      "bytes": 71462,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Wiszaca_mala/08.png"
+      ]
+    },
+    "09ecc2f3336da489f683.png": {
+      "sha256": "09ecc2f3336da489f683211b25097355ab03c11ee6ea6739a3c309ede3f106ff",
+      "bytes": 69987,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Wiszaca_mala/10.png"
+      ]
+    },
+    "f4461c5e97a2b8390349.png": {
+      "sha256": "f4461c5e97a2b839034908cec077c4469d6783bcf59451566036712848fba196",
+      "bytes": 67408,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Wiszaca_mala/11.png"
+      ]
+    },
+    "29ead40bdc6c27885f6c.png": {
+      "sha256": "29ead40bdc6c27885f6c074bb6f60dc81048fb86f74cfce3bbefc5e6a42e885a",
+      "bytes": 5639,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Klasyczna_duza/01.png"
+      ]
+    },
+    "7ac7afa841f344c7bccd.png": {
+      "sha256": "7ac7afa841f344c7bccdf83b7e76c6cadc8ed488f1f5bbb7c07e3a0ae7680fd7",
+      "bytes": 16428,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Klasyczna_duza/02.png"
+      ]
+    },
+    "9d5c63973e4ee713475c.png": {
+      "sha256": "9d5c63973e4ee713475c59416b08a24d49f53ff7c8e95ac06f3c416e2a879ce4",
+      "bytes": 44623,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Klasyczna_duza/03.png"
+      ]
+    },
+    "fe05c7828a5eaae2e2a5.png": {
+      "sha256": "fe05c7828a5eaae2e2a51169287a78eca2ede16a4be9d7fb62509f6e2b5c67f6",
+      "bytes": 175028,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Klasyczna_duza/05.png"
+      ]
+    },
+    "8539f74854ab275cafd9.png": {
+      "sha256": "8539f74854ab275cafd936fbb52260b0177497cb134a903b119da4351eea3f72",
+      "bytes": 322967,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Klasyczna_duza/07.png"
+      ]
+    },
+    "80301ae8348e6a7abdaf.png": {
+      "sha256": "80301ae8348e6a7abdaf2b01ca88b4e578d0a22fb632807eb914f168fbcd9c95",
+      "bytes": 350657,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Klasyczna_duza/08.png"
+      ]
+    },
+    "f348d5229ee0d7806066.png": {
+      "sha256": "f348d5229ee0d78060669d2629747d318cc97ada79203c4e0294f77de6ea1d66",
+      "bytes": 346956,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Klasyczna_duza/10.png"
+      ]
+    },
+    "f8bbffe46b7905f8e75c.png": {
+      "sha256": "f8bbffe46b7905f8e75cd94e63b88728865f4fbd8734311b262a1367e0ca933f",
+      "bytes": 331477,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Klasyczna_duza/11.png"
+      ]
+    },
+    "c05e272a00e31d7e60d3.png": {
+      "sha256": "c05e272a00e31d7e60d3ca492d6da860c8d5c8b6472edf735b8114a80016b832",
+      "bytes": 3503,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Klasyczna_mala/01.png"
+      ]
+    },
+    "a473e56b6f18f47e9e99.png": {
+      "sha256": "a473e56b6f18f47e9e99566221c1b7baf88d9dcb19288a37a9a6c067388a8160",
+      "bytes": 8783,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Klasyczna_mala/02.png"
+      ]
+    },
+    "1ab53ec01106cebc298d.png": {
+      "sha256": "1ab53ec01106cebc298d6a98e5cd4f52544fa9f1f4dbd905b9aff15ccf4b2510",
+      "bytes": 21787,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Klasyczna_mala/03.png"
+      ]
+    },
+    "7b748f481c0960a76b86.png": {
+      "sha256": "7b748f481c0960a76b86f09703503bc98c9c7f990720afaea8c29f40c8473d7d",
+      "bytes": 78456,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Klasyczna_mala/05.png"
+      ]
+    },
+    "19e5255162339a8e2a00.png": {
+      "sha256": "19e5255162339a8e2a00b79e039ad96c959eb850307caedbe1c8854bce355153",
+      "bytes": 141103,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Klasyczna_mala/07.png"
+      ]
+    },
+    "ceed152db2cdeffe9f58.png": {
+      "sha256": "ceed152db2cdeffe9f58abd6430413d66353f8c009c58ccbf672a079e1c52f49",
+      "bytes": 152147,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Klasyczna_mala/08.png"
+      ]
+    },
+    "add1ca2892b22a6508db.png": {
+      "sha256": "add1ca2892b22a6508dbbdb218ee55b052abbfecd044f50611ecf5c25ff4f06f",
+      "bytes": 150961,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Klasyczna_mala/10.png"
+      ]
+    },
+    "1d362b58bcd633f58f74.png": {
+      "sha256": "1d362b58bcd633f58f745d06968a915944e8bed72d00984ffe8a5a8808c9cd23",
+      "bytes": 137130,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Klasyczna_mala/11.png"
+      ]
+    },
+    "263660bc01f35f4d4fce.png": {
+      "sha256": "263660bc01f35f4d4fce530536dd1519e3771d6c193569939e2738a83273501e",
+      "bytes": 1937,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Narozna/01.png"
+      ]
+    },
+    "50bfad1559bf3b812864.png": {
+      "sha256": "50bfad1559bf3b812864e305bf0d665d7d5d50b26a0d4950f7c6fbc91aca309f",
+      "bytes": 3538,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Narozna/02.png"
+      ]
+    },
+    "b540d25ef235c732f85e.png": {
+      "sha256": "b540d25ef235c732f85e9a2037491c3ea06477590db9b8818548ceb631761288",
+      "bytes": 7446,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Narozna/03.png"
+      ]
+    },
+    "caf4eca461b14b9fb62f.png": {
+      "sha256": "caf4eca461b14b9fb62fb0f213eece1cbc6e99c6e56fb7a3837b9367b2b405b9",
+      "bytes": 24229,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Narozna/05.png"
+      ]
+    },
+    "1f3fd19e19a7b1d50f3d.png": {
+      "sha256": "1f3fd19e19a7b1d50f3d1838d7d9475969e54454060856da0369630ec844c7b7",
+      "bytes": 42197,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Narozna/07.png"
+      ]
+    },
+    "6d9067094b7f65fb7e76.png": {
+      "sha256": "6d9067094b7f65fb7e76b0b28f734335c0371513c5d679eaa0e516eebb9098ed",
+      "bytes": 45387,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Narozna/08.png"
+      ]
+    },
+    "19331a35df30bd7d18fa.png": {
+      "sha256": "19331a35df30bd7d18fabdaa38236683c9f08eeb9a29b8a73c6516cf7f38585a",
+      "bytes": 44584,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Narozna/10.png"
+      ]
+    },
+    "d76f69a71b1cc4529d89.png": {
+      "sha256": "d76f69a71b1cc4529d89865ca03fcc20e86fae3e812ded35d5fad9ce1e4017bb",
+      "bytes": 41473,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Narozna/11.png"
+      ]
+    },
+    "28e3412dd9d356bd6b62.png": {
+      "sha256": "28e3412dd9d356bd6b62d81f5f02306acb7a205535ebb3d1713b9ea26e92178e",
+      "bytes": 2429,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Kokon/01.png"
+      ]
+    },
+    "9fbf38f9a89670b077b0.png": {
+      "sha256": "9fbf38f9a89670b077b0f16b22849f93bb0f7f2a0bb6ca2a2269afc54181c0ac",
+      "bytes": 5241,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Kokon/02.png"
+      ]
+    },
+    "7bcf46ff1b65a52477d9.png": {
+      "sha256": "7bcf46ff1b65a52477d93defd57f411847f6678eccb9ab010c9b2ae9dce00e03",
+      "bytes": 12410,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Kokon/03.png"
+      ]
+    },
+    "b529de66fecad26cab1d.png": {
+      "sha256": "b529de66fecad26cab1d5049fdb5b4742bd902b6f1fe3c4c8c95fde57ec1bebf",
+      "bytes": 49301,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Kokon/05.png"
+      ]
+    },
+    "db7b54892cfc68560e0d.png": {
+      "sha256": "db7b54892cfc68560e0db44801e98880c6eaf589b1ad2de3c43b416cdd49aaad",
+      "bytes": 96421,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Kokon/07.png"
+      ]
+    },
+    "53381c1f2f5e44a19169.png": {
+      "sha256": "53381c1f2f5e44a19169f1975ba2795944e898cf59604b425553df420226d62f",
+      "bytes": 105798,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Kokon/08.png"
+      ]
+    },
+    "93fe190e5eec954c2666.png": {
+      "sha256": "93fe190e5eec954c2666bd0299a45fb9545bc8ceb0ed76ec7ae822d0651425ea",
+      "bytes": 104187,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Kokon/10.png"
+      ]
+    },
+    "9df64d787a8b1750f47c.png": {
+      "sha256": "9df64d787a8b1750f47c01e1b512794b728017b850d4986d9957927d1bb4d10c",
+      "bytes": 101714,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "spider_man/Powstawanie_sieci/Kokon/11.png"
+      ]
+    },
+    "7fddafcd46e9c8648b1c.png": {
+      "sha256": "7fddafcd46e9c8648b1c0aacc1254de5c4e94f1cb7ae65bd58b26c9747d9b6d3",
+      "bytes": 608222,
+      "size": [
+        1254,
+        1254
+      ],
+      "originals": [
+        "COMMON/uderzenie.png"
+      ]
+    },
+    "f7bfb9acfc28ba219b14.png": {
+      "sha256": "f7bfb9acfc28ba219b141ab62c74ff599d94963931701ee8775757fb7ea32020",
+      "bytes": 872308,
+      "size": [
+        1254,
+        1254
+      ],
+      "originals": [
+        "COMMON/uderzenie 2.png"
+      ]
+    },
+    "9cd7f7ab9c71903014fd.png": {
+      "sha256": "9cd7f7ab9c71903014fdc99d26166a6add657149639258dc9283618ea9db7dad",
+      "bytes": 524927,
+      "size": [
+        1254,
+        1254
+      ],
+      "originals": [
+        "COMMON/uderzenie 3.png"
+      ]
+    },
+    "a9c4b7758911337d7df8.png": {
+      "sha256": "a9c4b7758911337d7df89d0cdf3980656eec6b95c8b727c7627b320c6f6edd17",
+      "bytes": 568194,
+      "size": [
+        1254,
+        1254
+      ],
+      "originals": [
+        "COMMON/uderzenie 4.png"
+      ]
+    },
+    "03179ed3dfd90eb3cf01.png": {
+      "sha256": "03179ed3dfd90eb3cf01dfb543f1377bcacacecfd5c10811d5a28e95e196603c",
+      "bytes": 391178,
+      "size": [
+        2172,
+        724
+      ],
+      "originals": [
+        "efekty/Smugi/lewo-prawo-krotka.png"
+      ]
+    },
+    "9f2a3b098e48b73d7951.png": {
+      "sha256": "9f2a3b098e48b73d7951c07f4a891293fea1c783ab7537750fca256f215adca5",
+      "bytes": 755919,
+      "size": [
+        2172,
+        724
+      ],
+      "originals": [
+        "efekty/Smugi/lewo-prawo-dluga.png"
+      ]
+    },
+    "7872227dfced7951437e.png": {
+      "sha256": "7872227dfced7951437e055ee59c0c74e7e3b8cf07d55f677fd8a0890a87f9cd",
+      "bytes": 667081,
+      "size": [
+        1774,
+        887
+      ],
+      "originals": [
+        "efekty/Smugi/prawo-lewo-krotka.png"
+      ]
+    },
+    "a2179628028f9228e636.png": {
+      "sha256": "a2179628028f9228e636a8ff4f21c26d17cf6f85e97ec45e78d058fba11ad0c6",
+      "bytes": 728314,
+      "size": [
+        2172,
+        724
+      ],
+      "originals": [
+        "efekty/Smugi/prawo-lewo-dluga.png"
+      ]
+    },
+    "4055148e61b1b3475c09.png": {
+      "sha256": "4055148e61b1b3475c09acffc6547adbcdc9faf4f0e4bac2bdefcdb5f7837186",
+      "bytes": 737527,
+      "size": [
+        2172,
+        724
+      ],
+      "originals": [
+        "hulk/Efekty/Wgniecenie_plytkie.png"
+      ]
+    },
+    "d1148b604c54ed9ef2c7.png": {
+      "sha256": "d1148b604c54ed9ef2c7f5444bf605c68a51a49d22e6d4b1a79ed249702198ba",
+      "bytes": 1230801,
+      "size": [
+        1774,
+        887
+      ],
+      "originals": [
+        "hulk/Efekty/Wgniecenie_w_stali.png"
+      ]
+    },
+    "ffc8a4b582e12c30ecd0.png": {
+      "sha256": "ffc8a4b582e12c30ecd0135a2701f4dfd239293091ebbefa7b1acdc5ed21e6da",
+      "bytes": 1106856,
+      "size": [
+        2172,
+        724
+      ],
+      "originals": [
+        "hulk/Efekty/Wgniecenie_glebokie.png"
+      ]
+    },
+    "3f847421c993e0418612.png": {
+      "sha256": "3f847421c993e04186121b77ab2034e3c4b481d8560620e14751b5faf697d52b",
+      "bytes": 1151476,
+      "size": [
+        2172,
+        724
+      ],
+      "originals": [
+        "hulk/Efekty/Wgniecenie_z_peknieciami.png"
+      ]
+    },
+    "dbcb56aa67dbbecd2c3a.png": {
+      "sha256": "dbcb56aa67dbbecd2c3ab852c9761db7151c24c80f98477400aca45f08a1ce7a",
+      "bytes": 1041380,
+      "size": [
+        2172,
+        724
+      ],
+      "originals": [
+        "kapitan_ameryka/Efekty/Wgniecenie_po_tarczy.png"
+      ]
+    },
+    "9fb9868a862f29f15d8b.png": {
+      "sha256": "9fb9868a862f29f15d8ba72619c0e0bb8c6d4b189aa32f5566a9864d8efe5de5",
+      "bytes": 835648,
+      "size": [
+        1254,
+        1254
+      ],
+      "originals": [
+        "kapitan_ameryka/Pozycje_bazowe/efekt-trafienia.png"
+      ]
+    },
+    "6c15ad39bd39ecca0e8d.png": {
+      "sha256": "6c15ad39bd39ecca0e8def82913927431acac04a9fd208bbc8dd5602964ae8a1",
+      "bytes": 2034642,
+      "size": [
+        1672,
+        941
+      ],
+      "originals": [
+        "thor/Thor_PNG/Efekty/Wgniecenie_po_mlocie.png"
+      ]
+    },
+    "96faa2bad821aa24c234.png": {
+      "sha256": "96faa2bad821aa24c23466f4dd9f6b9872e4cb46215d26ee56db2b4f6cb8bcf5",
+      "bytes": 283994,
+      "size": [
+        500,
+        512
+      ],
+      "originals": [
+        "efekty/Laser/01-trafienie-czerwone.png"
+      ]
+    },
+    "9273e1c40c4d5a0614c2.png": {
+      "sha256": "9273e1c40c4d5a0614c2b25821ccdab8a37603ee3173e5de560018efaacca13b",
+      "bytes": 320864,
+      "size": [
+        512,
+        512
+      ],
+      "originals": [
+        "efekty/Laser/02-trafienie-blekitne.png"
+      ]
+    },
+    "07cb5e68ce548a1e3897.png": {
+      "sha256": "07cb5e68ce548a1e389793810df45d52ad55101c4b0c08ad289a5a4f2c33f8ef",
+      "bytes": 344907,
+      "size": [
+        524,
+        512
+      ],
+      "originals": [
+        "efekty/Laser/03-trafienie-fioletowe.png"
+      ]
+    },
+    "43d264e4c34dbbd86813.png": {
+      "sha256": "43d264e4c34dbbd86813ee0aae9d548d7b6083a169397570332f2786738b9ef2",
+      "bytes": 198394,
+      "size": [
+        440,
+        512
+      ],
+      "originals": [
+        "efekty/Laser/04-dziura-mala.png"
+      ]
+    },
+    "cee81157f86ea952eb8d.png": {
+      "sha256": "cee81157f86ea952eb8d49b50aca1e806cb2de4bdc2300358d68cc98a194ffc5",
+      "bytes": 294741,
+      "size": [
+        537,
+        512
+      ],
+      "originals": [
+        "efekty/Laser/05-dziura-owalna.png"
+      ]
+    },
+    "ea72cbc93bfc24aef046.png": {
+      "sha256": "ea72cbc93bfc24aef046eef9059144edfcdc7d602432c0c52d635b8e2373b84f",
+      "bytes": 382494,
+      "size": [
+        559,
+        512
+      ],
+      "originals": [
+        "efekty/Laser/06-dziura-postrzepiona.png"
+      ]
+    },
+    "2018ddafe525d6eed90e.png": {
+      "sha256": "2018ddafe525d6eed90efff6a03a9d93b077130a77147e5a8a25eaec50f6d1b1",
+      "bytes": 410372,
+      "size": [
+        1254,
+        1254
+      ],
+      "originals": [
+        "laser/00-rozblysk-na-koncu-promienia.png"
+      ]
+    }
+  }
+}

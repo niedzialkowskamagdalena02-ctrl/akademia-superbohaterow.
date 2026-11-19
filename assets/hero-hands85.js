@@ -12,32 +12,7 @@ const costumes={
  gamora:['#508852','#a2ce80','#253d32','#472750','#e489cc','bands']
 };
 
-const handImages=new Map(),illustratedHands=new Set(['hulk','iron','spider','captain']);
 export const HERO_POWER_TIME=Object.freeze({punch:440,laser:640});
-
-function loadHandImage(path,fallback){
- if(!handImages.has(path)){
-  handImages.set(path,new Promise(resolve=>{
-   const image=new Image();
-   image.onload=()=>resolve(image);
-   image.onerror=()=>{
-    if(fallback&&!image.src.endsWith(fallback))image.src=fallback;
-    else{handImages.delete(path);resolve(null);}
-   };
-   image.src=path;
-  }));
- }
- return handImages.get(path);
-}
-
-export function loadHeroHands88(hero){
- if(!illustratedHands.has(hero))return Promise.resolve(null);
- return loadHandImage('assets/hq/hd93/hands-'+hero+'.webp','assets/hq/hands90-'+hero+'.webp');
-}
-
-export function loadHulkFist(){
- return loadHandImage('assets/hq/hands90-hulk.webp');
-}
 
 let paths;
 function geometry(){

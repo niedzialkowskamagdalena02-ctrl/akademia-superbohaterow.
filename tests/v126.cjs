@@ -68,7 +68,7 @@ const root=path.resolve(__dirname,'..'),url=n=>pathToFileURL(path.join(root,'ass
  const other={naturalWidth:200,naturalHeight:100};draws.length=0;soft.load(other,null,walkRooms.pet);soft.draw({x:0,z:0},cameraBasis86(0,0),.434,.94,0);
  assert.ok(draws.every(a=>a[0]===other),'Cube cannot leak into other rooms');
  if(process.env.V126_GPU_CAPTURE)fs.writeFileSync(process.env.V126_GPU_CAPTURE,JSON.stringify({vertex:sources[1],fragment:sources[2],bounds:walkRooms.hall.bounds}));
- const sw=vm.runInNewContext(fs.readFileSync(path.join(root,'sw.js'),'utf8')+'\n({CACHE,ASSETS})',{self:{addEventListener(){}}});assert.equal(sw.CACHE,'academy-v126');
+ const sw=vm.runInNewContext(fs.readFileSync(path.join(root,'sw.js'),'utf8')+'\n({CACHE,ASSETS})',{self:{addEventListener(){}}});assert.equal(sw.CACHE,'academy-v127');
  for(const face of hallFaces126)assert.ok(sw.ASSETS.includes('./assets/hq/'+face));
  for(const asset of sw.ASSETS)assert.ok(fs.existsSync(path.join(root,asset.split('?')[0])),asset);
  assert.ok(!sw.ASSETS.some(a=>/panorama119\/|panorama125\/|views118\/.+\.png/.test(a)));
