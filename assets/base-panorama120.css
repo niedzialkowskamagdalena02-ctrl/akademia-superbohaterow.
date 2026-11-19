@@ -1,0 +1,4 @@
+.hq86-stage button.hq120-entry:not(:disabled):not(.mic){position:absolute;left:0!important;top:0!important;display:block;margin:0!important;padding:0!important;min-width:0!important;min-height:0!important;max-width:none!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;transform:none!important;touch-action:none;color:transparent!important;cursor:pointer}
+.hq86-stage .hq120-entry::before,.hq86-stage .hq120-entry::after{content:none!important;display:none!important}
+.hq86-stage .hq120-entry:focus-visible{background:#b9ffff22!important}
+.hq86-stage .hq120-entry:active{background:#b9ffff12!important}

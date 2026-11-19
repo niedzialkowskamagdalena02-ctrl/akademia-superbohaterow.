@@ -1,4 +1,4 @@
-import {hallPoint119,hallDoor119,placeHallPanel119} from './base-panorama119.js?v=119';
+import {hallPoint120,hallDoor120,hallSurface120,hallOutline120,placeHallHit120} from './base-panorama120.js?v=120';
 import {panoramaSoftware119} from './panorama-software119.js?v=119';
 import {hqPet,hqPlaced,hqRead} from './headquarters84.js?v=117';
 import {baseArt88} from './base-art88.js?v=119';
@@ -11,7 +11,7 @@ import {gameGroup92} from './learning-games92.js?v=92';
 
 const routes=new Map(),images=new Map();
 const skyHD=['training86','polish86','english86','explorer87','annex86','hall88','workshop91','armory','arcade','nook86','hangar','hangar95','shop87','vault87'];
-const roomImage93=file=>file==='hall88.webp'?'panorama119/hall.png':(skyHD.includes(file.replace('.webp',''))?'hd93/':'')+file;
+const roomImage93=file=>file==='hall88.webp'?'panorama120/hall.webp':(skyHD.includes(file.replace('.webp',''))?'hd93/':'')+file;
 const pose=room=>({room,x:0,z:0,yaw:((walkRooms[room].heading??(room==='hall'?.62:.5))-.5)*FULL_TURN,pitch:0});
 const current=child=>routes.get(child)?.at(-1)??pose('hall');
 const casePositions={a:[.194,.567],b:[.81,.567],c:[.5,.574]};
@@ -57,9 +57,9 @@ export function baseWalkMarkup(profile,child,hero,release,panel,mic=''){
     const label=p.action==='hq:pet'&&animal?escapeText(animal.name):p.label;
     const art=p.fixture?`<img src="assets/hq/${p.fixture}91.webp" alt="" draggable="false">`:p.icon?`<span aria-hidden="true">${p.icon}</span>`:'';
     const plate=room==='hall'&&p.room;
-    const content=plate?hallDoor119(p.room,p.label):mentor?mentorMarkup87(profile.mentor):`${art}<b>${label}</b>`;
+    const content=plate?hallDoor120(p.label):mentor?mentorMarkup87(profile.mentor):`${art}<b>${label}</b>`;
     const action=locked?'data-action="hq:room:workshop"':p.room?`data-walk-door="${p.room}"` :`data-action="${p.action}"`;
-    return `<button type="button" class="hq86-point${style}${plate?' hq119-panel':''}" data-room="${room}" data-index="${i}" ${action} hidden>${content}</button>`;
+    return `<button type="button" class="hq86-point${style}${plate?' hq120-entry':''}" data-room="${room}" data-index="${i}" ${action} hidden>${content}</button>`;
    })).join('')}
    ${Object.entries(casePositions).map(([slot,[u,v]])=>trophy(slot,'armory',u,v)).join('')+trophy('lab','polish',labShelf.u,labShelf.v-.041,false)+pet+shop}
    <header class="hq86-top">
@@ -129,7 +129,11 @@ function panoramaWorld(canvas){
   void main(){screen=position;gl_Position=vec4(position,0.,1.);}
  `);
  attach(gl.FRAGMENT_SHADER,`
+  #ifdef GL_FRAGMENT_PRECISION_HIGH
+  precision highp float;
+  #else
   precision mediump float;
+  #endif
   varying vec2 screen;
   uniform mat3 basis;
   uniform vec3 eye, bounds, tint;
@@ -180,8 +184,15 @@ function panoramaWorld(canvas){
  const uniform=Object.fromEntries(['basis','eye','bounds','tint','fov','photoFov','squish'].map(name=>[name,gl.getUniformLocation(program,name)]));
  return {
   load(image,front,room){
+   const limit=gl.getParameter(gl.MAX_TEXTURE_SIZE);
    [image,front].forEach((texture,i)=>{
     if(!texture)return;
+    if(Math.max(texture.naturalWidth,texture.naturalHeight)>limit){
+     const resized=document.createElement('canvas');
+     const ratio=limit/Math.max(texture.naturalWidth,texture.naturalHeight);
+     resized.width=Math.round(texture.naturalWidth*ratio);resized.height=Math.round(texture.naturalHeight*ratio);
+     resized.getContext('2d').drawImage(texture,0,0,resized.width,resized.height);texture=resized;
+    }
     gl.activeTexture(gl.TEXTURE0+i);
     gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,texture);
    });
@@ -263,8 +274,9 @@ export function mountBaseWalk(root){
    const original=room().points[Number(marker.dataset.index)]??{
     u:Number(marker.dataset.u),v:Number(marker.dataset.v),front:marker.dataset.front==='1'
    };
-   const p=state().room==='hall'?hallPoint119(original):original;
-   sceneMarkers.push({marker,p,anchor:roomAnchor86(room(),p,portraitRatio)});
+   const p=state().room==='hall'?hallPoint120(original):original;
+   sceneMarkers.push({marker,p,anchor:p.panel120?hallSurface120(room(),p.u,p.v):roomAnchor86(room(),p,portraitRatio),
+    outline:p.panel120?hallOutline120(room(),p.panel120):null});
   }
  }
  async function load(){
@@ -300,8 +312,8 @@ export function mountBaseWalk(root){
   return [(.5+x/(2*depth*fx))*width,(.5-y/(2*depth*fy))*height,depth];
  }
  function paintMarkers(basis,fx,fy,now){
-  for(const {marker,p,anchor} of sceneMarkers){
-   if(p.panel119){placeHallPanel119(marker,p,anchor,corner=>project(basis,fx,fy,corner),width,height);continue;}
+  for(const {marker,p,anchor,outline} of sceneMarkers){
+   if(outline){placeHallHit120(marker,outline,state(),basis,fx,fy,width,height);continue;}
    const projected=project(basis,fx,fy,anchor);
    marker.hidden=!projected||projected[0]<24||projected[0]>width-24||projected[1]<100||projected[1]>height-90;
    if(marker.hidden)continue;

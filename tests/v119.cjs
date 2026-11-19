@@ -47,11 +47,11 @@ const url=name=>pathToFileURL(path.join(root,'assets',name));
   }
  }
  const walk=baseWalkMarkup({grade:'2',base:{owned:[]}},'qa','iron',119,'');
- assert.equal((walk.match(/hq119-plate-art/g)||[]).length,7);
- assert.doesNotMatch(walk,/hq118-art|hq118-entry/);
+ assert.equal((walk.match(/hq120-entry/g)||[]).length,7);
+ assert.doesNotMatch(walk,/hq118-art|hq118-entry|hq119-plate-art/);
  const walkCode=fs.readFileSync(path.join(root,'assets/base-walk85.js'),'utf8');
  assert.doesNotMatch(walkCode,/mountHall118|hallView118/);
- assert.ok(walkCode.includes('panorama119/hall.png'));
+ assert.ok(walkCode.includes('panorama120/hall.webp'));
  const png=fs.readFileSync(path.join(root,'assets/hq/panorama119/hall.png'));
  assert.ok(Math.abs(png.readUInt32BE(16)/png.readUInt32BE(20)-2)<.01);
  const view=app(),account=data();
@@ -75,7 +75,7 @@ const url=name=>pathToFileURL(path.join(root,'assets',name));
  assert.match(hulk,/viewBox="0 420 709 800"/);
  assert.deepEqual(Buffer.from(hulk.match(/base64,([^"\s]+)/)[1],'base64'),fs.readFileSync(path.join(root,'assets/interface119/hulk-source.webp')));
  const cache=vm.runInNewContext(fs.readFileSync(path.join(root,'sw.js'),'utf8')+'\n({CACHE,ASSETS})',{self:{addEventListener(){}}});
- assert.equal(cache.CACHE,'academy-v119');
+ assert.equal(cache.CACHE,'academy-v120');
  for(const name of ['interface119.js?v=119','interface119.css?v=119','base-panorama119.js?v=119','base-panorama119.css?v=119','panorama-software119.js?v=119','hq/panorama119/hall.png','interface119/hulk.svg','interface119/subjects.webp','interface119/range.webp','interface119/modes.webp']){
   assert.ok(cache.ASSETS.includes('./assets/'+name),name);
  }

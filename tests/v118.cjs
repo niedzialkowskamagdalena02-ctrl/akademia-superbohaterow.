@@ -59,8 +59,8 @@ const inside=([x,y],points)=>{
   assert.equal((markup.match(/ is-charged/g)||[]).length,energy.charged);
  }
  const manifest=vm.runInNewContext(fs.readFileSync(path.join(root,'sw.js'),'utf8')+'\n({CACHE,ASSETS})',{self:{addEventListener(){}}});
- assert.equal(manifest.CACHE,'academy-v119');
- for(const url of ['base-walk85.js?v=119','base-views118.js?v=118','base-views118.css?v=118',...hallViews118.map(v=>v.src.replace('assets/',''))]){
+ assert.equal(manifest.CACHE,'academy-v120');
+ for(const url of ['base-walk85.js?v=120','base-views118.js?v=118','base-views118.css?v=118',...hallViews118.map(v=>v.src.replace('assets/',''))]){
   assert.ok(manifest.ASSETS.includes('./assets/'+url),'Offline: '+url);
  }
  console.log('PASS V118 — 9 original files, 7 existing doors, icon/text/chevron hit areas at 6 screen sizes, real energy and offline assets.');
