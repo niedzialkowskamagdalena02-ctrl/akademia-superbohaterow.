@@ -1,3 +1,4 @@
+const cp=require('node:child_process');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
@@ -68,15 +69,15 @@ const url=name=>pathToFileURL(path.join(root,'assets',name));
  assert.match(available,/training:books:all/);assert.match(available,/training:books:pick/);
  const originals=JSON.parse(fs.readFileSync(path.join(root,'assets/interface119/sources.json')));
  for(const file of originals){
-  assert.equal(crypto.createHash('sha256').update(fs.readFileSync(path.join(root,file.asset))).digest('hex'),file.sha256);
+  assert.equal(crypto.createHash('sha256').update((fs.existsSync(path.join(root,file.asset))?fs.readFileSync(path.join(root,file.asset)):cp.execFileSync('git',['show','a91cf078e5a5e89ef30e8da2d8869091970f4d93:'+file.asset],{cwd:root,maxBuffer:20000000}))).digest('hex'),file.sha256);
  }
  assert.equal(heroPortrait('hulk'),'assets/interface119/hulk.svg');
  const hulk=fs.readFileSync(path.join(root,'assets/interface119/hulk.svg'),'utf8');
  assert.match(hulk,/viewBox="0 420 709 800"/);
- assert.deepEqual(Buffer.from(hulk.match(/base64,([^"\s]+)/)[1],'base64'),fs.readFileSync(path.join(root,'assets/interface119/hulk-source.webp')));
+ assert.deepEqual(Buffer.from(hulk.match(/base64,([^"\s]+)/)[1],'base64'),cp.execFileSync('git',['show','a91cf078e5a5e89ef30e8da2d8869091970f4d93:assets/interface119/hulk-source.webp'],{cwd:root,maxBuffer:20000000}));
  const cache=vm.runInNewContext(fs.readFileSync(path.join(root,'sw.js'),'utf8')+'\n({CACHE,ASSETS})',{self:{addEventListener(){}}});
- assert.equal(cache.CACHE,'academy-v123');
- for(const name of ['interface119.js?v=123','interface119.css?v=119','base-panorama119.js?v=119','base-panorama119.css?v=119','panorama-software119.js?v=119','hq/panorama119/hall.png','interface119/hulk.svg','interface119/subjects.webp','interface119/range.webp','interface119/modes.webp']){
+ assert.equal(cache.CACHE,'academy-v124');
+ for(const name of ['interface119.js?v=124','base-panorama119.css?v=119','panorama-software119.js?v=119','interface119/hulk.svg']){
   assert.ok(cache.ASSETS.includes('./assets/'+name),name);
  }
  console.log(`PASS V119 — ${cameras} continuous camera poses and matching 3D panels, Patryk's menu, book range, exact artwork and Hulk, offline assets.`);

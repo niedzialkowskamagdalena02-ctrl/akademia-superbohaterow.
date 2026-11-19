@@ -1,0 +1,142 @@
+[
+  {
+    "asset": "assets/interface124/rocket.webp",
+    "source": "background-extraction: elementy/9014c4f7-957e-4a75-8d18-9cff06fceb98.png",
+    "width": 440,
+    "height": 335,
+    "sha256": "4256f1eb405fa645235c8fcd4ebef7fa8fa5c4ea51cb9d109cfb358dffa53832"
+  },
+  {
+    "asset": "assets/interface124/books.webp",
+    "source": "background-extraction: elementy/9014c4f7-957e-4a75-8d18-9cff06fceb98.png",
+    "width": 430,
+    "height": 345,
+    "sha256": "03502435308103648e14b0a2a02433b5cf5ebcbf41e18f83d8e7a712af54287a"
+  },
+  {
+    "asset": "assets/interface124/pages.webp",
+    "source": "background-extraction: elementy/9014c4f7-957e-4a75-8d18-9cff06fceb98.png",
+    "width": 430,
+    "height": 345,
+    "sha256": "e40670e24e2d36b78a847e932b1523facf84e2fe69cb5e6176ae9b8e0c6a01ea"
+  },
+  {
+    "asset": "assets/interface124/dice.webp",
+    "source": "background-extraction: elementy/9014c4f7-957e-4a75-8d18-9cff06fceb98.png",
+    "width": 420,
+    "height": 335,
+    "sha256": "4d55acc970c830812240e92615cb8b89c217d7bae9bdb59a40ce13f5e84b0636"
+  },
+  {
+    "asset": "assets/interface124/controller.webp",
+    "source": "background-extraction: elementy/9014c4f7-957e-4a75-8d18-9cff06fceb98.png",
+    "width": 430,
+    "height": 335,
+    "sha256": "37c5307c1940d9cc696237f9f439b44ab25082e5a96788492425aa22c34d18f0"
+  },
+  {
+    "asset": "assets/interface124/trophy.webp",
+    "source": "background-extraction: elementy/9014c4f7-957e-4a75-8d18-9cff06fceb98.png",
+    "width": 390,
+    "height": 320,
+    "sha256": "e7b132d611ca176bfb2a5c3b84025dd9f3bc3fbd6e329e8e9e79469cabe687e4"
+  },
+  {
+    "asset": "assets/interface124/back.webp",
+    "source": "background-extraction: elementy/9014c4f7-957e-4a75-8d18-9cff06fceb98.png",
+    "width": 445,
+    "height": 240,
+    "sha256": "198a90b31ae7e8d0282af411fdd683b359276bd4b56141bbc6b532417158256f"
+  },
+  {
+    "asset": "assets/interface124/voice.webp",
+    "source": "background-extraction: elementy/9014c4f7-957e-4a75-8d18-9cff06fceb98.png",
+    "width": 435,
+    "height": 300,
+    "sha256": "41479ca9144a4d498bd82a0c61b40d3e70874ee6086fbc2912ba952e6a35c8db"
+  },
+  {
+    "asset": "assets/interface124/mic.webp",
+    "source": "background-extraction: elementy/9014c4f7-957e-4a75-8d18-9cff06fceb98.png",
+    "width": 400,
+    "height": 335,
+    "sha256": "a912efda592ec0a43449297462b4e33898835f26d8796588e67574224a43fbdf"
+  },
+  {
+    "asset": "assets/interface124/space.webp",
+    "source": "tła/57f5286c-9cff-4220-ba9b-e594eb6f9fb9.png",
+    "width": 901,
+    "height": 1746,
+    "sha256": "ed19b3cacad5c46f4b1544046ab20fa22c89ef67ac50c29c27e1ddfa4cc052cf"
+  },
+  {
+    "asset": "assets/interface124/next.webp",
+    "source": "elementy/dalej-wybierz-tryb.png",
+    "width": 2057,
+    "height": 707,
+    "sha256": "ed1276af1b42aa26a167f811d2affb05009cca2ce185a9f5430957743448e3da"
+  },
+  {
+    "asset": "assets/interface124/classic.webp",
+    "source": "d0035813-9d84-4c53-9843-033fd0627880.png",
+    "width": 911,
+    "height": 477,
+    "sha256": "a111ed29c4ad388e6303458030a751f65aeba51e31ac7f5c5fb42ad084cb3963"
+  },
+  {
+    "asset": "assets/interface124/walk.webp",
+    "source": "d0035813-9d84-4c53-9843-033fd0627880.png",
+    "width": 911,
+    "height": 467,
+    "sha256": "b9d84a71bce9d0a4d3ee846ea88459a194cf8315749b182d7e2bc456e4c7f21e"
+  },
+  {
+    "asset": "assets/interface124/profile-pawel.webp",
+    "source": "08e726c8-c5c1-438c-8c66-3edd9122bbdb.png",
+    "width": 807,
+    "height": 436,
+    "sha256": "e7b1d2ead577109d7139a9ce8fd3e4f9872002e03f7fb18a93359167bbb704e0"
+  },
+  {
+    "asset": "assets/interface124/profile-pawel-other.webp",
+    "source": "08e726c8-c5c1-438c-8c66-3edd9122bbdb.png",
+    "width": 807,
+    "height": 436,
+    "sha256": "c2dd1ffff00263397f88d57897975f1b48f7bea46559e67557dee607395dce54"
+  },
+  {
+    "asset": "assets/interface124/profile-patryk.webp",
+    "source": "08e726c8-c5c1-438c-8c66-3edd9122bbdb.png",
+    "width": 807,
+    "height": 425,
+    "sha256": "2833f0800841c45092573681cf776667fdde7f9df247921e06b743199bb4bb5c"
+  },
+  {
+    "asset": "assets/interface124/profile-patryk-other.webp",
+    "source": "08e726c8-c5c1-438c-8c66-3edd9122bbdb.png",
+    "width": 807,
+    "height": 425,
+    "sha256": "edfc6447bb98dbcc55cfdc31bf208323c5ac5e7bca4ef333e1810e22478486e1"
+  },
+  {
+    "asset": "assets/interface124/entry-scene.webp",
+    "source": "08e726c8-c5c1-438c-8c66-3edd9122bbdb.png",
+    "width": 853,
+    "height": 1844,
+    "sha256": "72d39013b294f087105691663a4b5ec81a73e8c5685e6215250f8a35ec875b97"
+  },
+  {
+    "asset": "assets/interface124/entry-listen.webp",
+    "source": "08e726c8-c5c1-438c-8c66-3edd9122bbdb.png",
+    "width": 315,
+    "height": 121,
+    "sha256": "ba1b9553a5301d58388ea8b4cfc389a6167f996cf2b8bd65b75c7220cf5494dc"
+  },
+  {
+    "asset": "assets/interface124/entry-parent.webp",
+    "source": "08e726c8-c5c1-438c-8c66-3edd9122bbdb.png",
+    "width": 824,
+    "height": 204,
+    "sha256": "cee95ba4ac924ea608064776b14674df3a0dfe6bc3934901b1e46095429e202b"
+  }
+]

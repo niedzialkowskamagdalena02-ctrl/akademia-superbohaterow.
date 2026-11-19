@@ -1,6 +1,7 @@
-import {training119Range} from './interface119.js?v=123';
+import {training124Picker,voice124,art124,pageCount124} from './interface124.js?v=124';
+import {training119Range} from './interface119.js?v=124';
 import {gamePreview99, hangarPaint99} from './game-art99.js?v=99';
-import {academy102Shell,academy102Choices,academy102Player,academy102DashboardNav,academy102DashboardVoice,academy102FamilyHeading,academy115TrainingPanel,academy102MissionsHeader,academy102MissionZone,academy107Entry,academy107PinScreen,heroPortrait,academy111Training} from './interface102.js?v=123';
+import {academy102Shell,academy102Choices,academy102Player,academy102DashboardNav,academy102DashboardVoice,academy102FamilyHeading,academy115TrainingPanel,academy102MissionsHeader,academy102MissionZone,academy107Entry,academy107PinScreen,heroPortrait,academy111Training} from './interface102.js?v=124';
 // V48_AI_RESPONSE_DIAGNOSTICS
 // V44_BULK_CHAPTERS
 // V42_CHAPTERS
@@ -80,7 +81,7 @@ const select=(id,label,options,value)=>`<label for="${id}">${label}</label><sele
 const grades=[['P','Przedszkole'],...Array.from({length:12},(_,i)=>[String(i+1),`Klasa ${i+1}`])];
 const people=[['pawel','Paweł'],['patryk','Patryk']];
 const note=t=>{const n=$('hq85-notice')||$('notice');if(!n){console.warn('Powiadomienie:',t);return}n.textContent=t;n.classList.add('visible');setTimeout(()=>{if(n.isConnected)n.classList.remove('visible')},4500)};
-const ACADEMY_RELEASE=123;
+const ACADEMY_RELEASE=124;
 async function checkAcademyUpdate(button){
  if(!button||button.disabled)return;
  const label=button.textContent,controller=new AbortController();
@@ -1277,6 +1278,13 @@ function trainingList95(){
    `<button type="button" class="tr71-choice" data-action="training:play:${encodeURIComponent(item.id)}">${gamePreview99(item.kind,`<span aria-hidden="true">${item.icon}</span>`)}<strong>${e(item.name)}</strong></button>`).join('')}</div>`).join('');
 }
 function trainingFlowMarkup(){
+ if(trainingStep==='pick'){
+  const bs=trainingBookItems(),ps=trainingPageItems();
+  return training124Picker({subject:e(trainingSelectedSubject),voice:trainingVoice('Możesz zaznaczyć wiele książek i stron.'),
+   tools:trainingCard('☑ Zaznacz wszystko','training:all')+trainingCard('Odznacz wszystko','training:none'),
+   books:bs.map(b=>v77RangeMarkup(b,ps.filter(p=>p.bookId===b.id))).join(''),count:trainingSelectedPages.size,
+   nextLabel:trainingSource115==='books'?'Dalej · wybierz tryb':'⚡ Rozpocznij misję'});
+ }
  if(trainingStep==='range')return training119Range({subject:e(trainingSelectedSubject),voice:trainingVoice('Wybierz cały materiał albo konkretne książki, działy i strony.'),hasPages:trainingPageItems().length>0});
  if(trainingStep==='subject'){
   const extras=trainingSubjectsList().filter(name=>
@@ -1323,7 +1331,7 @@ function trainingFlowMarkup(){
  content+='</section>';
  return content;
 }
-function trainingSelectionUpdate(){for(const el of document.querySelectorAll('[data-v77-range-summary]')){const n=trainingPageItems().filter(p=>p.bookId===el.dataset.v77RangeSummary&&trainingSelectedPages.has(p.id)).length;el.textContent='Wybrano '+n+' stron'}const el=document.getElementById('tr71-count');if(el)el.textContent='Zaznaczono '+trainingSelectedPages.size+' stron.'}
+function trainingSelectionUpdate(){for(const el of document.querySelectorAll('[data-v77-range-summary]')){const n=trainingPageItems().filter(p=>p.bookId===el.dataset.v77RangeSummary&&trainingSelectedPages.has(p.id)).length;el.textContent='Wybrano '+pageCount124(n)}const el=document.getElementById('tr71-count');if(el)el.textContent='Zaznaczono '+pageCount124(trainingSelectedPages.size)+'.'}
 function trainingSelectionChange(el){
  v772RememberRangeMode(el);
  const list=trainingPageItems(),checked=el.checked;
@@ -2511,7 +2519,7 @@ async function parentPinAction(action){
  }
  updateParentPinDisplay(input);
 }
-const academyPressControls = '.academy102-destinations button,.academy102-header-actions button,.academy102-screen-voice button,.academy102-choices button,.academy102-mic,.academy115-flow button,.academy116-back,.academy107-entry button,.academy107-pin-key,.academy111-voice-slot .listen,.academy121-back,.academy121-choice,.academy121-subject-voice .listen,.academy121-range-voice .listen,.academy122-material button,.academy122-options button,.mentor-room .mentor-choice';
+const academyPressControls = '.academy124-flow button,.academy124-flow summary,.academy124-entry button,.academy102-destinations button,.academy102-header-actions button,.academy102-screen-voice button,.academy102-choices button,.academy102-mic,.academy115-flow button,.academy116-back,.academy107-entry button,.academy107-pin-key,.academy111-voice-slot .listen,.academy121-back,.academy121-choice,.academy121-subject-voice .listen,.academy121-range-voice .listen,.academy122-material button,.academy122-options button,.mentor-room .mentor-choice';
 const academyPressTimers=new WeakMap();
 function pressAcademyControl(control,complete,immediate=false,duration=190){
  const pending=academyPressTimers.get(control);
@@ -2555,7 +2563,7 @@ document.addEventListener('click',ev=>{
  if(btn.dataset.action==='mic'&&micDragIgnoreClick){ev.preventDefault();ev.stopPropagation();return}
  if(btn.matches?.(academyPressControls)){
   const action=btn.dataset.action;
-  const animate=btn.matches('.academy115-books,.academy115-practice,.academy115-choose,.academy121-choice[data-motion121],.academy122-scope-card,.academy122-mode')&&!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  const animate=btn.matches('.academy115-books,.academy115-practice,.academy115-choose,.academy121-choice[data-motion121],.academy122-scope-card,.academy122-mode,.academy124-card[data-motion121]')&&!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   pressAcademyControl(btn,()=>handle(action,btn),/^parent-pin:(digit:|erase$)/.test(action),animate?840:190);
   return;
  }
@@ -2874,7 +2882,7 @@ function v77RangeMarkup(b,ps){
  const chosen=ps.filter(p=>trainingSelectedPages.has(p.id)),state=v77Ranges.get(b.id)||{from:chosen[0]?.id||ps[0]?.id,to:chosen.at(-1)?.id||ps.at(-1)?.id};
  const chapters=v773ChapterNames(ps,true),mode=v772RangeModes.get(b.id);
  const options=value=>ps.map((p,i)=>`<option value="${e(p.id)}" ${p.id===value?'selected':''}>${e(p.number)}${ps.filter(x=>String(x.number)===String(p.number)).length>1?' · '+e(p.chapter||'bez działu')+' · zdjęcie '+(i+1):''}</option>`).join('');
- return `<div class="tr71-book v77-range-book"><div class="v77-book-identity">${trainingVoice(b.title)}${b.coverId?`<img data-image="${e(b.coverId)}" alt="Okładka ${e(b.title)}">`:'<span class="tr71-cover">📘</span>'}<strong>${e(b.title)}</strong><small>${ps.length} stron</small></div><div class="v77-book-range"><label class="tr71-check"><input type="checkbox" data-tr71-book="${e(b.id)}" ${ps.length&&chosen.length===ps.length?'checked':''}> Cała książka</label><details class="v77-range-fold" data-v772-book-choice="chapter" data-v772-book-id="${e(b.id)}" ${mode==='chapter'?'open':''}><summary>Wybierz dział</summary><label>Dział<select data-v772-chapter-book="${e(b.id)}"><option value="">Wybierz dział</option>${chapters.map(c=>`<option value="${e(c)}" ${v772ChapterChosen(ps,c)?'selected':''}>${e(c)}</option>`).join('')}</select></label></details><details class="v77-range-fold" data-v772-book-choice="range" data-v772-book-id="${e(b.id)}" ${mode==='range'?'open':''}><summary>Wybierz zakres stron</summary>${ps.length?`<div class="v77-from-to"><label>Od<select data-v77-range-book="${e(b.id)}" data-v77-range-edge="from">${options(state.from)}</select></label><label>Do<select data-v77-range-book="${e(b.id)}" data-v77-range-edge="to">${options(state.to)}</select></label></div>`:'<p>Brak odczytanych stron.</p>'}<small role="status" data-v772-range-error="${e(b.id)}"></small></details><small data-v77-range-summary="${e(b.id)}">Wybrano ${chosen.length} stron</small></div></div>`;
+ return `<div class="tr71-book v77-range-book academy124-book" data-tone="${/angiel|english/i.test(b.subject)?'green':'blue'}"><div class="v77-book-identity"><span class="academy124-voice">${voice124(trainingVoice(b.title))}</span>${(b.coverId||ps.find(p=>p.imageId)?.imageId)?`<img data-image="${e(b.coverId||ps.find(p=>p.imageId)?.imageId)}" alt="Okładka ${e(b.title)}">`:art124('books','academy124-cover-fallback')}<strong>${e(b.title)}</strong><small>${pageCount124(ps.length)}</small></div><div class="v77-book-range"><label class="tr71-check"><input type="checkbox" data-tr71-book="${e(b.id)}" ${ps.length&&chosen.length===ps.length?'checked':''}> Cała książka</label><details class="v77-range-fold" data-v772-book-choice="chapter" data-v772-book-id="${e(b.id)}" ${mode==='chapter'?'open':''}><summary>Wybierz dział</summary><label>Dział<select data-v772-chapter-book="${e(b.id)}"><option value="">Wybierz dział</option>${chapters.map(c=>`<option value="${e(c)}" ${v772ChapterChosen(ps,c)?'selected':''}>${e(c)}</option>`).join('')}</select></label></details><details class="v77-range-fold" data-v772-book-choice="range" data-v772-book-id="${e(b.id)}" ${mode==='range'?'open':''}><summary>Wybierz zakres stron</summary>${ps.length?`<div class="v77-from-to"><label>Od<select data-v77-range-book="${e(b.id)}" data-v77-range-edge="from">${options(state.from)}</select></label><label>Do<select data-v77-range-book="${e(b.id)}" data-v77-range-edge="to">${options(state.to)}</select></label></div>`:'<p>Brak odczytanych stron.</p>'}<small role="status" data-v772-range-error="${e(b.id)}"></small></details><small data-v77-range-summary="${e(b.id)}">Wybrano ${pageCount124(chosen.length)}</small></div></div>`;
 }
 function v772ChapterChosen(ps,chapter){const matching=ps.filter(p=>v773ChapterKey(p.chapter||'Bez działu')===v773ChapterKey(chapter));return matching.length&&matching.length===ps.filter(p=>trainingSelectedPages.has(p.id)).length&&matching.every(p=>trainingSelectedPages.has(p.id));}
 function v772RememberRangeMode(el){

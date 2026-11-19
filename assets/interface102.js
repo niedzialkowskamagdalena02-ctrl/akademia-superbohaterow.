@@ -1,5 +1,5 @@
-import {entry122} from './interface122.js?v=123';
-import {training119Subjects,training119Options} from './interface119.js?v=123';
+import {entry124,choices124,microphone124} from './interface124.js?v=124';
+import {training119Subjects,training119Options} from './interface119.js?v=124';
 const art = (name, className = '') =>
   `<img class="academy102-art ${className}" src="assets/interface102/${name}.webp" alt="" draggable="false">`;
 const dashboardArt = (name) =>
@@ -28,7 +28,7 @@ export function heroPortrait(key) {
 }
 
 export function academy107Entry(options){
- return entry122({...options,portrait:heroPortrait});
+ return entry124({...options,portrait:heroPortrait});
 }
 
 export function academy107PinScreen(length) {
@@ -77,7 +77,7 @@ export function academy102Shell(scene, {title, content, menu='', voice='', relea
   if(back&&content.includes('data-interface119='))return `<main class="academy102-screen academy116-section academy119-full" ${skipScreenReader?'data-preschool-screen-skip':''}>
     ${test?`<div class="academy116-test" role="note">Tryb mamy · postępy nie są zapisywane ${exit}</div>`:''}
     <div class="academy104-section-body">${content.replaceAll('data-back119',`data-action="${back}"`)}</div>
-    ${content.includes('data-interface119="subjects"')?'':microphone()}
+    ${content.includes('data-interface119="subjects"')?'':content.includes('data-interface124=')?microphone124():microphone()}
   </main>`;
   if(back)return `<main class="academy102-screen academy102-${screen} academy116-section${base?' hq88-base-page':''}" ${skipScreenReader?'data-preschool-screen-skip':''}>
     <header class="academy116-top">
@@ -106,18 +106,7 @@ export function academy102Shell(scene, {title, content, menu='', voice='', relea
   </main>`;
 }
 
-export function academy102Choices() {
-  const views=[
-    ['classic','Widok klasyczny','overview','☰'],
-    ['walk','Spacer po bazie','walk','']
-  ];
-  return `<nav class="academy102-choices" aria-label="Wybór widoku">
-    ${views.map(([key,label,background,icon])=>tile(key,label,'hq:view:'+key,{
-      artwork:`<img class="academy102-art" src="assets/hq/${background}.webp" alt="" draggable="false">`,
-      content:`<span class="academy110-choice-label">${icon?`<span aria-hidden="true">${icon}</span>`:''}${label}</span>`
-    })).join('')}
-  </nav>`;
-}
+export function academy102Choices() { return choices124(); }
 
 export function academy102Player({name, child, coins, grade, level, progress}) {
   return `<section class="academy102-player" aria-label="Profil bohatera">

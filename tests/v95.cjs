@@ -363,16 +363,16 @@ function fixture(){
  assert.ok(scope.some(turn=>turn.page?.number===12&&turn.key==='matematyka'));
  assert.deepEqual([...new Set(scope.map(turn=>turn.key))].sort(),['angielski','matematyka','polski','przyroda']);
  const manifest=vm.runInNewContext(fs.readFileSync(path.join(dir,'sw.js'),'utf8')+'\n({CACHE,ASSETS})',{self:{addEventListener(){}}});
- assert.equal(manifest.CACHE,'academy-v123');
+ assert.equal(manifest.CACHE,'academy-v124');
  for(const asset of ['base-walk85.js?v=120','hero-hands85.js?v=117','missions93.css?v=114','style.css?v=114','hq/hands90-hulk.webp'])
   assert.ok(manifest.ASSETS.includes('./assets/'+asset),asset);
- for(const asset of ['interface111.css?v=113','interface111/training-art.webp','interface113/training-frame.webp','interface111/knowledge-motion.webp'])
+ for(const asset of ['interface124.css?v=124','interface124/books.webp','interface124/controller.webp','interface121/subjects.webp'])
   assert.ok(manifest.ASSETS.includes('./assets/'+asset),asset);
  for(const version of ['interface113','interface117']){
   for(const image of fs.readdirSync(path.join(dir,'assets',version)))
    assert.ok(manifest.ASSETS.includes('./assets/'+version+'/'+image),image);
  }
- for(const asset of ['hq/overview.webp','hq/walk.webp','interface110/welcome-shield.webp','interface110/pair-phone.webp'])
+ for(const asset of ['hq/overview.webp','hq/walk.webp','interface124/entry-scene.webp','interface110/pair-phone.webp'])
   assert.ok(manifest.ASSETS.includes('./assets/'+asset),asset);
  for(const name of ['hulk','captain','thor','hood'])assert.ok(manifest.ASSETS.includes('./assets/art/'+name+'.webp'));
  for(const resource of manifest.ASSETS)assert.ok(fs.existsSync(path.resolve(dir,resource.split('?')[0])),resource);

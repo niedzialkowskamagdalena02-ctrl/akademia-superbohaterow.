@@ -220,16 +220,16 @@ function board(){
   assert.match(schoolView.root.innerHTML,/data-action="training:books:all"/);
   assert.match(schoolView.root.innerHTML,/data-action="training:source:outside"/);
   assert.doesNotMatch(schoolView.root.innerHTML,/data-action="training:(mixed:start|catalog|assessment)"/);
-  assert.match(schoolView.root.innerHTML,/interface123\/scope-all\.svg/);
-  assert.match(schoolView.root.innerHTML,/interface122\/scope-pick\.webp/);
+  assert.match(schoolView.root.innerHTML,/interface124\/books\.webp/);
+  assert.match(schoolView.root.innerHTML,/interface124\/pages\.webp/);
  }
  await schoolView.api.handle('training:source:outside');
  assert.match(schoolView.root.innerHTML,/data-v77-step="train-options"/);
  assert.equal((schoolView.root.innerHTML.match(/data-action="mic"/g)||[]).length,1);
  assert.match(schoolView.root.innerHTML,/data-action="training:assessment"/);
  assert.match(schoolView.root.innerHTML,/data-action="training:mixed:start"/);
- assert.ok(schoolView.root.innerHTML.includes('assets/interface122/mode-practice.webp'));
- assert.match(schoolView.root.innerHTML,/academy122-card-art/);
+ assert.ok(schoolView.root.innerHTML.includes('assets/interface124/dice.webp'));
+ assert.match(schoolView.root.innerHTML,/academy124-card-icon/);
  schoolView.ctx.window.matchMedia=()=>({matches:false});
  const gameTile={
   dataset:{action:'training:catalog'},isConnected:true,
@@ -239,7 +239,7 @@ function board(){
  for(const listener of schoolView.listeners.click)listener({target:gameTile,detail:1,isTrusted:true});
  assert.equal(clicks,3);
  assert.equal(gameTile.dataset.academyPressed,'true');
- assert.match(schoolView.root.innerHTML,/class="academy122-options/);
+ assert.match(schoolView.root.innerHTML,/class="academy124-flow academy124-options/);
  [...schoolView.timers.values()].find(timer=>timer.ms===840).fn();
  assert.match(schoolView.root.innerHTML,/data-v77-step="catalog"/);
  await schoolView.api.handle('training:back:train-options');
@@ -337,15 +337,15 @@ function board(){
  pinAccount.profiles.pawel.hero='hulk';
  pinView.api.set(pinAccount,{role:''});
  pinView.api.render();
- assert.match(pinView.root.innerHTML,/class="academy107-entry academy122-entry"/);
+ assert.match(pinView.root.innerHTML,/class="academy124-entry"/);
  assert.match(pinView.root.innerHTML,/academy107-pair/);
  assert.match(pinView.root.innerHTML,/data-action="enter:pawel"[\s\S]*data-action="enter:patryk"/);
- assert.match(pinView.root.innerHTML,/data-action="enter:pawel"[^>]*>[\s\S]*?<img[^>]*assets\/interface122\/profile-pawel\.webp/);
- assert.match(pinView.root.innerHTML,/assets\/interface122\/profile-patryk\.webp/);
+ assert.match(pinView.root.innerHTML,/data-action="enter:pawel"[^>]*>[\s\S]*?<img[^>]*assets\/interface124\/profile-pawel\.webp/);
+ assert.match(pinView.root.innerHTML,/assets\/interface124\/profile-patryk\.webp/);
  assert.match(pinView.root.innerHTML,/data-action="enter:admin" aria-label="Centrum dowodzenia mamy"[^>]*>[\s\S]*?<\/button>/);
  assert.match(pinView.root.innerHTML,/data-action="academy:update" aria-label="Aktualizuj Akademię">Aktualizuj Akademię<\/button>/);
  const choices=pinView.ctx.academy102Choices();
- assert.match(choices,/data-action="hq:view:classic"[\s\S]*hq\/overview\.webp[\s\S]*<\/span>Widok klasyczny<\/span>[\s\S]*data-action="hq:view:walk"[\s\S]*hq\/walk\.webp[\s\S]*>Spacer po bazie<\/span>/);
+ assert.match(choices,/hq:view:classic/);assert.match(choices,/hq:view:walk/);assert.match(choices,/interface124\/classic\.webp/);assert.match(choices,/interface124\/walk\.webp/);
  await pinView.api.handle('enter:admin');
  const pinMarkup=pinView.root.innerHTML;
  assert.equal((pinMarkup.match(/parent-pin:cancel/g)||[]).length,1);
@@ -357,7 +357,7 @@ function board(){
   assert.ok(pinMarkup.includes(`parent-pin:digit:${digit}" aria-label="${digit}">${digit}</button>`),digit);
  }
  await pinView.api.handle('parent-pin:cancel');
- assert.match(pinView.root.innerHTML,/class="academy107-entry academy122-entry"/);
+ assert.match(pinView.root.innerHTML,/class="academy124-entry"/);
  await pinView.api.handle('enter:admin');
  const pinField=pinView.ids['academy107-pin-value']={value:'2222',maxLength:4};
  const pinError=pinView.ids['academy107-pin-error']={textContent:''};
