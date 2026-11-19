@@ -1,7 +1,7 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process');
 const root=path.resolve(__dirname,'..'),base='605f75a3a0b851829d4602b2f7a7149852cfa0b2';
 const old=file=>cp.execFileSync('git',['show',base+':'+file],{cwd:root,maxBuffer:8*1024*1024});
-for(const file of ['assets/hq/panorama125/hall.webp','assets/hq/panorama125/details.webp','assets/base-panorama125.js','assets/hall-details125.js','assets/panorama-software119.js','assets/base-panorama119.css','assets/style.css','assets/interface124.js','assets/base-map86.js','assets/headquarters84.js','assets/hero-animation127.css'])assert.deepEqual(fs.readFileSync(path.join(root,file)),old(file),file+' preserved');
+for(const file of ['assets/hq/panorama125/hall.webp','assets/hq/panorama125/details.webp','assets/base-panorama125.js','assets/hall-details125.js','assets/panorama-software119.js','assets/base-panorama119.css','assets/style.css','assets/interface124.js','assets/base-map86.js','assets/headquarters84.js'])assert.deepEqual(fs.readFileSync(path.join(root,file)),old(file),file+' preserved');
 const world=s=>s.slice(s.indexOf('export function panoramaWorld('),s.indexOf('let dispose='));
 assert.equal(world(fs.readFileSync(path.join(root,'assets/base-walk85.js'),'utf8')),world(old('assets/base-walk85.js').toString()));
 const art=JSON.parse(fs.readFileSync(path.join(root,'assets/hq/hands127/sources.json'))),refs=new Set(Object.values(art.files).flatMap(f=>f.originals));

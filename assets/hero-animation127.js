@@ -1,5 +1,6 @@
 import {heroAssets127 as ART} from './hero-assets127.js?v=129';
 import {heroResources129} from './hero-resources129.js?v=129';
+import {fistPoint130,paintWind130} from './hero-wind130.js?v=130';
 import {panoramaTriangle119} from './panorama-software119.js?v=126';
 import {FLOOR_DEPTH} from './base-map86.js?v=95';
 
@@ -13,18 +14,22 @@ export const heroModes127=Object.freeze({
 
 export const hasHeroArt127=hero=>Object.hasOwn(ART.heroes,hero);
 export function powerMarkup127(hero){
- const modes=heroModes127[hero];if(!modes)return '';
- return `<div class="hq127-controls" data-walk-controls role="group" aria-label="Ruchy bohatera">
-  <div class="hq127-modes">${modes.map(([id,label],i)=>`<button type="button" data-walk-mode="${id}" aria-pressed="${i===0}">${label}</button>`).join('')}</div>
-  <div class="hq112-power-controls"><button type="button" data-walk-power="-1" aria-keyshortcuts="F">👊 Lewa</button><button type="button" data-walk-power="1" aria-keyshortcuts="G">👊 Prawa</button></div>
-  <span class="hq127-status" role="status" aria-live="polite"></span>
- </div>`;
+ if(!hasHeroArt127(hero))return '';
+ return '<span class="hq127-status" role="status" aria-live="polite"></span>';
 }
 export function frameKeys127(frame){return typeof frame==='string'?[frame]:frame.layers.map(layer=>layer.src);}
-export function action127(hero,mode,side){return ART.heroes[hero]?.actions[mode+':'+side]??null;}
+export function action127(hero,mode,side){
+ if(hero==='captain'&&mode==='shield-hit'&&side===1){
+  // The supplied throw starts with four frames in which the shield stays held.
+  // Reuse that wind-up and its return for a contact strike; never launch the shield.
+  const source=ART.heroes.captain.actions['shield:1'],out=source.frames.slice(0,4);
+  return {frames:[...out,...out.slice(0,-1).reverse()],duration:520,contact:.5,effect:'shield-dent'};
+ }
+ return ART.heroes[hero]?.actions[mode+':'+side]??null;
+}
 export function idleKey127(hero,mode){
  const art=ART.heroes[hero];if(!art)return null;
- return mode==='shield'?art.shieldIdle:mode==='hammer'||mode==='throw'?art.hammerIdle:mode==='laser'?art.laserIdle:art.idle;
+ return mode==='shield'||mode==='shield-hit'?art.shieldIdle:mode==='hammer'||mode==='throw'?art.hammerIdle:mode==='laser'?art.laserIdle:art.idle;
 }
 export function frameIndex127(age,duration,count,reduced=false,durations=null){
  const t=Math.max(0,Math.min(.999999,age/duration));
@@ -87,8 +92,8 @@ function fitFlash127(ctx,image,x,y,size,alpha=1){
 // Frames are the supplied PNGs, drawn intact. Only placement and playback are code.
 export function heroPlayer127(hero,changed=()=>{},{resources=heroResources129}={}){
  const supported=hasHeroArt127(hero),pool=resources,owner={},marks=[],requested=new Set();
- let mode='punch',idle=null,playing=null,loading=false,ready=false,serial=0,dead=false,error='',counter=0,progress='',lastContext=null;
- let firstKeys=[],seedKeys=[];
+ let mode='punch',idle=null,playing=null,equipping=null,loading=false,ready=false,serial=0,dead=false,error='',counter=0,progress='',lastContext=null;
+ let firstKeys=[],seedKeys=[],hotKeys=[];const preparedModes=new Set();
  const actionKeys=action=>action? action.frames.flatMap(frameKeys127):[];
  const starts=next=>[-1,1].flatMap(side=>action127(hero,next,side)?.frames.slice(0,3).flatMap(frameKeys127)??[]);
  function spec(next,side,count){
@@ -115,7 +120,8 @@ export function heroPlayer127(hero,changed=()=>{},{resources=heroResources129}={
  }
  function windowKeys(action,index){return action.frames.slice(Math.max(0,index-1),Math.min(action.frames.length,index+4)).flatMap(frameKeys127);}
  function pin(){
-  const keys=[idle,...firstKeys,...seedKeys,...marks.flatMap(mark=>[...mark.images.keys()])];
+  const keys=[idle,...firstKeys,...seedKeys,...hotKeys,...marks.flatMap(mark=>[...mark.images.keys()])];
+  if(equipping)keys.push(equipping.from,equipping.to);
   if(playing)keys.push(...windowKeys(playing,playing.index),...frameKeys127(playing.frames[playing.lastIndex]),...fxKeys(playing,true));
   pool.pin(owner,keys.filter(Boolean));
  }
@@ -140,18 +146,41 @@ export function heroPlayer127(hero,changed=()=>{},{resources=heroResources129}={
    if(!warmed||!valid())return false;
    seedKeys=[...new Set([-1,1].flatMap(side=>fxKeys(spec(next,side,counter+1))))];pin();
    await pool.decodeAll([...firstKeys,...seedKeys]);
-   if(valid())ready=true;
+   if(valid()){ready=true;preparedModes.add(next);}
   }catch(e){if(valid())error=e.message;}
   finally{if(valid()){loading=false;pin();changed();}}
   return ready;
  }
+ async function prepareGesture(modes){
+  if(!supported||playing||dead)return false;
+  if(ready&&modes.every(next=>preparedModes.has(next))&&hotKeys.every(key=>pool.peek(key)))return true;
+  const ticket=++serial,valid=()=>!dead&&ticket===serial;
+  loading=true;ready=false;error='';progress='';
+  hotKeys=[...new Set(modes.flatMap(next=>[idleKey127(hero,next),...starts(next),...[-1,1].flatMap(side=>fxKeys(spec(next,side,counter+1)))]))].filter(Boolean);
+  firstKeys=starts(mode);pin();changed();
+  try{
+   const key=idleKey127(hero,mode);await pool.decode(key);if(!valid())return false;idle=key;pin();changed();
+   const keys=[...new Set(modes.flatMap(modeKeys))];
+   if(!await pool.warm(keys,(done,total)=>{if(valid()){progress=done+'/'+total;changed();}},valid)||!valid())return false;
+   await pool.decodeAll(hotKeys);if(!valid())return false;
+   modes.forEach(next=>preparedModes.add(next));ready=true;
+  }catch(e){if(valid())error=e.message;}
+  finally{if(valid()){loading=false;pin();changed();}}
+  return ready;
+ }
+ function equip(next){
+  if(playing||equipping||loading||!ready||!preparedModes.has(next)||dead)return false;
+  const to=idleKey127(hero,next);if(!pool.peek(to))return false;
+  if(next===mode)return true;
+  equipping={from:idle,to,at:performance.now(),duration:180};mode=next;idle=to;firstKeys=starts(next);pin();changed();return true;
+ }
  // A ready input sets playback state immediately. Downloads and effect decoding
  // never sit in front of the first movement frame.
- async function play(side){
-  if(!supported||playing||loading||!ready||dead)return false;
-  const action=action127(hero,mode,side);if(!action)return false;
+ async function play(side,next=mode,{preserveOther=false}={}){
+  if(!supported||playing||equipping||loading||!ready||dead||next!==mode&&!preparedModes.has(next))return false;
+  const action=action127(hero,next,side);if(!action)return false;
   counter++;seedKeys=[];error='';
-  playing={...action,...spec(mode,side,counter),at:performance.now(),side,mode,index:0,lastIndex:0,hit:false,surface:null};
+  playing={...action,...spec(next,side,counter),at:performance.now(),side,mode:next,index:0,lastIndex:0,hit:false,surface:null,preserveOther};
   pin();changed();request([...windowKeys(playing,0),...fxKeys(playing,true)]);
   return true;
  }
@@ -193,20 +222,32 @@ export function heroPlayer127(hero,changed=()=>{},{resources=heroResources129}={
    const wanted=active.frames[index],complete=frameKeys127(wanted).every(key=>pool.peek(key));
    if(complete)active.lastIndex=index;
    const frame=active.frames[active.lastIndex],loaded=new Map(frameKeys127(frame).map(key=>[key,pool.peek(key)]));
-   if(active.windKey&&!reduced&&delta>-.28&&delta<.10){const wind=pool.peek(active.windKey);if(wind)fitFlash127(ctx,wind,width*.5,height*.60,width*.9,Math.sin((delta+.28)/.38*Math.PI)*.65);}
-   drawFrame127(ctx,width,height,frame,loaded);
+   if(active.windKey&&!reduced&&delta>-.28&&delta<.10){
+    const wind=pool.peek(active.windKey),box=frameRect127(width,height);
+    if(wind)paintWind130(ctx,active.windKey,wind,fistPoint130(frame,active.side,box),box,Math.sin((delta+.28)/.38*Math.PI)*.85);
+   }
+   if(active.preserveOther&&idle){
+    ctx.save();ctx.beginPath();ctx.rect(active.side<0?0:width/2,0,width/2,height);ctx.clip();drawFrame127(ctx,width,height,frame,loaded);ctx.restore();
+    const image=pool.peek(idle);if(image){ctx.save();ctx.beginPath();ctx.rect(active.side<0?width/2:0,0,width/2,height);ctx.clip();drawFrame127(ctx,width,height,idle,new Map([[idle,image]]));ctx.restore();}
+   }else drawFrame127(ctx,width,height,frame,loaded);
    if(active.tipKey&&delta>=-.05&&delta<.10){const tip=pool.peek(active.tipKey);if(tip)fitFlash127(ctx,tip,width*.5,height*.47,Math.min(width,height)*.23,reduced?.35:.85);}
    if(active.flashKey&&delta>=0&&delta<.25){const flash=pool.peek(active.flashKey);if(flash)fitFlash127(ctx,flash,width*.5,height*.47,Math.min(width,height)*.42,(1-delta/.25)*(reduced?.45:1));}
+  }else if(equipping){
+   const t=Math.min(1,(now-equipping.at)/equipping.duration),from=pool.peek(equipping.from),to=pool.peek(equipping.to);
+   if(from){ctx.save();ctx.beginPath();ctx.rect(0,0,width/2,height);ctx.clip();drawFrame127(ctx,width,height,equipping.from,new Map([[equipping.from,from]]));ctx.restore();}
+   const key=t<.5?equipping.from:equipping.to,image=t<.5?from:to;
+   if(image){ctx.save();ctx.beginPath();ctx.rect(width/2,0,width/2,height);ctx.clip();ctx.translate(0,height*.16*(t<.5?t*2:(1-t)*2));drawFrame127(ctx,width,height,key,new Map([[key,image]]));ctx.restore();}
+   if(t>=1){equipping=null;changed();}
   }else if(idle){const image=pool.peek(idle);if(image)drawFrame127(ctx,width,height,idle,new Map([[idle,image]]));}
   pin();
   return true;
  }
  return {
-  supported,draw,setMode,play,
-  get mode(){return mode;},get loading(){return loading;},get ready(){return ready;},get progress(){return progress;},get busy(){return !!playing||loading;},get error(){return error;},
+  supported,draw,setMode,prepareGesture,equip,play,
+  get mode(){return mode;},get loading(){return loading;},get ready(){return ready;},get progress(){return progress;},get busy(){return !!playing||!!equipping||loading;},get error(){return error;},
   get stats(){return {...pool.stats,frame:playing?.index??null,shown:playing?.lastIndex??null};},
-  get animated(){return !!playing||marks.some(mark=>lastContext?.room===mark.room&&mark.keys.length>1&&performance.now()-mark.at<400);},
-  stop(){serial++;if(loading)ready=false;playing=null;loading=false;pin();},
-  dispose(){dead=true;serial++;playing=null;marks.length=0;pool.release(owner);}
+  get animated(){return !!playing||!!equipping||marks.some(mark=>lastContext?.room===mark.room&&mark.keys.length>1&&performance.now()-mark.at<400);},
+  stop(){serial++;if(loading)ready=false;playing=null;equipping=null;loading=false;pin();},
+  dispose(){dead=true;serial++;playing=null;equipping=null;marks.length=0;pool.release(owner);}
  };
 }

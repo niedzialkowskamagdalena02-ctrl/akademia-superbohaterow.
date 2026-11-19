@@ -4,7 +4,8 @@ import {panoramaSoftware119} from './panorama-software119.js?v=128';
 import {hqPet,hqPlaced,hqRead} from './headquarters84.js?v=117';
 import {baseArt88} from './base-art88.js?v=119';
 import {drawHeroHands} from './hero-hands85.js?v=127';
-import {heroPlayer127,powerMarkup127,action127} from './hero-animation127.js?v=129';
+import {heroPlayer127,powerMarkup127} from './hero-animation127.js?v=130';
+import {heroAbility130,gestureModes130,handAction130,handAt130,createHandGestures130} from './hero-gestures130.js?v=130';
 import {walkRooms,FLOOR_DEPTH,FULL_TURN,PHOTO_FOV,VERTICAL_SCALE,advance86,cameraBasis86,clamp86,roomAnchor86,wrapAngle} from './base-map86.js?v=95';
 import {energy86} from './base-training86.js?v=117';
 import {petSprite86} from './pet-care86.js?v=117';
@@ -34,8 +35,8 @@ export function baseWalkMarkup(profile,child,hero,release,panel,mic=''){
   prop('shop',.905,.391,true,baseArt88('thorhammer'),'shop-hammer','','hq88-shop-display')+
   prop('shop',.892,.507,true,baseArt88('boots'),'shop-boots','','hq88-shop-display');
  const {crystals,charged,capacity,level}=energy86(profile);
- return `<section class="hq86-walk" data-hq84-scene data-hq86-walk data-child="${child}" data-hero="${hero}" data-jet="${jet?paint:school?'blue':''}">
-  <div class="hq86-stage" tabindex="0" aria-label="Przesuń palcem, aby się rozejrzeć. Przytrzymaj ekran, żeby iść. Na klawiaturze użyj strzałek i spacji.">
+ return `<section class="hq86-walk" data-hq84-scene data-hq86-walk data-child="${child}" data-hero="${hero}" data-hand-attribute="${heroAbility130(hero,profile.base?.owned??[])?1:0}" data-jet="${jet?paint:school?'blue':''}">
+  <div class="hq86-stage" tabindex="0" aria-label="Przesuń palcem poza dłońmi, aby się rozejrzeć. Przytrzymaj ekran poza dłońmi, żeby iść. Stuknij dłoń: cios. Dwa szybkie stuknięcia w tę samą dłoń: moc. Przesuń prawą dłoń w górę, żeby wyjąć przedmiot; w dół, żeby go schować. Klawiatura: strzałki i spacja, F — lewa, G — prawa dłoń.">
    <div class="hq86-fallback" aria-hidden="true"></div>
    <canvas class="hq119-software" aria-hidden="true"></canvas>
    <canvas class="hq86-world" aria-hidden="true"></canvas><canvas class="hq86-hands" aria-hidden="true"></canvas>
@@ -65,7 +66,7 @@ export function baseWalkMarkup(profile,child,hero,release,panel,mic=''){
    </header>
    ${powerMarkup127(hero)}
    <div class="hq86-location" role="status">${scene.name}</div><small class="hq86-release">V${release}</small>
-   <p class="hq86-help">Przesuń palcem, żeby się rozejrzeć. Przytrzymaj, żeby iść.</p>
+   <p class="hq86-help">Przesuń poza dłońmi, żeby się rozejrzeć. Przytrzymaj, żeby iść. Dłoń: stuknij — cios, dwa razy — moc.</p>
    ${panel?'':'<div class="hq86-notice" id="hq85-notice" role="status"></div>'}
   </div>${panel}${panel?'':mic}</section>`;
 }
@@ -250,7 +251,10 @@ export function mountBaseWalk(root){
  let pointer=null,transition=null,busy=false,effect=null,ignoreClickUntil=0,forwarding=false;
  let portraitRatio=.73,sceneMarkers=[],greeting=null;
  let ironArt=null,jetBounds=null;
- const heroPlayer=heroPlayer127(hero,()=>{syncPowerControls();renderSoon();});
+ let gestures=null,powerQueue=[];
+ const unlocked=root.dataset.handAttribute==='1';
+ const held=()=>heroPlayer.mode==='shield'||heroPlayer.mode==='hammer';
+ const heroPlayer=heroPlayer127(hero,()=>{syncPowerControls();flushPowers();renderSoon();});
  const on=(target,name,listener,options={})=>target.addEventListener(name,listener,{...options,signal});
  const state=()=>stack.at(-1);
  const room=()=>walkRooms[state().room];
@@ -263,16 +267,26 @@ export function mountBaseWalk(root){
  function renderSoon(){if(!frame)frame=requestAnimationFrame(draw);}
  function syncPowerControls(){
   if(signal.aborted)return;
-  for(const button of stage.querySelectorAll('[data-walk-mode]')){
-   button.setAttribute('aria-pressed',String(button.dataset.walkMode===heroPlayer.mode));
-   button.disabled=busy||!!transition||heroPlayer.busy;
-  }
-  for(const button of stage.querySelectorAll('[data-walk-power]')){
-   button.disabled=busy||!!transition||heroPlayer.busy||!heroPlayer.ready||!action127(hero,heroPlayer.mode,Number(button.dataset.walkPower));
-  }
   const status=stage.querySelector('.hq127-status');
   if(status)status.textContent=heroPlayer.loading?'Przygotowuję ruchy… '+heroPlayer.progress:heroPlayer.error;
  }
+ function flushPowers(){
+  if(signal.aborted||dialog||busy||transition||heroPlayer.busy||!heroPlayer.ready||!powerQueue.length)return;
+  const action=powerQueue.shift();void heroPlayer.play(action.side,action.mode,{preserveOther:action.preserveOther});
+ }
+ gestures=createHandGestures130({
+  handAt:event=>{const rect=stage.getBoundingClientRect();return handAt130(hero,held(),event.clientX-rect.left,event.clientY-rect.top,width,height);},
+  act:(side,double)=>{
+   if(dialog||busy||transition||!ctx||!heroPlayer.ready)return;
+   if(powerQueue.length<2)powerQueue.push(handAction130(hero,side,double,unlocked,held()));
+   flushPowers();
+  },
+  equip:up=>{
+   if(dialog||busy||transition||!unlocked||!['captain','thor'].includes(hero))return;
+   const mode=up?(hero==='captain'?'shield':'hammer'):'punch';
+   if(heroPlayer.equip(mode)){powerQueue=[];renderSoon();}
+  }
+ });
  if(stage.querySelector('[data-mentor="iron"]'))image86('mentor-iron91-sheet.webp').then(image=>{
   if(!signal.aborted){ironArt=image;renderSoon();}
  }).catch(()=>{});
@@ -307,8 +321,8 @@ export function mountBaseWalk(root){
   back.hidden=stack.length===1;menu.hidden=stack.length!==1;
   greeting=null;sceneMarkers=[];markers.forEach(marker=>marker.hidden=true);
   jetBounds=null;
-  heroPlayer.stop();syncPowerControls();
-  if(heroPlayer.supported)void heroPlayer.setMode(heroPlayer.mode);
+  gestures.cancel();powerQueue=[];heroPlayer.stop();syncPowerControls();
+  if(heroPlayer.supported)void heroPlayer.prepareGesture(gestureModes130(hero,unlocked));
   fallback.style.backgroundImage=`url("assets/hq/${roomImage93(selected.portrait??selected.art)}")`;
   fallback.classList.toggle('has-portrait',!!selected.portrait);
   try{
@@ -455,12 +469,14 @@ export function mountBaseWalk(root){
  on(stage,'pointerdown',event=>{
   ignoreClickUntil=0;
   if(event.button!==0||pointer||busy||transition||dialog||event.target.closest('.hq86-top,[data-walk-controls],.pres93-speaker'))return;
+  if(gestures.down(event)){event.preventDefault();event.stopPropagation();stage.setPointerCapture(event.pointerId);return;}
   const point=event.target.closest('.hq86-point')||jetTarget(event);
   pointer={id:event.pointerId,time:performance.now(),x:event.clientX,y:event.clientY,drag:false,walk:false,point};
   if(!point)stage.setPointerCapture(event.pointerId);
   renderSoon();
  });
  on(stage,'pointermove',event=>{
+  if(gestures.move(event)){event.preventDefault();event.stopPropagation();return;}
   if(!pointer||event.pointerId!==pointer.id||busy||transition)return;
   const dx=event.clientX-pointer.x,dy=event.clientY-pointer.y;
   if(!pointer.drag&&Math.hypot(dx,dy)<8)return;
@@ -470,13 +486,15 @@ export function mountBaseWalk(root){
   view.pitch=clamp86(view.pitch+dy*2.55/height,-.86,.89);
   pointer.x=event.clientX;pointer.y=event.clientY;renderSoon();
  });
- for(const event of ['pointerup','pointercancel'])on(window,event,stop);
- on(stage,'lostpointercapture',event=>{if(event.target===stage)stop(event);});
- on(window,'blur',()=>stop());
+ for(const type of ['pointerup','pointercancel'])on(window,type,event=>{
+  if(gestures.end(event)){event.preventDefault();ignoreClickUntil=performance.now()+450;return;}stop(event);
+ });
+ on(stage,'lostpointercapture',event=>{if(event.target===stage){if(gestures.touching)gestures.cancel();stop(event);}});
+ on(window,'blur',()=>{gestures.cancel();powerQueue=[];stop();});
  on(stage,'contextmenu',event=>event.preventDefault());
  on(stage,'click',event=>{
   if(forwarding)return;
-  if(event.detail&&performance.now()<ignoreClickUntil){
+  if(event.detail&&(performance.now()<ignoreClickUntil||gestures.suppressClick())){
    event.preventDefault();event.stopPropagation();return;
   }
   if(event.target.closest('[data-walk-back]')){
@@ -509,20 +527,13 @@ export function mountBaseWalk(root){
  },{capture:true});
  function activatePower(side){
   if(dialog||busy||transition||!ctx)return;
-  void heroPlayer.play(side);
- }
- for(const button of stage.querySelectorAll('[data-walk-mode]')){
-  on(button,'click',()=>{if(!dialog&&!busy&&!transition)void heroPlayer.setMode(button.dataset.walkMode);});
- }
- for(const button of stage.querySelectorAll('[data-walk-power]')){
-  on(button,'click',()=>activatePower(Number(button.dataset.walkPower)));
+  gestures.tap(side);
  }
  on(stage,'keydown',event=>{
   if(event.target!==stage||dialog||busy||transition)return;
   const view=state();
   if(heroPlayer.supported&&!event.repeat&&['KeyF','KeyG'].includes(event.code)){
-   const left=action127(hero,heroPlayer.mode,-1);
-   activatePower(event.code==='KeyF'&&left?-1:1);
+   activatePower(event.code==='KeyF'?-1:1);
   }
   else if(event.code==='Space'){
    if(!pointer)pointer={id:'keyboard',time:performance.now(),drag:false,walk:false};
@@ -542,5 +553,5 @@ export function mountBaseWalk(root){
  });
  const observer=new ResizeObserver(resize);observer.observe(stage);resize();
  void load();
- dispose=()=>{controller.abort();heroPlayer.dispose();observer.disconnect();cancelAnimationFrame(frame);world?.free();};
+ dispose=()=>{gestures.cancel();powerQueue=[];controller.abort();heroPlayer.dispose();observer.disconnect();cancelAnimationFrame(frame);world?.free();};
 }

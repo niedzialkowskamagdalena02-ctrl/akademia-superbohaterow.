@@ -1,17 +1,3 @@
-.hq127-controls{
- position:absolute;z-index:5;left:50%;bottom:clamp(116px,22svh,230px);
- transform:translateX(-50%);display:grid;justify-items:center;gap:6px;max-width:92%;
-}
-.hq127-controls .hq112-power-controls{position:static;transform:none;display:flex;gap:8px}
-.hq127-modes{display:flex;justify-content:center;gap:4px;padding:4px;border:1px solid #8bbedf66;border-radius:14px;background:#101d30e8;max-width:100%}
-.hq127-modes>button{
- min-width:0;min-height:36px;margin:0;padding:5px 10px;border:1px solid transparent;border-radius:10px;
- background:transparent;color:#d5e7fa;font-size:clamp(11px,3vw,14px);white-space:nowrap;touch-action:manipulation;
-}
-.hq127-modes>button[aria-pressed="true"]{background:#214659;border-color:#86d5de;color:#fff4b8}
-.hq127-controls button:focus-visible{outline:2px solid #fff278;outline-offset:2px}
-.hq127-controls button:disabled{opacity:.48}
+/* Hands are controlled on their rendered PNGs. No mode or punch buttons. */
+.hq86-stage>.hq127-status{position:absolute;z-index:5;left:50%;top:clamp(125px,22svh,210px);transform:translateX(-50%);max-width:min(310px,88vw);padding:5px 9px;border-radius:9px;background:#101d30ed;color:#e6f4ff;text-align:center;font-size:12px;pointer-events:none}
 .hq127-status:empty{display:none}
-.hq127-status{max-width:min(310px,88vw);padding:5px 9px;border-radius:9px;background:#101d30ed;color:#e6f4ff;text-align:center;font-size:12px}
-.hq86-stage[data-art-view]>.hq127-controls{left:var(--art118-power-x);top:var(--art118-power-y);bottom:auto;transform:translate(-30%,-100%)}
-@media(max-height:500px){.hq127-controls{bottom:84px;gap:3px}.hq127-modes>button{min-height:30px;padding:3px 8px}.hq127-controls .hq112-power-controls>button{min-height:38px}}

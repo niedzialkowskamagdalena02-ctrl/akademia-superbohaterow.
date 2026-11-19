@@ -51,7 +51,7 @@ global.Image=class extends native.Image{
  for(const hero of Object.keys(heroModes127)){
   const player=heroPlayer127(hero,()=>changes++);
   assert.ok(await player.setMode('punch'));assert.equal(player.loading,false);
-  assert.ok(idleKey127(hero,'punch'));assert.match(powerMarkup127(hero),/data-walk-mode/);
+  assert.ok(idleKey127(hero,'punch'));assert.ok(!/button|data-walk-mode/.test(powerMarkup127(hero)));
   for(const [mode]of heroModes127[hero]){
    assert.ok(await player.setMode(mode));
    for(const side of [-1,1]){
@@ -88,9 +88,23 @@ global.Image=class extends native.Image{
   player.dispose();assert.equal(player.busy,false);
  }
  const before=requests.length,unsupported=heroPlayer127('wanda');assert.equal(unsupported.supported,false);assert.equal(await unsupported.play(1),false);assert.equal(requests.length,before);
+ // Mixed actions must also start immediately after all gesture modes are warmed.
+ const {gestureModes130,handAction130}=await import(url('hero-gestures130.js'));
+ for(const hero of Object.keys(heroModes127)){
+  const player=heroPlayer127(hero),modes=gestureModes130(hero,true);assert(await player.prepareGesture(modes),player.error);
+  const held=hero==='captain'||hero==='thor';
+  if(held){assert(player.equip(hero==='captain'?'shield':'hammer'));clock+=200;player.draw(ctx,canvas,clock,context);}
+  for(const side of [-1,1])for(const double of [false,true]){
+   const move=handAction130(hero,side,double,true,held),net=network;
+   const started=player.play(side,move.mode,{preserveOther:move.preserveOther});assert(player.animated);assert.equal(network,net);assert(await started);
+   const action=action127(hero,move.mode,side);clock+=action.duration*.45;player.draw(ctx,canvas,clock,context);clock+=action.duration;player.draw(ctx,canvas,clock,context);
+   assert(player.stats.decodedBytes<=player.stats.decodedBudget,'Mixed-gesture decoded memory remains bounded: '+hero);
+  }
+  player.dispose();
+ }
  for(const [w,h]of [[393,852],[709,1384],[1200,600],[2400,1080]]){const r=frameRect127(w,h);assert.ok(Math.abs(r.w/r.h-1280/720)<1e-9);assert.equal(r.y+r.h,h);}
  const floor=hitSurface127({x:0,z:0},basis,.48,.94,[.5,.73],[7,3.2,6.3],true);assert.equal(floor.axis,1);assert.ok(Math.abs(floor.point[1]+1.58)<.002);
- const sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');assert.match(sw,/academy-v129/);
+ const sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');assert.match(sw,/academy-v130/);
  assert.ok(!sw.includes('hands90-hulk.webp'));assert.ok(!sw.includes('hands127/'),'Do not force all heroes PNGs to download during app update');
  const removed=JSON.parse(fs.readFileSync(path.join(root,'V127_REMOVED.json')));assert.equal(removed.length,12);for(const file of removed)assert.ok(!fs.existsSync(path.join(root,file)));
  fs.writeFileSync(path.join(review,'sequences.json'),JSON.stringify(sequences,null,2));
@@ -102,6 +116,7 @@ global.Image=class extends native.Image{
   setAttribute(k,v){this.attrs[k]=v;}removeAttribute(k){delete this.attrs[k];}
   querySelector(){return null;}querySelectorAll(){return [];}closest(){return null;}
   getBoundingClientRect(){return {width:393,height:852,left:0,top:0};}
+  setPointerCapture(){}hasPointerCapture(){return true;}
  }
  class Surface extends Element{
   constructor(){super();this.backing=native.createCanvas(393,852);}
@@ -109,10 +124,9 @@ global.Image=class extends native.Image{
   get height(){return this.backing.height;}set height(v){this.backing.height=v;}
   getContext(kind,options){return kind==='2d'?this.backing.getContext(kind,options):null;}
  }
- const stage=new Element(),scene=new Element({hero:'captain',child:'v127-controller'}),hands=new Surface(),world=new Surface(),software=new Surface(),fallback=new Element(),status=new Element();
- const modes=heroModes127.captain.map(([id])=>new Element({walkMode:id})),buttons=[new Element({walkPower:'-1'}),new Element({walkPower:'1'})];
+ const stage=new Element(),scene=new Element({hero:'captain',child:'v130-controller',handAttribute:'1'}),hands=new Surface(),world=new Surface(),software=new Surface(),fallback=new Element(),status=new Element();
  stage.querySelector=s=>s==='.hq119-software'?software:s==='.hq127-status'?status:s==='[data-walk-back]'||s==='[data-action="hq:view:menu"]'?new Element():null;
- stage.querySelectorAll=s=>s==='[data-walk-mode]'?modes:s==='[data-walk-power]'?buttons:[];
+ stage.querySelectorAll=()=>[];
  scene.querySelector=s=>s==='.hq86-stage'?stage:s==='.hq86-world'?world:s==='.hq86-hands'?hands:s==='.hq86-fallback'?fallback:s==='.hq86-location'||s==='.hq86-release'?new Element():null;
  const raf=new Map();let rid=0;
  global.requestAnimationFrame=fn=>{raf.set(++rid,fn);return rid;};global.cancelAnimationFrame=id=>raf.delete(id);
@@ -122,15 +136,20 @@ global.Image=class extends native.Image{
  const {mountBaseWalk}=await import(url('base-walk85.js'));
  mountBaseWalk(scene);
  const settle=async predicate=>{for(let i=0;i<300;i++){if(predicate())return;await new Promise(r=>setTimeout(r,20));}throw Error('Controller did not settle: '+status.textContent);};
- await settle(()=>stage.attrs['aria-busy']==='false'&&!buttons[0].disabled);
- assert.equal(status.textContent,'');modes[1].dispatchEvent(new Event('click'));
- await settle(()=>modes[1].attrs['aria-pressed']==='true'&&!buttons[1].disabled);
- assert.equal(buttons[0].disabled,true,'Shield is held by the original right hand');
- buttons[1].dispatchEvent(new Event('click'));assert.equal(buttons[1].disabled,true);
- await settle(()=>status.textContent==='');
- clock+=600;for(const [id,draw]of [...raf]){raf.delete(id);draw(clock);}
+ await settle(()=>stage.attrs['aria-busy']==='false'&&status.textContent==='');
+ const {handZones130}=await import(url('hero-gestures130.js'));
+ const drawStep=ms=>{clock+=ms;for(const [id,draw]of [...raf]){raf.delete(id);draw(clock);}};
+ const dispatch=(target,type,x,y)=>{const event=new Event(type,{cancelable:true});Object.assign(event,{pointerId:1,pointerType:'touch',button:0,clientX:x,clientY:y});target.dispatchEvent(event);};
+ const zone=handZones130('captain',false,393,852)[1],x=(zone.left+zone.right)/2,y=(zone.top+zone.bottom)/2;
+ dispatch(stage,'pointerdown',x,y);dispatch(stage,'pointermove',x,y-65);dispatch(window,'pointerup',x,y-65);drawStep(200);
+ const armed=handZones130('captain',true,393,852)[1],ax=(armed.left+armed.right)/2,ay=(armed.top+armed.bottom)/2;
+ const netBeforeGesture=network;
+ dispatch(stage,'pointerdown',ax,ay);dispatch(window,'pointerup',ax,ay);clock+=100;
+ dispatch(stage,'pointerdown',ax,ay);dispatch(window,'pointerup',ax,ay);
+ assert.equal(network,netBeforeGesture,'Prepared double tap starts the throw without a download');
+ drawStep(600);
  assert.ok(hands.getContext('2d').getImageData(0,600,393,252).data.some((v,i)=>i%4===3&&v>128));
- clock+=1600;for(const [id,draw]of [...raf]){raf.delete(id);draw(clock);}assert.equal(buttons[1].disabled,false);
+ drawStep(1600);
  mountBaseWalk(null);
- console.log(`PASS V129: ${Object.keys(art.files).length} untouched original PNGs, ${actions} full movements / ${frames} rendered frames, synchronous start without network, bounded decoded memory (${(maxBytes/1024/1024).toFixed(1)} MiB), real controller mode/click wiring; ${changes} updates.`);
+ console.log(`PASS V129: ${Object.keys(art.files).length} untouched original PNGs, ${actions} full movements / ${frames} rendered frames, synchronous start without network, bounded decoded memory (${(maxBytes/1024/1024).toFixed(1)} MiB), real touch controller equip/double-tap wiring; ${changes} updates.`);
 })().catch(e=>{console.error(e);process.exitCode=1;});
