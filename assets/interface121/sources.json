@@ -1,0 +1,37 @@
+[
+  {
+    "asset": "assets/interface121/entry.webp",
+    "source": "05-1000059036.png",
+    "width": 710,
+    "height": 1536,
+    "sha256": "81622b5dd3ad847c45961107f742bb453fb756dfcaf091f146251544da13851a"
+  },
+  {
+    "asset": "assets/interface121/subjects.webp",
+    "source": "04-1000059044.png",
+    "width": 709,
+    "height": 1536,
+    "sha256": "575aaa449b69e9818c6e8fc8233c21f217ad6566e0659f75607cf64ec0303e70"
+  },
+  {
+    "asset": "assets/interface121/modes.webp",
+    "source": "01-1000060418.webp",
+    "width": 1413,
+    "height": 1536,
+    "sha256": "c5dd069a1b8691fc65d98d2c73404b0600064a20772948dcb5a8acdddcfd7ef2"
+  },
+  {
+    "asset": "assets/interface121/dashboard.webp",
+    "source": "02-1000060419.webp",
+    "width": 782,
+    "height": 1536,
+    "sha256": "4469e02cd37a371c9848d7076bf9042dc8c5a3db49fea562426d89ff8480c484"
+  },
+  {
+    "asset": "assets/interface121/range.webp",
+    "source": "03-1000060417.webp",
+    "width": 695,
+    "height": 1536,
+    "sha256": "538f5bcdda0e1baa76c833d9b4ffde81cd3231970212938e4c08097c4d1231d6"
+  }
+]

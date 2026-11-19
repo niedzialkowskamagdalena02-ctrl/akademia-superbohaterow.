@@ -1,4 +1,5 @@
-import {training119Subjects,training119Options} from './interface119.js?v=119';
+import {entry121,dashboard121} from './interface121.js?v=121';
+import {training119Subjects,training119Options} from './interface119.js?v=121';
 const art = (name, className = '') =>
   `<img class="academy102-art ${className}" src="assets/interface102/${name}.webp" alt="" draggable="false">`;
 const dashboardArt = (name) =>
@@ -26,36 +27,9 @@ export function heroPortrait(key) {
   return heroPortraits.get(key) ?? `assets/art/${key}.svg`;
 }
 
-export function academy107Entry({release, profiles, status, linked, parent, pair, update}) {
-  return `<main class="academy107-entry">
-    <header class="academy107-entry-header">
-      <h1>${refinedArt('entry-logo')}<span class="academy102-sr">Akademia Superbohaterów</span><span>V${release}</span></h1>
-      <p>Wybierz swoją bazę</p>
-    </header>
-    <section class="academy107-welcome">
-      <img src="assets/interface110/welcome-shield.webp" alt="" draggable="false">
-      <h2>Witaj w Akademii!</h2>
-      <p>Każdy bohater ma własne misje i nagrody.</p>
-    </section>
-    <div class="academy107-profiles">${profiles.map(({id, name, grade, coins, progress, hero, audio})=>{
-      const portrait=heroPortrait(hero);
-      return `
-      <div class="academy107-profile">
-        <button type="button" class="academy107-profile-card academy107-profile-${id}" data-action="enter:${id}">
-          <img class="academy107-profile-hero${portrait.endsWith('.svg')?' academy108-selected-hero':''}" src="${portrait}" alt="" draggable="false">
-          <span class="academy107-profile-name">${name}</span>
-          <span class="academy107-profile-grade">${grade} · ${coins} złotych</span>
-          <span class="academy107-profile-progress" aria-label="Postęp ${progress}%"><span style="width:${progress}%"></span></span>
-        </button>${audio}
-      </div>`;
-    }).join('')}</div>
-    <section class="academy107-link-panel">
-      ${parent ? `<button type="button" class="academy107-entry-art academy107-entry-parent" data-action="enter:admin" aria-label="Centrum dowodzenia mamy"></button>` : ''}
-      <p${linked?' data-sync78-message role="status"':''}>${status}</p>
-    </section>
-    ${pair}
-    ${update ? `<footer><button type="button" class="academy107-entry-art academy107-update" data-action="academy:update" aria-label="Aktualizuj Akademię"></button></footer>` : ''}
-  </main>`;
+export function academy107Entry(options){
+ const portrait=key=>['hulk','spider'].includes(key)?'assets/interface121/hero-'+key+'.svg':heroPortrait(key);
+ return entry121({...options,portrait});
 }
 
 export function academy107PinScreen(length) {
@@ -168,14 +142,7 @@ const destinations = [
   ['headquarters','Baza Avengersów i gry','base']
 ];
 
-export function academy102DashboardNav(preschool, speak, current) {
-  return `<nav class="academy102-destinations${preschool?' academy102-preschool':''}" aria-label="Menu Akademii">${destinations.map(([picture,label,tab])=>{
-    const artwork=referenceArt('nav-'+picture);
-    const link = `<button type="button" class="academy104-destination" data-action="child:${tab}"${tab===current?' aria-current="page"':''} aria-label="${label}">
-      <span class="academy107-wide-face">${artwork}<span>${label}</span></span></button>`;
-    return `<div class="academy102-voiced" data-destination="${picture}">${link}${speak(label)}</div>`;
-  }).join('')}</nav>`;
-}
+export function academy102DashboardNav(preschool,speak,current){return dashboard121(destinations,speak,current);}
 
 export function academy111Training(voice,extraSubjects='') { return training119Subjects(voice,extraSubjects); }
 

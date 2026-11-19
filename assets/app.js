@@ -1,6 +1,6 @@
-import {training119Range} from './interface119.js?v=119';
+import {training119Range} from './interface119.js?v=121';
 import {gamePreview99, hangarPaint99} from './game-art99.js?v=99';
-import {academy102Shell,academy102Choices,academy102Player,academy102DashboardNav,academy102DashboardVoice,academy102FamilyHeading,academy115TrainingPanel,academy102MissionsHeader,academy102MissionZone,academy107Entry,academy107PinScreen,heroPortrait,academy111Training} from './interface102.js?v=119';
+import {academy102Shell,academy102Choices,academy102Player,academy102DashboardNav,academy102DashboardVoice,academy102FamilyHeading,academy115TrainingPanel,academy102MissionsHeader,academy102MissionZone,academy107Entry,academy107PinScreen,heroPortrait,academy111Training} from './interface102.js?v=121';
 // V48_AI_RESPONSE_DIAGNOSTICS
 // V44_BULK_CHAPTERS
 // V42_CHAPTERS
@@ -80,7 +80,7 @@ const select=(id,label,options,value)=>`<label for="${id}">${label}</label><sele
 const grades=[['P','Przedszkole'],...Array.from({length:12},(_,i)=>[String(i+1),`Klasa ${i+1}`])];
 const people=[['pawel','Paweł'],['patryk','Patryk']];
 const note=t=>{const n=$('hq85-notice')||$('notice');if(!n){console.warn('Powiadomienie:',t);return}n.textContent=t;n.classList.add('visible');setTimeout(()=>{if(n.isConnected)n.classList.remove('visible')},4500)};
-const ACADEMY_RELEASE=120;
+const ACADEMY_RELEASE=121;
 async function checkAcademyUpdate(button){
  if(!button||button.disabled)return;
  const label=button.textContent,controller=new AbortController();
@@ -2500,7 +2500,7 @@ async function parentPinAction(action){
  }
  updateParentPinDisplay(input);
 }
-const academyPressControls = '.academy102-destinations button,.academy102-header-actions button,.academy102-screen-voice button,.academy102-choices button,.academy102-mic,.academy115-flow button,.academy116-back,.academy107-entry button,.academy107-pin-key,.academy111-voice-slot .listen,.mentor-room .mentor-choice';
+const academyPressControls = '.academy102-destinations button,.academy102-header-actions button,.academy102-screen-voice button,.academy102-choices button,.academy102-mic,.academy115-flow button,.academy116-back,.academy107-entry button,.academy107-pin-key,.academy111-voice-slot .listen,.academy121-back,.academy121-choice,.academy121-subject-voice .listen,.academy121-range-voice .listen,.mentor-room .mentor-choice';
 const academyPressTimers=new WeakMap();
 function pressAcademyControl(control,complete,immediate=false,duration=190){
  const pending=academyPressTimers.get(control);
@@ -2544,11 +2544,11 @@ document.addEventListener('click',ev=>{
  if(btn.dataset.action==='mic'&&micDragIgnoreClick){ev.preventDefault();ev.stopPropagation();return}
  if(btn.matches?.(academyPressControls)){
   const action=btn.dataset.action;
-  const animate=btn.matches('.academy115-books,.academy115-practice,.academy115-choose')&&!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  const animate=btn.matches('.academy115-books,.academy115-practice,.academy115-choose,.academy121-choice[data-motion121]')&&!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   pressAcademyControl(btn,()=>handle(action,btn),/^parent-pin:(digit:|erase$)/.test(action),animate?840:190);
   return;
  }
- if(btn.classList.contains('tr72-subject-card')){if(btn.dataset.opening)return;btn.dataset.opening='1';btn.classList.add('tr72-selected');trainingTapSound(true,true);setTimeout(()=>{if(btn.isConnected)handle(btn.dataset.action,btn)},['matematyka','przyroda','wiedza'].includes(btn.dataset.theme)?1150:480);return}if(btn.closest('.tr71')&&/^training:(source|mode):/.test(btn.dataset.action||'')){if(btn.dataset.opening)return;btn.dataset.opening='1';btn.classList.add('v76-tile-pressed');btn.setAttribute('aria-busy','true');trainingTapSound();setTimeout(()=>{if(btn.isConnected)handle(btn.dataset.action,btn)},280);return}if(btn.closest('.tr71')&&btn.dataset.action?.startsWith('training:')&&btn.dataset.action!=='training:toggle-sound')trainingTapSound();handle(btn.dataset.action,btn)}});
+ if(btn.classList.contains('tr72-subject-card')){if(btn.dataset.opening)return;btn.dataset.opening='1';btn.classList.add('tr72-selected');trainingTapSound(true,true);setTimeout(()=>{if(btn.isConnected)handle(btn.dataset.action,btn)},['matematyka','przyroda','wiedza'].includes(btn.dataset.theme)?1150:btn.dataset.theme==='polski'?850:650);return}if(btn.closest('.tr71')&&/^training:(source|mode):/.test(btn.dataset.action||'')){if(btn.dataset.opening)return;btn.dataset.opening='1';btn.classList.add('v76-tile-pressed');btn.setAttribute('aria-busy','true');trainingTapSound();setTimeout(()=>{if(btn.isConnected)handle(btn.dataset.action,btn)},280);return}if(btn.closest('.tr71')&&btn.dataset.action?.startsWith('training:')&&btn.dataset.action!=='training:toggle-sound')trainingTapSound();handle(btn.dataset.action,btn)}});
 document.addEventListener('keydown',ev=>{
  if(!parentPinOpen||!ev.target.closest?.('#academy107-pin-form'))return;
  const key=ev.key;

@@ -130,10 +130,10 @@ function board(){
  await view.api.handle('child:home');
  assert.equal((view.root.innerHTML.match(/class="academy104-destination"/g)||[]).length,6);
  assert.equal((view.root.innerHTML.match(/data-action="child:academy"/g)||[]).length,1);
- assert.match(view.root.innerHTML,/data-destination="books"[\s\S]*?aria-label="Książki">\s*<span[^>]*>\s*<img[^>]*interface117\/nav-books\.webp/);
+ assert.match(view.root.innerHTML,/data-destination="books"[\s\S]*?aria-label="Książki"[\s\S]*?interface121\/dashboard\.webp/);
  assert.match(view.root.innerHTML,/data-speak="Książki"/);
  for(const icon of ['missions','books','training','explorers','mentor','headquarters']){
-  assert.ok(view.root.innerHTML.includes('assets/interface117/nav-'+icon+'.webp'),icon);
+  assert.ok(view.root.innerHTML.includes('data-destination="'+icon+'"'),icon);
  }
  const header=markup=>markup.match(/<header class="academy102-header">[\s\S]*?<\/header>/)?.[0];
  const dashboardHeader=header(view.root.innerHTML);
@@ -141,7 +141,7 @@ function board(){
  assert.match(dashboardHeader,/interface106\/masthead\.webp/);
  for(const page of ['missions-board','books','academy','mentor','learn','base']){
   await view.api.handle('child:'+page);
-  if(page==='learn')assert.match(view.root.innerHTML,/<header class="academy119-subject-header">[\s\S]*?data-action="child:home" aria-label="Wróć"/,page);
+  if(page==='learn')assert.match(view.root.innerHTML,/<div class="academy121-subject-board">[\s\S]*?data-action="child:home" aria-label="Wróć"/,page);
   else assert.match(view.root.innerHTML,/<header class="academy116-top">[\s\S]*?data-action="child:home"[\s\S]*?>←<\/span> Wróć<\/button>/,page);
   assert.doesNotMatch(view.root.innerHTML,/class="academy102-header"|class="academy102-destinations|class="academy102-player"/,page);
   await view.api.handle('child:home');
@@ -160,7 +160,7 @@ function board(){
    assert.equal((view.root.innerHTML.match(/data-action="mic"/g)||[]).length,0);
    assert.doesNotMatch(view.root.innerHTML,/training:subject:Przedszkole/);
    for(const subject of ['Chemia','Fizyka']){
-    assert.match(view.root.innerHTML,new RegExp(`class="academy119-subject"[^>]* disabled aria-label="${subject} — w przygotowaniu"`));
+    assert.match(view.root.innerHTML,new RegExp(`class="academy121-subject"[^>]* disabled aria-label="${subject} — w przygotowaniu"`));
     assert.ok(!view.root.innerHTML.includes('training:subject:'+subject));
    }
   }
@@ -193,11 +193,11 @@ function board(){
  const schoolView=app();
  schoolView.api.set(account,{role:'child',who:'pawel'});
  await schoolView.api.handle('child:home');
- assert.match(schoolView.root.innerHTML,/aria-label="Trening">\s*<span[^>]*>\s*<img[^>]*interface117\/nav-training\.webp/);
+ assert.match(schoolView.root.innerHTML,/aria-label="Trening">[\s\S]*?interface121\/dashboard\.webp/);
  assert.match(schoolView.root.innerHTML,/data-speak="Książki"/);
- assert.equal((schoolView.root.innerHTML.match(/academy107-wide-face/g)||[]).length,6);
+ assert.equal((schoolView.root.innerHTML.match(/academy121-dashboard-art/g)||[]).length,6);
  await schoolView.api.handle('child:learn');
- assert.match(schoolView.root.innerHTML,/assets\/interface119\/subjects\.webp/);
+ assert.match(schoolView.root.innerHTML,/assets\/interface121\/subjects\.webp/);
  assert.match(schoolView.root.innerHTML,/data-theme="matematyka"/);
  assert.match(schoolView.root.innerHTML,/data-theme="przyroda"/);
  schoolView.ctx.window.AudioContext=view.ctx.window.AudioContext;
@@ -220,16 +220,16 @@ function board(){
   assert.match(schoolView.root.innerHTML,/data-action="training:source:books"/);
   assert.match(schoolView.root.innerHTML,/data-action="training:source:outside"/);
   assert.doesNotMatch(schoolView.root.innerHTML,/data-action="training:(mixed:start|catalog|assessment)"/);
-  assert.match(schoolView.root.innerHTML,/interface117\/shelf\.webp/);
-  assert.match(schoolView.root.innerHTML,/interface117\/planet\.webp/);
+  assert.match(schoolView.root.innerHTML,/interface121\/range\.webp/);
+  assert.match(schoolView.root.innerHTML,/interface121\/subjects\.webp/);
  }
  await schoolView.api.handle('training:source:outside');
  assert.match(schoolView.root.innerHTML,/data-v77-step="train-options"/);
  assert.equal((schoolView.root.innerHTML.match(/data-action="mic"/g)||[]).length,1);
  assert.match(schoolView.root.innerHTML,/data-action="training:assessment"/);
  assert.match(schoolView.root.innerHTML,/data-action="training:mixed:start"/);
- assert.ok(schoolView.root.innerHTML.includes('assets/interface119/modes.webp'));
- assert.match(schoolView.root.innerHTML,/academy119-illustration/);
+ assert.ok(schoolView.root.innerHTML.includes('assets/interface121/modes.webp'));
+ assert.match(schoolView.root.innerHTML,/academy121-illustration/);
  schoolView.ctx.window.matchMedia=()=>({matches:false});
  const gameTile={
   dataset:{action:'training:catalog'},isConnected:true,
@@ -239,7 +239,7 @@ function board(){
  for(const listener of schoolView.listeners.click)listener({target:gameTile,detail:1,isTrusted:true});
  assert.equal(clicks,3);
  assert.equal(gameTile.dataset.academyPressed,'true');
- assert.match(schoolView.root.innerHTML,/class="academy119-page academy119-options/);
+ assert.match(schoolView.root.innerHTML,/class="academy121-page academy121-options/);
  [...schoolView.timers.values()].find(timer=>timer.ms===840).fn();
  assert.match(schoolView.root.innerHTML,/data-v77-step="catalog"/);
  await schoolView.api.handle('training:back:train-options');
@@ -318,14 +318,14 @@ function board(){
  updatedProfiles.profiles.patryk.hero='hawkeye';
  heroProfiles.api.set(updatedProfiles,{role:''});
  heroProfiles.api.render();
- assert.match(heroProfiles.root.innerHTML,/data-action="enter:pawel">\s*<img[^>]*interface116\/groot-lady\.webp/);
- assert.match(heroProfiles.root.innerHTML,/data-action="enter:patryk">\s*<img[^>]*interface116\/hawkeye\.webp/);
+ assert.match(heroProfiles.root.innerHTML,/data-action="enter:pawel"[^>]*>[\s\S]*?<img[^>]*interface116\/groot-lady\.webp/);
+ assert.match(heroProfiles.root.innerHTML,/data-action="enter:patryk"[^>]*>[\s\S]*?<img[^>]*interface116\/hawkeye\.webp/);
  updatedProfiles.profiles.pawel.hero='wanda';
  updatedProfiles.profiles.patryk.hero='widow';
  heroProfiles.api.set(updatedProfiles,{role:''});
  heroProfiles.api.render();
- assert.match(heroProfiles.root.innerHTML,/data-action="enter:pawel">\s*<img[^>]*interface117\/wanda\.webp/);
- assert.match(heroProfiles.root.innerHTML,/data-action="enter:patryk">\s*<img[^>]*interface117\/widow\.webp/);
+ assert.match(heroProfiles.root.innerHTML,/data-action="enter:pawel"[^>]*>[\s\S]*?<img[^>]*interface117\/wanda\.webp/);
+ assert.match(heroProfiles.root.innerHTML,/data-action="enter:patryk"[^>]*>[\s\S]*?<img[^>]*interface117\/widow\.webp/);
  await schoolView.api.handle('hq:wallet');
  assert.match(schoolView.root.innerHTML,/class="academy116-back alt" data-action="hq:close"/);
  assert.doesNotMatch(schoolView.root.innerHTML,/id="hq84-title"/);
@@ -337,13 +337,13 @@ function board(){
  pinAccount.profiles.pawel.hero='hulk';
  pinView.api.set(pinAccount,{role:''});
  pinView.api.render();
- assert.match(pinView.root.innerHTML,/class="academy107-entry"/);
+ assert.match(pinView.root.innerHTML,/class="academy107-entry academy121-entry"/);
  assert.match(pinView.root.innerHTML,/academy107-pair/);
  assert.match(pinView.root.innerHTML,/data-action="enter:pawel"[\s\S]*data-action="enter:patryk"/);
- assert.match(pinView.root.innerHTML,/class="academy107-profile-card academy107-profile-pawel" data-action="enter:pawel">\s*<img[^>]*assets\/interface119\/hulk\.svg/);
- assert.match(pinView.root.innerHTML,/assets\/interface108\/hero-patryk\.webp/);
- assert.match(pinView.root.innerHTML,/data-action="enter:admin" aria-label="Centrum dowodzenia mamy"><\/button>/);
- assert.match(pinView.root.innerHTML,/data-action="academy:update" aria-label="Aktualizuj Akademię"><\/button>/);
+ assert.match(pinView.root.innerHTML,/data-action="enter:pawel"[^>]*>[\s\S]*?<img[^>]*assets\/interface121\/hero-hulk\.svg/);
+ assert.match(pinView.root.innerHTML,/assets\/interface121\/hero-spider\.svg/);
+ assert.match(pinView.root.innerHTML,/data-action="enter:admin" aria-label="Centrum dowodzenia mamy">[\s\S]*?<\/button>/);
+ assert.match(pinView.root.innerHTML,/data-action="academy:update" aria-label="Aktualizuj Akademię">Aktualizuj Akademię<\/button>/);
  const choices=pinView.ctx.academy102Choices();
  assert.match(choices,/data-action="hq:view:classic"[\s\S]*hq\/overview\.webp[\s\S]*<\/span>Widok klasyczny<\/span>[\s\S]*data-action="hq:view:walk"[\s\S]*hq\/walk\.webp[\s\S]*>Spacer po bazie<\/span>/);
  await pinView.api.handle('enter:admin');
@@ -357,7 +357,7 @@ function board(){
   assert.ok(pinMarkup.includes(`parent-pin:digit:${digit}" aria-label="${digit}">${digit}</button>`),digit);
  }
  await pinView.api.handle('parent-pin:cancel');
- assert.match(pinView.root.innerHTML,/class="academy107-entry"/);
+ assert.match(pinView.root.innerHTML,/class="academy107-entry academy121-entry"/);
  await pinView.api.handle('enter:admin');
  const pinField=pinView.ids['academy107-pin-value']={value:'2222',maxLength:4};
  const pinError=pinView.ids['academy107-pin-error']={textContent:''};
@@ -384,7 +384,7 @@ function board(){
  await pinView.api.handle('hero:set:patryk:hood');
  assert.equal(pinAccount.profiles.patryk.hero,'hood');
  await pinView.api.handle('exit');
- assert.match(pinView.root.innerHTML,/data-action="enter:patryk">\s*<img[^>]*assets\/art\/hood\.webp/);
+ assert.match(pinView.root.innerHTML,/data-action="enter:patryk"[^>]*>[\s\S]*?<img[^>]*assets\/art\/hood\.webp/);
  const setupView=app(),setupAccount=data();
  setupAccount.parentPin='';
  setupView.api.set(setupAccount,{role:''});
