@@ -1,0 +1,69 @@
+{
+  "version": 126,
+  "source": "Hol_360_poprawny_uklad_6144x3072.png",
+  "source_size": [
+    6144,
+    3072
+  ],
+  "source_sha256": "7bd6177e3c7f104e37a6779e77defcc5d9709f260bedd89efb819fe289541a89",
+  "projection": "equirectangular 360x180; u=.5+yaw/(2*pi), v=.5-pitch/pi",
+  "runtime": "six lossless 2048x2048 faces; no detail islands or low-resolution base",
+  "order": [
+    "px",
+    "nx",
+    "py",
+    "ny",
+    "pz",
+    "nz"
+  ],
+  "files": {
+    "px.webp": {
+      "size": [
+        2048,
+        2048
+      ],
+      "bytes": 2490364,
+      "sha256": "74699d6265e8a6e3a322c19f0f6721c123a0eddddda35f4e4e168e6cb1333e22"
+    },
+    "nx.webp": {
+      "size": [
+        2048,
+        2048
+      ],
+      "bytes": 2417854,
+      "sha256": "c1d48da5aa48284fad6285d7e40e0df8ae61282888e8f4f6f62de001b509548e"
+    },
+    "py.webp": {
+      "size": [
+        2048,
+        2048
+      ],
+      "bytes": 3475928,
+      "sha256": "d274aba27604d5968667d3d25e1ad532fa8186f58a44bc8de9e77a86a92a2d16"
+    },
+    "ny.webp": {
+      "size": [
+        2048,
+        2048
+      ],
+      "bytes": 2610136,
+      "sha256": "4c5d647b97b64f72da388eebae669527514d6ae9e179fe8bc8bcd8cb71202762"
+    },
+    "pz.webp": {
+      "size": [
+        2048,
+        2048
+      ],
+      "bytes": 2503084,
+      "sha256": "3793c7811bcd2cc5565533b2f8dd61dead06154b0b3034b167632f0e55e8539f"
+    },
+    "nz.webp": {
+      "size": [
+        2048,
+        2048
+      ],
+      "bytes": 2337056,
+      "sha256": "ead555677efa449719b95543a8b33429e8801ecaa93f307d95aae830419fb707"
+    }
+  }
+}

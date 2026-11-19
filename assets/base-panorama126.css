@@ -1,0 +1,4 @@
+.hq126-sign{position:absolute;left:0;top:0;display:block;width:1000px;height:170px;transform-origin:0 0;pointer-events:none;overflow:visible}
+.hq126-sign[hidden]{display:none}
+.hq126-sign svg{display:block;width:100%;height:100%;overflow:visible;filter:drop-shadow(0 2px 2px #001321) drop-shadow(0 0 1px #82ffff88)}
+.hq120-entry:active .hq126-sign svg{filter:brightness(1.25) drop-shadow(0 0 3px #56f7ff)}

@@ -1,6 +1,5 @@
-import {hallPoint120,hallDoor120,hallSurface120,hallOutline120,placeHallHit120,hallDensity125} from './base-panorama125.js?v=125';
-import {hallDetails125} from './hall-details125.js?v=125';
-import {panoramaSoftware119} from './panorama-software119.js?v=125';
+import {hallPoint120,hallDoor120,hallSurface120,hallOutline120,placeHallHit120,placeHallLabel126,hallDensity125,hallFaces126} from './base-panorama126.js?v=126';
+import {panoramaSoftware126} from './panorama-software126.js?v=126';
 import {hqPet,hqPlaced,hqRead} from './headquarters84.js?v=117';
 import {baseArt88} from './base-art88.js?v=119';
 import {drawHeroHands,loadHeroHands88,loadHulkFist,HERO_POWER_TIME} from './hero-hands85.js?v=117';
@@ -12,8 +11,8 @@ import {gameGroup92} from './learning-games92.js?v=92';
 
 const routes=new Map(),images=new Map();
 const skyHD=['training86','polish86','english86','explorer87','annex86','hall88','workshop91','armory','arcade','nook86','hangar','hangar95','shop87','vault87'];
-const roomImage93=file=>file==='hall88.webp'?'panorama125/hall.webp':(skyHD.includes(file.replace('.webp',''))?'hd93/':'')+file;
-const pose=room=>({room,x:0,z:0,yaw:((walkRooms[room].heading??(room==='hall'?.62:.5))-.5)*FULL_TURN,pitch:0});
+const roomImage93=file=>file==='hall88.webp'?'panorama126/pz.webp':(skyHD.includes(file.replace('.webp',''))?'hd93/':'')+file;
+const pose=room=>({room,x:0,z:0,yaw:((walkRooms[room].heading??(room==='hall'?.54:.5))-.5)*FULL_TURN,pitch:room==='hall'?-.22:0});
 const current=child=>routes.get(child)?.at(-1)??pose('hall');
 const casePositions={a:[.194,.567],b:[.81,.567],c:[.5,.574]};
 const labShelf=walkRooms.polish.points.find(point=>point.fixture==='shelf');
@@ -58,7 +57,7 @@ export function baseWalkMarkup(profile,child,hero,release,panel,mic=''){
     const label=p.action==='hq:pet'&&animal?escapeText(animal.name):p.label;
     const art=p.fixture?`<img src="assets/hq/${p.fixture}91.webp" alt="" draggable="false">`:p.icon?`<span aria-hidden="true">${p.icon}</span>`:'';
     const plate=room==='hall'&&p.room;
-    const content=plate?hallDoor120(p.label):mentor?mentorMarkup87(profile.mentor):`${art}<b>${label}</b>`;
+    const content=plate?hallDoor120(p.label,p.room):mentor?mentorMarkup87(profile.mentor):`${art}<b>${label}</b>`;
     const action=locked?'data-action="hq:room:workshop"':p.room?`data-walk-door="${p.room}"` :`data-action="${p.action}"`;
     return `<button type="button" class="hq86-point${style}${plate?' hq120-entry':''}" data-room="${room}" data-index="${i}" ${action} hidden>${content}</button>`;
    })).join('')}
@@ -119,17 +118,6 @@ function image86(file){
 export function panoramaWorld(canvas){
  const gl=canvas.getContext('webgl',{alpha:false,antialias:false,depth:false,powerPreference:'low-power'});
  if(!gl)return null;
- // WebGL 1 guarantees only 16 fragment vectors. On a small GPU retain the
- // most important native detail; larger GPUs also sample the seven signs.
- const detailCount=Math.min(hallDetails125.length,Math.max(1,Math.floor((gl.getParameter(gl.MAX_FRAGMENT_UNIFORM_VECTORS)-14)/2)));
- const detailShader=Array.from({length:detailCount},(_,i)=>`
-   if(hasDetails>0.5){
-    vec2 local=(uv-detailUV[${i}].xy)/detailUV[${i}].zw;
-    if(min(local.x,local.y)>=0.&&max(local.x,local.y)<=1.){
-     vec4 tile=texture2D(details,detailAtlas[${i}].xy+local*detailAtlas[${i}].zw);
-     bg=bg*(1.-tile.a)+tile.rgb;
-    }
-   }`).join('');
  const program=gl.createProgram();
  function attach(type,source){
   const shader=gl.createShader(type);
@@ -150,9 +138,9 @@ export function panoramaWorld(canvas){
   uniform mat3 basis;
   uniform vec3 eye, bounds, tint;
   uniform vec2 fov, photoFov;
-  uniform float squish, hasDetails;
-  uniform sampler2D panorama, portrait, details;
-  uniform vec4 detailUV[${detailCount}], detailAtlas[${detailCount}];
+  uniform float squish, useHall;
+  uniform sampler2D panorama, portrait;
+  uniform samplerCube hall;
   const float pi=3.14159265;
   void main(){
    vec3 ray=basis*vec3(screen*fov,1.);
@@ -163,12 +151,14 @@ export function panoramaWorld(canvas){
    vec3 dir=normalize(eye+distance*ray);
    vec2 uv=vec2(.5+atan(dir.x,dir.z)/(2.*pi),.5-asin(clamp(dir.y,-1.,1.))*${VERTICAL_SCALE}/pi);
    uv.y=clamp(uv.y,.002,.998);
-   vec3 bg=texture2D(panorama,uv).rgb;
-   float seam=1.-smoothstep(0.,.023,min(uv.x,1.-uv.x));
-   // Other room panoramas retain their original edge treatment. The new hall
-   // uses one continuous photograph, without the old 8-degree mirror smear.
-   if(abs(hasDetails)<0.5)bg=mix(bg,texture2D(panorama,vec2(1.-uv.x,uv.y)).rgb,seam*.5);
-   ${detailShader}
+   vec3 bg;
+   if(useHall>.5){
+    bg=textureCube(hall,dir).rgb;
+   }else{
+    bg=texture2D(panorama,uv).rgb;
+    float seam=1.-smoothstep(0.,.023,min(uv.x,1.-uv.x));
+    bg=mix(bg,texture2D(panorama,vec2(1.-uv.x,uv.y)).rgb,seam*.5);
+   }
    bg*=tint;
    if(photoFov.x>0.&&dir.z>.02){
     vec2 photo=vec2(.5)+vec2(dir.x,-dir.y)/dir.z/(2.*photoFov);
@@ -189,7 +179,7 @@ export function panoramaWorld(canvas){
  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
  const position=gl.getAttribLocation(program,'position');
  gl.enableVertexAttribArray(position);gl.vertexAttribPointer(position,2,gl.FLOAT,false,0,0);
- const textures=['panorama','portrait','details'].map((name,i)=>{
+ const textures=['panorama','portrait'].map((name,i)=>{
   const texture=gl.createTexture();
   gl.activeTexture(gl.TEXTURE0+i);gl.bindTexture(gl.TEXTURE_2D,texture);
   for(const axis of [gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T])gl.texParameteri(gl.TEXTURE_2D,axis,gl.CLAMP_TO_EDGE);
@@ -198,15 +188,18 @@ export function panoramaWorld(canvas){
   gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([28,45,70,255]));
   return texture;
  });
- const uniform=Object.fromEntries(['basis','eye','bounds','tint','fov','photoFov','squish','hasDetails'].map(name=>[name,gl.getUniformLocation(program,name)]));
- for(let i=0;i<detailCount;i++){
-  gl.uniform4fv(gl.getUniformLocation(program,`detailUV[${i}]`),hallDetails125[i].uv);
-  gl.uniform4fv(gl.getUniformLocation(program,`detailAtlas[${i}]`),hallDetails125[i].atlas);
- }
+ const cube=gl.createTexture();
+ gl.activeTexture(gl.TEXTURE0+2);gl.bindTexture(gl.TEXTURE_CUBE_MAP,cube);
+ for(const axis of [gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T])gl.texParameteri(gl.TEXTURE_CUBE_MAP,axis,gl.CLAMP_TO_EDGE);
+ for(const filter of [gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER])gl.texParameteri(gl.TEXTURE_CUBE_MAP,filter,gl.LINEAR);
+ for(let i=0;i<6;i++)gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X+i,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([28,45,70,255]));
+ gl.uniform1i(gl.getUniformLocation(program,'hall'),2);
+ const uniform=Object.fromEntries(['basis','eye','bounds','tint','fov','photoFov','squish','useHall'].map(name=>[name,gl.getUniformLocation(program,name)]));
  return {
-  load(image,front,room,detailImage){
+  load(image,front,room,faces){
+   if(faces&&gl.getParameter(gl.MAX_CUBE_MAP_TEXTURE_SIZE)<faces[0].naturalWidth)return false;
    const limit=gl.getParameter(gl.MAX_TEXTURE_SIZE);
-   [image,front,detailImage].forEach((texture,i)=>{
+   [image,front].forEach((texture,i)=>{
     if(!texture)return;
     if(Math.max(texture.naturalWidth,texture.naturalHeight)>limit){
      const resized=document.createElement('canvas');
@@ -216,13 +209,15 @@ export function panoramaWorld(canvas){
      context.drawImage(texture,0,0,resized.width,resized.height);texture=resized;
     }
     gl.activeTexture(gl.TEXTURE0+i);
-    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,i===2);
     gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,texture);
-    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,false);
    });
+   if(faces){
+    gl.activeTexture(gl.TEXTURE0+2);
+    faces.forEach((face,i)=>gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X+i,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,face));
+   }
    gl.uniform3fv(uniform.bounds,room.bounds);
    gl.uniform3fv(uniform.tint,room.tint??[1,1,1]);
-   gl.uniform1f(uniform.hasDetails,detailImage?1:room.art==='hall88.webp'?-1:0);
+   gl.uniform1f(uniform.useHall,faces?1:0);
    gl.uniform2f(uniform.photoFov,front?PHOTO_FOV*front.naturalWidth/front.naturalHeight:0,PHOTO_FOV);
   },
   draw(state,basis,fx,fy,squish){
@@ -233,9 +228,9 @@ export function panoramaWorld(canvas){
    gl.uniform1f(uniform.squish,squish);
    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
   },
-  free(){
-   textures.forEach(texture=>gl.deleteTexture(texture));gl.deleteBuffer(buffer);gl.deleteProgram(program);
-   gl.getExtension('WEBGL_lose_context')?.loseContext();
+  free(keepContext=false){
+   gl.deleteTexture(cube);textures.forEach(texture=>gl.deleteTexture(texture));gl.deleteBuffer(buffer);gl.deleteProgram(program);
+   if(!keepContext)gl.getExtension('WEBGL_lose_context')?.loseContext();
   }
  };
 }
@@ -256,7 +251,7 @@ export function mountBaseWalk(root){
  const {hero,child}=root.dataset,stack=routes.get(child)??[pose('hall')];
  const powerKind=hero==='hulk'?'punch':hero==='iron'?'laser':null;
  routes.set(child,stack);
- let world=panoramaWorld(canvas)??panoramaSoftware119(software),width=0,height=0,frame=0,last=0,step=0;
+ let world=panoramaWorld(canvas)??panoramaSoftware126(software),width=0,height=0,frame=0,last=0,step=0;
  stage.dataset.renderer=world?.kind??'webgl';
  let pointer=null,transition=null,busy=false,effect=null,ignoreClickUntil=0,forwarding=false;
  let portraitRatio=.73,sceneMarkers=[],greeting=null;
@@ -316,11 +311,15 @@ export function mountBaseWalk(root){
   fallback.style.backgroundImage=`url("assets/hq/${roomImage93(selected.portrait??selected.art)}")`;
   fallback.classList.toggle('has-portrait',!!selected.portrait);
   try{
-   const [image,front,detailImage]=await Promise.all([image86(roomImage93(selected.art)),selected.portrait?image86(roomImage93(selected.portrait)):null,
-    selected===walkRooms.hall?image86('panorama125/details.webp').catch(()=>null):null]);
+   const hall=selected===walkRooms.hall;
+   const [image,front,faces]=await Promise.all([hall?null:image86(roomImage93(selected.art)),selected.portrait?image86(roomImage93(selected.portrait)):null,
+    hall?Promise.all(hallFaces126.map(image86)):null]);
    if(signal.aborted)return;
    portraitRatio=front?front.naturalWidth/front.naturalHeight:.73;
-   world?.load(image,front,selected,detailImage);
+   if(world?.load(image,front,selected,faces)===false){
+    world.free(true);world=panoramaSoftware126(software);stage.dataset.renderer=world?.kind??'none';
+    world?.load(image,front,selected,faces);
+   }
    stage.classList.toggle('has-depth',!!world);
   }catch{
    if(signal.aborted)return;
@@ -340,7 +339,11 @@ export function mountBaseWalk(root){
  }
  function paintMarkers(basis,fx,fy,now){
   for(const {marker,p,anchor,outline} of sceneMarkers){
-   if(outline){placeHallHit120(marker,outline,state(),basis,fx,fy,width,height);continue;}
+   if(outline){
+    placeHallHit120(marker,outline,state(),basis,fx,fy,width,height);
+    if(!marker.hidden)placeHallLabel126(marker,room(),p.panel120,point=>project(basis,fx,fy,point));
+    continue;
+   }
    const projected=project(basis,fx,fy,anchor);
    marker.hidden=!projected||projected[0]<24||projected[0]>width-24||projected[1]<100||projected[1]>height-90;
    if(marker.hidden)continue;
@@ -555,7 +558,7 @@ export function mountBaseWalk(root){
   effect={...event.detail,start:performance.now()};renderSoon();
  });
  on(canvas,'webglcontextlost',event=>{
-  event.preventDefault();world=panoramaSoftware119(software);stage.dataset.renderer='software';stage.classList.remove('has-depth');void load();renderSoon();
+  event.preventDefault();world=panoramaSoftware126(software);stage.dataset.renderer='software';stage.classList.remove('has-depth');void load();renderSoon();
  });
  const observer=new ResizeObserver(resize);observer.observe(stage);resize();
  void load();
