@@ -20,6 +20,8 @@ Jedna operacja zmieniająca nazewnictwo oraz reguły i zakres zadań odprawy zos
 
 Zgodnie z prośbą użytkowniczki nie przygotowano tej częściowo ukończonej aktualizacji jako gotowej paczki do publikacji i nie opublikowano jej na GitHubie.
 
+Do przeglądu przygotowano osobną paczkę roboczą. Zawiera wyłącznie zastosowany kod, ten raport oraz weryfikator kompletności. Nie zawiera polecenia publikacji ani instalatora zmieniającego projekt w telefonie.
+
 ## Testy
 
 - `node tests/v131.cjs` — odczyt mnożenia w prawdziwej funkcji syntezy, uprawnienia profili, pamięć zamykania instrukcji, zabezpieczenie wejścia do kokpitu, brak powtórnego wyboru poziomu, karta i odczyt pasażera, odróżnienie tapnięcia samolotu od przeciągania.
