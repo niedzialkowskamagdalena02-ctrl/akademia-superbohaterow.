@@ -4,7 +4,7 @@ import {panoramaSoftware119} from './panorama-software119.js?v=128';
 import {hqPet,hqPlaced,hqRead} from './headquarters84.js?v=117';
 import {baseArt88} from './base-art88.js?v=119';
 import {drawHeroHands} from './hero-hands85.js?v=127';
-import {heroPlayer127,powerMarkup127,action127} from './hero-animation127.js?v=127';
+import {heroPlayer127,powerMarkup127,action127} from './hero-animation127.js?v=129';
 import {walkRooms,FLOOR_DEPTH,FULL_TURN,PHOTO_FOV,VERTICAL_SCALE,advance86,cameraBasis86,clamp86,roomAnchor86,wrapAngle} from './base-map86.js?v=95';
 import {energy86} from './base-training86.js?v=117';
 import {petSprite86} from './pet-care86.js?v=117';
@@ -268,10 +268,10 @@ export function mountBaseWalk(root){
    button.disabled=busy||!!transition||heroPlayer.busy;
   }
   for(const button of stage.querySelectorAll('[data-walk-power]')){
-   button.disabled=busy||!!transition||heroPlayer.busy||!action127(hero,heroPlayer.mode,Number(button.dataset.walkPower));
+   button.disabled=busy||!!transition||heroPlayer.busy||!heroPlayer.ready||!action127(hero,heroPlayer.mode,Number(button.dataset.walkPower));
   }
   const status=stage.querySelector('.hq127-status');
-  if(status)status.textContent=heroPlayer.loading?'Ładuję oryginalne klatki…':heroPlayer.error;
+  if(status)status.textContent=heroPlayer.loading?'Przygotowuję ruchy… '+heroPlayer.progress:heroPlayer.error;
  }
  if(stage.querySelector('[data-mentor="iron"]'))image86('mentor-iron91-sheet.webp').then(image=>{
   if(!signal.aborted){ironArt=image;renderSoon();}
