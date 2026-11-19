@@ -1,0 +1,74 @@
+[
+  {
+    "runtime": "assets/space132/astronauta.png",
+    "sha256": "47034d84f6b6d98cdf7b236d58f7a2c98adaab9c0d6c3dacd0638dedac59c3f0",
+    "sources": [
+      "Kosmiczne_Dyktando.zip:grafiki/astronauta.png",
+      "Kosmiczna_Ortografia (1).zip:grafiki/astronauta.png"
+    ]
+  },
+  {
+    "runtime": "assets/space132/fala_dzwiekowa.png",
+    "sha256": "effdde1daa8d13c3aeaeeb08ffb6c38d2abc53566af6ec0d100744ea4e7720a0",
+    "sources": [
+      "Kosmiczne_Dyktando.zip:grafiki/fala_dzwiekowa.png",
+      "Kosmiczna_Ortografia (1).zip:grafiki/fala_dzwiekowa.png"
+    ]
+  },
+  {
+    "runtime": "assets/space132/gwiazda.png",
+    "sha256": "eebdb595aa52e4f4b78eaf189c093f5ba3227419f8a120a0a4f4f604b27e9a45",
+    "sources": [
+      "Kosmiczne_Dyktando.zip:grafiki/gwiazda.png",
+      "Kosmiczna_Ortografia (1).zip:grafiki/gwiazda.png"
+    ]
+  },
+  {
+    "runtime": "assets/space132/mikrofon.png",
+    "sha256": "0a889c4babc0636390314327920c8ec90a0a335cb7b590db11a377ac5c67faca",
+    "sources": [
+      "Kosmiczne_Dyktando.zip:grafiki/mikrofon.png",
+      "Kosmiczna_Ortografia (1).zip:grafiki/mikrofon.png"
+    ]
+  },
+  {
+    "runtime": "assets/space132/rakieta.png",
+    "sha256": "fc261fb046449d3f61b42ea02b7bd41a356e7ec0f2763cf28fc6d9f24a01a36d",
+    "sources": [
+      "Kosmiczne_Dyktando.zip:grafiki/rakieta.png",
+      "Kosmiczna_Ortografia (1).zip:grafiki/rakieta.png"
+    ]
+  },
+  {
+    "runtime": "assets/space132/rakieta_przezroczysta.png",
+    "sha256": "2d63b8333cd86ffaaa6bf005edc87eb46734eed997598d0adbe42158dd4a2b14",
+    "sources": [
+      "Kosmiczne_Dyktando.zip:grafiki/rakieta_przezroczysta.png",
+      "Kosmiczna_Ortografia (1).zip:grafiki/rakieta_przezroczysta.png"
+    ]
+  },
+  {
+    "runtime": "assets/space132/robot.png",
+    "sha256": "efcbb7e0a6fb7f2e2703ef77355e340e0dde8219b314e08fa6c77f72ceb8e2f3",
+    "sources": [
+      "Kosmiczne_Dyktando.zip:grafiki/robot.png",
+      "Kosmiczna_Ortografia (1).zip:grafiki/robot.png"
+    ]
+  },
+  {
+    "runtime": "assets/space132/skrzynia.png",
+    "sha256": "4db92a475c712a0050539eff8f6bab4f06b8ce96bc16d64e6344dd141cca902e",
+    "sources": [
+      "Kosmiczne_Dyktando.zip:grafiki/skrzynia.png",
+      "Kosmiczna_Ortografia (1).zip:grafiki/skrzynia.png"
+    ]
+  },
+  {
+    "runtime": "assets/space132/tlo.png",
+    "sha256": "609536ed4a15f093ac62a77759f6aae6b368bf72e5070aa461756877d5407088",
+    "sources": [
+      "Kosmiczne_Dyktando.zip:grafiki/tlo.png",
+      "Kosmiczna_Ortografia (1).zip:grafiki/tlo.png"
+    ]
+  }
+]

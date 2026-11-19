@@ -8,7 +8,8 @@ import {GAME_TITLES81,buildGames81,renderGame81,gameAction81,mountGame81,stopAud
 import {cardArt81} from './art81.js?v=81';
 const GAME_TITLES_ALL81={...GAME_TITLES80,...GAME_TITLES81};
 const allGames81=(pool,round)=>[...buildGames80(pool,round),...buildGames81(pool,round)];
-import {speakSequence,stopVoice,setVoiceState,spellEnglish77} from './voice.js?v=131';
+import {speakSequence,stopVoice,setVoiceState,spellEnglish77,listen} from './voice.js?v=131';
+import {spaceKind132,spaceMarkup132,spaceResult132,mountSpaceDrag132,spaceSessionKey132,readSpace132,writeSpace132,clearSpace132} from './space-literacy132.js?v=132';
 import {cleanEnglish76,vocabulary76,checkedVocabulary76,englishInstruction76,makeVocabularyTasks76,spokenMatch76,englishTaskSafe76,englishCue774,englishRecall774,simplifyEnglish774,englishExplanation774,englishAudioAllowed774,polishText774,normalizeListening79,listeningVocabulary79,readingProgress79,acceptReading79} from './english76.js?v=81';
 // V53_TEST_FIXES_01
 // V53_CONSOLIDATED_CROSSING_CHAPTERS
@@ -39,8 +40,15 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,childG
  const shuffle=a=>{const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;};
  let motionCleanup80=()=>{};
  let tutorMessages=[],tutorBusy=false,tutorListening=false,stageEpoch=0,readingRec=null;
- let rewardRun82='';
+ let rewardRun82='',spaceStarted132=false,spaceFinished132=false;
  let bookId=initialBookId||'',scope='all',mode='game',tasks=[],idx=0,points=0,choice=null,answered=false,tiles=[],busy=false,award=false,progress={},hintLevel=0,paused=false,wrongAttempts=0;
+ const spaceKind=()=>spaceKind132(launch,task()||tasks[0],assessment);
+ const spaceKey=()=>spaceSessionKey132(child,launch?.space132);
+ document.addEventListener('academy:voice-state',e=>{
+  if(!spaceKind()||!root.isConnected)return;
+  root.querySelector('.space132')?.classList.toggle('is-listening',e.detail?.state==='speaking');
+  root.querySelector('.space132-mic')?.setAttribute('aria-pressed',String(e.detail?.state==='listening'));
+ },{signal:lifetime.signal});
  const book=()=>books.find(b=>b.id===bookId);
  const subject=(t=null)=>{if(t?.outsideSubject95)return t.outsideSubject95;if(!t&&launch?.tasks&&tasks[0]?.outsideSubject95)return tasks[0].outsideSubject95;const b=t?.sourceBookId?books.find(b=>b.id===t.sourceBookId):book();return /ang|english/i.test(b?.subject||'')?'angielski':/mat/i.test(b?.subject||'')?'matematyka':/przyrod|natur/i.test(b?.subject||'')?'przyroda':'polski'};
  const available=()=>books.filter(b=>pages.some(p=>p.bookId===b.id&&p.text?.trim()));
@@ -252,7 +260,7 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,childG
  }
  function runDeck115(queue){
   tasks=queue.map(t=>({...structuredClone(t),done:false,correct:false}));
-  idx=0;points=0;award=false;rewardRun82='';reset();draw();
+  idx=0;points=0;award=false;rewardRun82='';spaceFinished132=false;reset();if(spaceKind())remember();draw();
  }
  function materialRound115(ps,game,questions){
   const key=v773DeckKey('material-round',ps),round=Number(v773ReadState(key,0))||0;
@@ -421,8 +429,8 @@ export function mountMissionGame(root,{books,pages,ask,speak,reward,child,childG
 
  const bankKey=()=>`academy-v48-bank-${books.find(b=>b.id===bookId)?.child||child}-${bookId}`;
  const sessionKey=()=>`academy-v49-session-${child}-${launch&&initialBookId?initialBookId:bookId}`;
- const remember=()=>{if(launch?.tasks||launch?.single)return;try{localStorage.setItem(sessionKey(),JSON.stringify({scope,mode,tasks,idx,points,award:false,rewardRun82}))}catch{}};
- function resume(){if(embedded){reset();answered=!!task()?.done;return draw();}try{const x=JSON.parse(localStorage.getItem(sessionKey())||'null');if(!x||!x.tasks?.length)return setup();scope=x.scope;mode=x.mode;rewardRun82=x.rewardRun82||'';tasks=x.tasks.map(v76AttachInstruction);tasks.forEach(t=>{t.readActive=false});if(tasks.some(t=>t.type==='reading')){const before=tasks.slice(0,x.idx).filter(t=>t.type!=='reading').length;tasks=tasks.filter(t=>t.type!=='reading');x.idx=Math.min(before,Math.max(0,tasks.length-1))}idx=x.idx;points=x.points;award=x.award;paused=false;reset();answered=!!task()?.done;draw()}catch{setup()}}
+ const remember=()=>{if(spaceKind()&&launch.space132Resume){if(!spaceFinished132)writeSpace132(localStorage,spaceKey(),{tasks,idx,points,rewardRun82});return;}if(launch?.tasks||launch?.single)return;try{localStorage.setItem(sessionKey(),JSON.stringify({scope,mode,tasks,idx,points,award:false,rewardRun82}))}catch{}};
+ function resume(){if(embedded){reset();paused=false;answered=!!task()?.done;if(spaceKind())wrongAttempts=Number(task()?.space132Wrong)||0;return draw();}try{const x=JSON.parse(localStorage.getItem(sessionKey())||'null');if(!x||!x.tasks?.length)return setup();scope=x.scope;mode=x.mode;rewardRun82=x.rewardRun82||'';tasks=x.tasks.map(v76AttachInstruction);tasks.forEach(t=>{t.readActive=false});if(tasks.some(t=>t.type==='reading')){const before=tasks.slice(0,x.idx).filter(t=>t.type!=='reading').length;tasks=tasks.filter(t=>t.type!=='reading');x.idx=Math.min(before,Math.max(0,tasks.length-1))}idx=x.idx;points=x.points;award=x.award;paused=false;reset();answered=!!task()?.done;draw()}catch{setup()}}
  const selectionIds=()=>new Set(scopePages().map(p=>String(p.number)));
  const fingerprint=t=>norm(t.question)+'|'+norm(t.answer);
  function v75MatchesPage(x,p){
@@ -1047,6 +1055,10 @@ Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj
   if(busy)return;
   stageEpoch++;tutorBusy=false;
   if(launch?.tasks){
+   if(launch.space132Resume&&!spaceStarted132){
+    spaceStarted132=true;const saved=readSpace132(localStorage,spaceKey(),launch.space132);
+    if(saved){tasks=saved.tasks;idx=saved.idx;points=saved.points;award=false;rewardRun82=saved.rewardRun82||'';reset();answered=!!task()?.done;wrongAttempts=Number(task()?.space132Wrong)||0;draw();return;}
+   }
    const raw=launch.repeat?.()??launch.tasks;
    const queue=assessment?raw.filter(assessmentTask):raw;
    if(!queue.length){root.innerHTML='<section class="mg-panel"><p>Brak zadań tego typu.</p>'+btn('Wróć','back')+'</section>';return;}
@@ -1155,7 +1167,7 @@ Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj
   }catch(err){console.warn('Tworzenie misji:',err);if(root.isConnected)root.innerHTML='<section class="mg-panel"><h2>Nie udało się przygotować misji</h2><p>Spróbuj ponownie, kiedy AI będzie dostępne.</p>'+btn('Spróbuj ponownie','start')+btn('Wróć','back')+'</section>'}
   finally{busy=false}
  }
- function reset(){motionCleanup80();stopGameAudio80();stopAudio81();if(readingRec){readingRec.__v76Cancelled=true;try{readingRec.abort()}catch(e){}readingRec=null;}stageEpoch++;tutorBusy=false;choice=null;answered=false;tiles=[];hintLevel=0;wrongAttempts=0;tutorMessages=[]}
+ function reset(){motionCleanup80();stopGameAudio80();stopAudio81();if(readingRec){readingRec.__v76Cancelled=true;try{readingRec.abort()}catch(e){}readingRec=null;}stageEpoch++;if(spaceKind())stopVoice();tutorBusy=false;tutorListening=false;choice=null;answered=false;tiles=[];hintLevel=0;wrongAttempts=0;tutorMessages=[]}
  const task=()=>tasks[idx];
  function answer(value){
   if(answered)return;
@@ -1179,7 +1191,7 @@ Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj
    }catch(e){tutorMessages.push({who:'system',text:'🦸 Nie udało się teraz sprawdzić odpowiedzi. Spróbuj ponownie.'})}
    finally{busy=false;draw()}})();return;
   }
-  if(!t.correct){if(/spółgłoski|samogłoski/i.test(t.question)){const a=Array.from(lettersOnly(t.answer)).sort().join(''),b=Array.from(lettersOnly(choice)).sort().join('');t.orderHint=!!a&&a===b;}wrongAttempts++;t.hqWrong84=true;audioCue(false);if(wrongAttempts>=2)logDifficulty(t,'błędne próby');hintLevel=Math.min(3,hintLevel+1);remember();draw();return}
+  if(!t.correct){if(/spółgłoski|samogłoski/i.test(t.question)){const a=Array.from(lettersOnly(t.answer)).sort().join(''),b=Array.from(lettersOnly(choice)).sort().join('');t.orderHint=!!a&&a===b;}wrongAttempts++;if(spaceKind())t.space132Wrong=wrongAttempts;t.hqWrong84=true;audioCue(false);if(wrongAttempts>=2)logDifficulty(t,'błędne próby');hintLevel=Math.min(3,hintLevel+1);remember();draw();return}
   answered=true;t.done=true;points++;audioCue(true);if(subject(t)==='angielski')celebrateReading();sayFeedback('Brawo! Dobra odpowiedź.'+(mode==='game'&&subject(t)==='angielski'&&t.explanation?' '+t.explanation:''));recordResult(t);remember();draw();
  }
  function hintText(t){
@@ -1210,7 +1222,7 @@ Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj
  function tutorPanel(){
   if(assessment)return '';
   const messages=tutorMessages.slice(-6).map(m=>'<p class="mg-tutor-message"><strong>'+(m.who==='uczen'?'Paweł':m.who==='system'?'Komunikat':'Nauczyciel AI')+':</strong> '+escape(m.text)+'</p>').join('');
-  return '<details class="mg-tutor a77-help" '+(tutorMessages.length||tutorBusy?'open':'')+'><summary>💬 Zapytaj nauczyciela AI</summary><div><h3>Pomoc nauczyciela '+btn('🔊','tutor-instruction')+'</h3><p>Naciśnij czerwony mikrofon z boku ekranu, żeby zapytać o zadanie. Możesz też napisać pytanie.</p><div aria-live="polite">'+messages+'</div><textarea id="mg-tutor-input" rows="2" placeholder="Wpisz pytanie do nauczyciela..."></textarea>'+btn(tutorBusy?'⏳ Odpowiadam...':'Wyślij pytanie','tutor-send','mg-primary')+(task()?.v82AwaitingReveal&&!task()?.v77Revealed&&!answered?'<div class="tutor82-consent"><p>'+REVEAL_OFFER82+'</p>'+btn('Tak, pokaż odpowiedź · bez pieniędzy','tutor82-yes','mg-primary')+btn('Nie, spróbuję sam','tutor82-no')+'</div>':'')+(task()?.v77Revealed?'<p class="v77-assisted">💡 Ćwiczymy z pomocą — za to zadanie bez monet.</p>':'')+'</div></details>';
+  return '<details class="mg-tutor a77-help" '+(tutorMessages.length||tutorBusy?'open':'')+'><summary>💬 Zapytaj nauczyciela AI</summary><div><h3>Pomoc nauczyciela '+btn('🔊','tutor-instruction')+'</h3><p>'+(spaceKind()?'Naciśnij mikrofon obok przycisku pomocy, żeby zapytać o zadanie. Możesz też napisać pytanie.':'Naciśnij czerwony mikrofon z boku ekranu, żeby zapytać o zadanie. Możesz też napisać pytanie.')+'</p><div aria-live="polite">'+messages+'</div><textarea id="mg-tutor-input" rows="2" placeholder="Wpisz pytanie do nauczyciela..."></textarea>'+btn(tutorBusy?'⏳ Odpowiadam...':'Wyślij pytanie','tutor-send','mg-primary')+(task()?.v82AwaitingReveal&&!task()?.v77Revealed&&!answered?'<div class="tutor82-consent"><p>'+REVEAL_OFFER82+'</p>'+btn('Tak, pokaż odpowiedź · bez pieniędzy','tutor82-yes','mg-primary')+btn('Nie, spróbuję sam','tutor82-no')+'</div>':'')+(task()?.v77Revealed?'<p class="v77-assisted">💡 Ćwiczymy z pomocą — za to zadanie bez monet.</p>':'')+'</div></details>';
  }
  function v77SafeHint(t){
   if(['listening','dictation','vocab-listen'].includes(t.type))return 'Naciśnij głośnik i posłuchaj jeszcze raz. Zwróć uwagę na pierwszy dźwięk, a potem spróbuj zapisać usłyszane słowo.';
@@ -1262,6 +1274,11 @@ Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj
  }
 
  function tutorMic(){
+  if(spaceKind()){
+   if(tutorListening)return;const current=task(),epoch=stageEpoch;
+   const active=()=>root.isConnected&&task()===current&&stageEpoch===epoch&&!paused;
+   tutorListening=true;listen(q=>{tutorListening=false;if(active())tutorAsk(q);},message=>{tutorListening=false;if(active()){tutorMessages.push({who:'system',text:message});draw();}},{onEnd:()=>{tutorListening=false;}});return;
+  }
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){tutorMessages.push({who:'system',text:'🎙️ Możesz wpisać pytanie w polu poniżej.'});draw();return}
   if(tutorListening)return;
@@ -1427,6 +1444,11 @@ Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj
   motionCleanup80();
   if(idx>=tasks.length)return finish();
   const t=task();v774Normalize(t);
+  if(spaceKind()){
+   root.innerHTML=spaceMarkup132({kind:spaceKind(),task:t,index:idx,total:tasks.length,points,answered,wrongAttempts,help:paused?'':tutorPanel(),paused});
+   if(!paused&&!answered)motionCleanup80=mountSpaceDrag132(root,i=>{if(!busy&&task()===t&&!answered&&t.options?.[i])answer(t.options[i]);});
+   return;
+  }
   const names={safe:'🔐 Sejf Iron Mana',shop:'🛒 Sklep Avengersów',clock:'⏰ Zegar misji',detective:'🕵️ Detektyw Spider-Mana',loki:'🦹 Bitwa z Lokim',reading:'🎙️ Laboratorium czytania',order:'🧩 Szyfr Avengersów',dictation:'✍️ Dyktando Kapitana',syllables:'🔠 Sylaby i głoski','vocab-choice':'🃏 Słówka · wybierz','vocab-write':'✍️ Słówka · napisz','vocab-speak':'🎙️ Słówka · powiedz','vocab-repeat':'🗣️ Słówka · powtórz','vocab-meaning':'💡 Słówka · znaczenie','vocab-listen':'🎧 Słówka · posłuchaj','vocab-reading':'📖 Słówka · przeczytaj','vocab-build':'🧩 Złóż słowo ze słuchu','vocab-match':'🔗 Połącz słówka',gallery77:'Galeria słów',radar77:'Radar słuchowy',command77:'Wykonaj polecenie',scene77:'Ustaw scenę',sort77:'Sortownia słów',detective77:'Detektyw tekstu',mosaic77:'Mozaika matematyczna',workshop77:'Warsztat liczenia',crossword:'📝 Krzyżówka',choice:'⚡ Zagadka bohatera',listening:'🎧 Misja słuchowa',memory:'🃏 Memory',spelling:'✍️ Pisownia',rebus:'🧩 Rebus Avengersów',memory:'🃏 Memory',"reading-mini":'🎙️ Czytaj słowo po słowie'};
   root.innerHTML=`<section class="mg-panel v77-play">${launch?.sectionBack?'':launch?.chooseMaterialGame?btn('← Wróć','material-games'):launch?.strictMaterial||assessment?btn('← Wróć','back'):''}<header class="mg-header"><div class="v77-adventure-art" aria-hidden="true"><span class="v77-rocket">🚀</span><span class="v77-star s1">✦</span><span class="v77-star s2">✧</span></div><small>${mode==='test'?'🏆 PRÓBNY SPRAWDZIAN':'⚡ MISJA SPECJALNA'} · ${escape(t.sourceTitle||('STRONA '+(t.pageNumber||'?')))}</small>${btn('🔊 Odczytaj polecenie','read-instruction')}<h2>${launch?.label?escape(launch.label):t.game80?escape(t.subject82?(t.subject82==='matematyka'?'🧮 ':'📖 ')+GAME_TITLES_ALL81[t.game80]:GAME_TITLES_ALL81[t.game80]):t.type==='reading'?'📜 Tajny przekaz Avengersów':t.type==='loki'?'🦹 Pułapka Lokiego':t.type==='detective'?'🕵️ Detektyw Spider-Mana':t.type==='wordsearch'?'🔎 Wykreślanka':t.type==='draw'?'🎨 Misja rysunkowa':names[t.type]||'🎮 Misja bohatera'}</h2><p>Wyzwanie ${idx+1} z ${tasks.length}</p><div class="mg-bar"><div style="width:${Math.round(idx/tasks.length*100)}%"></div></div>${btn(embedded?'⏸ Pauza':'⏸ Stop / zapisz','pause')}</header><div class="v77-task-surface">${mode!=='test'&&t.studyDone82&&t.model82?'<p class="study82-model">Wzór: <strong lang="en">'+escape(t.model82)+'</strong> · Możesz na niego patrzeć podczas ćwiczenia.</p>':''}${stage()}</div></section>`;
   if(t.game80)motionCleanup80=t.game81?mountGame81(root,t,act=>v80GameAction(act,t)):mountMotion80(root,t,act=>v80GameAction(act,t));
@@ -1455,6 +1477,9 @@ Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj
   try{localStorage.setItem(storeKey(),JSON.stringify({date:Date.now(),score:points,total,passed:mode==='test'?passed:null,coins,weak:tasks.filter(t=>!t.correct).map(t=>t.question)}))}catch(e){}}
   audioCue(passed||mode!=='test');sayFeedback(mode==='test'?(passed?'Gratulacje! Sprawdzian zaliczony. Zdobywasz '+coins+' złotych.':'To jeszcze nie koniec przygody. Poćwicz trudniejsze zadania i spróbuj ponownie. Zdobywasz '+coins+' złotych.'):'Misja ukończona! Zdobywasz '+coins+' złotych.');
   const summary=mode==='test'?(passed?'🏆 Sprawdzian zaliczony!':'🌱 Jeszcze trochę poćwiczymy. Spróbuj ponownie, kiedy będziesz gotowy.'):'🎉 Przygoda ukończona!';
+  if(spaceKind()){
+   spaceFinished132=true;clearSpace132(localStorage,spaceKey());root.innerHTML=spaceResult132({kind:spaceKind(),points,total,coins,skipped:tasks.filter(t=>t.space132Skipped).length});return;
+  }
   root.innerHTML='<section class="mg-panel mg-final"><h2>'+summary+'</h2><p>Wynik: <strong>'+points+' / '+total+'</strong> ('+pct+'%).</p><p>🪙 Zdobyte złote: <strong>'+coins+'</strong></p><p>'+(mode==='test'&&!passed?'Wróć do trudnych zadań i poćwicz. Dasz radę!':'Dobra robota!')+'</p>'+btn('🔄 Spróbuj ponownie','start','mg-primary')+btn('📋 Zobacz trudności','report')+(v76VocabOnly?btn('🃏 Wybierz inną grę','v80-vocab-picker'):'')+(launch?.chooseMaterialGame?btn('← Wybierz grę','material-games'):btn(launch?.strictMaterial||assessment?'← Wróć':'📚 Wybierz materiał','back'))+'</section>';
  }
  function crossStatus(t){
@@ -1467,6 +1492,7 @@ Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj
   audioCue(true);party();sayFeedback('Brawo! Odkryte hasło: '+t.answer+'. '+(t.crossInfo||''));remember();draw();
  }
  root.addEventListener('input',ev=>{
+  if(ev.target.matches?.('[data-space132-typed]')&&spaceKind()&&!answered&&!paused){task().space132Typed=ev.target.value;remember();}
   const el=ev.target.closest?.('[data-mg-cell]');if(!el||answered)return;
   const t=task();if(!t||t.type!=='crossword')return;
   const [row,col]=el.dataset.mgCell.split(':').map(Number);
@@ -1493,10 +1519,26 @@ Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj
   const el=ev.target.closest?.('[data-mg-cell]');if(!el||ev.key!=='Backspace'||el.value)return;
   const [row,col]=el.dataset.mgCell.split(':').map(Number);const prev=root.querySelector('[data-mg-cell="'+row+':'+(col-1)+'"]');if(prev)prev.focus();
  });
+ root.addEventListener('submit',ev=>{
+  if(!ev.target.matches?.('[data-space132-answer]')||!spaceKind())return;ev.preventDefault();
+  if(paused||answered||busy)return;const value=root.querySelector('#mg-written')?.value||'';
+  if(value.trim()){task().space132Typed=value;answer(value.normalize('NFC'));}
+ },{signal:lifetime.signal});
  root.addEventListener('click',ev=>{
   const b=ev.target.closest('[data-mg]');if(!b||b.disabled||busy)return;
   launch?.audioTap?.();
   const act=b.dataset.mg,t=task();
+  if(spaceKind()){
+   if(paused&&!['resume','back'].includes(act))return;
+   if(act==='back'){stopVoice();remember();return onBack?.();}
+   if(act==='space132-help'){const help=root.querySelector('.mg-tutor');if(help){help.open=!help.open;if(help.open)root.querySelector('#mg-tutor-input')?.focus();}return;}
+   if(act.startsWith('space132-pick:')){
+    if(answered)return;const i=Number(act.slice(14));if(!Number.isInteger(i)||!t.options?.[i])return;
+    if(idx%3===1){t.space132Selected=i;remember();return draw();}return answer(t.options[i]);
+   }
+   if(act==='space132-gap'){if(!answered&&Number.isInteger(t.space132Selected))answer(t.options[t.space132Selected]);return;}
+   if(act==='pause'){paused=true;motionCleanup80();stageEpoch++;stopVoice();tutorBusy=false;tutorListening=false;remember();return draw();}
+  }
   if(act==='study82-listen'){const word=t?.study82?.[t.studyIndex82||0];if(word)return speakSequence([{text:word.en,lang:'en-GB',rate:.65,pauseAfterMs:400},{text:word.pl,lang:'pl-PL',rate:.85},{text:word.en,lang:'en-GB',rate:.65}],{isCurrent:()=>root.isConnected&&task()===t});return;}
   if(act==='study82-next'){if(!t?.study82?.length)return;t.studyIndex82=(Number(t.studyIndex82)||0)+1;if(t.studyIndex82>=t.study82.length)t.studyDone82=true;remember();return draw();}
   if(act==='reward82-retry')return finish();
@@ -1518,9 +1560,9 @@ Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj
   if(act==='tutor82-no')return tutorAsk('Nie');
   if(act==='v76-word-model')return t?.vocab76?v76WordModel(t):undefined;
   if(act==='v76-word-record')return t?.vocab76&&!answered?v76WordVoice(t):undefined;
-  if(act==='tutor-instruction')return speak('Zapytaj nauczyciela AI. Naciśnij czerwony mikrofon z boku ekranu i powiedz, czego nie rozumiesz.','pl-PL');
+  if(act==='tutor-instruction')return speak(spaceKind()?'Zapytaj nauczyciela AI. Naciśnij mikrofon obok pomocy i powiedz, czego nie rozumiesz.':'Zapytaj nauczyciela AI. Naciśnij czerwony mikrofon z boku ekranu i powiedz, czego nie rozumiesz.','pl-PL');
   if(act==='read-instruction'){if(t?.game80)return speakSequence([{text:t.question,lang:'en-GB',rate:.8},{text:t.questionPl,lang:'pl-PL',rate:.9}],{isCurrent:()=>task()===t&&root.isConnected});if(subject(t)==='angielski'){v75InstructionSpeech(t,mode);return;}return speak((mode==='test'?'Sprawdzian':'Misja')+'. '+(t?.type==='reading'?'Przeczytaj na głos cały tekst poniżej. Naciśnij rozpocznij czytanie. Kiedy będziesz potrzebował przerwy, naciśnij zakończ fragment. Możesz później kontynuować.':t?.question||'')+(t?.type==='wordsearch'?' Wybieraj litery kolejno.':''),'pl-PL');}
-  if(act==='skip'){v774Normalize(t);logDifficulty(t,'uczeń poprosił o następne zadanie');if(!assessment)sayFeedback('Nie szkodzi. '+(subject(t)==='angielski'&&t.explanation?'Wyjaśnienie: '+t.explanation+'. ':'')+'Zapisuję to do powtórki.');idx++;reset();remember();return draw()}
+  if(act==='skip'){v774Normalize(t);if(spaceKind())t.space132Skipped=true;logDifficulty(t,'uczeń poprosił o następne zadanie');if(!assessment)sayFeedback('Nie szkodzi. '+(subject(t)==='angielski'&&t.explanation?'Wyjaśnienie: '+t.explanation+'. ':'')+'Zapisuję to do powtórki.');idx++;reset();remember();return draw()}
   if(act==='cross-new'){if(crossStatus(t))return crossDone(t);wrongAttempts++;t.hqWrong84=true;audioCue(false);const box=root.querySelector('#mg-cross-feedback');if(box)box.textContent='Nie wszystkie wyrazy są jeszcze poprawne. Wpisane litery pozostają w kratkach.';return}
   if(act==='read-aloud'){
    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -1607,7 +1649,7 @@ Krzyzowki, wykreslanki i rebusy dodaje aplikacja jako pelne plansze; nie generuj
   if(act==='draw-done'){answered=true;t.done=true;t.correct=true;points++;remember();return draw()}
   if(act==='clear-draw'){const c=root.querySelector('#mg-draw');c?.getContext('2d')?.clearRect(0,0,c.width,c.height);return}
   if(act==='next'){idx++;reset();remember();return draw()}
-  if(act==='audio'){v774Normalize(t);if(subject(t)==='angielski'&&!englishAudioAllowed774(t))return;if(t.v79UnsafeListening)return;return speak(t.audio||t.question,subject(t)==='angielski'?'en-GB':'pl-PL','tech',subject(t)==='angielski'?.74:1);}
+  if(act==='audio'){v774Normalize(t);if(subject(t)==='angielski'&&!englishAudioAllowed774(t))return;if(t.v79UnsafeListening)return;return speak(spaceKind()==='spelling'?t.spaceGap132.word:t.audio||t.question,subject(t)==='angielski'?'en-GB':'pl-PL','tech',subject(t)==='angielski'?.74:1);}
   if(answered)return;
   if(act.startsWith('pick:'))return answer(t.options[Number(act.slice(5))]);
   if(act.startsWith('tile:')){const i=Number(act.slice(5));if(!tiles.includes(i)){tiles.push(i);draw()}return}

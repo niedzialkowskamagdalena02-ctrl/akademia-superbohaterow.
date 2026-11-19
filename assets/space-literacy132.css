@@ -1,0 +1,72 @@
+.space132{box-sizing:border-box;width:min(100%,760px);margin:0 auto;padding:clamp(12px,3.5vw,28px);border-radius:22px;background:#06143a url('space132/tlo.png') center top/cover;color:#f4fbff;font:16px/1.4 system-ui,sans-serif;isolation:isolate}
+.space132 *{box-sizing:border-box}
+.space132 img{object-fit:contain;max-width:100%;user-select:none;pointer-events:none;-webkit-user-drag:none}
+.space132 :is(h2,h3,p){margin:0}
+.space132 button{font:750 16px/1.25 system-ui,sans-serif;border:2px solid #66cbf2;border-radius:15px;padding:11px 16px;min-height:46px;color:#fff;background:linear-gradient(#315e8d,#122d53);box-shadow:inset 0 1px 2px #b2edff66,0 3px 8px #030b2590;cursor:pointer;white-space:normal}
+.space132 button:disabled{opacity:.55;cursor:default}
+.space132 :is(button,input,textarea):focus-visible{outline:3px solid #ffe188;outline-offset:3px}
+.space132 .space132-header{display:grid;grid-template-columns:auto minmax(0,1fr) 65px;align-items:center;gap:10px;padding:0;background:none;border:0}
+.space132 .space132-header>button{font-size:15px;padding:9px}
+.space132 .space132-header h2{display:flex;align-items:center;justify-content:center;color:#ffe18b;font-size:clamp(25px,5.9vw,48px);line-height:1.1;text-shadow:0 3px 1px #72501a;letter-spacing:-.025em}
+.space132 .space132-title-ship{width:clamp(24px,5vw,42px);height:48px;flex-shrink:0;margin-right:5px}
+.space132 .space132-astronaut{width:65px;height:86px}
+.space132 .space132-count{text-align:center;font-size:17px;color:#143347;background:#d4f0ff;box-shadow:0 0 14px #88dfff55;border-radius:6px;padding:4px 16px;width:fit-content;margin:12px auto 20px}
+.space132 .space132-track{position:relative;height:13px;margin:20px 44px 27px 5px;border:1px solid #88e8ff;border-radius:20px;background:#123159;box-shadow:0 0 10px #7eeaff99}
+.space132 .space132-fill{display:block;height:100%;width:var(--space-progress,0%);background:linear-gradient(90deg,#51e5ff,#87f0c1,#ffdb75);border-radius:inherit;transition:width .35s}
+.space132 .space132-ship{position:absolute;top:50%;left:var(--space-progress,0%);transform:translate(-50%,-50%) rotate(25deg);width:58px;height:61px;transition:left .45s;z-index:2}
+.space132 .space132-chest{position:absolute;top:50%;right:-46px;transform:translateY(-50%);width:49px;height:45px}
+.space132 .space132-star{position:absolute;top:50%;transform:translate(-50%,-50%);width:25px;height:25px}
+.space132 .space132-star img{width:100%;height:100%}
+.space132 .space132-bar{display:flex;justify-content:center;align-items:center;gap:16px;flex-wrap:wrap;font-size:14px;color:#d4edff}
+.space132 .space132-bar button{border-color:#96ddff;box-shadow:0 0 9px #ab64d488;padding:8px 18px}
+.space132 .space132-guide{display:flex;align-items:center;justify-content:center;gap:10px;position:relative;min-height:170px;margin:7px 0}
+.space132 .space132-robot{width:clamp(115px,24vw,185px);height:190px}
+.space132 .space132-guide>p{color:#142e4b;background:#e7f6ff;max-width:280px;border-radius:16px;padding:13px 16px;font-size:clamp(15px,3.6vw,20px);font-weight:700;box-shadow:0 4px 10px #02142a99}
+.space132 .space132-wave{position:absolute;width:88px;height:50px;left:18%;bottom:9px;opacity:0;pointer-events:none}
+.space132.is-listening .space132-wave{opacity:1;animation:space132-wave .5s infinite alternate}
+.space132 .space132-answer{background:#0c234be8;border:2px solid #7cdefd;border-radius:21px;padding:16px;box-shadow:inset 0 0 15px #378fce80,0 0 16px #00a8e955;display:flex;align-items:stretch;flex-direction:column;gap:14px;text-align:center}
+.space132 .space132-listen{align-self:center;border-color:#ffdc84;font-size:21px;padding:12px 22px;margin-top:-30px;box-shadow:0 0 15px #6ee4ff66;background:linear-gradient(#397bac,#163c6d)}
+.space132 .space132-label{font-size:14px;color:#d0e9fc;text-align:left}
+.space132 .space132-input{width:100%;font:500 clamp(20px,4.8vw,26px)/1.35 system-ui;min-height:56px;border:2px solid #75c7e7;border-radius:13px;padding:14px;background:#091e41;color:#fff;box-shadow:inset 0 0 8px #459ac144}
+.space132 .space132-input::placeholder{color:#b2ccdf;opacity:1}
+.space132 button.space132-gold{color:#402d0e;border-color:#ffe7a9;background:linear-gradient(#fff0a7,#f9cb59 60%,#e5a335);font-size:clamp(20px,4.6vw,25px);box-shadow:inset 0 2px 2px #fff6cf,0 5px 0 #8b5b27,0 0 14px #ffcc6655;padding:12px 23px;align-self:center}
+.space132 .space132-answer h3{color:#ffdf87;font-size:19px}
+.space132 .space132-word{font-size:clamp(24px,6vw,35px);line-height:1.7;font-weight:750;overflow-wrap:anywhere;min-height:55px}
+.space132 .space132-gap{padding:3px 10px;font-size:inherit;min-width:58px;color:#203050;background:#ffe086;border-color:#ffedb8;vertical-align:baseline}
+.space132 .space132-options{display:flex;justify-content:center;gap:15px;flex-wrap:wrap}
+.space132 .space132-options button{min-width:74px;min-height:62px;font-size:28px}
+.space132[data-space132-stage="0"] .space132-options button{border-width:4px;border-radius:50%;box-shadow:0 0 15px #51c7f566}
+.space132[data-space132-stage="1"] .space132-options button{touch-action:none}
+.space132[data-space132-stage="2"] .space132-word{border-bottom:2px dashed #e9c270;padding-bottom:10px}
+.space132 .space132-options [aria-pressed="true"]{color:#1c314d;background:#ffe086;outline:3px solid #fff4b8;outline-offset:2px}
+.space132 .space132-options .is-dragging{position:relative;z-index:9;opacity:.9}
+.space132 .space132-gap.is-drop-target{outline:4px solid #70fbef;box-shadow:0 0 19px #86ffe7}
+.space132 .space132-feedback{margin:15px 0;color:#d5fff3;text-align:center;min-height:1.5em;font-size:17px}
+.space132>.space132-gold{display:block;margin:15px auto}
+.space132 .space132-tools{display:flex;flex-direction:column;align-items:center;gap:16px;margin-top:23px}
+.space132 .space132-help-row{display:flex;align-items:center;justify-content:center;gap:14px;width:100%;flex-wrap:nowrap}
+.space132 .space132-help-row>button:first-child{flex:1;max-width:330px;border-color:#b4ccff;box-shadow:0 0 10px #ac68ff66}
+.space132 button.space132-mic{flex:0 0 66px;width:66px;min-height:66px;height:66px;padding:0;border:0;border-radius:50%;background:transparent;box-shadow:none;position:static}
+.space132 .space132-mic img{width:100%;height:100%;object-fit:contain}
+.space132 .space132-mic[aria-pressed="true"]{outline:3px solid #85f4c2;outline-offset:2px}
+.space132 .mg-tutor{background:#0c234bf0;color:#e9f7ff;border:1px solid #85d4fa;border-radius:16px;padding:12px;margin-top:16px;text-align:left}
+.space132 .mg-tutor :is(h3,p){color:inherit}
+.space132 .mg-tutor textarea{width:100%;font:18px system-ui;background:#0b203f;color:#fff;border:1px solid #92cff7;border-radius:10px;padding:12px}
+.space132 .mg-tutor-message{padding:10px;border-bottom:1px solid #8ecbff55;line-height:1.5}
+.space132 .mg-tutor summary{cursor:pointer;min-height:44px;align-content:center}
+.space132 .space132-result{text-align:center;display:flex;flex-direction:column;align-items:center;gap:18px;padding:25px 0}
+.space132 .space132-result>img{width:190px;height:160px;filter:drop-shadow(0 0 15px #ffd66c)}
+.space132.is-good .space132-track{box-shadow:0 0 23px #ffda72}
+.space132.is-good[data-space132-stage="0"] .space132-ship{animation:space132-gate .65s ease-in-out}
+.space132.is-good[data-space132-stage="1"] .space132-answer{animation:space132-signal .7s ease-in-out}
+.space132.is-good[data-space132-stage="2"] .space132-ship{animation:space132-land .7s ease-in-out}
+.space132.is-good[data-space132-stage="2"] .space132-chest,.space132.is-complete .space132-chest{filter:drop-shadow(0 0 12px gold)}
+#app:has(.space132)>button.mic[data-action="mic"]{display:none}
+@keyframes space132-wave{to{transform:scaleY(.72);filter:drop-shadow(0 0 8px #94edff)}}
+@keyframes space132-gate{50%{transform:translate(16px,-85%) rotate(7deg)}}
+@keyframes space132-signal{50%{box-shadow:0 0 32px #b49dff,inset 0 0 12px #77efec}}
+@keyframes space132-land{50%{transform:translate(-50%,-12%) rotate(55deg)}}
+@media(max-width:380px){.space132 .space132-header{grid-template-columns:auto minmax(0,1fr) 46px;gap:5px}.space132 .space132-header>button{font-size:13px;padding:7px}.space132 .space132-astronaut{width:46px;height:64px}.space132 .space132-title-ship{display:none}.space132 .space132-guide{gap:4px;min-height:155px}.space132 .space132-robot{width:112px;height:160px}.space132 .space132-guide>p{padding:10px;font-size:15px}.space132 .space132-answer{padding:12px}.space132 button.space132-mic{flex-basis:58px;width:58px;height:58px;min-height:58px}}
+@media(prefers-reduced-motion:reduce){.space132 *{animation:none!important;transition:none!important}}
+
+.space132 [hidden]{display:none!important}

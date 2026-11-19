@@ -4,6 +4,7 @@ import {vocabulary,readings} from './learning.js';
 import {GAME_TITLES80,buildGames80} from './games80.js?v=84';
 import {GAME_TITLES81,buildGames81} from './games81.js?v=82';
 import {buildSubjectGames82} from './subject-games82.js?v=82';
+import {spaceGap132} from './space-literacy132.js?v=132';
 
 const subjects=['polski','matematyka','angielski','przyroda'];
 const names={polski:'Polski',matematyka:'Matematyka',angielski:'Angielski',przyroda:'Przyroda'};
@@ -150,7 +151,7 @@ export function outsideDeck95(game,grade,custom=[],one=false) {
  }
  let rows=[];
  switch(kind){
-  case 'spelling': return shuffle92(spelling).slice(0,one?1:8).map(([word,right,wrong])=>task(['Uzupełnij wyraz: '+word,right,wrong],subject,{explanation:'Piszemy: '+word.replace('_',right)+'.'}));
+  case 'spelling': return shuffle92(spelling).slice(0,one?1:8).map(([word,right,wrong])=>task(['Uzupełnij wyraz: '+word,right,wrong],subject,{explanation:'Piszemy: '+word.replace('_',right)+'.',spaceGap132:spaceGap132(word,right,[right,wrong])}));
   case 'dictation': return shuffle92(spelling).slice(0,one?1:6).map(([word,right,wrong])=>{
    const answer=word.replace('_',right);
    return task(['Posłuchaj i napisz usłyszany wyraz.',answer,word.replace('_',wrong)],subject,{type:'dictation',audio:answer});

@@ -10,6 +10,7 @@ function matches(el,selector){
   const chain=split(s.trim(),' ').filter(Boolean);if(chain.length>1){if(!matches(el,chain.pop()))return false;let parent=el.parentNode;while(parent){if(matches(parent,chain.join(' ')))return true;parent=parent.parentNode;}return false;}
   s=chain[0]||'';const tag=s.match(/^[a-z][\w-]*/i)?.[0];if(tag&&el.tagName!==tag.toLowerCase())return false;
   for(const [,name]of s.matchAll(/\.([\w-]+)/g))if(!el.classList.contains(name))return false;
+  for(const [,id]of s.matchAll(/#([\w-]+)/g))if(el.getAttribute('id')!==id)return false;
   for(const [,name,op,value]of s.matchAll(/\[([\w-]+)(?:(\^=|=)"([^"]*)")?\]/g)){
    const a=el.getAttribute(name);if(a===null||op==='='&&a!==value||op==='^='&&!a.startsWith(value))return false;
   }

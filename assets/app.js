@@ -5,7 +5,7 @@ import {academy102Shell,academy102Choices,academy102Player,academy102DashboardNa
 // V48_AI_RESPONSE_DIAGNOSTICS
 // V44_BULK_CHAPTERS
 // V42_CHAPTERS
-import {mountMissionGame} from './mission-game.js?v=116';
+import {mountMissionGame} from './mission-game.js?v=132';
 import { initHeadquarters3D } from './headquarters3d.js?v=119';
 import {initial,get,put,del,allRecords,replaceRecords,compress,uid,gradeName} from './data.js';
 import {speak,listen,stopVoice,getVoiceState,setVoiceState,spellEnglish77} from './voice.js?v=131';
@@ -23,7 +23,7 @@ import {gameGroup92,recordGameAward92} from './learning-games92.js?v=92';
 import {mountLearningGames92} from './learning-play92.js?v=95';
 import {mountMissions93,missionNote93} from './missions93.js?v=103';
 import {mountHangar130 as mountHangar95} from './hangar130.js?v=131';
-import {trainingCatalog95,trainingSubject95,trainingGroupName95,outsideDeck95,trainingAssessment115,outsideMix115} from './training95.js?v=115';
+import {trainingCatalog95,trainingSubject95,trainingGroupName95,outsideDeck95,trainingAssessment115,outsideMix115} from './training95.js?v=132';
 import {mountPreschoolAudio93} from './preschool-audio93.js?v=116';
 import {MASTER_PRIZES86,MASTER_SCORE86,recordEnergy86,trainingRound86,trainingConsole86,unlockMaster86} from './base-training86.js?v=117';
 import {affordable82,purchase82,credit82} from './wallet82.js?v=82';
@@ -81,7 +81,7 @@ const select=(id,label,options,value)=>`<label for="${id}">${label}</label><sele
 const grades=[['P','Przedszkole'],...Array.from({length:12},(_,i)=>[String(i+1),`Klasa ${i+1}`])];
 const people=[['pawel','Paweł'],['patryk','Patryk']];
 const note=t=>{const n=$('hq85-notice')||$('notice');if(!n){console.warn('Powiadomienie:',t);return}n.textContent=t;n.classList.add('visible');setTimeout(()=>{if(n.isConnected)n.classList.remove('visible')},4500)};
-const ACADEMY_RELEASE=131;
+const ACADEMY_RELEASE=132;
 async function checkAcademyUpdate(button){
  if(!button||button.disabled)return;
  const label=button.textContent,controller=new AbortController();
@@ -1275,7 +1275,7 @@ function trainingList95(){
  const groups=trainingSubject95(trainingSelectedSubject)==='all'?[...new Set(items.map(item=>item.subject))]:[items[0]?.subject];
  return groups.map(group=>`${groups.length>1?`<h4>${e(trainingGroupName95(group))}</h4>`:''}
   <div class="tr71-grid tr95-game-list">${items.filter(item=>item.subject===group).map(item=>
-   `<button type="button" class="tr71-choice" data-action="training:play:${encodeURIComponent(item.id)}">${gamePreview99(item.kind,`<span aria-hidden="true">${item.icon}</span>`)}<strong>${e(item.name)}</strong></button>`).join('')}</div>`).join('');
+   `<button type="button" class="tr71-choice" data-action="training:play:${encodeURIComponent(item.id)}">${item.subject==='polski'&&['spelling','dictation'].includes(item.kind)?`<img class="game99-thumb" src="assets/space132/${item.kind==='dictation'?'robot':'astronauta'}.png" alt="" loading="lazy" decoding="async">`:gamePreview99(item.kind,`<span aria-hidden="true">${item.icon}</span>`)}<strong>${e(item.name)}</strong></button>`).join('')}</div>`).join('');
 }
 function trainingFlowMarkup(){
  if(trainingStep==='pick'){
@@ -1681,7 +1681,7 @@ function mountTraining95(p){
   });
  }
  const makeTasks=()=>trainingOutsideTasks115(g,grade,mixed);
- const launch={subject:trainingSelectedSubject,label:g.name,pageIds:[],mode:'game',tasks:[],repeat:makeTasks,onFinish:mixed?advance:null};
+ const launch={subject:trainingSelectedSubject,label:g.name,pageIds:[],mode:'game',tasks:[],repeat:makeTasks,onFinish:mixed?advance:null,...(g.subject==='polski'&&['spelling','dictation'].includes(g.kind)?{space132:g.kind,space132Resume:!mixed}:{})};
  return smMount95(root,'',launch,onBack);
 }
 function trainingOutsideTasks115(game,grade,one=false){

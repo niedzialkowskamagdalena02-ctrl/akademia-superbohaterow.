@@ -128,7 +128,7 @@ Object.defineProperty(global,'performance',{value:{now:()=>global.__testTime130|
    assert.deepEqual(calls,view==='walk'?[['room','hangar'],['show',undefined]]:[['show','hangar']]);
   }
  }
- const sw=vm.runInNewContext(fs.readFileSync(path.join(root,'sw.js'))+'\n({CACHE,ASSETS})',{self:{addEventListener(){}}});assert.equal(sw.CACHE,'academy-v131');
+ const sw=vm.runInNewContext(fs.readFileSync(path.join(root,'sw.js'))+'\n({CACHE,ASSETS})',{self:{addEventListener(){}}});assert.equal(sw.CACHE,'academy-v132');
  for(const entry of sw.ASSETS)assert(fs.existsSync(path.join(root,entry.split('?')[0])),entry);
  for(const a of assets)assert(sw.ASSETS.includes('./'+a.runtime));
  const removed=[...JSON.parse(fs.readFileSync(path.join(root,'scripts/hangar130-removed.json'))),...JSON.parse(fs.readFileSync(path.join(root,'scripts/hangar131-removed.json')))];for(const a of removed)assert(!fs.existsSync(path.join(root,a.path)),a.path);
