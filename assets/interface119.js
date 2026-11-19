@@ -1,5 +1,5 @@
 import {training121Subjects} from './interface121.js?v=121';
-import {training122Options,training122Material} from './interface122.js?v=122';
+import {training122Options,training122Material} from './interface122.js?v=123';
 // These are viewports onto the user's original files. No illustration is redrawn.
 const sheets={subjects:[1114,1536],range:[695,1536],modes:[1413,1536]};
 export function crop119(sheet,[x,y,w,h],extra=''){

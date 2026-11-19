@@ -1,0 +1,32 @@
+/* V123 changes only the two material/mode screens requested by Magda. */
+.academy122-material button,.academy122-options button{appearance:none!important;-webkit-appearance:none!important;background-clip:padding-box;outline:none}
+.academy122-material button::before,.academy122-material button::after,.academy122-options button::before,.academy122-options button::after{content:none!important;display:none!important}
+.academy122-material button:focus-visible,.academy122-options button:focus-visible{outline:3px solid #fff;outline-offset:-5px}
+
+/* Raise the range composition slightly; its artwork and hit areas travel
+   together. The back button stays at the original accessible top position. */
+.academy122-material{--academy123-lift:clamp(16px,3svh,26px);overflow:hidden}
+.academy122-material .academy122-scope-board{transform:translateY(calc(-1 * var(--academy123-lift)))}
+.academy122-material .academy122-scope-back{translate:0 var(--academy123-lift)}
+.academy122-material .academy122-all>strong{position:absolute;left:5%;right:5%;top:68.3%;color:#fff;font-size:5.85cqi;font-weight:900;line-height:1.14;text-align:center;letter-spacing:-.015em;text-shadow:0 .5cqi .5cqi #051025}
+
+/* Live vector back button. Its surrounding area is genuinely transparent. */
+:is(.academy122-material,.academy122-options) .academy122-back{position:relative;overflow:visible;background:none!important;border:0!important;box-shadow:none!important;color:#fff;isolation:isolate}
+.academy123-back-art{display:block;width:100%;height:100%;overflow:visible;pointer-events:none}
+.academy123-back-label{position:absolute;left:35%;right:11%;top:29%;font-size:4.4cqi;font-weight:850;line-height:1.2;text-align:center;color:#f1fbff;text-shadow:0 2px 2px #08264a;pointer-events:none}
+
+/* Center the mode group in the usable area below its existing heading.
+   Each card keeps its original aspect ratio; none is stretched vertically. */
+.academy122-options{display:flex;flex-direction:column;padding-bottom:max(18cqi,calc(16px + env(safe-area-inset-bottom)))}
+.academy122-options>.academy122-modes-header,.academy122-options>.academy122-subtitle{flex:none}
+.academy122-options>.academy122-mode-grid{width:100%;flex:none;margin-block:auto;padding-block:4cqi}
+.academy122-options button.academy122-mode{background:none!important;border:0!important;box-shadow:none!important;outline:0;-webkit-tap-highlight-color:transparent}
+.academy122-options button.academy122-mode:focus-visible{outline:3px solid white}
+
+/* A restrained runtime detail filter, rather than another lossy raster copy.
+   The original glow remains soft; live text is outside this image filter. */
+.academy123-filters{position:absolute;width:0;height:0;overflow:hidden;pointer-events:none}
+:is(.academy122-material,.academy122-options) .academy122-card-art{filter:url(#academy123-detail);image-rendering:auto}
+.academy122-material .academy122-scope-title>img{filter:url(#academy123-detail)}
+@media(max-height:560px){.academy122-options>.academy122-mode-grid{margin-block:2cqi}}
+@media(prefers-reduced-motion:reduce){.academy122-material *,.academy122-options *{animation:none!important;transition:none!important}}

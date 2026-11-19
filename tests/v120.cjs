@@ -45,8 +45,8 @@ const url=name=>pathToFileURL(path.join(root,'assets',name));
  assert.equal((markup.match(/hq120-entry/g)||[]).length,7);
  assert.doesNotMatch(markup,/hq119-plate-art|hq118-art|hq118-entry/);
  const cache=vm.runInNewContext(fs.readFileSync(path.join(root,'sw.js'),'utf8')+'\n({CACHE,ASSETS})',{self:{addEventListener(){}}});
- assert.equal(cache.CACHE,'academy-v122');
- for(const entry of ['base-panorama120.js?v=120','base-panorama120.css?v=120','hall-entries120.js?v=120','hq/panorama120/hall.webp','base-walk85.js?v=120','app.js?v=122'])assert.ok(cache.ASSETS.includes('./assets/'+entry));
+ assert.equal(cache.CACHE,'academy-v123');
+ for(const entry of ['base-panorama120.js?v=120','base-panorama120.css?v=120','hall-entries120.js?v=120','hq/panorama120/hall.webp','base-walk85.js?v=120','app.js?v=123'])assert.ok(cache.ASSETS.includes('./assets/'+entry));
  for(const asset of cache.ASSETS){assert.ok(fs.existsSync(path.join(root,asset.split('?')[0])),asset+' exists');}
  console.log(`PASS V120: ${poses} camera positions, ${samples} texture/touch projections, 7 supplied entrances without baked HUD/hands, offline assets.`);
 })().catch(e=>{console.error(e);process.exitCode=1;});

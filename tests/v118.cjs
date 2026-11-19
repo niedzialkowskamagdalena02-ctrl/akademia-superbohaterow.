@@ -59,7 +59,7 @@ const inside=([x,y],points)=>{
   assert.equal((markup.match(/ is-charged/g)||[]).length,energy.charged);
  }
  const manifest=vm.runInNewContext(fs.readFileSync(path.join(root,'sw.js'),'utf8')+'\n({CACHE,ASSETS})',{self:{addEventListener(){}}});
- assert.equal(manifest.CACHE,'academy-v122');
+ assert.equal(manifest.CACHE,'academy-v123');
  for(const url of ['base-walk85.js?v=120','base-views118.js?v=118','base-views118.css?v=118',...hallViews118.map(v=>v.src.replace('assets/',''))]){
   assert.ok(manifest.ASSETS.includes('./assets/'+url),'Offline: '+url);
  }

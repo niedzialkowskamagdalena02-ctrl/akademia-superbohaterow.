@@ -220,7 +220,7 @@ function board(){
   assert.match(schoolView.root.innerHTML,/data-action="training:books:all"/);
   assert.match(schoolView.root.innerHTML,/data-action="training:source:outside"/);
   assert.doesNotMatch(schoolView.root.innerHTML,/data-action="training:(mixed:start|catalog|assessment)"/);
-  assert.match(schoolView.root.innerHTML,/interface122\/scope-all\.webp/);
+  assert.match(schoolView.root.innerHTML,/interface123\/scope-all\.svg/);
   assert.match(schoolView.root.innerHTML,/interface122\/scope-pick\.webp/);
  }
  await schoolView.api.handle('training:source:outside');

@@ -1,5 +1,5 @@
-import {entry122} from './interface122.js?v=122';
-import {training119Subjects,training119Options} from './interface119.js?v=122';
+import {entry122} from './interface122.js?v=123';
+import {training119Subjects,training119Options} from './interface119.js?v=123';
 const art = (name, className = '') =>
   `<img class="academy102-art ${className}" src="assets/interface102/${name}.webp" alt="" draggable="false">`;
 const dashboardArt = (name) =>

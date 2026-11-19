@@ -48,7 +48,7 @@ const url=n=>pathToFileURL(path.join(root,'assets',n));
   await a.api.handle('training:back:source');assert.match(a.root.innerHTML,/data-v77-step="source"/);
  }
  const sw=vm.runInNewContext(fs.readFileSync(path.join(root,'sw.js'),'utf8')+'\n({CACHE,ASSETS})',{self:{addEventListener(){}}});
- assert.equal(sw.CACHE,'academy-v122');
+ assert.equal(sw.CACHE,'academy-v123');
  for(const name of ['interface121.js?v=121','interface121.css?v=121','interface121/source-map.js?v=121','interface121/hero-hulk.svg','interface121/hero-spider.svg'])assert.ok(sw.ASSETS.includes('./assets/'+name),name);
  for(const file of fs.readdirSync(path.join(root,'assets/interface121')).filter(n=>!n.endsWith('.json'))){
   assert.ok(sw.ASSETS.includes('./assets/interface121/'+file+(file.endsWith('.js')?'?v=121':'')),file+' offline');
