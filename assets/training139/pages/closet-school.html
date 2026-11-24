@@ -152,7 +152,7 @@ function render(){
  $('.cheer').hidden=$('.spark').hidden=true;$('#next').hidden=true;
  $('#round').textContent=(index+1)+' / '+rounds.length+' · '+current.name;
  $('.paw').hidden=current.animal!=='mis';
- $('.animal').src='grafiki/'+(current.animal==='mis'?'mis_korpus':current.animal)+'.png';$('.animal').alt=current.name;
+ $('.animal').src=Training139.asset('grafiki/'+(current.animal==='mis'?'mis_korpus':current.animal)+'.png');$('.animal').alt=current.name;
 
  $('.shirt').hidden=$('.shorts').hidden=true;
  $('.status').textContent='Wybierz koszulkę i spodenki.';

@@ -17,17 +17,20 @@ function setup(kind,mode,config,restore){
  const originalCreate=doc.createElement;doc.createElement=tag=>{const el=originalCreate(tag);toggle(el);return el;};
  const canvas=new Proxy({measureText:t=>({width:String(t).length*8}),getImageData:()=>({data:new Uint8ClampedArray(400*400*4)})},{get:(o,k)=>o[k]||(()=>{}),set:(o,k,v)=>(o[k]=v,true)});
  Element.prototype.getContext=()=>canvas;
+ const pageURL=new URL('assets/training139/pages/'+kind+'-'+mode+'.html',base),requestedImages=[];let context;
+ const checkURL=value=>{if(!value)return;const url=new URL(value,pageURL);if(url.protocol==='file:')assert(fs.existsSync(url),kind+' missing image '+url.href);requestedImages.push(url.href);};
  let saved={},advances=0,back=0,spoken=[],now=0,timers=[];
- const training={config,restore,asset:s=>s,css:s=>s,storage:{getItem:()=>null,setItem(){}},shuffle:x=>[...x],speak:s=>spoken.push(s),save:s=>{saved={...saved,...structuredClone(s)};},advance:()=>advances++,back:()=>back++,dragCargo(){}};
- class Image{constructor(){this.complete=true;this.naturalWidth=300;this.naturalHeight=300;}set src(v){this._src=v;this.onload?.();}get src(){return this._src;}}
+ const training={config,restore,asset:s=>!s?s:new URL(String(s).startsWith('assets/')?s:(context.TRAINING139_ASSETS[s]||s),String(s).startsWith('assets/')?base:pageURL).href,css:s=>String(s).replace(/url\(['"]?([^)'"\s]+)['"]?\)/g,(_,p)=>'url("'+training.asset(p)+'")'),storage:{getItem:()=>null,setItem(){}},shuffle:x=>[...x],speak:s=>spoken.push(s),save:s=>{saved={...saved,...structuredClone(s)};},advance:()=>advances++,back:()=>back++,dragCargo(){}};
+ class Image{constructor(){this.complete=true;this.naturalWidth=300;this.naturalHeight=300;}set src(v){checkURL(v);this._src=v;this.onload?.();}get src(){return this._src;}}
  const scope={console,document:doc,Training139:training,window:null,Image,performance:{now:()=>now},setTimeout:(fn,ms)=>{timers.push({at:now+ms,fn});return timers.length;},clearTimeout(){},requestAnimationFrame:fn=>0,cancelAnimationFrame(){},matchMedia:()=>({matches:true}),getComputedStyle:()=>({getPropertyValue:()=>''}),SpeechSynthesisUtterance:class{constructor(text){this.text=text;}},speechSynthesis:{cancel(){},speak:u=>spoken.push(u.text)},location:{reload(){back++;}},Math,JSON,Map,Set};scope.window=scope;scope.window.speechSynthesis=scope.speechSynthesis;
- const context=vm.createContext(scope);
+ context=vm.createContext(scope);
  const scripts=[...html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/g)].filter(m=>m[2].trim()&&!m[1].includes('module'));
  for(const m of scripts)vm.runInContext(m[2],context,{filename:path.basename(file),timeout:3000});
- const run=s=>vm.runInContext(s,context,{timeout:3000});
+ const checkImages=()=>{for(const img of doc.querySelectorAll('img'))checkURL(img.src);};checkImages();
+ const run=s=>{const value=vm.runInContext(s,context,{timeout:3000});checkImages();return value;};
  const click=selector=>{const b=doc.querySelector(selector);assert(b,kind+' missing '+selector);b.onclick?.({target:b,preventDefault(){},stopPropagation(){}});return b;};
  const flush=async(ms=10000)=>{now+=ms;for(let n=0;n<20;n++){now+=ms;const ready=timers.filter(t=>t.at<=now);timers=timers.filter(t=>t.at>now);for(const t of ready)t.fn();await Promise.resolve();if(!ready.length)break;}};
- return {doc,run,click,flush,training,get saved(){return saved;},get advances(){return advances;},spoken};
+ return {doc,run,click,flush,training,checkImages,requestedImages,get saved(){return saved;},get advances(){return advances;},spoken};
 }
 (async()=>{
  global.document={baseURI:base.href};global.fetch=async url=>({ok:true,json:async()=>JSON.parse(fs.readFileSync(new URL(url),'utf8'))});global.localStorage={getItem:()=>null,setItem(){}};
@@ -58,7 +61,8 @@ function setup(kind,mode,config,restore){
  }
  for(const mode of ['pre','school']){
   const config=await frameConfig139({game:{kind:'closet'},grade:mode==='pre'?'P':'2',subject:'matematyka',tasks,child:'one',preview:true,signal:new AbortController().signal,material:'',restore:null});
-  const f=setup('closet',mode,config);assert.equal(f.run('animals.length'),8);const target=f.run('school?rounds[index].topTask[2]:rounds[index].target');const pick=f.doc.querySelectorAll('#tops .pick').find(b=>b.textContent===target);assert(pick);pick.onclick();assert(f.saved.selected.top!==undefined);const restore=setup('closet',mode,config,f.saved);assert.equal(restore.saved.selected.top,f.saved.selected.top);
+  const f=setup('closet',mode,config);assert.equal(f.run('animals.length'),8);for(const [animal,name]of f.run('animals')){f.run(`rounds[index].animal=${JSON.stringify(animal)};rounds[index].name=${JSON.stringify(name)};render()`);f.run(`refuse(${JSON.stringify(animal)})`);f.checkImages();}
+  const target=f.run('school?rounds[index].topTask[2]:rounds[index].target');const pick=f.doc.querySelectorAll('#tops .pick').find(b=>b.textContent===target);assert(pick);pick.onclick();assert(f.saved.selected.top!==undefined);const restore=setup('closet',mode,config,f.saved);assert.equal(restore.saved.selected.top,f.saved.selected.top);
  }
  {
   const {alphabet92}=await import(new URL('assets/learning-games92.js',base));const routes=Object.fromEntries([...alphabet92,...alphabet92.map(c=>c.toLocaleLowerCase('pl'))].map(c=>[c,[[[100,100],[112,100]]]]));

@@ -48,7 +48,7 @@ for kind,folder in packs.items():
   for source,target in sorted(mapping.items(),key=lambda x:-len(x[0])):html=html.replace(source,target)
   def scripts(match):
    s=match[1]
-   s=re.sub(r'(\b[\w.$()]+\.src\s*=)\s*([^;\n]+);',r'\1Training139.asset(\2);',s)
+   s=re.sub(r'(\.src\s*=\s*)([^;\n]+);',lambda m:m[0] if m[2].lstrip().startswith('Training139.asset(') else m[1]+'Training139.asset('+m[2]+');',s)
    s=re.sub(r'(\.style\.backgroundImage\s*=)\s*([^;\n]+);',r'\1Training139.css(\2);',s)
    s=s.replace('localStorage.getItem','Training139.storage.getItem').replace('localStorage.setItem','Training139.storage.setItem')
    if kind in ['letters','numbers']:

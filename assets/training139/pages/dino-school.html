@@ -44,7 +44,7 @@ function round(){
   $('#bubble-text').textContent=current.dymek;
  }else{
   $('#task').textContent='Podaj dinozaurowi jajko z pierwszą literą nazwy obrazka.';
-  $('#objet').src=current.plik;$('#objet').alt=current.nazwa;
+  $('#objet').src=Training139.asset(current.plik);$('#objet').alt=current.nazwa;
  }
  $('#score').textContent='Punkty: '+score;
  notice.textContent='Wybierz i przeciągnij jajko albo stuknij w jajko, a potem w dinozaura.';

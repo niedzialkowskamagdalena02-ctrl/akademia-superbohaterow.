@@ -23,7 +23,7 @@ for(const [i,entry] of scenes.entries()){
 }
 function setScene(i){
  scene=i;select.value=i;
- $('#background').src=scenes[i][1];
+ $('#background').src=Training139.asset(scenes[i][1]);
  $('#background').alt=scenes[i][0];
  for(const [index,object] of board.querySelectorAll('.object').entries())setProp(object,index);
 }
@@ -36,7 +36,7 @@ function say(text){
 }
 function setProp(button,index){
  const [prop,y]=props[(index+scene+round)%props.length];
- button.querySelector('img').src='grafiki/'+prop+'.png';
+ button.querySelector('img').src=Training139.asset('grafiki/'+prop+'.png');
  button.style.setProperty('--letter-y',y);
 }
 function render(){

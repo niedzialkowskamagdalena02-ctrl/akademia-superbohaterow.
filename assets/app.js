@@ -1,5 +1,5 @@
 import {trainingCatalog139,trainingReady139,decorateTasks139,schoolTasks139} from './training139-catalog.js?v=140';
-import {mountTrainingPackage139,materialTasks139,trainingScope139} from './training139-player.js?v=140';
+import {mountTrainingPackage139,materialTasks139,trainingScope139} from './training139-player.js?v=141';
 import {training124Picker,voice124,art124,pageCount124} from './interface124.js?v=124';
 import {training119Range} from './interface119.js?v=124';
 import {gamePreview99, hangarPaint99} from './game-art99.js?v=130';
@@ -16,7 +16,7 @@ import {syncAdapter} from './sync.js?v=81';
 import {BASE_ITEMS,baseMarkup,migrateBase} from './base.js?v=119';
 import {mountArcade,stopArcade} from './arcade.js?v=93';
 import {mountBaseScene84} from './base-scene84.js?v=117';
-import {baseWalkMarkup,mountBaseWalk,resetBaseWalk,openWalkRoom87,focusWalkCase88,walkRoomId93} from './base-walk85.js?v=138';
+import {baseWalkMarkup,mountBaseWalk,resetBaseWalk,openWalkRoom87,focusWalkCase88,walkRoomId93} from './base-walk85.js?v=141';
 import {HQ_SLOTS,hqItems,hqRead,hqBalances,hqEarnToken,hqSpendToken,hqRecordCrystals,hqBuyWithGems,hqPlaced,hqPlace,hqDisplayPurchase88,hqPet,hqChoosePet88,hqPaint,hqEarnFood,hqMarkup,hqWallet,hqShop,hqFoodQuiz88} from './headquarters84.js?v=117';
 import {petRoom86,petCareMarkup86,petPicker88,mountPetCare86,setPetCare86,servePet87} from './pet-care86.js?v=117';
 import {flightMarkup88,mountNounFlight88} from './noun-flight88.js?v=103';
@@ -83,7 +83,7 @@ const select=(id,label,options,value)=>`<label for="${id}">${label}</label><sele
 const grades=[['P','Przedszkole'],...Array.from({length:12},(_,i)=>[String(i+1),`Klasa ${i+1}`])];
 const people=[['pawel','Paweł'],['patryk','Patryk']];
 const note=t=>{const n=$('hq85-notice')||$('notice');if(!n){console.warn('Powiadomienie:',t);return}n.textContent=t;n.classList.add('visible');setTimeout(()=>{if(n.isConnected)n.classList.remove('visible')},4500)};
-const ACADEMY_RELEASE=140;
+const ACADEMY_RELEASE=141;
 async function checkAcademyUpdate(button){
  if(!button||button.disabled)return;
  const label=button.textContent,controller=new AbortController();

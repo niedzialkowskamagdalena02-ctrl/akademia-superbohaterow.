@@ -84,7 +84,7 @@ export function mountTrainingPackage139(root,options){
  (async()=>{
   try{config=await frameConfig139({...options,signal,restore,subject});if(signal.aborted)return;window.__academyTraining139.set(session,config);
    const page=packagePages139[game.kind]?.[grade==='P'?'pre':'school']||packagePages139[game.kind]?.pre;if(!page)throw Error('Brak wersji gry dla tego poziomu.');
-   frame=document.createElement('iframe');frame.title=game.name;frame.className='training139-frame';frame.setAttribute('sandbox','allow-scripts allow-same-origin');frame.hidden=true;frame.src=page+'#session='+encodeURIComponent(session);root.querySelector('[data-t139-stage]').append(frame);
+   frame=document.createElement('iframe');frame.title=game.name;frame.className='training139-frame';frame.setAttribute('sandbox','allow-scripts allow-same-origin');frame.hidden=true;frame.src=page+'?v=141#session='+encodeURIComponent(session);root.querySelector('[data-t139-stage]').append(frame);
    if(generate&&['rhymes','closet'].includes(game.kind)&&!preview){
     const objects=await readJSON139('assets/training139/objects.json',signal);void replenish139({game:game.kind,grade,subject,material,verifiedTasks:tasks,objects,ask:generate,signal,key:poolKey139(child,game.kind,scope)});
    }

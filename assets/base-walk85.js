@@ -1,6 +1,7 @@
+import {hallLoadingMarkup141,mountHallLoading141} from './hall-loading141.js?v=141';
 import {hallPoint120,hallDoor120,hallSurface120,hallOutline120,placeHallHit120,hallDensity125} from './base-panorama125.js?v=125';
 import {hallDetails125} from './hall-details125.js?v=125';
-import {createHallView138,hallPoint138,placeHallEntrance138,hallScenes138,hallDefault138,hallAnchor138,clampHall138,hallFov138} from './hall-view138.js?v=138';
+import {createHallView138,hallPoint138,placeHallEntrance138,hallScenes138,hallDefault138,hallAnchor138,clampHall138,hallFov138} from './hall-view138.js?v=141';
 import {panoramaSoftware119} from './panorama-software119.js?v=128';
 import {hqPet,hqPlaced,hqRead} from './headquarters84.js?v=117';
 import {baseArt88} from './base-art88.js?v=119';
@@ -38,8 +39,8 @@ export function baseWalkMarkup(profile,child,hero,release,panel,mic=''){
   prop('shop',.892,.507,true,baseArt88('boots'),'shop-boots','','hq88-shop-display');
  const {crystals,charged,capacity,level}=energy86(profile);
  return `<section class="hq86-walk" data-hq84-scene data-hq86-walk data-child="${child}" data-hero="${hero}" data-hand-attribute="${heroAbility130(hero,profile.base?.owned??[],child)?1:0}" data-jet="${jet?paint:school?'blue':''}">
-  <div class="hq86-stage" tabindex="0" aria-label="Przesuń palcem poza dłońmi, aby się rozejrzeć. Przytrzymaj ekran poza dłońmi, żeby iść. Stuknij dłoń: cios. Dwa szybkie stuknięcia w tę samą dłoń: moc. Przesuń prawą dłoń w górę, żeby wyjąć przedmiot; w dół, żeby go schować. Klawiatura: strzałki i spacja, F — lewa, G — prawa dłoń.">
-   <div class="hq86-fallback" aria-hidden="true"></div>
+  <div class="hq86-stage is-loading141" tabindex="0" aria-label="Przesuń palcem poza dłońmi, aby się rozejrzeć. Przytrzymaj ekran poza dłońmi, żeby iść. Stuknij dłoń: cios. Dwa szybkie stuknięcia w tę samą dłoń: moc. Przesuń prawą dłoń w górę, żeby wyjąć przedmiot; w dół, żeby go schować. Klawiatura: strzałki i spacja, F — lewa, G — prawa dłoń.">
+   ${hallLoadingMarkup141()}<div class="hq86-fallback" aria-hidden="true"></div>
    <canvas class="hq119-software" aria-hidden="true"></canvas>
    <canvas class="hq86-world" aria-hidden="true"></canvas><canvas class="hq138-hall" aria-hidden="true"></canvas><canvas class="hq86-hands" aria-hidden="true"></canvas>
    ${Object.entries(walkRooms).flatMap(([room,value])=>value.points.map((p,i)=>{
@@ -254,6 +255,7 @@ export function mountBaseWalk(root){
  let world=panoramaWorld(canvas)??panoramaSoftware119(software),width=0,height=0,frame=0,last=0,step=0;
  stage.dataset.renderer=world?.kind??'webgl';
  let pointer=null,transition=null,busy=false,effect=null,ignoreClickUntil=0,forwarding=false;
+ let loading141=null,loadSerial141=0;const loadingUI141=mountHallLoading141(stage,{signal,onRetry:()=>void load()});
  let portraitRatio=.73,sceneMarkers=[],greeting=null;
  let ironArt=null,jetBounds=null;
  let gestures=null,powerQueue=[];
@@ -272,6 +274,7 @@ export function mountBaseWalk(root){
  function renderSoon(){if(!frame)frame=requestAnimationFrame(draw);}
  function syncPowerControls(){
   if(signal.aborted)return;
+  refreshLoading141();
   const status=stage.querySelector('.hq127-status');
   if(status)status.textContent=heroPlayer.loading?'Przygotowuję ruchy… '+heroPlayer.progress:heroPlayer.error;
  }
@@ -301,10 +304,10 @@ export function mountBaseWalk(root){
   if(!width||!height)return;
   const density=hallDensity125(width,height,window.devicePixelRatio);
   for(const surface of [canvas,hands,hallCanvas]){
-   surface.width=Math.round(width*density);surface.height=Math.round(height*density);
+   const w=Math.round(width*density),h=Math.round(height*density);if(surface.width!==w)surface.width=w;if(surface.height!==h)surface.height=h;
   }
   const softDensity=hallDensity125(width,height,window.devicePixelRatio,true);
-  software.width=Math.round(width*softDensity);software.height=Math.round(height*softDensity);
+  const sw=Math.round(width*softDensity),sh=Math.round(height*softDensity);if(software.width!==sw)software.width=sw;if(software.height!==sh)software.height=sh;
   renderSoon();
  }
  function setMarkers(){
@@ -319,40 +322,55 @@ export function mountBaseWalk(root){
     outline:p.panel120?hallOutline120(room(),p.panel120):null});
   }
  }
+ function refreshLoading141(){
+  if(!loading141)return;
+  const p=heroPlayer.progress.split('/').map(Number),hand=loading141.handsDone?100:p[1]?Math.min(96,p[0]/p[1]*96):0;
+  const percent=loading141.art*.75+hand*.20+(loading141.sceneReady?5:0);
+  loadingUI141.progress(Math.min(99,percent),loading141.art<100?'Wczytuję pomieszczenia i wystrój bazy…':!loading141.handsDone?'Przygotowuję ruchy postaci…':'Przygotowuję widok…');
+ }
  async function load(){
-  const selected=room();
+  const selected=room(),ticket=++loadSerial141;
+  loading141={art:0,handsDone:!heroPlayer.supported,sceneReady:false,file:''};loadingUI141.begin(selected.name);
   busy=true;stage.setAttribute('aria-busy','true');
   location.textContent=selected.name;stage.dataset.room=state().room;
   back.hidden=stack.length===1;menu.hidden=false;stage.dataset.canBack=String(stack.length>1);
   greeting=null;sceneMarkers=[];markers.forEach(marker=>marker.hidden=true);
   jetBounds=null;
   gestures.cancel();powerQueue=[];heroPlayer.stop();syncPowerControls();
-  if(heroPlayer.supported)void heroPlayer.prepareGesture(gestureModes130(hero,unlocked));
+  const handsReady141=heroPlayer.supported?heroPlayer.prepareGesture(gestureModes130(hero,unlocked)).then(()=>{if(ticket===loadSerial141&&!signal.aborted&&loading141){loading141.handsDone=true;refreshLoading141();}}):Promise.resolve();
   fallback.style.backgroundImage=`url("assets/hq/${roomImage93(selected.portrait??selected.art)}")`;
   fallback.classList.toggle('has-portrait',!!selected.portrait);
+  let success=false;
   try{
    if(selected===walkRooms.hall){
-    await hallView.load(state());
-    if(signal.aborted)return;
+    await hallView.load(state(),{onProgress:progress=>{if(ticket!==loadSerial141||signal.aborted||!loading141)return;loading141.art=progress.percent;loading141.file=progress.file;refreshLoading141();}});
+    if(signal.aborted||ticket!==loadSerial141)return;
     stage.classList.add('has-depth');
    }else{
     hallView.deactivate();
     const [image,front]=await Promise.all([image86(roomImage93(selected.art)),selected.portrait?image86(roomImage93(selected.portrait)):null]);
-    if(signal.aborted)return;
+    if(signal.aborted||ticket!==loadSerial141)return;
     portraitRatio=front?front.naturalWidth/front.naturalHeight:.73;
     world?.load(image,front,selected,null);
     stage.classList.toggle('has-depth',!!world);
    }
-  }catch{
-   if(signal.aborted)return;
+   loading141.art=100;loading141.sceneReady=true;refreshLoading141();
+   await handsReady141;if(signal.aborted||ticket!==loadSerial141)return;
+   success=true;busy=false;setMarkers();syncPowerControls();renderSoon();
+   await loadingUI141.finish();
+   if(!signal.aborted&&ticket===loadSerial141&&selected===walkRooms.hall)hallView.draw(state(),true);
+  }catch(error){
+   if(signal.aborted||ticket!==loadSerial141)return;
    stage.classList.remove('has-depth');
-   if(selected===walkRooms.hall)location.textContent='Hol — nie udało się wczytać widoku';
+   location.textContent=selected.name+' — nie udało się wczytać widoku';
+   loadingUI141.fail(error.message);console.warn('Widok bazy:',error);
   }finally{
-   if(!signal.aborted){
-    busy=false;stage.setAttribute('aria-busy','false');stage.classList.remove('is-travelling');setMarkers();syncPowerControls();renderSoon();
+   if(!signal.aborted&&ticket===loadSerial141){
+    loading141=null;busy=!success;stage.setAttribute('aria-busy','false');stage.classList.remove('is-travelling');syncPowerControls();renderSoon();
    }
   }
  }
+
  function project(basis,fx,fy,point){
   const view=state(),dx=point[0]-view.x,dy=point[1],dz=point[2]-view.z;
   const depth=dx*basis[6]+dy*basis[7]+dz*basis[8];

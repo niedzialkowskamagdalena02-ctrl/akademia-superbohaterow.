@@ -1,5 +1,6 @@
-import {hallScene138} from './hall-scene138.js?v=138';
-import {createLayeredHall137,hallGeometry137,hallCamera137} from './hall-layered137.js?v=138';
+import {createHallAssets141} from './hall-assets141.js?v=141';
+import {hallScene138} from './hall-scene138.js?v=141';
+import {createLayeredHall137,hallGeometry137,hallCamera137} from './hall-layered137.js?v=141';
 const TURN=Math.PI*2,OFFSET=(.5-.155)*TURN;
 const scene=hallScene138,geometry=hallGeometry137(scene),base=new URL('./hq/hall138/',import.meta.url);
 const mod=(x,n)=>(x%n+n)%n;
@@ -42,37 +43,44 @@ export function placeHallEntrance138(marker,point,snapshot,width,height){
  marker.style.width=width+'px';marker.style.height=height+'px';
  marker.style.clipPath='polygon('+region.polygon.map(([x,y])=>`${x*width/snapshot.width}px ${y*height/snapshot.height}px`).join(',')+')';
 }
-const image=file=>new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>reject(Error('Nie udało się wczytać nowego holu.'));im.src=new URL(file,base).href;});
 export function createHallView138(canvas,changed=()=>{}){
- let active=false,renderer=null,pending=null,token=0,snapshot=null,soft=null,softCanvas=null,images=null,controller=null;
- function fallback(){
+ let active=false,renderer=null,pending=null,token=0,snapshot=null,soft=null,softCanvas=null,assets=null,controller=null,lastState=null;
+ async function fallback(){
+  await assets.loadAll();
   if(!softCanvas){softCanvas=document.createElement('canvas');softCanvas.className='hq138-soft';softCanvas.setAttribute('aria-hidden','true');canvas.after(softCanvas);soft=softCanvas.getContext('2d',{alpha:false});}
   if(!soft)throw Error('Brak obsługi grafiki w przeglądarce.');
   canvas.dataset.fallback='true';softCanvas.hidden=!active;
-  return Promise.all(['png/ramka.png',...scene.rooms.flatMap(r=>[r.image,r.sign].filter(Boolean))].map(async file=>[file,await image(file)])).then(rows=>{if(!controller.signal.aborted)images=new Map(rows);});
  }
  function drawSoftware(state){
-  const w=canvas.width,h=canvas.height;softCanvas.width=w;softCanvas.height=h;
-  const index=mod(Math.round(state.yaw/(TURN/8)),8),room=scene.rooms[index],frame=images.get('png/ramka.png'),photo=images.get(room.image),scale=Math.max(w/frame.width,h/frame.height);
-  const rw=frame.width*scale,rh=frame.height*scale,x=(w-rw)/2,y=Math.max(h-rh,Math.min(0,(h-rh)/2+state.pitch*h*.2));
+  const w=canvas.width,h=canvas.height;if(softCanvas.width!==w)softCanvas.width=w;if(softCanvas.height!==h)softCanvas.height=h;
+  const index=mod(Math.round(state.yaw/(TURN/8)),8),room=scene.rooms[index],frame=assets.get('ramka.png'),photo=assets.get(room.image),fw=frame.naturalWidth||frame.width,fh=frame.naturalHeight||frame.height,scale=Math.max(w/fw,h/fh);
+  const rw=fw*scale,rh=fh*scale,x=(w-rw)/2,y=Math.max(h-rh,Math.min(0,(h-rh)/2+state.pitch*h*.2));
   soft.fillStyle='#10263c';soft.fillRect(0,0,w,h);soft.imageSmoothingQuality='high';soft.drawImage(photo,x,y,rw,rh);soft.drawImage(frame,x,y,rw,rh);
   let rect=[x+rw*.08,y+rh*.13,rw*.84,rh*.8];
-  if(room.sign){const sign=images.get(room.sign),sw=rw*.73,sh=sw*sign.height/sign.width,sx=(w-sw)/2,sy=y+rh*.82;soft.drawImage(sign,sx,sy,sw,sh);rect=[sx,sy,sw,sh];}
+  if(room.sign){const sign=assets.get(room.sign),sw=rw*.73,sh=sw*(sign.naturalHeight||sign.height)/(sign.naturalWidth||sign.width),sx=(w-sw)/2,sy=y+rh*.82;soft.drawImage(sign,sx,sy,sw,sh);rect=[sx,sy,sw,sh];}
   const [rx,ry,ww,hh]=rect;return [{scene:room.id,room:room.id==='globe'?'training':room.id,visible:true,polygon:[[rx,ry],[rx+ww,ry],[rx+ww,ry+hh],[rx,ry+hh]]}];
  }
  const api={
-  async load(state){
-   const mine=++token;active=true;
-   if(!pending){controller=new AbortController();pending=createLayeredHall137(canvas,scene,{baseURL:base.href,signal:controller.signal}).then(r=>{renderer=r;}).catch(error=>{if(controller.signal.aborted)throw error;return fallback();}).catch(e=>{pending=null;throw e;});}
-   await pending;if(mine!==token)return;if(softCanvas)softCanvas.hidden=false;changed();
+  async load(state,{onProgress=()=>{}}={}){
+   const mine=++token;active=true;lastState=state;
+   if(!pending){
+    controller?.abort();assets?.free();controller=new AbortController();
+    assets=createHallAssets141(scene,{baseURL:base.href,signal:controller.signal,onProgress:p=>onProgress(p)});
+    pending=(async()=>{try{renderer=await createLayeredHall137(canvas,scene,{baseURL:base.href,signal:controller.signal,assets});canvas.dataset.fallback='false';}catch(error){if(controller.signal.aborted)throw error;renderer?.free();renderer=null;await fallback();}})().catch(error=>{pending=null;controller.abort();assets?.free();throw error;});
+   }
+   await pending;if(mine!==token||!active)return false;
+   if(softCanvas)softCanvas.hidden=!soft;
+   try{api.draw(state);}catch(error){renderer?.free();renderer=null;await fallback();api.draw(state);}
+   onProgress({percent:100,phase:'ready'});changed();return true;
   },
-  draw(state){if(!active||!renderer&&!images)return null;const live=hallState138(state),w=canvas.width,h=canvas.height;
-   if(renderer)renderer.draw(live);const regions=renderer?hallRegions138(live,w,h):drawSoftware(live);snapshot={regions,width:w,height:h};return snapshot;
+  draw(state,force=false){if(!active||!renderer&&!soft)return null;lastState=state;const live=hallState138(state),w=canvas.width,h=canvas.height;
+   if(!w||!h)throw Error('Widok holu nie ma rozmiaru.');
+   if(renderer)renderer.draw(live,force);const regions=renderer?hallRegions138(live,w,h):drawSoftware(live);snapshot={regions,width:w,height:h};return snapshot;
   },
   snapshot:()=>snapshot,
   deactivate(){active=false;token++;snapshot=null;if(softCanvas)softCanvas.hidden=true;},
-  free(){api.deactivate();controller?.abort();renderer?.free();renderer=null;pending=null;images=null;softCanvas?.remove();}
+  free(){api.deactivate();controller?.abort();renderer?.free();assets?.free();renderer=null;pending=null;assets=null;softCanvas?.remove();softCanvas=null;soft=null;}
  };
- canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();renderer?.free();renderer=null;void fallback().then(changed).catch(()=>{});});
+ canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();if(!active||!assets||controller.signal.aborted)return;renderer?.free();renderer=null;void fallback().then(()=>{if(active&&lastState)api.draw(lastState);changed();}).catch(error=>canvas.dispatchEvent(new CustomEvent('hall141:error',{detail:{message:error.message}})));});
  return api;
 }

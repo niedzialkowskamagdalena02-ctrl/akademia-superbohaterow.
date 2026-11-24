@@ -1,0 +1,12 @@
+export function hallLoadingMarkup141(){return `<section class="hq141-loader" data-walk-loading role="status" aria-live="polite"><img class="hq141-loader-backdrop" src="assets/hq/hall138/fallback.png" alt="" decoding="async"><div class="hq141-loader-card"><h2 data-walk-loading-title>Wczytuję bazę…</h2><p data-walk-loading-detail>Przygotowuję grafiki holu.</p><div class="hq141-progress" role="progressbar" aria-label="Wczytywanie bazy" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span data-walk-loading-bar></span></div><strong data-walk-loading-percent>0%</strong><button type="button" data-walk-retry hidden>Spróbuj ponownie</button><button type="button" data-action="hq:view:menu">‹ Wybór widoku</button></div></section>`;}
+export function mountHallLoading141(stage,{signal,onRetry}){
+ const panel=stage.querySelector('[data-walk-loading]'),title=stage.querySelector('[data-walk-loading-title]'),detail=stage.querySelector('[data-walk-loading-detail]'),bar=stage.querySelector('[data-walk-loading-bar]'),percent=stage.querySelector('[data-walk-loading-percent]'),progress=stage.querySelector('.hq141-progress'),retry=stage.querySelector('[data-walk-retry]');let generation=0,value=0;
+ panel.addEventListener('pointerdown',event=>event.stopPropagation(),{signal});
+ retry.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();onRetry();},{signal});
+ const api={
+  begin(name='bazę'){generation++;value=0;panel.hidden=false;retry.hidden=true;stage.classList.add('is-loading141');stage.classList.remove('has-load-error141');title.textContent=name==='Hol główny'||name==='Hol'?'Wczytuję bazę…':'Wczytuję '+name+'…';api.progress(0,'Przygotowuję grafiki.');},
+  progress(amount,message){value=Math.max(value,Math.min(100,Math.floor(Number(amount)||0)));bar.style.width=value+'%';percent.textContent=value+'%';progress.setAttribute('aria-valuenow',String(value));if(message)detail.textContent=message;},
+  async finish(){const mine=generation;api.progress(100,'Baza gotowa.');for(let i=0;i<2;i++)await new Promise(resolve=>requestAnimationFrame(resolve));if(signal.aborted||mine!==generation)return false;panel.hidden=true;stage.classList.remove('is-loading141');return true;},
+  fail(message){generation++;stage.classList.add('is-loading141','has-load-error141');panel.hidden=false;retry.hidden=false;title.textContent='Nie udało się wczytać widoku';detail.textContent=String(message||'Sprawdź połączenie i spróbuj ponownie.');}
+ };return api;
+}
