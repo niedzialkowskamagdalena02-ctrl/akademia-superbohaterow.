@@ -1,0 +1,126 @@
+<!doctype html><html lang="pl"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kosmiczna misja</title>
+<script>window.TRAINING139_ASSETS={"grafiki/fala_dzwiekowa.png": "../../space132/fala_dzwiekowa.png", "grafiki/tlo.png": "../../space132/tlo.png", "grafiki/gwiazda.png": "../../space132/gwiazda.png", "grafiki/rakieta_przezroczysta.png": "../../space132/rakieta_przezroczysta.png", "grafiki/mikrofon.png": "../../space132/mikrofon.png", "grafiki/astronauta.png": "../../space132/astronauta.png", "grafiki/skrzynia.png": "../../space132/skrzynia.png", "grafiki/robot.png": "../../space132/robot.png"};</script><script src="../frame-bridge.js?v=140"></script><style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;color:#f1f6ff;background:#061439 url(../../space132/tlo.png) center/cover fixed;font:16px system-ui}main{width:min(100%,700px);margin:auto;padding:20px clamp(14px,4vw,36px)}header,.row,.answers{display:flex;align-items:center;gap:10px;flex-wrap:wrap}header{justify-content:space-between}h1{margin:5px 0;color:#ffdc7b;font-size:clamp(26px,6vw,47px);line-height:1.05}header img{width:58px;height:65px;object-fit:contain}button{position:relative;min-height:44px;color:#fff;background:linear-gradient(#315a92,#172c55);border:2px solid #7fc5f3;border-radius:13px;padding:8px 13px;font:inherit;font-weight:bold;cursor:pointer}button:focus-visible{outline:3px solid #ffda77}button:disabled{cursor:default}.counter{margin:13px 0 10px}.track{margin:8px 38px 17px 0;height:12px;position:relative;border:1px solid #67d8ff;background:#1a3261;border-radius:20px}.fill{width:var(--progress,0%);height:100%;background:linear-gradient(90deg,#58ddfa,#ffe095);border-radius:20px;transition:width .45s}.ship,.treasure,.star{position:absolute;top:50%;transform:translate(-50%,-50%);object-fit:contain}.ship{width:50px;left:var(--progress,0%);transition:left .45s;z-index:1}.treasure{right:-57px;width:45px}.star{left:50%;width:23px}.guide{display:flex;align-items:center;gap:5px;position:relative;margin:6px 0}.guide img{width:clamp(76px,23vw,130px);height:120px;object-fit:contain}.guide .wave{display:none;width:60px;height:48px;position:absolute;left:0;bottom:0}.listening .wave{display:block}.guide p{background:#e4f7ff;color:#142a48;border-radius:15px;padding:10px 15px;font-weight:700}article{background:#122953ec;border:2px solid #80d7ff;border-radius:22px;padding:clamp(15px,4vw,27px);box-shadow:0 0 17px #2fbee84f}h2{margin:10px 0;font-size:clamp(23px,4vw,32px)}blockquote{margin:0;padding:14px;background:#081b3f;border-left:4px solid #81dbff;font-size:19px;line-height:1.5}mark{background:#ffdf7b;color:#17274b;border-radius:3px}.answers{margin-top:14px;align-items:stretch}.answers button{flex:1 1 87px;min-height:57px;font-size:19px;overflow-wrap:anywhere}.good{background:#17644c!important;border-color:#98ffc1}.bad{background:#725223!important;border-color:#ffda75}.feedback{min-height:23px;margin:9px 0}.effect{display:flex;gap:6px;flex-wrap:wrap}.effect span{padding:4px 9px;border-radius:8px;background:#5a4385;border:1px solid #e2c7ff;animation:pop .35s both}.effect span:nth-child(2){animation-delay:.10s}.effect span:nth-child(3){animation-delay:.20s}@keyframes pop{0%{opacity:0;transform:translateY(7px) scale(.9)}}.foot{margin-top:13px}.foot .mic{padding:0;background:transparent;border:0}.mic img{width:50px;display:block}.gold{background:linear-gradient(#ffe7a3,#d6a44c);color:#14233b;border-color:#ffe0a4}[hidden]{display:none!important}@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.target{display:flex;align-items:center;gap:12px;margin:16px 0}.target strong{display:grid;place-items:center;width:78px;height:78px;border-radius:19px;background:linear-gradient(#fff0a8,#e9ae40);color:#172548;font-size:50px;box-shadow:0 0 24px #ffc86b65}.answer-tile{flex:1 1 74px;display:grid;gap:6px}.answer-tile button:first-child{font-size:34px}.sound{font-size:15px}.effect span{font-size:30px;background:#17644c}
+.answer-tile button:first-child{background:linear-gradient(145deg,#245b80,#15305a);box-shadow:0 0 13px #53d6fc35}.answer-tile .good{background:#17644c!important}.answer-tile .bad{background:#725223!important}</style><style>#filter,#scene,#random{display:none!important}body .lg92-trace-board{background:#fff9e9}body [data-trace-start]{fill:#ffc83d;filter:drop-shadow(0 0 3px #f0b800)}.slots.complete{box-shadow:0 0 20px #79edb1}.training139-paused{pointer-events:none;filter:blur(3px)}body.training139-paused *{animation-play-state:paused!important}</style>
+<main><header><button id="restart">← Od nowa</button><img src="../../space132/astronauta.png" alt=""></header><h1></h1>
+<p class="counter" id="count"></p><div class="track" aria-hidden="true"><div class="fill"></div><img class="star" src="../../space132/gwiazda.png" alt=""><img class="ship" src="../../space132/rakieta_przezroczysta.png" alt=""><img class="treasure" src="../../space132/skrzynia.png" alt=""></div>
+<div class="row"><button id="read">Odczytaj polecenie</button><button id="pause">Pauza</button></div>
+<div class="guide"><img src="../../space132/robot.png" alt=""><img class="wave" src="../../space132/fala_dzwiekowa.png" alt=""><p id="guide"></p></div>
+<article><blockquote hidden></blockquote><h2></h2><div class="target"><button id="hear">Posłuchaj liczby</button></div><div class="answers"></div><p class="feedback" role="status"></p><div class="effect"></div><button class="gold" id="next" hidden>Dalej</button></article>
+<div class="row foot"><button id="skip">Pomiń bez zaliczenia</button><button id="ai">Zapytaj nauczyciela AI</button><button class="mic" id="mic" aria-label="Zadaj pytanie przez mikrofon"><img src="../../space132/mikrofon.png" alt=""></button></div>
+<p id="info" role="status"></p></main>
+<script>
+
+const config=Training139.restore?.config||Training139.config.letterConfig;
+const $=s=>document.querySelector(s);
+const choices=$('.answers'), feedback=$('.feedback'), passage=$('blockquote'), effect=$('.effect');
+let i=Training139.restore?.index||0, correct=Training139.restore?.score||0, skipped=Training139.restore?.skipped||0, locked=false, paused=false;
+document.title=config.title;
+$('h1').textContent=config.title;
+$('#guide').textContent=config.theme;
+function status(){
+ const done=i===config.questions.length;
+ $('#count').textContent=done?'Misja zakończona':'Wyzwanie '+(i+1)+' z '+config.questions.length;
+ $('.track').style.setProperty('--progress',i/config.questions.length*100+'%');
+ for(const id of ['read','skip','pause'])$('#'+id).hidden=done;
+}
+function render(){
+ Training139.save({index:i,score:correct,skipped,config,roundComplete:false,context:{question:"Którą liczbę słyszysz?",answer:config.questions[i]?.[2]?.[config.questions[i]?.[3]],options:config.questions[i]?.[2]}});
+ status();
+ locked=false;
+ choices.replaceChildren();
+ effect.replaceChildren();
+ passage.hidden=true;
+ $('#next').hidden=true;
+ feedback.textContent='';
+ let q=config.questions[i];
+ $('.target').hidden=!q;
+ if(!q){
+  $('h2').textContent='Raport z misji';
+  feedback.textContent='Poprawne: '+correct+' · pominięte: '+skipped;
+  return;
+ }
+ $('h2').textContent='Którą liczbę słyszysz?';
+ speak(q[4]);
+
+ if(q[1]){passage.hidden=false;passage.textContent=q[1];}
+ q[2].forEach((answer,index)=>{
+  const btn=document.createElement('button');
+  btn.textContent=answer;
+  btn.onclick=()=>{
+   if(locked||paused)return;
+   for(const b of choices.querySelectorAll('.pick'))b.classList.remove('bad');
+   if(index!==q[3]){
+    btn.classList.add('bad');
+    feedback.textContent='Spróbuj jeszcze raz.';
+    return;
+   }
+   locked=true;
+   correct++;Training139.save({index:i+1,score:correct,skipped,config,roundComplete:true});
+   btn.classList.add('good');
+   for(const b of choices.querySelectorAll('.pick'))b.disabled=true;
+   feedback.textContent=q[5];
+   if(config.mode===2){
+    const start=q[1].indexOf(q[4]);
+    if(start>=0){
+     const highlight=document.createElement('mark');
+     highlight.textContent=q[4];
+     passage.replaceChildren(q[1].slice(0,start),highlight,q[1].slice(start+q[4].length));
+    }
+   }else for(const label of q[4].split('|')){
+    const tile=document.createElement('span');
+    tile.textContent=label;
+    effect.append(tile);
+   }
+   $('.track').style.setProperty('--progress',(i+1)/config.questions.length*100+'%');
+   $('#next').hidden=false;
+   $('#skip').hidden=true;
+  };
+  btn.className='pick';
+  const tile=document.createElement('div');
+  tile.className='answer-tile';
+  const sound=document.createElement('button');
+  sound.className='sound';
+  sound.textContent='♫';
+  sound.setAttribute('aria-label','Odsłuchaj liczbę '+answer);
+  sound.onclick=()=>speak(answer);
+  tile.append(btn,sound);
+  choices.append(tile);
+ });
+}
+$('#next').onclick=()=>{if(locked&&!paused){i++;Training139.advance();render();}};
+$('#skip').onclick=()=>{if(!locked&&!paused&&i<config.questions.length){i++;skipped++;Training139.advance();render();}};
+$('#pause').onclick=()=>{
+ paused=!paused;
+ $('article').inert=paused;
+ if(paused){window.speechSynthesis?.cancel();document.body.classList.remove('listening');}
+ $('#pause').textContent=paused?'Wznów':'Pauza';
+};
+function speak(text){
+ if(paused||!window.speechSynthesis)return;
+ window.speechSynthesis.cancel();
+ const speech=new SpeechSynthesisUtterance(text);
+ speech.lang='pl-PL';
+ speech.onend=speech.onerror=()=>document.body.classList.remove('listening');
+ document.body.classList.add('listening');
+ window.speechSynthesis.speak(speech);
+}
+$('#read').onclick=()=>{if(choices.hidden)speak('Znajdź liczbę, o której mówi lektor.');else if(config.questions[i])speak(config.questions[i][4]);};
+$('#hear').onclick=()=>{if(config.questions[i])speak(config.questions[i][4]);};
+$('#ai').onclick=$('#mic').onclick=()=>{$('#info').textContent='Miejsce na istniejącego nauczyciela AI w aplikacji.';};
+$('#restart').onclick=()=>Training139.back();
+choices.hidden=true;
+$('.target').hidden=true;
+$('#count').textContent='8 rund';
+$('h2').textContent='Znajdź liczbę, o której mówi lektor.';
+$('#skip').hidden=true;
+const start=document.createElement('button');
+start.textContent='Zaczynamy';
+start.className='gold';
+start.onclick=()=>{start.remove();choices.hidden=false;render();};
+$('h2').after(start);
+
+Training139.onSkip=()=>{if(!locked){i++;skipped++;render();}};
+</script></html>

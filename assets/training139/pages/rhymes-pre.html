@@ -1,0 +1,191 @@
+<!doctype html><html lang="pl" data-group="przedszkole"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rymowanki i literki</title>
+<script>window.TRAINING139_ASSETS={"grafiki/lisc.png": "../../training139/media/e54036b8a456_lisc.png", "grafiki/grzyb.png": "../../training139/media/709cac707a29_grzyb.png", "grafiki/jablko.png": "../../training139/media/1ac84aee5f89_jablko.png", "grafiki/rekawiczka.png": "../../training139/media/26fddf407397_rekawiczka.png", "grafiki/fala_dzwiekowa.png": "../../space132/fala_dzwiekowa.png", "grafiki/mis.png": "../../training139/media/a30511acc686_mis.png", "grafiki/truskawka.png": "../../training139/media/caa846f57dd1_truskawka.png", "grafiki/tlo.png": "../../space132/tlo.png", "grafiki/bebenek.png": "../../training139/media/c970834d10d3_bebenek.png", "grafiki/latawiec.png": "../../training139/media/092697fde27b_latawiec.png", "grafiki/gwiazda.png": "../../space132/gwiazda.png", "grafiki/rakieta_przezroczysta.png": "../../space132/rakieta_przezroczysta.png", "grafiki/mikrofon.png": "../../space132/mikrofon.png", "grafiki/klocek.png": "../../training139/media/af30beaa7ac8_klocek.png", "grafiki/sniezynka.png": "../../training139/media/45df7634dea4_sniezynka.png", "grafiki/pomarancza.png": "../../training139/media/b60d48851020_pomarancza.png", "grafiki/slonecznik.png": "../../training139/media/561274d89352_slonecznik.png", "grafiki/astronauta.png": "../../space132/astronauta.png", "grafiki/zoladz.png": "../../training139/media/6b8667447623_zoladz.png", "grafiki/balon.png": "../../training139/media/b075260f15f7_balon.png", "grafiki/dynia.png": "../../training139/media/f1783aeb3569_dynia.png", "grafiki/banan.png": "../../training139/media/b377ec6b8c5c_banan.png", "grafiki/szyszka.png": "../../training139/media/1e973b902640_szyszka.png", "grafiki/gruszka.png": "../../training139/media/97c752110094_gruszka.png", "grafiki/skrzynia.png": "../../space132/skrzynia.png", "grafiki/robot.png": "../../space132/robot.png", "grafiki/muszla.png": "../../training139/media/93a9f2b74e67_muszla.png", "grafiki/pilka.png": "../../training139/media/e9ab039f0942_pilka.png", "grafiki/ananas.png": "../../training139/media/d40399cde22e_ananas.png", "grafiki/marchew.png": "../../training139/media/835b8ae5e70e_marchew.png", "grafiki/prezent.png": "../../training139/media/f8ffd88e6591_prezent.png", "grafiki/rymowanki/pszczola.png": "../../training139/media/1060e48c447f_pszczola.png", "grafiki/rymowanki/zaba.png": "../../training139/media/76a68fa21b8a_zaba.png", "grafiki/rymowanki/kot.png": "../../training139/media/42719e4ba4d3_kot.png", "grafiki/rymowanki/slonce.png": "../../training139/media/c9b7f569bdcd_slonce.png", "grafiki/rymowanki/ptak.png": "../../training139/media/1aef9fbbab51_ptak.png", "grafiki/rymowanki/krolik.png": "../../training139/media/349c3977c1ba_krolik.png"};</script><script src="../frame-bridge.js?v=140"></script><style>
+*{box-sizing:border-box}body{margin:0;color:#f4f9ff;background:#081739 url(../../space132/tlo.png) center top/cover fixed;font:16px system-ui}main{max-width:690px;margin:auto;padding:20px 16px}h1{margin:12px 0;color:#ffe08b;font-size:clamp(29px,7vw,48px)}header,.row,.choices,.slots{display:flex;align-items:center;gap:10px;flex-wrap:wrap}header{justify-content:space-between}header img{width:58px}button,select{min-height:44px;padding:8px 13px;font:inherit;font-weight:700;color:white;background:#203e71;border:2px solid #76c8fa;border-radius:12px;cursor:pointer}button:disabled{opacity:.55;cursor:default}button:focus-visible,select:focus-visible{outline:3px solid gold}.gold,.slots span{background:linear-gradient(#ffe9a0,#e9ad47);color:#192342;border-color:#ffdc82}.track{height:12px;margin:17px 29px 22px 12px;background:#1d3964;border:1px solid #6bc6ff;border-radius:20px;position:relative}.track img{position:absolute;top:50%;transform:translate(-50%,-50%);width:46px;transition:left .4s}.track .chest{left:100%;width:36px}.track .ship{left:var(--done,0%);z-index:1}.fill{height:100%;width:var(--done,0%);border-radius:20px;background:linear-gradient(90deg,#5de6ff,#ffdc78);transition:width .4s}.guide{display:flex;align-items:center;gap:13px;margin:10px 0}.guide img{width:100px;height:105px;object-fit:contain}.guide p{padding:12px;background:#e5f7ff;color:#14264b;border-radius:14px;font-weight:bold}.panel{background:#122852ef;border:2px solid #79d4ff;border-radius:23px;padding:16px;box-shadow:0 0 15px #52c8fb43}h2{margin:0 0 12px}.choices>div{flex:1;min-width:65px;display:grid;gap:5px}.choices button:first-child{font-size:26px}.slots{margin:10px 0;justify-content:center}.slots span{border:2px solid #ffdc82;border-radius:12px;min-width:52px;padding:7px;text-align:center;font-size:26px;font-weight:bold}.slots span:empty{background:#081d49;border:2px dashed #92d8ff}.slots span:empty:before{content:'·';color:#b8ddff}.picture{font-size:70px;text-align:center}.bad{border-color:#ffcf70;background:#684b38}.good{border-color:#acffd1;background:#216355}.message{min-height:24px;margin:12px 0}.wave{display:none;width:58px!important;position:absolute;left:0;transform:translateY(32px)}.listening .wave{display:block;animation:pulse .5s infinite alternate}.guide{position:relative}@keyframes pulse{to{opacity:.5;scale:.85}}.help{margin-top:14px}.mic{border:0;background:none;padding:0}.mic img{width:51px;display:block}canvas{display:block;width:min(100%,400px);height:auto;aspect-ratio:1;margin:12px auto;border-radius:15px;background:#e3f3ff;touch-action:none}.glow{animation:pulse .35s alternate 2}[hidden]{display:none!important}@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.picture{display:grid;place-items:center;min-height:185px;margin:8px 0;background:radial-gradient(ellipse,#3561a8,#102851 72%);border:1px solid #71bdf0;border-radius:16px}.rhyme-picture{width:min(66%,205px);height:175px;object-fit:contain;border-radius:20px;background:#f6f9ff;box-shadow:0 8px 18px #081b37}</style><style>#filter,#scene,#random{display:none!important}body .lg92-trace-board{background:#fff9e9}body [data-trace-start]{fill:#ffc83d;filter:drop-shadow(0 0 3px #f0b800)}.slots.complete{box-shadow:0 0 20px #79edb1}.training139-paused{pointer-events:none;filter:blur(3px)}body.training139-paused *{animation-play-state:paused!important}</style>
+<main><header><button id="back">← Od nowa</button><img src="../../space132/astronauta.png" alt=""></header><h1>Rymowanki i literki</h1>
+<div id="count"></div><div class="track" aria-hidden="true"><div class="fill"></div><img class="chest" src="../../space132/skrzynia.png" alt=""><img class="ship" src="../../space132/rakieta_przezroczysta.png" alt=""></div>
+<div class="guide"><img src="../../space132/robot.png" alt=""><img class="wave" src="../../space132/fala_dzwiekowa.png" alt=""><p id="guide">Odgadnij hasło i wybierz jego pierwszą literę.</p></div>
+<section class="panel"><h2 id="heading"></h2><div id="play"></div><p class="message" role="status"></p></section>
+<div class="row help"><button id="ai">Zapytaj nauczyciela AI</button><button id="mic" class="mic" aria-label="Zadaj pytanie przez mikrofon"><img src="../../space132/mikrofon.png" alt=""></button></div>
+<p id="details" role="status"></p></main>
+<script>
+
+const mode="rhyme";
+const older=document.documentElement.dataset.group==='klasy';
+const bank=[{"id": "r01", "haslo": "Królik", "rymowanka": "Długie uszy ma i fika. Chrupie marchew i pomyka.", "obraz": "../../training139/media/349c3977c1ba_krolik.png"}, {"id": "r02", "haslo": "Kot", "rymowanka": "Na kanapie miękko mruczy. Łapa cicho się nie tłucze.", "obraz": "../../training139/media/42719e4ba4d3_kot.png"}, {"id": "r03", "haslo": "Żaba", "rymowanka": "Przy kałuży skacze, kumka. W wodzie z gracją daje nurka.", "obraz": "../../training139/media/76a68fa21b8a_zaba.png"}, {"id": "r04", "haslo": "Słońce", "rymowanka": "Rano wschodzi, jasno świeci. Ciepło niesie wszystkim dzieciom.", "obraz": "../../training139/media/c9b7f569bdcd_slonce.png"}, {"id": "r05", "haslo": "Pszczoła", "rymowanka": "Nad kwiatami bzyczy z rana. Miód przynosi już od lata.", "obraz": "../../training139/media/1060e48c447f_pszczola.png"}, {"id": "r06", "haslo": "Ptak", "rymowanka": "Ma skrzydełka, w górę wzlata. Swe piosenki śpiewa z rana.", "obraz": "../../training139/media/1aef9fbbab51_ptak.png"}, {"id": "r07", "haslo": "Rakieta", "rymowanka": "Ma silniki, ogień z tyłu. W przestrzeń mknie bez chwili spoczynku.", "obraz": "../../space132/rakieta_przezroczysta.png"}, {"id": "r08", "haslo": "Jabłko", "rymowanka": "Na gałęzi dojrzewa, rumieni się w sadzie. Chrupnie, kiedy je pogryziesz przy obiedzie.", "obraz": "../../training139/media/1ac84aee5f89_jablko.png"}, {"id": "r09", "haslo": "Gruszka", "rymowanka": "Na gałęzi sobie wisi, dół ma szerszy, górę małą. W środku skrywa słodki miąższ, zjesz ją z chęcią prawie całą.", "obraz": "../../training139/media/97c752110094_gruszka.png"}, {"id": "r10", "haslo": "Miś", "rymowanka": "Ma miękkie uszy i puszyste łapki. Przytula cię wieczorem tuż przed snem do drzemki.", "obraz": "../../training139/media/a30511acc686_mis.png"}, {"id": "r11", "haslo": "Klocek", "rymowanka": "Z przyjaciółmi wieżę stawia, choć sam jest niewielki. Z takich części zbudujesz zamki i hotelki.", "obraz": "../../training139/media/af30beaa7ac8_klocek.png"}, {"id": "r12", "haslo": "Prezent", "rymowanka": "Pod kokardą coś się chowa, papier skrywa niespodziankę. Ktoś podaje ci go z uśmiechem na urodzinową zachciankę.", "obraz": "../../training139/media/f8ffd88e6591_prezent.png"}, {"id": "r13", "haslo": "Balon", "rymowanka": "Gdy go nadmuchasz, robi się okrągły. Trzymaj za sznurek, by nie uleciał w obłoki.", "obraz": "../../training139/media/b075260f15f7_balon.png"}, {"id": "r14", "haslo": "Truskawka", "rymowanka": "Latem w ogródku czerwieni się z rana. Z wierzchu ma pestki, do deseru jest dodawana.", "obraz": "../../training139/media/caa846f57dd1_truskawka.png"}, {"id": "r15", "haslo": "Banan", "rymowanka": "Ma żółtą skórkę i kształt półksiężyca. Gdy go obierzesz, słodycz cię zachwyca.", "obraz": "../../training139/media/b377ec6b8c5c_banan.png"}, {"id": "r16", "haslo": "Pomarańcza", "rymowanka": "Okrągła jak piłka, pod skórką ma cząstki. Sok z niej wyciśniesz do szklanki lub do flaszki.", "obraz": "../../training139/media/b60d48851020_pomarancza.png"}, {"id": "r17", "haslo": "Ananas", "rymowanka": "Liście jak korona wyrastają mu z góry. W środku jest słodki, choć ma twarde mury.", "obraz": "../../training139/media/d40399cde22e_ananas.png"}, {"id": "r18", "haslo": "Marchew", "rymowanka": "Pod ziemią rośnie pomarańczowa. Królik ją chrupie, bo jest zdrowa.", "obraz": "../../training139/media/835b8ae5e70e_marchew.png"}, {"id": "r19", "haslo": "Dynia", "rymowanka": "Jesienią w ogrodzie olbrzymią kulę spotkasz. Zrobisz z niej zupę, a w środku pestki spotkasz.", "obraz": "../../training139/media/f1783aeb3569_dynia.png"}, {"id": "r20", "haslo": "Grzyb", "rymowanka": "Po deszczu w lesie wyrasta z ziemi. Nosi kapelusz między drzewami i liśćmi.", "obraz": "../../training139/media/709cac707a29_grzyb.png"}, {"id": "r21", "haslo": "Żołądź", "rymowanka": "Spada spod dębu, nosi czapeczkę. Dzik go wypatrzy, gdy wejdzie w ścieżeczkę.", "obraz": "../../training139/media/6b8667447623_zoladz.png"}, {"id": "r22", "haslo": "Szyszka", "rymowanka": "Na sośnie rośnie i łuski ma w rzędzie. Gdy spadnie na ziemię, leśnym skarbem będzie.", "obraz": "../../training139/media/1e973b902640_szyszka.png"}, {"id": "r23", "haslo": "Liść", "rymowanka": "Latem zielony, jesienią złoty. Wiatr go porywa na długie loty.", "obraz": "../../training139/media/e54036b8a456_lisc.png"}, {"id": "r24", "haslo": "Słonecznik", "rymowanka": "Żółte płatki wokół głowy, wysoki aż do płotu. Jego pestki chrupią ptaki, gdy wracają z lotu.", "obraz": "../../training139/media/561274d89352_slonecznik.png"}, {"id": "r25", "haslo": "Piłka", "rymowanka": "Kopniesz ją nogą, poleci do bramki. Odbija się od ziemi, lubi gry i zabawki.", "obraz": "../../training139/media/e9ab039f0942_pilka.png"}, {"id": "r26", "haslo": "Bębenek", "rymowanka": "Gdy stukasz pałeczką, wydaje dźwięk głośny. Na szkolnym występie wybija rytm radosny.", "obraz": "../../training139/media/c970834d10d3_bebenek.png"}, {"id": "r27", "haslo": "Latawiec", "rymowanka": "Na sznurku ku chmurom szybuje. Gdy wieje wiatr, wysoko wędruje.", "obraz": "../../training139/media/092697fde27b_latawiec.png"}, {"id": "r28", "haslo": "Muszla", "rymowanka": "Morze wyrzuciło ją na brzeg wraz z pianą. Możesz ją znaleźć na plaży nad ranem.", "obraz": "../../training139/media/93a9f2b74e67_muszla.png"}, {"id": "r29", "haslo": "Rękawiczka", "rymowanka": "Zimą ogrzewa rękę, gdy zamieć dmucha. W parze z drugą pilnuje, by dłoń była sucha.", "obraz": "../../training139/media/26fddf407397_rekawiczka.png"}, {"id": "r30", "haslo": "Śnieżynka", "rymowanka": "Z nieba wiruje, wśród mrozu króluje. Gdy siądzie na dłoni, od razu topnieje.", "obraz": "../../training139/media/45df7634dea4_sniezynka.png"}];
+function mix(items){
+ const a=[...items];
+ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+ return a;
+}
+function sampleRounds(){
+ const used=new Set();
+ try{for(const id of JSON.parse(Training139.storage.getItem('rymowanki:last:'+older)||'[]'))used.add(id);}catch{}
+ const selected=[...mix(bank.filter(r=>!used.has(r.id))),...mix(bank.filter(r=>used.has(r.id)))].slice(0,7);
+ try{Training139.storage.setItem('rymowanki:last:'+older,JSON.stringify(selected.map(r=>r.id)));}catch{}
+ return selected.map(r=>{
+  const first=r.haslo[0];
+  const similar=bank.filter(x=>x.id!==r.id && x.haslo[0]===first && x.haslo.toLowerCase()!==r.haslo.toLowerCase());
+  const others=bank.filter(x=>x.id!==r.id && x.haslo[0]!==first);
+  const distractors=older?[...mix(similar),...mix(others)].slice(0,2).map(x=>x.haslo):mix([...new Set(others.map(x=>x.haslo[0]))]).slice(0,2);
+  const answer=older?r.haslo:first;
+  return [r.obraz,r.rymowanka,mix([answer,...distractors]),answer,r.haslo];
+ });
+}
+let rounds=Training139.restore?.rounds||Training139.config.rhymeRounds;
+const $=s=>document.querySelector(s);
+const play=$('#play'), message=$('.message'), heading=$('#heading');
+let index=Training139.restore?.index||0;let correct=Training139.restore?.score||0,skipped=Training139.restore?.skipped||0,roundSolved=false;
+if(older)document.querySelector('#guide').textContent='Przeczytaj lub odsłuchaj zagadkę i wybierz całe hasło.';
+const instruction=mode==='order'?'Dotykaj liter w kolejności alfabetu.':mode==='rhyme'?(older?'Posłuchaj rymowanki i wybierz całe hasło.':'Posłuchaj rymowanki i wskaż pierwszą literę odgadniętego słowa.'):'Zacznij od świecącej kropki.';
+function speak(text){
+ if(!window.speechSynthesis){$('#details').textContent='Odsłuch wymaga polskiego głosu w przeglądarce.';return;}
+ speechSynthesis.cancel();
+ const utterance=new SpeechSynthesisUtterance(text);
+ utterance.lang='pl-PL';
+ utterance.onend=utterance.onerror=()=>document.body.classList.remove('listening');
+ document.body.classList.add('listening');
+ speechSynthesis.speak(utterance);
+}
+function element(tag,text,cls){
+ const node=document.createElement(tag);
+ if(text!==undefined)node.textContent=text;
+ if(cls)node.className=cls;
+ return node;
+}
+function button(text,action,cls){
+ const node=element('button',text,cls);
+ node.type='button';node.onclick=action;
+ return node;
+}
+function progress(n){$('.track').style.setProperty('--done',n/rounds.length*100+'%');}
+function render(){
+ play.replaceChildren();message.textContent='';
+ const q=rounds[index];roundSolved=false;Training139.save({index,rounds,score:correct,skipped,roundComplete:false,context:q?{question:q[1],answer:q[3],word:q[4],options:q[2]}:{}});
+ progress(index);
+ $('#count').textContent=q?'Wyzwanie '+(index+1)+' z '+rounds.length:'Trasa ukończona';
+ if(!q){
+  heading.textContent='Misja zakończona';message.textContent='Poprawne: '+correct+' · pominięte: '+skipped;
+  play.append(button('Zagraj ponownie',()=>{index=0;rounds=sampleRounds();render();},'gold'));
+  return;
+ }
+ if(mode==='trace'){trace();return;}
+ heading.textContent=mode==='order'?'Ułóż litery w kolejności.':older?'Jakie słowo pasuje do zagadki?':'Jaka jest pierwsza litera?';
+ const answer=mode==='order'?q[1]:[q[3]];
+ let picks=[];
+ if(mode==='rhyme'){
+  const picture=element('img',undefined,'rhyme-picture');
+  picture.src=Training139.asset(q[0]);picture.alt='';picture.hidden=older;
+  const frame=element('div',undefined,'picture');
+  frame.append(picture);if(older)frame.hidden=true;
+  play.append(frame,element('p',q[1]),button('Posłuchaj rymowanki',()=>speak(q[1])));
+ }
+ else play.append(button('Odczytaj polecenie',()=>speak(instruction)));
+ const slots=element('div',undefined,'slots'), choices=element('div',undefined,'choices');
+ if(mode==='order'){
+  answer.forEach(()=>slots.append(element('span')));
+  play.append(slots);
+ }
+ play.append(choices);
+ const options=q[mode==='order'?0:2];
+ for(const letter of options){
+  const tile=element('div');
+  const pick=button(letter,()=>{
+   for(const b of choices.querySelectorAll('.bad'))b.classList.remove('bad');
+   if(letter!==answer[picks.length]){
+    pick.classList.add('bad');message.textContent='Spróbuj jeszcze raz.';return;
+   }
+   if(mode==='order')slots.children[picks.length].textContent=letter;
+   picks.push(letter);pick.disabled=true;pick.classList.add('good');
+   if(picks.length===answer.length){
+    for(const b of choices.querySelectorAll('.pick'))b.disabled=true;
+    if(older){const picture=play.querySelector('.rhyme-picture');picture.hidden=false;picture.parentElement.hidden=false;}
+    message.textContent=mode==='rhyme'?(older?'Brawo! Hasło to '+q[4]+'.':q[4]+' zaczyna się na '+letter+'.'):'Dobra kolejność: '+picks.join(' → ')+'.';
+    correct++;roundSolved=true;progress(index+1);Training139.save({index:index+1,rounds,score:correct,skipped,roundComplete:true});
+    play.append(button('Dalej',()=>{index++;Training139.advance();render();},'gold'));
+   } else message.textContent='Dobrze. Wybierz kolejną literę.';
+  },'pick');
+  const audio=button('♫',()=>speak(letter));
+  audio.setAttribute('aria-label','Posłuchaj '+letter);
+  tile.append(pick,audio);choices.append(tile);
+ }
+}
+function trace(){
+ heading.textContent='Pisz po śladzie';
+ const select=element('select');
+ select.setAttribute('aria-label','Wybierz znak');
+ rounds.forEach(([glyph],n)=>{const option=element('option',glyph);option.value=n;select.append(option);});
+ select.value=index;select.onchange=()=>{index=Number(select.value);render();};
+ const [glyph,strokes]=rounds[index];
+ const canvas=element('canvas');
+ canvas.width=canvas.height=400;
+ canvas.setAttribute('aria-label','Narysuj znak '+glyph+' od świecącej kropki');
+ const ctx=canvas.getContext('2d');
+ let piece=0,checkpoint=0,active=null,ink=[];
+ function sample(stroke){
+  return stroke.flatMap((end,n)=>{
+   if(!n)return [end];
+   const start=stroke[n-1], steps=Math.ceil(Math.hypot(end[0]-start[0],end[1]-start[1])/12);
+   return Array.from({length:steps},(_,k)=>start.map((p,d)=>p+(end[d]-p)*(k+1)/steps));
+  });
+ }
+ const paths=strokes.map(sample);
+ function line(points,color,width,dashes=[]){
+  if(!points.length)return;
+  ctx.strokeStyle=color;ctx.lineWidth=width;ctx.setLineDash(dashes);
+  ctx.beginPath();ctx.moveTo(...points[0]);points.slice(1).forEach(p=>ctx.lineTo(...p));ctx.stroke();ctx.setLineDash([]);
+ }
+ function draw(){
+  ctx.clearRect(0,0,400,400);ctx.lineCap='round';ctx.lineJoin='round';
+  for(const y of [65,135,265,335])line([[18,y],[382,y]],'#a6c7df',2);
+  strokes.forEach(s=>line(s,'#607f9d',7,[6,9]));
+  ink.forEach(s=>line(s,'#1674ce',8));
+  if(paths[piece]){
+   ctx.fillStyle='#e85822';ctx.beginPath();ctx.arc(...paths[piece][checkpoint],9,0,Math.PI*2);ctx.fill();
+  }
+ }
+ function point(e){const r=canvas.getBoundingClientRect();return [(e.clientX-r.left)*400/r.width,(e.clientY-r.top)*400/r.height];}
+ function close(a,b){return Math.hypot(a[0]-b[0],a[1]-b[1])<20;}
+ canvas.onpointerdown=e=>{
+  if(!paths[piece]||active!==null)return;
+  const p=point(e);
+  if(!close(p,paths[piece][0])){message.textContent=instruction;return;}
+  active=e.pointerId;canvas.setPointerCapture(active);checkpoint=0;ink[piece]=[p];draw();
+ };
+ canvas.onpointermove=e=>{
+  if(e.pointerId!==active||!paths[piece])return;
+  for(const event of e.getCoalescedEvents?.().length?e.getCoalescedEvents():[e]){
+   const p=point(event), path=paths[piece];
+   while(checkpoint+1<path.length&&close(p,path[checkpoint+1]))checkpoint++;
+   if(close(p,path[checkpoint]))ink[piece].push(p);
+  }
+  draw();
+ };
+ function end(e,check){
+  if(e.pointerId!==active)return;
+  active=null;
+  if(check&&checkpoint===paths[piece].length-1){
+   piece++;
+   if(piece===paths.length){message.textContent='Brawo! Znak gotowy.';correct++;roundSolved=true;progress(index+1);Training139.save({index:index+1,rounds,score:correct,skipped,roundComplete:true});}
+   else message.textContent='Teraz zacznij od nowej kropki.';
+  }else{ink.length=piece;message.textContent='Spróbuj spokojnie poprowadzić linię do końca.';}
+  checkpoint=0;draw();
+ }
+ canvas.onpointerup=e=>{canvas.onpointermove(e);end(e,true);};
+ canvas.onpointercancel=e=>end(e,false);
+ const toolbar=element('div',undefined,'row');
+ toolbar.append(select,button('Posłuchaj znaku',()=>speak(glyph)));
+ const controls=element('div',undefined,'row');
+ controls.append(button('Wyczyść',()=>render()),button('Następny znak',()=>{index=(index+1)%rounds.length;render();},'gold'));
+ play.append(toolbar,canvas,controls);message.textContent=instruction;
+ $('#count').textContent='Znak '+(index+1)+' z '+rounds.length;
+ draw();
+}
+$('#back').onclick=()=>Training139.back();
+$('#ai').onclick=$('#mic').onclick=()=>{$('#details').textContent='W aplikacji ten przycisk otwiera istniejącą pomoc nauczyciela AI.';};
+heading.textContent='Gotowi do startu?';
+play.append(button('Zaczynamy',render,'gold'),button('Odczytaj polecenie',()=>speak(instruction)));
+
+Training139.onSkip=()=>{if(!roundSolved){index++;skipped++;render();}};
+</script></html>

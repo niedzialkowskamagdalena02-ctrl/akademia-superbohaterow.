@@ -1,0 +1,15 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path'),{fixture,Element}=require('./hangar130-dom.cjs');
+const f=fixture(),events={},sent=[],pending=[],storageWrites=[];let now=100;
+f.doc.body=f.root;f.doc.querySelector=s=>f.root.querySelector(s);f.root.innerHTML='<main><button id="pause"></button><button id="skip"></button></main>';f.root.classList.toggle=(c,on)=>on?f.root.classList.add(c):f.root.classList.remove(c);
+const parent={__academyTraining139:new Map([['test',{child:'same-child',scope:'P:polski:outside',game:'rail',preview:true,appBase:'https://example.test/academy/'}]]),postMessage:(data,origin)=>sent.push({data,origin})};
+const s={parent,document:f.doc,location:{origin:'https://example.test',href:'https://example.test/academy/assets/training139/pages/rail-pre.html#session=test',hash:'#session=test'},URL,URLSearchParams,performance:{now:()=>now},setTimeout:(fn,ms)=>{pending.push({fn,ms});return pending.length;},clearTimeout(){},requestAnimationFrame:fn=>1,cancelAnimationFrame(){},localStorage:{getItem:()=>null,setItem:(...args)=>storageWrites.push(args)},ResizeObserver:class{constructor(fn){this.fn=fn;}observe(){this.fn();}},addEventListener:(name,fn)=>(events[name]??=[]).push(fn),console,Map,Set};s.window=s;
+vm.createContext(s);vm.runInContext(fs.readFileSync(path.join(__dirname,'../assets/training139/frame-bridge.js'),'utf8'),s);
+const dispatch=(type,data={})=>{for(const fn of events[type]||[])fn(data);};
+assert(!sent.some(x=>x.data.kind==='ready'));f.doc.emit('DOMContentLoaded',{});assert(!sent.some(x=>x.data.kind==='ready'));dispatch('load');assert(sent.some(x=>x.data.kind==='ready'));
+assert.equal(s.Training139.asset('assets/training139/media/test.png'),'https://example.test/academy/assets/training139/media/test.png');
+s.Training139.storage.setItem('round','9');assert.equal(s.Training139.storage.getItem('round'),'9');assert.equal(storageWrites.length,0,'Mother preview never writes progress');
+const message=data=>dispatch('message',{source:parent,origin:s.location.origin,data:{academyTraining139:'test',...data}});
+dispatch('message',{source:parent,origin:'https://wrong.test',data:{academyTraining139:'test',kind:'pause',paused:true}});assert(!f.root.inert);
+message({kind:'pause',paused:true});assert(f.root.inert);const before=pending.length;s.setTimeout(()=>{},200);assert.equal(pending.length,before);now+=500;message({kind:'pause',paused:false});assert(!f.root.inert);assert.equal(pending.at(-1).ms,200);
+let skipped=0;s.Training139.onSkip=()=>skipped++;message({kind:'skip'});assert.equal(skipped,1);
+dispatch('pagehide');console.log('PASS frame bridge: source/origin guard, preview storage, real asset URLs, load gate, pause/resume timers and cleanup.');

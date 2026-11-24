@@ -1,0 +1,1796 @@
+[
+  {
+    "pack": "letters",
+    "source": "patryk/Kosmiczne_Poznaj_Literki/grafiki/fala_dzwiekowa.png",
+    "runtime": "assets/space132/fala_dzwiekowa.png",
+    "sha256": "effdde1daa8d13c3aeaeeb08ffb6c38d2abc53566af6ec0d100744ea4e7720a0"
+  },
+  {
+    "pack": "letters",
+    "source": "patryk/Kosmiczne_Poznaj_Literki/grafiki/tlo.png",
+    "runtime": "assets/space132/tlo.png",
+    "sha256": "609536ed4a15f093ac62a77759f6aae6b368bf72e5070aa461756877d5407088"
+  },
+  {
+    "pack": "letters",
+    "source": "patryk/Kosmiczne_Poznaj_Literki/grafiki/gwiazda.png",
+    "runtime": "assets/space132/gwiazda.png",
+    "sha256": "eebdb595aa52e4f4b78eaf189c093f5ba3227419f8a120a0a4f4f604b27e9a45"
+  },
+  {
+    "pack": "letters",
+    "source": "patryk/Kosmiczne_Poznaj_Literki/grafiki/rakieta_przezroczysta.png",
+    "runtime": "assets/space132/rakieta_przezroczysta.png",
+    "sha256": "2d63b8333cd86ffaaa6bf005edc87eb46734eed997598d0adbe42158dd4a2b14"
+  },
+  {
+    "pack": "letters",
+    "source": "patryk/Kosmiczne_Poznaj_Literki/grafiki/mikrofon.png",
+    "runtime": "assets/space132/mikrofon.png",
+    "sha256": "0a889c4babc0636390314327920c8ec90a0a335cb7b590db11a377ac5c67faca"
+  },
+  {
+    "pack": "letters",
+    "source": "patryk/Kosmiczne_Poznaj_Literki/grafiki/astronauta.png",
+    "runtime": "assets/space132/astronauta.png",
+    "sha256": "47034d84f6b6d98cdf7b236d58f7a2c98adaab9c0d6c3dacd0638dedac59c3f0"
+  },
+  {
+    "pack": "letters",
+    "source": "patryk/Kosmiczne_Poznaj_Literki/grafiki/skrzynia.png",
+    "runtime": "assets/space132/skrzynia.png",
+    "sha256": "4db92a475c712a0050539eff8f6bab4f06b8ce96bc16d64e6344dd141cca902e"
+  },
+  {
+    "pack": "letters",
+    "source": "patryk/Kosmiczne_Poznaj_Literki/grafiki/robot.png",
+    "runtime": "assets/space132/robot.png",
+    "sha256": "efcbb7e0a6fb7f2e2703ef77355e340e0dde8219b314e08fa6c77f72ceb8e2f3"
+  },
+  {
+    "pack": "numbers",
+    "source": "patryk/Kosmiczne_Cyfrowe_Lowy_v2/grafiki/fala_dzwiekowa.png",
+    "runtime": "assets/space132/fala_dzwiekowa.png",
+    "sha256": "effdde1daa8d13c3aeaeeb08ffb6c38d2abc53566af6ec0d100744ea4e7720a0"
+  },
+  {
+    "pack": "numbers",
+    "source": "patryk/Kosmiczne_Cyfrowe_Lowy_v2/grafiki/tlo.png",
+    "runtime": "assets/space132/tlo.png",
+    "sha256": "609536ed4a15f093ac62a77759f6aae6b368bf72e5070aa461756877d5407088"
+  },
+  {
+    "pack": "numbers",
+    "source": "patryk/Kosmiczne_Cyfrowe_Lowy_v2/grafiki/gwiazda.png",
+    "runtime": "assets/space132/gwiazda.png",
+    "sha256": "eebdb595aa52e4f4b78eaf189c093f5ba3227419f8a120a0a4f4f604b27e9a45"
+  },
+  {
+    "pack": "numbers",
+    "source": "patryk/Kosmiczne_Cyfrowe_Lowy_v2/grafiki/rakieta_przezroczysta.png",
+    "runtime": "assets/space132/rakieta_przezroczysta.png",
+    "sha256": "2d63b8333cd86ffaaa6bf005edc87eb46734eed997598d0adbe42158dd4a2b14"
+  },
+  {
+    "pack": "numbers",
+    "source": "patryk/Kosmiczne_Cyfrowe_Lowy_v2/grafiki/mikrofon.png",
+    "runtime": "assets/space132/mikrofon.png",
+    "sha256": "0a889c4babc0636390314327920c8ec90a0a335cb7b590db11a377ac5c67faca"
+  },
+  {
+    "pack": "numbers",
+    "source": "patryk/Kosmiczne_Cyfrowe_Lowy_v2/grafiki/astronauta.png",
+    "runtime": "assets/space132/astronauta.png",
+    "sha256": "47034d84f6b6d98cdf7b236d58f7a2c98adaab9c0d6c3dacd0638dedac59c3f0"
+  },
+  {
+    "pack": "numbers",
+    "source": "patryk/Kosmiczne_Cyfrowe_Lowy_v2/grafiki/skrzynia.png",
+    "runtime": "assets/space132/skrzynia.png",
+    "sha256": "4db92a475c712a0050539eff8f6bab4f06b8ce96bc16d64e6344dd141cca902e"
+  },
+  {
+    "pack": "numbers",
+    "source": "patryk/Kosmiczne_Cyfrowe_Lowy_v2/grafiki/robot.png",
+    "runtime": "assets/space132/robot.png",
+    "sha256": "efcbb7e0a6fb7f2e2703ef77355e340e0dde8219b314e08fa6c77f72ceb8e2f3"
+  },
+  {
+    "pack": "order",
+    "source": "oboje/Kosmiczne_Literki_w_Kolejnosci/grafiki/fala_dzwiekowa.png",
+    "runtime": "assets/space132/fala_dzwiekowa.png",
+    "sha256": "effdde1daa8d13c3aeaeeb08ffb6c38d2abc53566af6ec0d100744ea4e7720a0"
+  },
+  {
+    "pack": "order",
+    "source": "oboje/Kosmiczne_Literki_w_Kolejnosci/grafiki/tlo.png",
+    "runtime": "assets/space132/tlo.png",
+    "sha256": "609536ed4a15f093ac62a77759f6aae6b368bf72e5070aa461756877d5407088"
+  },
+  {
+    "pack": "order",
+    "source": "oboje/Kosmiczne_Literki_w_Kolejnosci/grafiki/gwiazda.png",
+    "runtime": "assets/space132/gwiazda.png",
+    "sha256": "eebdb595aa52e4f4b78eaf189c093f5ba3227419f8a120a0a4f4f604b27e9a45"
+  },
+  {
+    "pack": "order",
+    "source": "oboje/Kosmiczne_Literki_w_Kolejnosci/grafiki/rakieta_przezroczysta.png",
+    "runtime": "assets/space132/rakieta_przezroczysta.png",
+    "sha256": "2d63b8333cd86ffaaa6bf005edc87eb46734eed997598d0adbe42158dd4a2b14"
+  },
+  {
+    "pack": "order",
+    "source": "oboje/Kosmiczne_Literki_w_Kolejnosci/grafiki/mikrofon.png",
+    "runtime": "assets/space132/mikrofon.png",
+    "sha256": "0a889c4babc0636390314327920c8ec90a0a335cb7b590db11a377ac5c67faca"
+  },
+  {
+    "pack": "order",
+    "source": "oboje/Kosmiczne_Literki_w_Kolejnosci/grafiki/astronauta.png",
+    "runtime": "assets/space132/astronauta.png",
+    "sha256": "47034d84f6b6d98cdf7b236d58f7a2c98adaab9c0d6c3dacd0638dedac59c3f0"
+  },
+  {
+    "pack": "order",
+    "source": "oboje/Kosmiczne_Literki_w_Kolejnosci/grafiki/skrzynia.png",
+    "runtime": "assets/space132/skrzynia.png",
+    "sha256": "4db92a475c712a0050539eff8f6bab4f06b8ce96bc16d64e6344dd141cca902e"
+  },
+  {
+    "pack": "order",
+    "source": "oboje/Kosmiczne_Literki_w_Kolejnosci/grafiki/robot.png",
+    "runtime": "assets/space132/robot.png",
+    "sha256": "efcbb7e0a6fb7f2e2703ef77355e340e0dde8219b314e08fa6c77f72ceb8e2f3"
+  },
+  {
+    "pack": "trace",
+    "source": "patryk/Kosmiczne_Pisanie_po_Sladzie/grafiki/fala_dzwiekowa.png",
+    "runtime": "assets/space132/fala_dzwiekowa.png",
+    "sha256": "effdde1daa8d13c3aeaeeb08ffb6c38d2abc53566af6ec0d100744ea4e7720a0"
+  },
+  {
+    "pack": "trace",
+    "source": "patryk/Kosmiczne_Pisanie_po_Sladzie/grafiki/tlo.png",
+    "runtime": "assets/space132/tlo.png",
+    "sha256": "609536ed4a15f093ac62a77759f6aae6b368bf72e5070aa461756877d5407088"
+  },
+  {
+    "pack": "trace",
+    "source": "patryk/Kosmiczne_Pisanie_po_Sladzie/grafiki/gwiazda.png",
+    "runtime": "assets/space132/gwiazda.png",
+    "sha256": "eebdb595aa52e4f4b78eaf189c093f5ba3227419f8a120a0a4f4f604b27e9a45"
+  },
+  {
+    "pack": "trace",
+    "source": "patryk/Kosmiczne_Pisanie_po_Sladzie/grafiki/rakieta_przezroczysta.png",
+    "runtime": "assets/space132/rakieta_przezroczysta.png",
+    "sha256": "2d63b8333cd86ffaaa6bf005edc87eb46734eed997598d0adbe42158dd4a2b14"
+  },
+  {
+    "pack": "trace",
+    "source": "patryk/Kosmiczne_Pisanie_po_Sladzie/grafiki/mikrofon.png",
+    "runtime": "assets/space132/mikrofon.png",
+    "sha256": "0a889c4babc0636390314327920c8ec90a0a335cb7b590db11a377ac5c67faca"
+  },
+  {
+    "pack": "trace",
+    "source": "patryk/Kosmiczne_Pisanie_po_Sladzie/grafiki/astronauta.png",
+    "runtime": "assets/space132/astronauta.png",
+    "sha256": "47034d84f6b6d98cdf7b236d58f7a2c98adaab9c0d6c3dacd0638dedac59c3f0"
+  },
+  {
+    "pack": "trace",
+    "source": "patryk/Kosmiczne_Pisanie_po_Sladzie/grafiki/skrzynia.png",
+    "runtime": "assets/space132/skrzynia.png",
+    "sha256": "4db92a475c712a0050539eff8f6bab4f06b8ce96bc16d64e6344dd141cca902e"
+  },
+  {
+    "pack": "trace",
+    "source": "patryk/Kosmiczne_Pisanie_po_Sladzie/grafiki/robot.png",
+    "runtime": "assets/space132/robot.png",
+    "sha256": "efcbb7e0a6fb7f2e2703ef77355e340e0dde8219b314e08fa6c77f72ceb8e2f3"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla_nowe/03_nocny_port.webp",
+    "runtime": "assets/training139/media/3d015351ca5a_03_nocny_port.webp",
+    "sha256": "3d015351ca5ae78d6bbc0b9be62f00ed6f0d9827f1646af4fe147bc2efd9cb52"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla_nowe/12_wiosenna_rzeka.webp",
+    "runtime": "assets/training139/media/fad76a485069_12_wiosenna_rzeka.webp",
+    "sha256": "fad76a48506903c55a8c72393c24889907131ccf11b4d286630dcbaf43a1ccf7"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla_nowe/20_podwodny_tunel.webp",
+    "runtime": "assets/training139/media/89be14907074_20_podwodny_tunel.webp",
+    "sha256": "89be14907074bf1e324d6401117f87c27d577260339fd6a1831e02cbf9e2f626"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla_nowe/07_wodospad.webp",
+    "runtime": "assets/training139/media/9282ab980a07_07_wodospad.webp",
+    "sha256": "9282ab980a075bc1d4c6055bdd84c4bd49c6e1a041e5d2324f093065afe2c844"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla_nowe/13_mokradla_dinozaurow.webp",
+    "runtime": "assets/training139/media/86814432388d_13_mokradla_dinozaurow.webp",
+    "sha256": "86814432388d5f34c18e836d084d321aec6cc804ea0eac1ab2c635f6cd217d6e"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla_nowe/04_las_grzybow.webp",
+    "runtime": "assets/training139/media/ec6d47b69f9c_04_las_grzybow.webp",
+    "sha256": "ec6d47b69f9cf8aa13c4f4774da02bc3522f38dec50b1c2ac3793c31e0dda404"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla_nowe/06_gorska_wioska.webp",
+    "runtime": "assets/training139/media/cb067d984640_06_gorska_wioska.webp",
+    "sha256": "cb067d984640140085522ef5863dda44c8fa02a14ca1344d9e7a4e0bda6eaae9"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla_nowe/08_sniezna_dolina.webp",
+    "runtime": "assets/training139/media/f74b7d239fde_08_sniezna_dolina.webp",
+    "sha256": "f74b7d239fde3b827ee0f1d2e4a275be7292a9fb3d8018669d4e0f378bf8fb00"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla_nowe/18_wiatraki.webp",
+    "runtime": "assets/training139/media/1307c1c897e6_18_wiatraki.webp",
+    "sha256": "1307c1c897e6ef3a2cedfd967fdd5782fe81f7d8fa54fce9197f676668809c4f"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla_nowe/02_deszczowe_miasto.webp",
+    "runtime": "assets/training139/media/bd50709f5f19_02_deszczowe_miasto.webp",
+    "sha256": "bd50709f5f190048d3c23bebd68ed7ead7b5cbbddc949670bae193939c718c9c"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla_nowe/01_sloneczniki.webp",
+    "runtime": "assets/training139/media/889f1f62eb5a_01_sloneczniki.webp",
+    "sha256": "889f1f62eb5a183b24ad74dff7b37cf3d524b1e181e75bc1a0ead022fa66e8d5"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla_nowe/17_dolina_kaktusow.webp",
+    "runtime": "assets/training139/media/e639ea0234a5_17_dolina_kaktusow.webp",
+    "sha256": "e639ea0234a5338c2441eff473dfdd6187b05e34c5d92c77d54e121c8f6630c7"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla_nowe/14_piernikowe_miasto.webp",
+    "runtime": "assets/training139/media/ca6b0b7c7752_14_piernikowe_miasto.webp",
+    "sha256": "ca6b0b7c77528b6000a86fb306af0ee18f3d1dc7f21ec1d1e89e05c6628f35d8"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla_nowe/19_jezioro_zorzy.webp",
+    "runtime": "assets/training139/media/4c5725c04370_19_jezioro_zorzy.webp",
+    "sha256": "4c5725c04370a0e5d729691113bb67bf0e54660f3a182768892d5f3226bf2bab"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla_nowe/10_teczowe_wzgorza.webp",
+    "runtime": "assets/training139/media/0c745b258449_10_teczowe_wzgorza.webp",
+    "sha256": "0c745b25844983bf1b7c0fca647b5bbee1ba3243ce3f9a6bb82589f4cfea4ea4"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla_nowe/15_krysztalowa_jaskinia.webp",
+    "runtime": "assets/training139/media/f3c2cb406446_15_krysztalowa_jaskinia.webp",
+    "sha256": "f3c2cb4064469e37e113f0d2832a492fe37212af1a0d3e1146649002e3113fff"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla_nowe/05_czerwony_kanion.webp",
+    "runtime": "assets/training139/media/07f6bdec6e3c_05_czerwony_kanion.webp",
+    "sha256": "07f6bdec6e3cbf386db24a386915300ae9b45ac8b25f142a4521ad77a7956627"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla_nowe/09_jesienny_sad.webp",
+    "runtime": "assets/training139/media/ca30342ce0e6_09_jesienny_sad.webp",
+    "sha256": "ca30342ce0e610c43b176f0d78be717814d3331a8dd94b7abc8ec719b4df3d22"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla_nowe/16_bambusowy_las.webp",
+    "runtime": "assets/training139/media/7d60a1326146_16_bambusowy_las.webp",
+    "sha256": "7d60a1326146584b3d7973853428b70699a3a4e655a8f1d8ed6ff84b9f51fbda"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla_nowe/11_kosmodrom.webp",
+    "runtime": "assets/training139/media/496db46fcaab_11_kosmodrom.webp",
+    "sha256": "496db46fcaab3e365c6950090ae4fb5f2f8b1e15bbdb3ca4f0556447b96f329b"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla/24_festiwal_lampionow.webp",
+    "runtime": "assets/training139/media/afdf519d3bd9_24_festiwal_lampionow.webp",
+    "sha256": "afdf519d3bd9e9668bdd8d9358c1468963a4695b8af9d2d17d96f522b56ae35b"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla/12_wyspy_w_chmurach.webp",
+    "runtime": "assets/training139/media/722b40f33a67_12_wyspy_w_chmurach.webp",
+    "sha256": "722b40f33a67dfd10fa358d680fa73c83f5641fd8bcac3374227a6b9913b5d9c"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla/18_park_miejski.webp",
+    "runtime": "assets/training139/media/d7e2248e0311_18_park_miejski.webp",
+    "sha256": "d7e2248e0311b093b18ca928ae91262b227b01e824d5d4ae2bae3f719cf3123c"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla/07_rafa_koralowa.webp",
+    "runtime": "assets/training139/media/47e4f0289782_07_rafa_koralowa.webp",
+    "sha256": "47e4f0289782e9bbd57132e5ce0981fd84c14c6cd71f945b32812c5b6caa276b"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla/21_obca_planeta.webp",
+    "runtime": "assets/training139/media/5c5a28fe7ed0_21_obca_planeta.webp",
+    "sha256": "5c5a28fe7ed0a0507501176ab21205f1167039a34e0f823b2a2d3ce94cba7a29"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla/20_baza_ksiezycowa.webp",
+    "runtime": "assets/training139/media/68798127d248_20_baza_ksiezycowa.webp",
+    "sha256": "68798127d248b1c35cef682442abb7b29322a8553e6ccde90902bc6d18a20cd3"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla/09_ogrod_zamku.webp",
+    "runtime": "assets/training139/media/ff6b8266544d_09_ogrod_zamku.webp",
+    "sha256": "ff6b8266544da3508acaf4fb9c62b39a4699796ee32f0e2aad835783ef1b6dbd"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla/08_dolina_dinozaurow.webp",
+    "runtime": "assets/training139/media/328f29921597_08_dolina_dinozaurow.webp",
+    "sha256": "328f299215977aa89512a9c5243aacf52495cbdce703194ad76526a0fd5f6c51"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla/05_jesienny_park.webp",
+    "runtime": "assets/training139/media/5fd83ccc5775_05_jesienny_park.webp",
+    "sha256": "5fd83ccc577562f3781f90c294d4f61564399ef99694364188843f4805193110"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla/13_gospodarstwo.webp",
+    "runtime": "assets/training139/media/4140632e21b3_13_gospodarstwo.webp",
+    "sha256": "4140632e21b326f140dff9cff12fc430c9fd8685f4e60fd5a59298a0ac96a590"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla/06_zimowa_wioska.webp",
+    "runtime": "assets/training139/media/c1a3dc29ec72_06_zimowa_wioska.webp",
+    "sha256": "c1a3dc29ec7290fe54b203f011b0afb658bddaa86f1fe74725b4c0b1ab0debf5"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla/11_smocza_gora.webp",
+    "runtime": "assets/training139/media/295323bc52f8_11_smocza_gora.webp",
+    "sha256": "295323bc52f832c57a4e9ac37d628f97890e985d0de0889b651b7fb5ed824e27"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla/10_kraina_slodyczy.webp",
+    "runtime": "assets/training139/media/ac19631f1a38_10_kraina_slodyczy.webp",
+    "sha256": "ac19631f1a388b97104a05b478fa2fe3abd62a3f2731f9272f6cb7a31460c153"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla/23_pustynna_oaza.webp",
+    "runtime": "assets/training139/media/3162d41e9e3d_23_pustynna_oaza.webp",
+    "sha256": "3162d41e9e3d58d45533a3944f3790d0ab6f2e8840a7ba1e124ea50b85be1aaf"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla/04_tropikalna_plaza.webp",
+    "runtime": "assets/training139/media/3e3257c8738e_04_tropikalna_plaza.webp",
+    "sha256": "3e3257c8738ebcade72f41d2948aec62ee017e0674bc98a1a322f370e09341e4"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla/19_stacja_kosmiczna.webp",
+    "runtime": "assets/training139/media/a7460df581cb_19_stacja_kosmiczna.webp",
+    "sha256": "a7460df581cb67f7db31a5350bdf3f0fc243fb72d90c9b41b3667c2a6cc62379"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla/16_biblioteka.webp",
+    "runtime": "assets/training139/media/8b310f4655ed_16_biblioteka.webp",
+    "sha256": "8b310f4655ed581cadd33c3602bce8e1c27a56f7d7e8910c347f3208281e5180"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla/14_ogrod_zoologiczny.webp",
+    "runtime": "assets/training139/media/de3d7806c11a_14_ogrod_zoologiczny.webp",
+    "sha256": "de3d7806c11ad516b3d7ecf01aa775096ba2141ae34b63a7139a1cca062531b9"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla/15_warsztat_zabawek.webp",
+    "runtime": "assets/training139/media/2cf2957f9372_15_warsztat_zabawek.webp",
+    "sha256": "2cf2957f937277e95ae3641dbd583d9b0975cc138b517240ed0b5e2d8e7729e5"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla/02_lesny_strumien.webp",
+    "runtime": "assets/training139/media/694409cc48ef_02_lesny_strumien.webp",
+    "sha256": "694409cc48ef0a68b6a4b438f28cb61056e57106d4380ffdb3c12b2836767962"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla/03_gorska_laka.webp",
+    "runtime": "assets/training139/media/9491b16dddec_03_gorska_laka.webp",
+    "sha256": "9491b16dddec1dbbfa12c51409dae4d1d2f7f965bffe77845752bbd761d1cc4d"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla/01_plac_zabaw.webp",
+    "runtime": "assets/training139/media/debf6d2fe1fd_01_plac_zabaw.webp",
+    "sha256": "debf6d2fe1fd1d8dc2b93a7134fd54c0ee1b16a939c700d72177f39c8e43fedb"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla/17_stacja_kolejowa.webp",
+    "runtime": "assets/training139/media/4044e9c207a8_17_stacja_kolejowa.webp",
+    "sha256": "4044e9c207a8f5aca751d1e5fd1ba8e561fd00aacbf4370d639e6cac494aa334"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/tla/22_wyspa_piratow.webp",
+    "runtime": "assets/training139/media/94c4e98eebf2_22_wyspa_piratow.webp",
+    "sha256": "94c4e98eebf252f22219d76cc3a7fe17690ab8200459a31e08f77f2b335e87b6"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/grafiki/fala_dzwiekowa.png",
+    "runtime": "assets/space132/fala_dzwiekowa.png",
+    "sha256": "effdde1daa8d13c3aeaeeb08ffb6c38d2abc53566af6ec0d100744ea4e7720a0"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/grafiki/tlo.png",
+    "runtime": "assets/space132/tlo.png",
+    "sha256": "609536ed4a15f093ac62a77759f6aae6b368bf72e5070aa461756877d5407088"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/grafiki/gwiazda.png",
+    "runtime": "assets/space132/gwiazda.png",
+    "sha256": "eebdb595aa52e4f4b78eaf189c093f5ba3227419f8a120a0a4f4f604b27e9a45"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/grafiki/rakieta_przezroczysta.png",
+    "runtime": "assets/space132/rakieta_przezroczysta.png",
+    "sha256": "2d63b8333cd86ffaaa6bf005edc87eb46734eed997598d0adbe42158dd4a2b14"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/grafiki/mikrofon.png",
+    "runtime": "assets/space132/mikrofon.png",
+    "sha256": "0a889c4babc0636390314327920c8ec90a0a335cb7b590db11a377ac5c67faca"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/grafiki/samochodzik.png",
+    "runtime": "assets/training139/media/954d21e1e7a3_samochodzik.png",
+    "sha256": "954d21e1e7a34cb0e68dbcb2db87532f487c8385267371f361c2385045b7ae56"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/grafiki/astronauta.png",
+    "runtime": "assets/space132/astronauta.png",
+    "sha256": "47034d84f6b6d98cdf7b236d58f7a2c98adaab9c0d6c3dacd0638dedac59c3f0"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/grafiki/skrzynia.png",
+    "runtime": "assets/space132/skrzynia.png",
+    "sha256": "4db92a475c712a0050539eff8f6bab4f06b8ce96bc16d64e6344dd141cca902e"
+  },
+  {
+    "pack": "rally",
+    "source": "patryk/Literkowy_Rajd_Plynne_Pisanie/grafiki/robot.png",
+    "runtime": "assets/space132/robot.png",
+    "sha256": "efcbb7e0a6fb7f2e2703ef77355e340e0dde8219b314e08fa6c77f72ceb8e2f3"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/lisc.png",
+    "runtime": "assets/training139/media/e54036b8a456_lisc.png",
+    "sha256": "e54036b8a456e2952fa14d37db622625b9af7d586afd856bd2b88292b20ee5b3"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/grzyb.png",
+    "runtime": "assets/training139/media/709cac707a29_grzyb.png",
+    "sha256": "709cac707a299b7655aecc8549dd66ea29987b4e55c27351be6125df532e458d"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/jablko.png",
+    "runtime": "assets/training139/media/1ac84aee5f89_jablko.png",
+    "sha256": "1ac84aee5f8927c7ab35fb49f5e935d17a71e3bf168b3f0fee5c4eee4f2ec4d0"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/rekawiczka.png",
+    "runtime": "assets/training139/media/26fddf407397_rekawiczka.png",
+    "sha256": "26fddf407397ac2fc6718a480e4ef8d41dfdaeffbff8556d769a7d8b0ae272cf"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/fala_dzwiekowa.png",
+    "runtime": "assets/space132/fala_dzwiekowa.png",
+    "sha256": "effdde1daa8d13c3aeaeeb08ffb6c38d2abc53566af6ec0d100744ea4e7720a0"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/mis.png",
+    "runtime": "assets/training139/media/a30511acc686_mis.png",
+    "sha256": "a30511acc686a1ac2e29803cbbd45c36e0713f7ae3c880c17a7a9fcc168e8a9d"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/truskawka.png",
+    "runtime": "assets/training139/media/caa846f57dd1_truskawka.png",
+    "sha256": "caa846f57dd1bbbacedb1ea189ee2f0d3896c2800658ced26d33f25bb4b2945f"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/tlo.png",
+    "runtime": "assets/space132/tlo.png",
+    "sha256": "609536ed4a15f093ac62a77759f6aae6b368bf72e5070aa461756877d5407088"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/bebenek.png",
+    "runtime": "assets/training139/media/c970834d10d3_bebenek.png",
+    "sha256": "c970834d10d3ae87b7da7aee858e504c6d032c2269aeb15460ce6c702a28a75b"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/latawiec.png",
+    "runtime": "assets/training139/media/092697fde27b_latawiec.png",
+    "sha256": "092697fde27b677a5b0ecd121a1a668897a773af4e9775b8d5825ff740461259"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/gwiazda.png",
+    "runtime": "assets/space132/gwiazda.png",
+    "sha256": "eebdb595aa52e4f4b78eaf189c093f5ba3227419f8a120a0a4f4f604b27e9a45"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/rakieta_przezroczysta.png",
+    "runtime": "assets/space132/rakieta_przezroczysta.png",
+    "sha256": "2d63b8333cd86ffaaa6bf005edc87eb46734eed997598d0adbe42158dd4a2b14"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/mikrofon.png",
+    "runtime": "assets/space132/mikrofon.png",
+    "sha256": "0a889c4babc0636390314327920c8ec90a0a335cb7b590db11a377ac5c67faca"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/klocek.png",
+    "runtime": "assets/training139/media/af30beaa7ac8_klocek.png",
+    "sha256": "af30beaa7ac8881ec2c7b5a101fe93fe433d0590bcac10a039d69b98e599975b"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/sniezynka.png",
+    "runtime": "assets/training139/media/45df7634dea4_sniezynka.png",
+    "sha256": "45df7634dea491ff21b8cf570836dc2f7f0b1ae9683d5a940a3ef42d616bf467"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/pomarancza.png",
+    "runtime": "assets/training139/media/b60d48851020_pomarancza.png",
+    "sha256": "b60d48851020940dfba307a27de637e6d58c01469f2fca53c94de4007d43bb75"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/slonecznik.png",
+    "runtime": "assets/training139/media/561274d89352_slonecznik.png",
+    "sha256": "561274d89352d81484bbcd9694f5532290845ebae36c1601d6385802143ccc89"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/astronauta.png",
+    "runtime": "assets/space132/astronauta.png",
+    "sha256": "47034d84f6b6d98cdf7b236d58f7a2c98adaab9c0d6c3dacd0638dedac59c3f0"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/zoladz.png",
+    "runtime": "assets/training139/media/6b8667447623_zoladz.png",
+    "sha256": "6b8667447623a5391f4a4bb44ed5e3eb0afdfeb22cbe919a497ff65aa04e17e8"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/balon.png",
+    "runtime": "assets/training139/media/b075260f15f7_balon.png",
+    "sha256": "b075260f15f7d9db3e1534542c2773646e52d2ee8b200215664dc09371c5290f"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/dynia.png",
+    "runtime": "assets/training139/media/f1783aeb3569_dynia.png",
+    "sha256": "f1783aeb35696c59de098d907d9a552c6445777c75d9312d7f17bd47db53eea5"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/banan.png",
+    "runtime": "assets/training139/media/b377ec6b8c5c_banan.png",
+    "sha256": "b377ec6b8c5c050c62d42ef31ca07eaef97a98419d0983777011d77aa59aa700"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/szyszka.png",
+    "runtime": "assets/training139/media/1e973b902640_szyszka.png",
+    "sha256": "1e973b902640b8add2a5500f570f3537647d65bf5a5b658a361631257e766555"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/gruszka.png",
+    "runtime": "assets/training139/media/97c752110094_gruszka.png",
+    "sha256": "97c752110094e2393a34ed8a043be3e983988673fde0102b35f765f68f406577"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/skrzynia.png",
+    "runtime": "assets/space132/skrzynia.png",
+    "sha256": "4db92a475c712a0050539eff8f6bab4f06b8ce96bc16d64e6344dd141cca902e"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/robot.png",
+    "runtime": "assets/space132/robot.png",
+    "sha256": "efcbb7e0a6fb7f2e2703ef77355e340e0dde8219b314e08fa6c77f72ceb8e2f3"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/muszla.png",
+    "runtime": "assets/training139/media/93a9f2b74e67_muszla.png",
+    "sha256": "93a9f2b74e674c3006e9be0524f86d59e5fc7cfbec36aba86f064c1f2cdc9207"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/pilka.png",
+    "runtime": "assets/training139/media/e9ab039f0942_pilka.png",
+    "sha256": "e9ab039f0942469790ff839022d1210041ecf4696994f97a9af0c1bc437afd3a"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/ananas.png",
+    "runtime": "assets/training139/media/d40399cde22e_ananas.png",
+    "sha256": "d40399cde22e7fa089824a9a7f27a01e253450dd98600cb6513531cb92f4718c"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/marchew.png",
+    "runtime": "assets/training139/media/835b8ae5e70e_marchew.png",
+    "sha256": "835b8ae5e70e0556a6c5eb56604854123c0748f7e5588915a513f9c1e6266243"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/prezent.png",
+    "runtime": "assets/training139/media/f8ffd88e6591_prezent.png",
+    "sha256": "f8ffd88e6591f8eb95b97e6f963a7dd3122662405d055b69e4b9d707ad030d86"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/rymowanki/pszczola.png",
+    "runtime": "assets/training139/media/1060e48c447f_pszczola.png",
+    "sha256": "1060e48c447fe29783bb41f505f85d18fa087917202a266f529515ca26b0e215"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/rymowanki/zaba.png",
+    "runtime": "assets/training139/media/76a68fa21b8a_zaba.png",
+    "sha256": "76a68fa21b8ae6e02298cdcbcdf21e4dae9541eeadd0861757e16dbdacc0176c"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/rymowanki/kot.png",
+    "runtime": "assets/training139/media/42719e4ba4d3_kot.png",
+    "sha256": "42719e4ba4d3a5206e9c629fed09fb8ce7203cd9f61e4bed54b5a971bbe30cc5"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/rymowanki/slonce.png",
+    "runtime": "assets/training139/media/c9b7f569bdcd_slonce.png",
+    "sha256": "c9b7f569bdcd1ae424e3cb758c377081b9866ccc3121ce19e4f712a09850d1cb"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/rymowanki/ptak.png",
+    "runtime": "assets/training139/media/1aef9fbbab51_ptak.png",
+    "sha256": "1aef9fbbab519e7cba9cd698e713b013c32f3a3ddf94d30f985e840a56ff4bc6"
+  },
+  {
+    "pack": "rhymes",
+    "source": "patryk/Rymowanki_30_Zagadek_Dwie_Wersje/grafiki/rymowanki/krolik.png",
+    "runtime": "assets/training139/media/349c3977c1ba_krolik.png",
+    "sha256": "349c3977c1bac6d959d9fdebcc07cefabcda9d0c621ac7908833fc9741452b2d"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/tla/24_festiwal_lampionow.webp",
+    "runtime": "assets/training139/media/afdf519d3bd9_24_festiwal_lampionow.webp",
+    "sha256": "afdf519d3bd9e9668bdd8d9358c1468963a4695b8af9d2d17d96f522b56ae35b"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/tla/12_wyspy_w_chmurach.webp",
+    "runtime": "assets/training139/media/722b40f33a67_12_wyspy_w_chmurach.webp",
+    "sha256": "722b40f33a67dfd10fa358d680fa73c83f5641fd8bcac3374227a6b9913b5d9c"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/tla/18_park_miejski.webp",
+    "runtime": "assets/training139/media/d7e2248e0311_18_park_miejski.webp",
+    "sha256": "d7e2248e0311b093b18ca928ae91262b227b01e824d5d4ae2bae3f719cf3123c"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/tla/07_rafa_koralowa.webp",
+    "runtime": "assets/training139/media/47e4f0289782_07_rafa_koralowa.webp",
+    "sha256": "47e4f0289782e9bbd57132e5ce0981fd84c14c6cd71f945b32812c5b6caa276b"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/tla/21_obca_planeta.webp",
+    "runtime": "assets/training139/media/5c5a28fe7ed0_21_obca_planeta.webp",
+    "sha256": "5c5a28fe7ed0a0507501176ab21205f1167039a34e0f823b2a2d3ce94cba7a29"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/tla/20_baza_ksiezycowa.webp",
+    "runtime": "assets/training139/media/68798127d248_20_baza_ksiezycowa.webp",
+    "sha256": "68798127d248b1c35cef682442abb7b29322a8553e6ccde90902bc6d18a20cd3"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/tla/09_ogrod_zamku.webp",
+    "runtime": "assets/training139/media/ff6b8266544d_09_ogrod_zamku.webp",
+    "sha256": "ff6b8266544da3508acaf4fb9c62b39a4699796ee32f0e2aad835783ef1b6dbd"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/tla/08_dolina_dinozaurow.webp",
+    "runtime": "assets/training139/media/328f29921597_08_dolina_dinozaurow.webp",
+    "sha256": "328f299215977aa89512a9c5243aacf52495cbdce703194ad76526a0fd5f6c51"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/tla/05_jesienny_park.webp",
+    "runtime": "assets/training139/media/5fd83ccc5775_05_jesienny_park.webp",
+    "sha256": "5fd83ccc577562f3781f90c294d4f61564399ef99694364188843f4805193110"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/tla/13_gospodarstwo.webp",
+    "runtime": "assets/training139/media/4140632e21b3_13_gospodarstwo.webp",
+    "sha256": "4140632e21b326f140dff9cff12fc430c9fd8685f4e60fd5a59298a0ac96a590"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/tla/06_zimowa_wioska.webp",
+    "runtime": "assets/training139/media/c1a3dc29ec72_06_zimowa_wioska.webp",
+    "sha256": "c1a3dc29ec7290fe54b203f011b0afb658bddaa86f1fe74725b4c0b1ab0debf5"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/tla/11_smocza_gora.webp",
+    "runtime": "assets/training139/media/295323bc52f8_11_smocza_gora.webp",
+    "sha256": "295323bc52f832c57a4e9ac37d628f97890e985d0de0889b651b7fb5ed824e27"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/tla/10_kraina_slodyczy.webp",
+    "runtime": "assets/training139/media/ac19631f1a38_10_kraina_slodyczy.webp",
+    "sha256": "ac19631f1a388b97104a05b478fa2fe3abd62a3f2731f9272f6cb7a31460c153"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/tla/23_pustynna_oaza.webp",
+    "runtime": "assets/training139/media/3162d41e9e3d_23_pustynna_oaza.webp",
+    "sha256": "3162d41e9e3d58d45533a3944f3790d0ab6f2e8840a7ba1e124ea50b85be1aaf"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/tla/04_tropikalna_plaza.webp",
+    "runtime": "assets/training139/media/3e3257c8738e_04_tropikalna_plaza.webp",
+    "sha256": "3e3257c8738ebcade72f41d2948aec62ee017e0674bc98a1a322f370e09341e4"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/tla/19_stacja_kosmiczna.webp",
+    "runtime": "assets/training139/media/a7460df581cb_19_stacja_kosmiczna.webp",
+    "sha256": "a7460df581cb67f7db31a5350bdf3f0fc243fb72d90c9b41b3667c2a6cc62379"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/tla/16_biblioteka.webp",
+    "runtime": "assets/training139/media/8b310f4655ed_16_biblioteka.webp",
+    "sha256": "8b310f4655ed581cadd33c3602bce8e1c27a56f7d7e8910c347f3208281e5180"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/tla/14_ogrod_zoologiczny.webp",
+    "runtime": "assets/training139/media/de3d7806c11a_14_ogrod_zoologiczny.webp",
+    "sha256": "de3d7806c11ad516b3d7ecf01aa775096ba2141ae34b63a7139a1cca062531b9"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/tla/15_warsztat_zabawek.webp",
+    "runtime": "assets/training139/media/2cf2957f9372_15_warsztat_zabawek.webp",
+    "sha256": "2cf2957f937277e95ae3641dbd583d9b0975cc138b517240ed0b5e2d8e7729e5"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/tla/02_lesny_strumien.webp",
+    "runtime": "assets/training139/media/694409cc48ef_02_lesny_strumien.webp",
+    "sha256": "694409cc48ef0a68b6a4b438f28cb61056e57106d4380ffdb3c12b2836767962"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/tla/03_gorska_laka.webp",
+    "runtime": "assets/training139/media/9491b16dddec_03_gorska_laka.webp",
+    "sha256": "9491b16dddec1dbbfa12c51409dae4d1d2f7f965bffe77845752bbd761d1cc4d"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/tla/01_plac_zabaw.webp",
+    "runtime": "assets/training139/media/debf6d2fe1fd_01_plac_zabaw.webp",
+    "sha256": "debf6d2fe1fd1d8dc2b93a7134fd54c0ee1b16a939c700d72177f39c8e43fedb"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/tla/17_stacja_kolejowa.webp",
+    "runtime": "assets/training139/media/4044e9c207a8_17_stacja_kolejowa.webp",
+    "sha256": "4044e9c207a8f5aca751d1e5fd1ba8e561fd00aacbf4370d639e6cac494aa334"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/tla/22_wyspa_piratow.webp",
+    "runtime": "assets/training139/media/94c4e98eebf2_22_wyspa_piratow.webp",
+    "sha256": "94c4e98eebf252f22219d76cc3a7fe17690ab8200459a31e08f77f2b335e87b6"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/grafiki/jablko.png",
+    "runtime": "assets/training139/media/1ac84aee5f89_jablko.png",
+    "sha256": "1ac84aee5f8927c7ab35fb49f5e935d17a71e3bf168b3f0fee5c4eee4f2ec4d0"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/grafiki/tlo.png",
+    "runtime": "assets/space132/tlo.png",
+    "sha256": "609536ed4a15f093ac62a77759f6aae6b368bf72e5070aa461756877d5407088"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/grafiki/rakieta_przezroczysta.png",
+    "runtime": "assets/space132/rakieta_przezroczysta.png",
+    "sha256": "2d63b8333cd86ffaaa6bf005edc87eb46734eed997598d0adbe42158dd4a2b14"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/grafiki/mikrofon.png",
+    "runtime": "assets/space132/mikrofon.png",
+    "sha256": "0a889c4babc0636390314327920c8ec90a0a335cb7b590db11a377ac5c67faca"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/grafiki/wiaderko.png",
+    "runtime": "assets/training139/media/fbee000bb357_wiaderko.png",
+    "sha256": "fbee000bb35764f12aa4d63dfea50e4e1aff8c80df6b5827b5ae738bdfd6e8d3"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/grafiki/astronauta.png",
+    "runtime": "assets/space132/astronauta.png",
+    "sha256": "47034d84f6b6d98cdf7b236d58f7a2c98adaab9c0d6c3dacd0638dedac59c3f0"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/grafiki/balon.png",
+    "runtime": "assets/training139/media/b075260f15f7_balon.png",
+    "sha256": "b075260f15f7d9db3e1534542c2773646e52d2ee8b200215664dc09371c5290f"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/grafiki/dynia.png",
+    "runtime": "assets/training139/media/f1783aeb3569_dynia.png",
+    "sha256": "f1783aeb35696c59de098d907d9a552c6445777c75d9312d7f17bd47db53eea5"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/grafiki/gruszka.png",
+    "runtime": "assets/training139/media/97c752110094_gruszka.png",
+    "sha256": "97c752110094e2393a34ed8a043be3e983988673fde0102b35f765f68f406577"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/grafiki/muszla.png",
+    "runtime": "assets/training139/media/93a9f2b74e67_muszla.png",
+    "sha256": "93a9f2b74e674c3006e9be0524f86d59e5fc7cfbec36aba86f064c1f2cdc9207"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/grafiki/pilka.png",
+    "runtime": "assets/training139/media/e9ab039f0942_pilka.png",
+    "sha256": "e9ab039f0942469790ff839022d1210041ecf4696994f97a9af0c1bc437afd3a"
+  },
+  {
+    "pack": "camera",
+    "source": "patryk/Zaczarowany_Aparat_Litery_na_Przedmiotach/grafiki/prezent.png",
+    "runtime": "assets/training139/media/f8ffd88e6591_prezent.png",
+    "sha256": "f8ffd88e6591f8eb95b97e6f963a7dd3122662405d055b69e4b9d707ad030d86"
+  },
+  {
+    "pack": "dino",
+    "source": "oboje/Dinozaur_Dwie_Wersje/tlo.webp",
+    "runtime": "assets/training139/media/328f29921597_08_dolina_dinozaurow.webp",
+    "sha256": "328f299215977aa89512a9c5243aacf52495cbdce703194ad76526a0fd5f6c51"
+  },
+  {
+    "pack": "dino",
+    "source": "oboje/Dinozaur_Dwie_Wersje/nowe/latarka.png",
+    "runtime": "assets/training139/media/6f448d65ceb8_latarka.png",
+    "sha256": "6f448d65ceb820aa19cf4b14e86a2df47956b45972264cf60ea5626d3e13cb82"
+  },
+  {
+    "pack": "dino",
+    "source": "oboje/Dinozaur_Dwie_Wersje/nowe/konewka.png",
+    "runtime": "assets/training139/media/22609c3efd10_konewka.png",
+    "sha256": "22609c3efd10269a21dbdb54f9a78f2a36240807757359989dba716972a8295c"
+  },
+  {
+    "pack": "dino",
+    "source": "oboje/Dinozaur_Dwie_Wersje/nowe/parasol.png",
+    "runtime": "assets/training139/media/effb3674dc14_parasol.png",
+    "sha256": "effb3674dc149411f3549853dae897d9a9e9311d778b7d81b078ba61fec18b68"
+  },
+  {
+    "pack": "dino",
+    "source": "oboje/Dinozaur_Dwie_Wersje/nowe/pacholek.png",
+    "runtime": "assets/training139/media/71493f000689_pacholek.png",
+    "sha256": "71493f0006899e2bf8e0def37675fe2b03454814fdbd9c8d95709670a721c5ab"
+  },
+  {
+    "pack": "dino",
+    "source": "oboje/Dinozaur_Dwie_Wersje/nowe/skarpetka.png",
+    "runtime": "assets/training139/media/d5006a41a775_skarpetka.png",
+    "sha256": "d5006a41a7751515b08ef3d788790e632a42d8e53f2a2589b9922e74cdc3946d"
+  },
+  {
+    "pack": "dino",
+    "source": "oboje/Dinozaur_Dwie_Wersje/nowe/klepsydra.png",
+    "runtime": "assets/training139/media/7aae9b7269c6_klepsydra.png",
+    "sha256": "7aae9b7269c65360753f0b1666db1907c4c6087b93ec914ebd49769c2e39e610"
+  },
+  {
+    "pack": "dino",
+    "source": "oboje/Dinozaur_Dwie_Wersje/nowe/oko.png",
+    "runtime": "assets/training139/media/28229654c06e_oko.png",
+    "sha256": "28229654c06e0c7121b419c29000a54f899d753714d6e71d79031bf15918de83"
+  },
+  {
+    "pack": "dino",
+    "source": "oboje/Dinozaur_Dwie_Wersje/nowe/klodka.png",
+    "runtime": "assets/training139/media/fe2383e92525_klodka.png",
+    "sha256": "fe2383e92525e1e71e088c5d454aa5d92a4617f57000094d206e4308a314e295"
+  },
+  {
+    "pack": "dino",
+    "source": "oboje/Dinozaur_Dwie_Wersje/nowe/lodz.png",
+    "runtime": "assets/training139/media/795c20ee9070_lodz.png",
+    "sha256": "795c20ee90703a1d13f899a9c8a3903c75e44d938da183df8171f4d084fc5120"
+  },
+  {
+    "pack": "dino",
+    "source": "oboje/Dinozaur_Dwie_Wersje/nowe/szczoteczka.png",
+    "runtime": "assets/training139/media/c7d08b87bc33_szczoteczka.png",
+    "sha256": "c7d08b87bc33f4feb8db146bcdd180ae41addf7727bc87fd025dab05a194c101"
+  },
+  {
+    "pack": "dino",
+    "source": "oboje/Dinozaur_Dwie_Wersje/grafiki/jablko.png",
+    "runtime": "assets/training139/media/1ac84aee5f89_jablko.png",
+    "sha256": "1ac84aee5f8927c7ab35fb49f5e935d17a71e3bf168b3f0fee5c4eee4f2ec4d0"
+  },
+  {
+    "pack": "dino",
+    "source": "oboje/Dinozaur_Dwie_Wersje/grafiki/mis.png",
+    "runtime": "assets/training139/media/a30511acc686_mis.png",
+    "sha256": "a30511acc686a1ac2e29803cbbd45c36e0713f7ae3c880c17a7a9fcc168e8a9d"
+  },
+  {
+    "pack": "dino",
+    "source": "oboje/Dinozaur_Dwie_Wersje/grafiki/klocek.png",
+    "runtime": "assets/training139/media/af30beaa7ac8_klocek.png",
+    "sha256": "af30beaa7ac8881ec2c7b5a101fe93fe433d0590bcac10a039d69b98e599975b"
+  },
+  {
+    "pack": "dino",
+    "source": "oboje/Dinozaur_Dwie_Wersje/grafiki/balon.png",
+    "runtime": "assets/training139/media/b075260f15f7_balon.png",
+    "sha256": "b075260f15f7d9db3e1534542c2773646e52d2ee8b200215664dc09371c5290f"
+  },
+  {
+    "pack": "dino",
+    "source": "oboje/Dinozaur_Dwie_Wersje/grafiki/gruszka.png",
+    "runtime": "assets/training139/media/97c752110094_gruszka.png",
+    "sha256": "97c752110094e2393a34ed8a043be3e983988673fde0102b35f765f68f406577"
+  },
+  {
+    "pack": "dino",
+    "source": "oboje/Dinozaur_Dwie_Wersje/grafiki/prezent.png",
+    "runtime": "assets/training139/media/f8ffd88e6591_prezent.png",
+    "sha256": "f8ffd88e6591f8eb95b97e6f963a7dd3122662405d055b69e4b9d707ad030d86"
+  },
+  {
+    "pack": "dino",
+    "source": "oboje/Dinozaur_Dwie_Wersje/dino/glodny.png",
+    "runtime": "assets/training139/media/2b4a4f9665dc_glodny.png",
+    "sha256": "2b4a4f9665dc5b14cf6d44db6ef4349fed0ad59b280c39f92bd802165107e057"
+  },
+  {
+    "pack": "dino",
+    "source": "oboje/Dinozaur_Dwie_Wersje/dino/brzuch.png",
+    "runtime": "assets/training139/media/77e7fb921901_brzuch.png",
+    "sha256": "77e7fb921901fc1105887e7283482646d8eac7753c559cb6fd3dd6fc3a711cb5"
+  },
+  {
+    "pack": "dino",
+    "source": "oboje/Dinozaur_Dwie_Wersje/dino/gryzie.png",
+    "runtime": "assets/training139/media/fb4671d5524c_gryzie.png",
+    "sha256": "fb4671d5524cb96acd12a644f5374fce8db42cf808183eb60db4d20b663cf463"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/tla/24_festiwal_lampionow.webp",
+    "runtime": "assets/training139/media/afdf519d3bd9_24_festiwal_lampionow.webp",
+    "sha256": "afdf519d3bd9e9668bdd8d9358c1468963a4695b8af9d2d17d96f522b56ae35b"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/tla/12_wyspy_w_chmurach.webp",
+    "runtime": "assets/training139/media/722b40f33a67_12_wyspy_w_chmurach.webp",
+    "sha256": "722b40f33a67dfd10fa358d680fa73c83f5641fd8bcac3374227a6b9913b5d9c"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/tla/18_park_miejski.webp",
+    "runtime": "assets/training139/media/d7e2248e0311_18_park_miejski.webp",
+    "sha256": "d7e2248e0311b093b18ca928ae91262b227b01e824d5d4ae2bae3f719cf3123c"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/tla/07_rafa_koralowa.webp",
+    "runtime": "assets/training139/media/47e4f0289782_07_rafa_koralowa.webp",
+    "sha256": "47e4f0289782e9bbd57132e5ce0981fd84c14c6cd71f945b32812c5b6caa276b"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/tla/21_obca_planeta.webp",
+    "runtime": "assets/training139/media/5c5a28fe7ed0_21_obca_planeta.webp",
+    "sha256": "5c5a28fe7ed0a0507501176ab21205f1167039a34e0f823b2a2d3ce94cba7a29"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/tla/20_baza_ksiezycowa.webp",
+    "runtime": "assets/training139/media/68798127d248_20_baza_ksiezycowa.webp",
+    "sha256": "68798127d248b1c35cef682442abb7b29322a8553e6ccde90902bc6d18a20cd3"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/tla/26_stacja.webp",
+    "runtime": "assets/training139/media/50c5c9e31148_26_stacja.webp",
+    "sha256": "50c5c9e31148642d107d6d36f903aba0b00dbe538d9de7c6a951e170685ce89f"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/tla/09_ogrod_zamku.webp",
+    "runtime": "assets/training139/media/ff6b8266544d_09_ogrod_zamku.webp",
+    "sha256": "ff6b8266544da3508acaf4fb9c62b39a4699796ee32f0e2aad835783ef1b6dbd"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/tla/27_stacja.webp",
+    "runtime": "assets/training139/media/eb38fb7137a8_27_stacja.webp",
+    "sha256": "eb38fb7137a896fb5aa2162d349c5fbaafe88da9b1aa3cc8484a4c8d2af0c860"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/tla/08_dolina_dinozaurow.webp",
+    "runtime": "assets/training139/media/328f29921597_08_dolina_dinozaurow.webp",
+    "sha256": "328f299215977aa89512a9c5243aacf52495cbdce703194ad76526a0fd5f6c51"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/tla/05_jesienny_park.webp",
+    "runtime": "assets/training139/media/5fd83ccc5775_05_jesienny_park.webp",
+    "sha256": "5fd83ccc577562f3781f90c294d4f61564399ef99694364188843f4805193110"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/tla/13_gospodarstwo.webp",
+    "runtime": "assets/training139/media/4140632e21b3_13_gospodarstwo.webp",
+    "sha256": "4140632e21b326f140dff9cff12fc430c9fd8685f4e60fd5a59298a0ac96a590"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/tla/06_zimowa_wioska.webp",
+    "runtime": "assets/training139/media/c1a3dc29ec72_06_zimowa_wioska.webp",
+    "sha256": "c1a3dc29ec7290fe54b203f011b0afb658bddaa86f1fe74725b4c0b1ab0debf5"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/tla/11_smocza_gora.webp",
+    "runtime": "assets/training139/media/295323bc52f8_11_smocza_gora.webp",
+    "sha256": "295323bc52f832c57a4e9ac37d628f97890e985d0de0889b651b7fb5ed824e27"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/tla/10_kraina_slodyczy.webp",
+    "runtime": "assets/training139/media/ac19631f1a38_10_kraina_slodyczy.webp",
+    "sha256": "ac19631f1a388b97104a05b478fa2fe3abd62a3f2731f9272f6cb7a31460c153"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/tla/23_pustynna_oaza.webp",
+    "runtime": "assets/training139/media/3162d41e9e3d_23_pustynna_oaza.webp",
+    "sha256": "3162d41e9e3d58d45533a3944f3790d0ab6f2e8840a7ba1e124ea50b85be1aaf"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/tla/04_tropikalna_plaza.webp",
+    "runtime": "assets/training139/media/3e3257c8738e_04_tropikalna_plaza.webp",
+    "sha256": "3e3257c8738ebcade72f41d2948aec62ee017e0674bc98a1a322f370e09341e4"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/tla/19_stacja_kosmiczna.webp",
+    "runtime": "assets/training139/media/a7460df581cb_19_stacja_kosmiczna.webp",
+    "sha256": "a7460df581cb67f7db31a5350bdf3f0fc243fb72d90c9b41b3667c2a6cc62379"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/tla/16_biblioteka.webp",
+    "runtime": "assets/training139/media/8b310f4655ed_16_biblioteka.webp",
+    "sha256": "8b310f4655ed581cadd33c3602bce8e1c27a56f7d7e8910c347f3208281e5180"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/tla/14_ogrod_zoologiczny.webp",
+    "runtime": "assets/training139/media/de3d7806c11a_14_ogrod_zoologiczny.webp",
+    "sha256": "de3d7806c11ad516b3d7ecf01aa775096ba2141ae34b63a7139a1cca062531b9"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/tla/15_warsztat_zabawek.webp",
+    "runtime": "assets/training139/media/2cf2957f9372_15_warsztat_zabawek.webp",
+    "sha256": "2cf2957f937277e95ae3641dbd583d9b0975cc138b517240ed0b5e2d8e7729e5"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/tla/28_stacja.webp",
+    "runtime": "assets/training139/media/68d49f52d389_28_stacja.webp",
+    "sha256": "68d49f52d3899c1f6e0fe072ac86c65a0d528dcbefbec64fa20dd38b44666db8"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/tla/02_lesny_strumien.webp",
+    "runtime": "assets/training139/media/694409cc48ef_02_lesny_strumien.webp",
+    "sha256": "694409cc48ef0a68b6a4b438f28cb61056e57106d4380ffdb3c12b2836767962"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/tla/03_gorska_laka.webp",
+    "runtime": "assets/training139/media/9491b16dddec_03_gorska_laka.webp",
+    "sha256": "9491b16dddec1dbbfa12c51409dae4d1d2f7f965bffe77845752bbd761d1cc4d"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/tla/01_plac_zabaw.webp",
+    "runtime": "assets/training139/media/debf6d2fe1fd_01_plac_zabaw.webp",
+    "sha256": "debf6d2fe1fd1d8dc2b93a7134fd54c0ee1b16a939c700d72177f39c8e43fedb"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/tla/30_stacja.webp",
+    "runtime": "assets/training139/media/a4f7f2bc336e_30_stacja.webp",
+    "sha256": "a4f7f2bc336eae21e8beca7298a5c098cd5bb7fadda01060ec1a0af60098580d"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/tla/29_stacja.webp",
+    "runtime": "assets/training139/media/7c3802a55a18_29_stacja.webp",
+    "sha256": "7c3802a55a18a4de883c52c3809ac2063e77c28e79f658664faa4e00dd71b479"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/tla/17_stacja_kolejowa.webp",
+    "runtime": "assets/training139/media/4044e9c207a8_17_stacja_kolejowa.webp",
+    "sha256": "4044e9c207a8f5aca751d1e5fd1ba8e561fd00aacbf4370d639e6cac494aa334"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/tla/25_stacja.webp",
+    "runtime": "assets/training139/media/efebbc661af9_25_stacja.webp",
+    "sha256": "efebbc661af9c4c5bcac9049219d14f743b50478f3f1ece195b0191c671f85e6"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/tla/22_wyspa_piratow.webp",
+    "runtime": "assets/training139/media/94c4e98eebf2_22_wyspa_piratow.webp",
+    "sha256": "94c4e98eebf252f22219d76cc3a7fe17690ab8200459a31e08f77f2b335e87b6"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/lokomotywa_manewrowa.png",
+    "runtime": "assets/training139/media/6e863c286641_lokomotywa_manewrowa.png",
+    "sha256": "6e863c286641d314bada15beb10f64c9face2b8c6f0c59eb369002fc78e96962"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/lisc.png",
+    "runtime": "assets/training139/media/e54036b8a456_lisc.png",
+    "sha256": "e54036b8a456e2952fa14d37db622625b9af7d586afd856bd2b88292b20ee5b3"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/grzyb.png",
+    "runtime": "assets/training139/media/709cac707a29_grzyb.png",
+    "sha256": "709cac707a299b7655aecc8549dd66ea29987b4e55c27351be6125df532e458d"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/jablko.png",
+    "runtime": "assets/training139/media/1ac84aee5f89_jablko.png",
+    "sha256": "1ac84aee5f8927c7ab35fb49f5e935d17a71e3bf168b3f0fee5c4eee4f2ec4d0"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/rekawiczka.png",
+    "runtime": "assets/training139/media/26fddf407397_rekawiczka.png",
+    "sha256": "26fddf407397ac2fc6718a480e4ef8d41dfdaeffbff8556d769a7d8b0ae272cf"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/mis.png",
+    "runtime": "assets/training139/media/a30511acc686_mis.png",
+    "sha256": "a30511acc686a1ac2e29803cbbd45c36e0713f7ae3c880c17a7a9fcc168e8a9d"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/truskawka.png",
+    "runtime": "assets/training139/media/caa846f57dd1_truskawka.png",
+    "sha256": "caa846f57dd1bbbacedb1ea189ee2f0d3896c2800658ced26d33f25bb4b2945f"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/lokomotywa_elektryczna.png",
+    "runtime": "assets/training139/media/7e9d63522dce_lokomotywa_elektryczna.png",
+    "sha256": "7e9d63522dce0f4f423cc844d35f899120437ce791a95c8ba086cedbaddc9c27"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/lokomotywa_zielona.png",
+    "runtime": "assets/training139/media/e0a91c239d01_lokomotywa_zielona.png",
+    "sha256": "e0a91c239d0181a033e7904a6c520560149f86cc2246293c0cb4d458552bb513"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/bebenek.png",
+    "runtime": "assets/training139/media/c970834d10d3_bebenek.png",
+    "sha256": "c970834d10d3ae87b7da7aee858e504c6d032c2269aeb15460ce6c702a28a75b"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/latawiec.png",
+    "runtime": "assets/training139/media/092697fde27b_latawiec.png",
+    "sha256": "092697fde27b677a5b0ecd121a1a668897a773af4e9775b8d5825ff740461259"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/gwiazda.png",
+    "runtime": "assets/training139/media/5c150b15f905_gwiazda.png",
+    "sha256": "5c150b15f90533f7438bd92f9da782fe17ff482b481bdbc8dd0a4a4195f6cf7f"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/lokomotywa_fioletowa.png",
+    "runtime": "assets/training139/media/a86b15a9af94_lokomotywa_fioletowa.png",
+    "sha256": "a86b15a9af946b46ad8fb9a08c8f2378a1456619068529266316de9b566eceff"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/lokomotywa_retro.png",
+    "runtime": "assets/training139/media/c5e68bef00cc_lokomotywa_retro.png",
+    "sha256": "c5e68bef00ccd2ffd654c23aa765e374ea30a5c7a5f16e4327da4dcf09ec603a"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/rozgwiazda.png",
+    "runtime": "assets/training139/media/e2b88722e500_rozgwiazda.png",
+    "sha256": "e2b88722e500c2fa4620011b77e479c255e786599e838b5c3ee8a72a3a7dbe9f"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/wiaderko.png",
+    "runtime": "assets/training139/media/fbee000bb357_wiaderko.png",
+    "sha256": "fbee000bb35764f12aa4d63dfea50e4e1aff8c80df6b5827b5ae738bdfd6e8d3"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/klocek.png",
+    "runtime": "assets/training139/media/af30beaa7ac8_klocek.png",
+    "sha256": "af30beaa7ac8881ec2c7b5a101fe93fe433d0590bcac10a039d69b98e599975b"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/sniezynka.png",
+    "runtime": "assets/training139/media/45df7634dea4_sniezynka.png",
+    "sha256": "45df7634dea491ff21b8cf570836dc2f7f0b1ae9683d5a940a3ef42d616bf467"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/pomarancza.png",
+    "runtime": "assets/training139/media/b60d48851020_pomarancza.png",
+    "sha256": "b60d48851020940dfba307a27de637e6d58c01469f2fca53c94de4007d43bb75"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/slonecznik.png",
+    "runtime": "assets/training139/media/561274d89352_slonecznik.png",
+    "sha256": "561274d89352d81484bbcd9694f5532290845ebae36c1601d6385802143ccc89"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/samochodzik.png",
+    "runtime": "assets/training139/media/988bd8b7115e_samochodzik.png",
+    "sha256": "988bd8b7115e643b3c746fcd838025549ba933de5a943d07fba9500a1181ecbc"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/kasztan.png",
+    "runtime": "assets/training139/media/91b8b814ab92_kasztan.png",
+    "sha256": "91b8b814ab92c03b4cbfa06853363c375a811cf15321404c91b4b4196662a6a5"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/zoladz.png",
+    "runtime": "assets/training139/media/6b8667447623_zoladz.png",
+    "sha256": "6b8667447623a5391f4a4bb44ed5e3eb0afdfeb22cbe919a497ff65aa04e17e8"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/balon.png",
+    "runtime": "assets/training139/media/b075260f15f7_balon.png",
+    "sha256": "b075260f15f7d9db3e1534542c2773646e52d2ee8b200215664dc09371c5290f"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/dynia.png",
+    "runtime": "assets/training139/media/f1783aeb3569_dynia.png",
+    "sha256": "f1783aeb35696c59de098d907d9a552c6445777c75d9312d7f17bd47db53eea5"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/banan.png",
+    "runtime": "assets/training139/media/b377ec6b8c5c_banan.png",
+    "sha256": "b377ec6b8c5c050c62d42ef31ca07eaef97a98419d0983777011d77aa59aa700"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/szyszka.png",
+    "runtime": "assets/training139/media/1e973b902640_szyszka.png",
+    "sha256": "1e973b902640b8add2a5500f570f3537647d65bf5a5b658a361631257e766555"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/gruszka.png",
+    "runtime": "assets/training139/media/97c752110094_gruszka.png",
+    "sha256": "97c752110094e2393a34ed8a043be3e983988673fde0102b35f765f68f406577"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/lokomotywa_niebieska.png",
+    "runtime": "assets/training139/media/ba399e86345a_lokomotywa_niebieska.png",
+    "sha256": "ba399e86345ac49f4150e3777855b07a9f2d7b7dfd75de7ac326afc09aac66af"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/wagon.png",
+    "runtime": "assets/training139/media/31baa2ecdf59_wagon.png",
+    "sha256": "31baa2ecdf5954bfa370897c56b3d5044fef19714430e78983561e844e035d63"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/muszla.png",
+    "runtime": "assets/training139/media/93a9f2b74e67_muszla.png",
+    "sha256": "93a9f2b74e674c3006e9be0524f86d59e5fc7cfbec36aba86f064c1f2cdc9207"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/lokomotywa_czerwona.png",
+    "runtime": "assets/training139/media/412982a74c62_lokomotywa_czerwona.png",
+    "sha256": "412982a74c62135563a382128e4c7817a88333aec219e93c6263f73475543201"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/pilka.png",
+    "runtime": "assets/training139/media/e9ab039f0942_pilka.png",
+    "sha256": "e9ab039f0942469790ff839022d1210041ecf4696994f97a9af0c1bc437afd3a"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/ananas.png",
+    "runtime": "assets/training139/media/d40399cde22e_ananas.png",
+    "sha256": "d40399cde22e7fa089824a9a7f27a01e253450dd98600cb6513531cb92f4718c"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/marchew.png",
+    "runtime": "assets/training139/media/835b8ae5e70e_marchew.png",
+    "sha256": "835b8ae5e70e0556a6c5eb56604854123c0748f7e5588915a513f9c1e6266243"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/prezent.png",
+    "runtime": "assets/training139/media/f8ffd88e6591_prezent.png",
+    "sha256": "f8ffd88e6591f8eb95b97e6f963a7dd3122662405d055b69e4b9d707ad030d86"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/lokomotywa_futurystyczna.png",
+    "runtime": "assets/training139/media/001e7294cb95_lokomotywa_futurystyczna.png",
+    "sha256": "001e7294cb958b054e40253ec53cbf376ed1de6b7b381029e4360ff9b7c21664"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/cukierek.png",
+    "runtime": "assets/training139/media/ff31dc2fabbe_cukierek.png",
+    "sha256": "ff31dc2fabbe167766a605bb4ab46e9c16faf276d8c47e6c07f7df69cb16a1dd"
+  },
+  {
+    "pack": "rail",
+    "source": "oboje/Pociag_Pelen_Cyferek_Dwie_Wersje/grafiki/kaczuszka.png",
+    "runtime": "assets/training139/media/3e7947f9e53e_kaczuszka.png",
+    "sha256": "3e7947f9e53e690b32fb471028000fee7913d9bb4b56f7f8d6971586771819f1"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/tla/garderoba.webp",
+    "runtime": "assets/training139/media/6d82cf1af56c_garderoba.webp",
+    "sha256": "6d82cf1af56c8fa147ec2d8095b1f161f3f955563d0d7e22a166a87335df24d3"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/spodenki.png",
+    "runtime": "assets/training139/media/ae3bb5f2c83f_spodenki.png",
+    "sha256": "ae3bb5f2c83f40da3fcf1cb1864158f7ae931c1e3dcd549a8565c8eff28c24aa"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/pies.png",
+    "runtime": "assets/training139/media/723810792068_pies.png",
+    "sha256": "723810792068669c17a3aaff5233dd21f6c75a6033964d84ce4b5c91b12c4b3b"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/pies_spodenki.png",
+    "runtime": "assets/training139/media/d5fa7a61e0a0_pies_spodenki.png",
+    "sha256": "d5fa7a61e0a02c9159dcba1fb16ba6a6e82d6d6b23c5a11bcc673d985370fbfa"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/mis.png",
+    "runtime": "assets/training139/media/672110469878_mis.png",
+    "sha256": "672110469878f02d189103e44dafbe4f8ae91404af49425a12f66afb02ac0360"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/swinka_koszulka.png",
+    "runtime": "assets/training139/media/839de41c2e24_swinka_koszulka.png",
+    "sha256": "839de41c2e24bba5c370cecd3cd218dfad7dab4f49e82ecb5a6b5ecc3fe4e497"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/lis_koszulka.png",
+    "runtime": "assets/training139/media/8f48085dc483_lis_koszulka.png",
+    "sha256": "8f48085dc4830d031593cabd9d62df502f3d2c250e24942fc2ad91c0a745347f"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/kot.png",
+    "runtime": "assets/training139/media/dabca2af37bb_kot.png",
+    "sha256": "dabca2af37bbdba5ca149239bc7146a5ca3da13fcb19623c15fa3e1b4d0d4b88"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/swinka_spodenki.png",
+    "runtime": "assets/training139/media/d5fa7a61e0a0_pies_spodenki.png",
+    "sha256": "d5fa7a61e0a02c9159dcba1fb16ba6a6e82d6d6b23c5a11bcc673d985370fbfa"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/panda.png",
+    "runtime": "assets/training139/media/1b8f6106914b_panda.png",
+    "sha256": "1b8f6106914bba18d955ed2af4e8d3073b8994ef774da134501bf256f0b5cf06"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/koszulka.png",
+    "runtime": "assets/training139/media/d7161294db75_koszulka.png",
+    "sha256": "d7161294db759fe488e9214d036ca7bbc154fc2d60d2b5d0bca62545fcc85b25"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/gwiazda.png",
+    "runtime": "assets/training139/media/eb97e33db883_gwiazda.png",
+    "sha256": "eb97e33db883b4192180e84bbda54df71cd61ea36e08ab7e83302aa4317901a5"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/mis_lapa.png",
+    "runtime": "assets/training139/media/dd3aea9ff541_mis_lapa.png",
+    "sha256": "dd3aea9ff541987768fe16b72a2205d3429d64ab057035840984fa4709e005bb"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/mis_korpus.png",
+    "runtime": "assets/training139/media/f77ec7779770_mis_korpus.png",
+    "sha256": "f77ec7779770be743bc4b4bee51cdb3b29fbfc66919782a33bffc6712adb42d1"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/kaczka_spodenki.png",
+    "runtime": "assets/training139/media/f877daf00b95_kaczka_spodenki.png",
+    "sha256": "f877daf00b954fa8a882232ecc541cd6d70ac34c00dbec11d0f3c526c05dff26"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/kot_spodenki.png",
+    "runtime": "assets/training139/media/d5fa7a61e0a0_pies_spodenki.png",
+    "sha256": "d5fa7a61e0a02c9159dcba1fb16ba6a6e82d6d6b23c5a11bcc673d985370fbfa"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/pies_koszulka.png",
+    "runtime": "assets/training139/media/aa32026faf43_pies_koszulka.png",
+    "sha256": "aa32026faf43fba8c7e5b2d9ed2975acf28f250e0d9e9830a845374e285285c5"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/panda_koszulka.png",
+    "runtime": "assets/training139/media/ea5edefe6fd7_panda_koszulka.png",
+    "sha256": "ea5edefe6fd7ef3cd4ee21eefa4d75de245e424571fbb1c6d4958a7c4c394895"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/kot_koszulka.png",
+    "runtime": "assets/training139/media/99d8e6e846bd_kot_koszulka.png",
+    "sha256": "99d8e6e846bdc75ce400385efe9d65f287ecec4a4a43f1d6e3d6362deb308f01"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/mis_spodenki.png",
+    "runtime": "assets/training139/media/d5fa7a61e0a0_pies_spodenki.png",
+    "sha256": "d5fa7a61e0a02c9159dcba1fb16ba6a6e82d6d6b23c5a11bcc673d985370fbfa"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/krolik_spodenki.png",
+    "runtime": "assets/training139/media/d5fa7a61e0a0_pies_spodenki.png",
+    "sha256": "d5fa7a61e0a02c9159dcba1fb16ba6a6e82d6d6b23c5a11bcc673d985370fbfa"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/kaczka_koszulka.png",
+    "runtime": "assets/training139/media/21d8cc9b27b6_kaczka_koszulka.png",
+    "sha256": "21d8cc9b27b6a1b0a9e0082c99c97e8ac1f5ce76568fb8aa15fd7723d45463d0"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/kaczka.png",
+    "runtime": "assets/training139/media/62e79c24dbd7_kaczka.png",
+    "sha256": "62e79c24dbd76ad8baf798bf61e211724ac8d52c4c9a4792c05feae8fe924308"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/krolik.png",
+    "runtime": "assets/training139/media/9850975f80c0_krolik.png",
+    "sha256": "9850975f80c0e38c1fe514311cdea8b643e7d584440ee1d8b4e340779875df08"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/mis_koszulka.png",
+    "runtime": "assets/training139/media/49858947e196_mis_koszulka.png",
+    "sha256": "49858947e1961025060d8a470415a7d1bbede39dfd3c93a06993d3f280c37a92"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/panda_spodenki.png",
+    "runtime": "assets/training139/media/d5fa7a61e0a0_pies_spodenki.png",
+    "sha256": "d5fa7a61e0a02c9159dcba1fb16ba6a6e82d6d6b23c5a11bcc673d985370fbfa"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/krolik_koszulka.png",
+    "runtime": "assets/training139/media/c230d9c782e8_krolik_koszulka.png",
+    "sha256": "c230d9c782e8a1699ba7cb1987f806960096d5f7124d1533cfd94815aabb0b6b"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/lis_spodenki.png",
+    "runtime": "assets/training139/media/d5fa7a61e0a0_pies_spodenki.png",
+    "sha256": "d5fa7a61e0a02c9159dcba1fb16ba6a6e82d6d6b23c5a11bcc673d985370fbfa"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/swinka.png",
+    "runtime": "assets/training139/media/3b7febb428da_swinka.png",
+    "sha256": "3b7febb428da5188ecd888ab9e7ea1cc454f2740214c55eaf1d60c9e43bbd840"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/lis.png",
+    "runtime": "assets/training139/media/20184e6798e4_lis.png",
+    "sha256": "20184e6798e4c4109b7523383ef51891ffea9e9cb99767554a3c19e790870930"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/odmowa/panda_prawo.png",
+    "runtime": "assets/training139/media/8cd8ee36832c_panda_prawo.png",
+    "sha256": "8cd8ee36832c618fc658b7a828cdbfeb3a4259b95cb285135eee67e0b37eca6d"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/odmowa/lis_lewo.png",
+    "runtime": "assets/training139/media/a30d87ff7200_lis_lewo.png",
+    "sha256": "a30d87ff72004512d3272e7dbe3ae05c72068766d180a087cf765aeb3a9a1f6b"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/odmowa/krolik_prawo.png",
+    "runtime": "assets/training139/media/c4b5bf5e6788_krolik_prawo.png",
+    "sha256": "c4b5bf5e6788e52f363ab23e39d937aa3f572729cbfbf617f2ac9dfa0ad0b08c"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/odmowa/mis_prawo.png",
+    "runtime": "assets/training139/media/33f618f70437_mis_prawo.png",
+    "sha256": "33f618f70437421919d2e3d5c4d0b70f361cadac6a97eb3bae09faf7d284de0a"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/odmowa/swinka_prawo.png",
+    "runtime": "assets/training139/media/69bf6de14340_swinka_prawo.png",
+    "sha256": "69bf6de1434084583c846b97e3ee156d06d2e8d8b6db2963cc602242e98af6e7"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/odmowa/kaczka_prawo.png",
+    "runtime": "assets/training139/media/0394aad46411_kaczka_prawo.png",
+    "sha256": "0394aad46411e46f1ed74041027a117e7f99d3488f43e93fefc8ad23b86e83f5"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/odmowa/mis_lewo.png",
+    "runtime": "assets/training139/media/3f0d2c6f6d58_mis_lewo.png",
+    "sha256": "3f0d2c6f6d586d720153888383303f5042e556a03e156cb0947ba61dea6c819b"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/odmowa/kot_lewo.png",
+    "runtime": "assets/training139/media/b518d52c104a_kot_lewo.png",
+    "sha256": "b518d52c104abb720acdbd83eb587778e4a9f3122981fefc1150d4eda553bc10"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/odmowa/kot_prawo.png",
+    "runtime": "assets/training139/media/630866b06c1a_kot_prawo.png",
+    "sha256": "630866b06c1aa0d7be6632fd6777e899a813e2b8a196088de0fefc14b6175bc5"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/odmowa/pies_lewo.png",
+    "runtime": "assets/training139/media/c78b7dcbb69b_pies_lewo.png",
+    "sha256": "c78b7dcbb69b96fad35b18e9d6f555caf316dfdb94b2c6c2d2779b111564778d"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/odmowa/lis_prawo.png",
+    "runtime": "assets/training139/media/d1e23e60fb5a_lis_prawo.png",
+    "sha256": "d1e23e60fb5a0acda1939bd6f439dc2d6d3be0fc3ec48bf638d2b3e9d337b03f"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/odmowa/kaczka_lewo.png",
+    "runtime": "assets/training139/media/0c44ae54224e_kaczka_lewo.png",
+    "sha256": "0c44ae54224edda3f2097b704366339f72154c601d2801c062f5156b4a3d1fad"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/odmowa/krolik_lewo.png",
+    "runtime": "assets/training139/media/8f9516048711_krolik_lewo.png",
+    "sha256": "8f95160487112c361626d0b2129b8db42637890fed1980fe57af9ad6fc5a2d10"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/odmowa/swinka_lewo.png",
+    "runtime": "assets/training139/media/61cb7e4c51e5_swinka_lewo.png",
+    "sha256": "61cb7e4c51e576775d37d67623ab6130edb006a9525906e4009efa7db7cd1433"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/odmowa/pies_prawo.png",
+    "runtime": "assets/training139/media/31229d17abc5_pies_prawo.png",
+    "sha256": "31229d17abc584eed81dbbaeaa8fb60925aaff764973697f76d55efbdbfa3cf2"
+  },
+  {
+    "pack": "closet",
+    "source": "oboje/Szafa_Zwierzatek_Klatki_i_Zadania_AI (1)/grafiki/odmowa/panda_lewo.png",
+    "runtime": "assets/training139/media/a037572e9fc1_panda_lewo.png",
+    "sha256": "a037572e9fc17a99e3b2fc31ae8ac2aa8fe1161a0190becaecaf48ca1e3a91bf"
+  },
+  {
+    "pack": "grammar",
+    "source": "pawel/Czesci_Mowy_Laboratorium_Slow/grafiki/pies.png",
+    "runtime": "assets/training139/media/4f8c67e8b0b5_pies.png",
+    "sha256": "4f8c67e8b0b594b475a9d88c8124774bd6e0149bc86ee066977fc2f93c557926"
+  },
+  {
+    "pack": "grammar",
+    "source": "pawel/Czesci_Mowy_Laboratorium_Slow/grafiki/jablko.png",
+    "runtime": "assets/training139/media/2b67771f7517_jablko.png",
+    "sha256": "2b67771f7517a7d78db3fdb7d9cc0ba1c8d7e5e6f200b25671f6d0d1ca880448"
+  },
+  {
+    "pack": "grammar",
+    "source": "pawel/Czesci_Mowy_Laboratorium_Slow/grafiki/rakieta.png",
+    "runtime": "assets/training139/media/4787df365f16_rakieta.png",
+    "sha256": "4787df365f16a81fb555bd1d03ddf84836e8b1ce45cc270aaee1156bd8f8bb9d"
+  },
+  {
+    "pack": "grammar",
+    "source": "pawel/Czesci_Mowy_Laboratorium_Slow/grafiki/zaba.png",
+    "runtime": "assets/training139/media/916ebc04a222_zaba.png",
+    "sha256": "916ebc04a2224efc7a9dc9c5836b8119f13d41c02c164bc755e66a02b05aad1c"
+  },
+  {
+    "pack": "grammar",
+    "source": "pawel/Czesci_Mowy_Laboratorium_Slow/grafiki/plecak.png",
+    "runtime": "assets/training139/media/0373cac4908a_plecak.png",
+    "sha256": "0373cac4908aef6a4a125845478f31022f75611b3032021cb01979b39ef1b7a7"
+  },
+  {
+    "pack": "grammar",
+    "source": "pawel/Czesci_Mowy_Laboratorium_Slow/grafiki/robot.png",
+    "runtime": "assets/training139/media/226664082287_robot.png",
+    "sha256": "226664082287de50dc833f8e22e880c9a9eea6fbd1aee2f68ec20d6343a5075b"
+  }
+]
