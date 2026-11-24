@@ -1,5 +1,6 @@
 import {hallPoint120,hallDoor120,hallSurface120,hallOutline120,placeHallHit120,hallDensity125} from './base-panorama125.js?v=125';
 import {hallDetails125} from './hall-details125.js?v=125';
+import {createHallView138,hallPoint138,placeHallEntrance138,hallScenes138,hallDefault138,hallAnchor138,clampHall138,hallFov138} from './hall-view138.js?v=138';
 import {panoramaSoftware119} from './panorama-software119.js?v=128';
 import {hqPet,hqPlaced,hqRead} from './headquarters84.js?v=117';
 import {baseArt88} from './base-art88.js?v=119';
@@ -15,8 +16,8 @@ import {gameGroup92} from './learning-games92.js?v=92';
 
 const routes=new Map(),images=new Map();
 const skyHD=['training86','polish86','english86','explorer87','annex86','hall88','workshop91','armory','arcade','nook86','hangar','hangar95','shop87','vault87'];
-const roomImage93=file=>file==='hall88.webp'?'panorama125/hall.webp':(skyHD.includes(file.replace('.webp',''))?'hd93/':'')+file;
-const pose=room=>({room,x:0,z:0,yaw:((walkRooms[room].heading??(room==='hall'?.62:.5))-.5)*FULL_TURN,pitch:0});
+const roomImage93=file=>file==='hall88.webp'?hallDefault138:(skyHD.includes(file.replace('.webp',''))?'hd93/':'')+file;
+const pose=room=>({room,x:0,z:0,yaw:((walkRooms[room].heading??(room==='hall'?.655:.5))-.5)*FULL_TURN,pitch:0});
 const current=child=>routes.get(child)?.at(-1)??pose('hall');
 const casePositions={a:[.194,.567],b:[.81,.567],c:[.5,.574]};
 const labShelf=walkRooms.polish.points.find(point=>point.fixture==='shelf');
@@ -40,7 +41,7 @@ export function baseWalkMarkup(profile,child,hero,release,panel,mic=''){
   <div class="hq86-stage" tabindex="0" aria-label="Przesuń palcem poza dłońmi, aby się rozejrzeć. Przytrzymaj ekran poza dłońmi, żeby iść. Stuknij dłoń: cios. Dwa szybkie stuknięcia w tę samą dłoń: moc. Przesuń prawą dłoń w górę, żeby wyjąć przedmiot; w dół, żeby go schować. Klawiatura: strzałki i spacja, F — lewa, G — prawa dłoń.">
    <div class="hq86-fallback" aria-hidden="true"></div>
    <canvas class="hq119-software" aria-hidden="true"></canvas>
-   <canvas class="hq86-world" aria-hidden="true"></canvas><canvas class="hq86-hands" aria-hidden="true"></canvas>
+   <canvas class="hq86-world" aria-hidden="true"></canvas><canvas class="hq138-hall" aria-hidden="true"></canvas><canvas class="hq86-hands" aria-hidden="true"></canvas>
    ${Object.entries(walkRooms).flatMap(([room,value])=>value.points.map((p,i)=>{
     if(profile.grade==='P'&&(p.action?.startsWith('hq:exercise:')||p.action==='hq:master'))return '';
     if(p.action==='hq:board'&&!jet&&!school)return '';
@@ -238,13 +239,16 @@ export function mountBaseWalk(root){
  if(!root)return;
  const stage=root.querySelector('.hq86-stage'),canvas=root.querySelector('.hq86-world');
  const fallback=root.querySelector('.hq86-fallback'),hands=root.querySelector('.hq86-hands');
- const software=stage.querySelector('.hq119-software');
+ const software=stage.querySelector('.hq119-software'),hallCanvas=stage.querySelector('.hq138-hall');
  const location=root.querySelector('.hq86-location'),dialog=root.querySelector('dialog');
  const back=stage.querySelector('[data-walk-back]'),menu=stage.querySelector('[data-action="hq:view:menu"]');
  const markers=[...stage.querySelectorAll('.hq86-point,.hq86-prop')];
+ const trainingDoor=markers.find(m=>m.dataset.room==='hall'&&m.dataset.walkDoor==='training');
+ if(trainingDoor){trainingDoor.dataset.hallScene='training';const globe=trainingDoor.cloneNode(true);globe.dataset.hallScene='globe';stage.append(globe);markers.push(globe);}
  const flightButton=stage.querySelector('[data-action="hq:board"]');
  const ctx=hands.getContext('2d'),controller=new AbortController(),{signal}=controller;
  const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ const hallView=createHallView138(hallCanvas,renderSoon);
  const {hero,child}=root.dataset,stack=routes.get(child)??[pose('hall')];
  routes.set(child,stack);
  let world=panoramaWorld(canvas)??panoramaSoftware119(software),width=0,height=0,frame=0,last=0,step=0;
@@ -296,7 +300,7 @@ export function mountBaseWalk(root){
   width=rect.width;height=rect.height;
   if(!width||!height)return;
   const density=hallDensity125(width,height,window.devicePixelRatio);
-  for(const surface of [canvas,hands]){
+  for(const surface of [canvas,hands,hallCanvas]){
    surface.width=Math.round(width*density);surface.height=Math.round(height*density);
   }
   const softDensity=hallDensity125(width,height,window.devicePixelRatio,true);
@@ -310,8 +314,8 @@ export function mountBaseWalk(root){
    const original=room().points[Number(marker.dataset.index)]??{
     u:Number(marker.dataset.u),v:Number(marker.dataset.v),front:marker.dataset.front==='1'
    };
-   const p=state().room==='hall'?hallPoint120(original):original;
-   sceneMarkers.push({marker,p,anchor:p.panel120?hallSurface120(room(),p.u,p.v):roomAnchor86(room(),p,portraitRatio),
+   const p=state().room==='hall'?hallPoint138(original,state(),marker.dataset.hallScene):original;
+   sceneMarkers.push({marker,p,anchor:state().room==='hall'?hallAnchor138(p.scene):p.panel120?hallSurface120(room(),p.u,p.v):roomAnchor86(room(),p,portraitRatio),
     outline:p.panel120?hallOutline120(room(),p.panel120):null});
   }
  }
@@ -327,15 +331,22 @@ export function mountBaseWalk(root){
   fallback.style.backgroundImage=`url("assets/hq/${roomImage93(selected.portrait??selected.art)}")`;
   fallback.classList.toggle('has-portrait',!!selected.portrait);
   try{
-   const [image,front,detailImage]=await Promise.all([image86(roomImage93(selected.art)),selected.portrait?image86(roomImage93(selected.portrait)):null,
-    selected===walkRooms.hall?image86('panorama125/details.webp').catch(()=>null):null]);
-   if(signal.aborted)return;
-   portraitRatio=front?front.naturalWidth/front.naturalHeight:.73;
-   world?.load(image,front,selected,detailImage);
-   stage.classList.toggle('has-depth',!!world);
+   if(selected===walkRooms.hall){
+    await hallView.load(state());
+    if(signal.aborted)return;
+    stage.classList.add('has-depth');
+   }else{
+    hallView.deactivate();
+    const [image,front]=await Promise.all([image86(roomImage93(selected.art)),selected.portrait?image86(roomImage93(selected.portrait)):null]);
+    if(signal.aborted)return;
+    portraitRatio=front?front.naturalWidth/front.naturalHeight:.73;
+    world?.load(image,front,selected,null);
+    stage.classList.toggle('has-depth',!!world);
+   }
   }catch{
    if(signal.aborted)return;
    stage.classList.remove('has-depth');
+   if(selected===walkRooms.hall)location.textContent='Hol — nie udało się wczytać widoku';
   }finally{
    if(!signal.aborted){
     busy=false;stage.setAttribute('aria-busy','false');stage.classList.remove('is-travelling');setMarkers();syncPowerControls();renderSoon();
@@ -350,7 +361,13 @@ export function mountBaseWalk(root){
   return [(.5+x/(2*depth*fx))*width,(.5-y/(2*depth*fy))*height,depth];
  }
  function paintMarkers(basis,fx,fy,now){
-  for(const {marker,p,anchor,outline} of sceneMarkers){
+  for(const item of sceneMarkers){
+   const {marker,p,anchor,outline}=item;
+   if(state().room==='hall'){
+    const snapshot=hallView.snapshot();placeHallEntrance138(marker,p,snapshot,width,height);
+    if(!marker.hidden)item.anchor=hallAnchor138(marker.dataset.hallScene||p.scene);
+    continue;
+   }
    if(outline){placeHallHit120(marker,outline,state(),basis,fx,fy,width,height);continue;}
    const projected=project(basis,fx,fy,anchor);
    marker.hidden=!projected||projected[0]<24||projected[0]>width-24||projected[1]<100||projected[1]>height-90;
@@ -419,13 +436,15 @@ export function mountBaseWalk(root){
    moving=amount<1&&Math.hypot(to.x-from.x,to.z-from.z)>.04;
    if(amount===1){transition=null;done();if(signal.aborted)return;}
   }
+  if(view.room==='hall')clampHall138(view);
   if(moving&&!reduced)step+=dt*7.7;
   if(effect&&now-effect.start>650)effect=null;
   const aspect=width/height;
-  const fx=Math.max(Math.min(.94*aspect,.60),selected.minHorizontalFov??0),fy=fx/aspect;
+  const fx=view.room==='hall'?hallFov138(width,height)[0]:Math.max(Math.min(.94*aspect,.60),selected.minHorizontalFov??0),fy=fx/aspect;
   const live=state(),basis=cameraBasis86(live.yaw,live.pitch);
   const squish=live.room==='pet'&&effect?.kind==='egg'?Math.sin((now-effect.start)/650*Math.PI):0;
-  if(world&&!busy&&stage.classList.contains('has-depth'))world.draw(live,basis,fx,fy,squish);
+  if(live.room==='hall'&&!busy&&stage.classList.contains('has-depth'))hallView.draw(live);
+  else if(world&&!busy&&stage.classList.contains('has-depth'))world.draw(live,basis,fx,fy,squish);
   else{
    const yaw=live.yaw+Math.atan2(live.x,room().bounds[2]);
    fallback.style.backgroundPosition=`calc(50% - ${yaw/FULL_TURN*height*2.56}px) ${50-live.pitch*34}%`;
@@ -484,7 +503,7 @@ export function mountBaseWalk(root){
   if(!pointer.drag){pointer.drag=true;stage.setPointerCapture(event.pointerId);}
   const view=state();
   view.yaw=wrapAngle(view.yaw-dx*2.65/width);
-  view.pitch=clamp86(view.pitch+dy*2.55/height,-.86,.89);
+  view.pitch=clamp86(view.pitch+dy*2.55/height,-.86,view.room==='hall'?1.55:.89);
   pointer.x=event.clientX;pointer.y=event.clientY;renderSoon();
  });
  for(const type of ['pointerup','pointercancel'])on(window,type,event=>{
@@ -544,7 +563,7 @@ export function mountBaseWalk(root){
   }else if(['ArrowLeft','ArrowRight'].includes(event.code)){
    view.yaw=wrapAngle(view.yaw+(event.code==='ArrowLeft'?-.22:.22));
   }else if(['ArrowUp','ArrowDown'].includes(event.code)){
-   view.pitch=clamp86(view.pitch+(event.code==='ArrowUp'?.13:-.13),-.86,.89);
+   view.pitch=clamp86(view.pitch+(event.code==='ArrowUp'?.13:-.13),-.86,view.room==='hall'?1.55:.89);
   }else return;
   event.preventDefault();renderSoon();
  });
@@ -553,9 +572,9 @@ export function mountBaseWalk(root){
   effect={...event.detail,start:performance.now()};renderSoon();
  });
  on(canvas,'webglcontextlost',event=>{
-  event.preventDefault();world=panoramaSoftware119(software);stage.dataset.renderer='software';stage.classList.remove('has-depth');void load();renderSoon();
+  event.preventDefault();world?.free();world=panoramaSoftware119(software);stage.dataset.renderer='software';stage.classList.remove('has-depth');void load();renderSoon();
  });
  const observer=new ResizeObserver(resize);observer.observe(stage);resize();
  void load();
- dispose=()=>{gestures.cancel();powerQueue=[];controller.abort();heroPlayer.dispose();observer.disconnect();cancelAnimationFrame(frame);world?.free();};
+ dispose=()=>{gestures.cancel();powerQueue=[];controller.abort();heroPlayer.dispose();observer.disconnect();cancelAnimationFrame(frame);hallView?.free();world?.free();};
 }
