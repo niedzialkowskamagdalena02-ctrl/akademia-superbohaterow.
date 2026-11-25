@@ -1,3 +1,4 @@
+import {hitSurface142,projectImpact142,contactFrameKeys142,contactPoint142,markAnchor142,paintImpactFlash142} from './hero-impact142.js?v=142';
 import {heroAssets127 as ART} from './hero-assets127.js?v=129';
 import {heroResources129} from './hero-resources129.js?v=129';
 import {fistPoint130,paintWind130,windAngle131,paintContact131} from './hero-wind130.js?v=131';
@@ -79,21 +80,17 @@ function drawMark127(ctx,mark,now,view,basis,fx,fy,width,height){
  const image=mark.images.get(keys[Math.max(0,frame)])??mark.images.get(keys[mark.lastIndex??0]);if(!image)return;
  const sourceW=image.naturalWidth,sourceH=image.naturalHeight;
  const w=mark.size,h=w*sourceH/sourceW;
- const points=[[-.5,.5],[.5,.5],[.5,-.5],[-.5,-.5]].map(([x,y])=>project127(view,basis,fx,fy,width,height,mark.point.map((n,i)=>n+mark.horizontal[i]*w*x+mark.vertical[i]*h*y)));
+ const [u,v]=markAnchor142(keys[0]);
+ const points=[[0,0],[1,0],[1,1],[0,1]].map(([x,y])=>project127(view,basis,fx,fy,width,height,mark.point.map((n,i)=>n+mark.horizontal[i]*w*(x-u)+mark.vertical[i]*h*(v-y))));
  if(points.some(p=>!p))return;
  const uv=[[0,0],[sourceW,0],[sourceW,sourceH],[0,sourceH]];
  for(const indices of [[0,1,2],[0,2,3]])panoramaTriangle119(ctx,image,indices.map(i=>uv[i]),indices.map(i=>points[i].slice(0,2)));
 }
-function fitFlash127(ctx,image,x,y,size,alpha=1){
- const scale=size/Math.max(image.naturalWidth,image.naturalHeight),w=image.naturalWidth*scale,h=image.naturalHeight*scale;
- ctx.save();ctx.globalAlpha=alpha;ctx.drawImage(image,x-w/2,y-h/2,w,h);ctx.restore();
-}
-
 // Frames are the supplied PNGs, drawn intact. Only placement and playback are code.
 export function heroPlayer127(hero,changed=()=>{},{resources=heroResources129}={}){
  const supported=hasHeroArt127(hero),pool=resources,owner={},marks=[],requested=new Set();
  let mode='punch',idle=null,playing=null,equipping=null,loading=false,ready=false,serial=0,dead=false,error='',counter=0,progress='',lastContext=null;
- let firstKeys=[],seedKeys=[],hotKeys=[];const preparedModes=new Set();
+ let firstKeys=[],seedKeys=[],hotKeys=[],gestureStarters=[];const preparedModes=new Set();
  const actionKeys=action=>action? action.frames.flatMap(frameKeys127):[];
  const starts=next=>[-1,1].flatMap(side=>action127(hero,next,side)?.frames.slice(0,3).flatMap(frameKeys127)??[]);
  function spec(next,side,count){
@@ -119,9 +116,12 @@ export function heroPlayer127(hero,changed=()=>{},{resources=heroResources129}={
   return [...new Set(keys)].filter(Boolean);
  }
  function windowKeys(action,index){return action.frames.slice(Math.max(0,index-1),Math.min(action.frames.length,index+4)).flatMap(frameKeys127);}
+ // Keep each gesture's immediate first frame, plus the current playback
+ // window. Other predecoded frames may leave RAM; their original bytes stay cached.
  function pin(){
-  const keys=[idle,...firstKeys,...seedKeys,...hotKeys,...marks.flatMap(mark=>[...mark.images.keys()])];
+  const keys=[idle,...(playing?gestureStarters:firstKeys),...seedKeys,...gestureStarters,...marks.flatMap(mark=>[...mark.images.keys()])];
   if(equipping)keys.push(equipping.from,equipping.to);
+  if(playing&&!playing.hit)keys.push(...contactFrameKeys142(hero,playing.mode,playing.side));
   if(playing)keys.push(...windowKeys(playing,playing.index),...frameKeys127(playing.frames[playing.lastIndex]),...fxKeys(playing,true));
   pool.pin(owner,keys.filter(Boolean));
  }
@@ -133,7 +133,7 @@ export function heroPlayer127(hero,changed=()=>{},{resources=heroResources129}={
   });
  }
  function prepareEffects(){
-  seedKeys=[...new Set([-1,1].flatMap(side=>fxKeys(spec(mode,side,counter+1))))];pin();request(seedKeys);
+  seedKeys=[...new Set([-1,1].flatMap(side=>fxKeys(spec(mode,side,counter+1))))];pin();request([...seedKeys,...hotKeys]);
  }
  async function setMode(next){
   if(!supported||playing||loading||dead||!heroModes127[hero].some(([id])=>id===next))return false;
@@ -145,7 +145,7 @@ export function heroPlayer127(hero,changed=()=>{},{resources=heroResources129}={
    const warmed=await pool.warm(modeKeys(next),(done,total)=>{if(valid()){progress=done+'/'+total;changed();}},valid);
    if(!warmed||!valid())return false;
    seedKeys=[...new Set([-1,1].flatMap(side=>fxKeys(spec(next,side,counter+1))))];pin();
-   await pool.decodeAll([...firstKeys,...seedKeys]);
+   await pool.decodeAll([...firstKeys,...seedKeys,...[-1,1].flatMap(side=>contactFrameKeys142(hero,next,side))]);
    if(valid()){ready=true;preparedModes.add(next);}
   }catch(e){if(valid())error=e.message;}
   finally{if(valid()){loading=false;pin();changed();}}
@@ -156,13 +156,14 @@ export function heroPlayer127(hero,changed=()=>{},{resources=heroResources129}={
   if(ready&&modes.every(next=>preparedModes.has(next))&&hotKeys.every(key=>pool.peek(key)))return true;
   const ticket=++serial,valid=()=>!dead&&ticket===serial;
   loading=true;ready=false;error='';progress='';
+  gestureStarters=[...new Set(modes.flatMap(next=>[idleKey127(hero,next),...[-1,1].flatMap(side=>action127(hero,next,side)?.frames.slice(0,1).flatMap(frameKeys127)||[])]))].filter(Boolean);
   hotKeys=[...new Set(modes.flatMap(next=>[idleKey127(hero,next),...starts(next),...[-1,1].flatMap(side=>fxKeys(spec(next,side,counter+1)))]))].filter(Boolean);
   firstKeys=starts(mode);pin();changed();
   try{
    const key=idleKey127(hero,mode);await pool.decode(key);if(!valid())return false;idle=key;pin();changed();
    const keys=[...new Set(modes.flatMap(modeKeys))];
    if(!await pool.warm(keys,(done,total)=>{if(valid()){progress=done+'/'+total;changed();}},valid)||!valid())return false;
-   await pool.decodeAll(hotKeys);if(!valid())return false;
+   await pool.decodeAll([...hotKeys,...modes.flatMap(next=>[-1,1].flatMap(side=>contactFrameKeys142(hero,next,side)))]);if(!valid())return false;
    modes.forEach(next=>preparedModes.add(next));ready=true;
   }catch(e){if(valid())error=e.message;}
   finally{if(valid()){loading=false;pin();changed();}}
@@ -181,7 +182,7 @@ export function heroPlayer127(hero,changed=()=>{},{resources=heroResources129}={
   const action=action127(hero,next,side);if(!action)return false;
   counter++;seedKeys=[];error='';
   playing={...action,...spec(next,side,counter),at:performance.now(),side,mode:next,index:0,lastIndex:0,hit:false,surface:null,preserveOther};
-  pin();changed();request([...windowKeys(playing,0),...fxKeys(playing,true)]);
+  pin();changed();request([...windowKeys(playing,0),...contactFrameKeys142(hero,next,side),...fxKeys(playing,true)]);
   return true;
  }
  function addMark(power,now){
@@ -211,17 +212,19 @@ export function heroPlayer127(hero,changed=()=>{},{resources=heroResources129}={
    pin();request(windowKeys(active,active.index));
    if(!active.hit&&t>=active.contact){
     active.hit=true;active.room=room;
-    const floor=active.effect.endsWith('-dent');
-    active.surface=ray127(view,basis,fx,fy,[.5,floor?.73:.47],bounds,floor);
-    if(!active.defer)addMark(active,now);
+    const contactKeys=contactFrameKeys142(hero,active.mode,active.side),contactFrame=contactKeys.length?active.frames.find(frame=>frameKeys127(frame).includes(contactKeys[0])):active.frames[active.index],box=frameRect127(width,height);
+    const fallback=fistPoint130(contactFrame||active.frames[active.index],active.side,box),point=contactPoint142(hero,active.mode,active.side,contactFrame||active.frames[active.index],box,fallback);
+    active.surface=hitSurface142(view,basis,fx,fy,[point.x/width,point.y/height],bounds,room);
+    if(!active.defer||active.effect==='web')addMark(active,now);
    }
-   if(t>=1){if(active.defer)addMark(active,now);playing=null;active=null;prepareEffects();changed();}
+   if(t>=1){if(active.defer&&active.effect!=='web')addMark(active,now);playing=null;active=null;prepareEffects();changed();}
   }
   if(active){
    const age=now-active.at,index=active.index,delta=age/active.duration-active.contact;
    const wanted=active.frames[index],complete=frameKeys127(wanted).every(key=>pool.peek(key));
    if(complete)active.lastIndex=index;
    const frame=active.frames[active.lastIndex],loaded=new Map(frameKeys127(frame).map(key=>[key,pool.peek(key)]));
+   const impact=active.surface?projectImpact142(view,basis,fx,fy,width,height,active.surface.point):null;
    const box=frameRect127(width,height),fist=active.effect==='punch'?fistPoint130(frame,active.side,box):null;
    if(fist){active.windAngle=windAngle131(active.windPoint,fist,active.side,active.windAngle||0);active.windPoint=fist;}
    if(active.windKey&&!reduced&&delta>-.28&&delta<.10){
@@ -232,10 +235,10 @@ export function heroPlayer127(hero,changed=()=>{},{resources=heroResources129}={
     ctx.save();ctx.beginPath();ctx.rect(active.side<0?0:width/2,0,width/2,height);ctx.clip();drawFrame127(ctx,width,height,frame,loaded);ctx.restore();
     const image=pool.peek(idle);if(image){ctx.save();ctx.beginPath();ctx.rect(active.side<0?width/2:0,0,width/2,height);ctx.clip();drawFrame127(ctx,width,height,idle,new Map([[idle,image]]));ctx.restore();}
    }else drawFrame127(ctx,width,height,frame,loaded);
-   if(active.tipKey&&delta>=-.05&&delta<.10){const tip=pool.peek(active.tipKey);if(tip)fitFlash127(ctx,tip,width*.5,height*.47,Math.min(width,height)*.23,reduced?.35:.85);}
+   if(active.tipKey&&impact&&delta>=0&&delta<.10){const tip=pool.peek(active.tipKey);if(tip)paintImpactFlash142(ctx,active.tipKey,tip,impact,Math.min(width,height)*.23,reduced?.35:.85);}
    if(active.flashKey&&delta>=0&&delta<.25){
     const flash=pool.peek(active.flashKey),alpha=(1-delta/.25)*(reduced?.45:1);
-    if(flash){if(fist)paintContact131(ctx,active.flashKey,flash,fist,box,alpha);else fitFlash127(ctx,flash,width*.5,height*.47,Math.min(width,height)*.42,alpha);}
+    if(flash){if(fist)paintContact131(ctx,active.flashKey,flash,fist,box,alpha);else if(impact)paintImpactFlash142(ctx,active.flashKey,flash,impact,Math.min(width,height)*.42,alpha);}
    }
   }else if(equipping){
    const t=Math.min(1,(now-equipping.at)/equipping.duration),from=pool.peek(equipping.from),to=pool.peek(equipping.to);
@@ -250,7 +253,7 @@ export function heroPlayer127(hero,changed=()=>{},{resources=heroResources129}={
  return {
   supported,draw,setMode,prepareGesture,equip,play,
   get mode(){return mode;},get loading(){return loading;},get ready(){return ready;},get progress(){return progress;},get busy(){return !!playing||!!equipping||loading;},get error(){return error;},
-  get stats(){return {...pool.stats,frame:playing?.index??null,shown:playing?.lastIndex??null};},
+  get stats(){return {...pool.stats,impact:playing?.surface||null,marks:marks.map(m=>({point:m.point,keys:m.keys,room:m.room})),frame:playing?.index??null,shown:playing?.lastIndex??null};},
   get animated(){return !!playing||!!equipping||marks.some(mark=>lastContext?.room===mark.room&&mark.keys.length>1&&performance.now()-mark.at<400);},
   stop(){serial++;if(loading)ready=false;playing=null;equipping=null;loading=false;pin();},
   dispose(){dead=true;serial++;playing=null;equipping=null;marks.length=0;pool.release(owner);}

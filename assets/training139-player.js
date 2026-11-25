@@ -1,4 +1,5 @@
-import {packagePages139} from './training139/catalog.js?v=140';
+import {spiderBank142,generateSpider142} from './spider142/bank.js?v=142';
+import {packagePages139} from './training139/catalog.js?v=142';
 import {preschoolRound92,alphabet92,shuffle92,letterName92} from './learning-games92.js?v=92';
 import {missionDeck93} from './missions93-data.js?v=140';
 import {traceStrokes92} from './learning-trace92.js?v=95';
@@ -50,16 +51,18 @@ export async function frameConfig139({game,grade,subject,tasks,child,preview,sig
   config.closetMissions=Array.from({length:8},(_,i)=>{const a=pool[(i*2)%pool.length],b=pool[(i*2+1)%pool.length];return [a?.sourceTitle||'Misja stylisty',[a?.question||'Wybierz rzeczownik.',a?.options||['kot','biegnie','zielony'],a?.answer||'kot'],[b?.question||'Wybierz czasownik.',b?.options||['biegnie','kot','zielony'],b?.answer||'biegnie'],'⭐'];});
   if(!preview&&older)try{localStorage.setItem(poolKey139(child,kind,scope,'recent'),JSON.stringify(config.closetMissions.flatMap(m=>[m[1][0],m[2][0]])));}catch{}
  }
+ if(kind==='web-climber')config.spiderBank=spiderBank142(grade,tasks);
  return config;
 }
 export function mountTrainingPackage139(root,options){
  const {game,grade,subject=game.subject,child,preview=false,speak,stopAudio=()=>{},askHelp,onMic,onBack,onFinish,oneRound=false,tasks=[],material='',generate}=options;
- const lifetime=new AbortController(),{signal}=lifetime;let frame,context={question:game.name,answer:''},paused=false,config,finished=false;
+ const lifetime=new AbortController(),{signal}=lifetime;let frame,context={question:game.name,answer:''},paused=false,config,finished=false,lastState=null;
+ const revealedAttempts=new Set(),completedAttempts=new Set();
  const scope=trainingScope139(grade,subject,material),key=`academy-training139:${child}:${scope}:${game.kind}`,session=crypto.randomUUID();
  window.__academyTraining139??=new Map();
  let restore=null;if(!preview)try{restore=JSON.parse(localStorage.getItem(key)||'null');}catch{}
  if(['closet','rally'].includes(game.kind)&&restore?.index>=restore?.rounds?.length)restore=null;
- const helper=cosmicHelp136(root,{signal,ask:askHelp,speak,mic:onMic,context:()=>context});
+ const helper=cosmicHelp136(root,{signal,ask:async(...args)=>{const attempt=lastState?.attempt;const reply=await askHelp?.(...args);if(context.v77Revealed&&attempt){revealedAttempts.add(attempt);send('revealed');}return reply;},speak,mic:onMic,context:()=>context});
  root.className='training139-root space132';root.innerHTML=`<header class="training139-nav"><button type="button" data-t139="back">‹ Wszystkie gry</button><button type="button" data-t139="pause">Ⅱ Pauza</button><button type="button" data-t139="skip">Pomiń bez zaliczenia</button></header><p class="training139-loading" role="status">Ładuję grę…</p><div data-t139-stage></div>${helper.markup()}`;
  const send=(kind,data={})=>frame?.contentWindow?.postMessage({academyTraining139:session,kind,...data},location.origin);
  const dispose=()=>{if(signal.aborted)return;lifetime.abort();stopAudio();window.__academyTraining139.delete(session);if(frame)frame.src='about:blank';};
@@ -73,18 +76,26 @@ export function mountTrainingPackage139(root,options){
   if(data.kind==='speak'&&typeof data.text==='string'&&!paused)speak(data.text.length===1&&alphabet92.includes(data.text.toLocaleUpperCase('pl'))?letterName92(data.text.toLocaleUpperCase('pl')):data.text,data.lang);if(data.kind==='stop-audio')stopAudio();
   if(data.kind==='back'){dispose();onBack();}if(data.kind==='help')helper.action('c136-help');if(data.kind==='mic')helper.action('c136-mic');
   if(data.kind==='state'&&data.state&&typeof data.state==='object'){
+   if(context.v77Revealed&&lastState?.attempt)revealedAttempts.add(lastState.attempt);
+   lastState=data.state;
+   if(revealedAttempts.has(lastState.attempt))lastState.revealed=true;
    const skip=root.querySelector('[data-t139="skip"]');if(skip)skip.disabled=!!data.state.roundComplete;
    if(data.state.context&&JSON.stringify(data.state.context)!==JSON.stringify(context)){context=data.state.context;helper.reset();}
    if(!preview)try{localStorage.setItem(key,JSON.stringify(data.state));}catch{}
+  }
+  if(data.kind==='complete'&&game.kind==='web-climber'&&!preview&&lastState?.solved===10&&lastState.position===11&&data.attempt===lastState.attempt&&!completedAttempts.has(data.attempt)){
+   completedAttempts.add(data.attempt);
+   if(!data.revealed&&!lastState.revealed&&!revealedAttempts.has(data.attempt))void options.onComplete?.(data.attempt);
   }
   if(data.kind==='advance'&&oneRound&&!finished){finished=true;dispose();onFinish();}
   if(data.kind==='restart'){if(!preview)localStorage.removeItem(key);dispose();mountTrainingPackage139(root,{...options});}
  },{signal});
  root.ownerDocument.addEventListener('academy:voice-state',e=>send('voice',{state:e.detail?.state}),{signal});
  (async()=>{
-  try{config=await frameConfig139({...options,signal,restore,subject});if(signal.aborted)return;window.__academyTraining139.set(session,config);
+  try{config=await frameConfig139({...options,signal,restore,subject});if(signal.aborted)return;if(game.kind==='web-climber'){config.oneRound=oneRound;config.generateSpider=()=>generateSpider142({bank:config.spiderBank,grade,material,ask:preview?null:generate,signal});}
+   window.__academyTraining139.set(session,config);
    const page=packagePages139[game.kind]?.[grade==='P'?'pre':'school']||packagePages139[game.kind]?.pre;if(!page)throw Error('Brak wersji gry dla tego poziomu.');
-   frame=document.createElement('iframe');frame.title=game.name;frame.className='training139-frame';frame.setAttribute('sandbox','allow-scripts allow-same-origin');frame.hidden=true;frame.src=page+'?v=141#session='+encodeURIComponent(session);root.querySelector('[data-t139-stage]').append(frame);
+   frame=document.createElement('iframe');frame.title=game.name;frame.className='training139-frame';frame.setAttribute('sandbox','allow-scripts allow-same-origin');frame.hidden=true;frame.src=page+'?v=142#session='+encodeURIComponent(session);root.querySelector('[data-t139-stage]').append(frame);
    if(generate&&['rhymes','closet'].includes(game.kind)&&!preview){
     const objects=await readJSON139('assets/training139/objects.json',signal);void replenish139({game:game.kind,grade,subject,material,verifiedTasks:tasks,objects,ask:generate,signal,key:poolKey139(child,game.kind,scope)});
    }

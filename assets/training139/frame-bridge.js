@@ -34,7 +34,7 @@
  try{Object.defineProperty(window,'speechSynthesis',{value:synthesis,configurable:true});}catch{window.speechSynthesis.speak=synthesis.speak;window.speechSynthesis.cancel=synthesis.cancel;}
  window.Training139={config,restore:config.restore,asset,css:s=>String(s).replace(/url\(['"]?([^)'"\s]+)['"]?\)/g,(_,p)=>'url("'+asset(p)+'")'),storage,shuffle,speak:text=>send('speak',{text,lang:'pl-PL'}),
   save(data){saved={...saved,...data};send('state',{state:saved});},
-  advance(){send('advance');},back(){send('back');},
+  advance(){send('advance');},back(){send('back');},help(){send('help');},complete(data){send('complete',data);},
   dragCargo(node,index,load){
    let drag=null,ghost=null;
    node.addEventListener('pointerdown',e=>{if(e.button!==0||node.disabled)return;drag={id:e.pointerId,x:e.clientX,y:e.clientY,moved:false};node.setPointerCapture(e.pointerId);});
@@ -47,6 +47,7 @@
  window.addEventListener('message',e=>{if(e.source!==parent||e.origin!==origin||e.data?.academyTraining139!==session)return;
   if(e.data.kind==='pause')pause(!!e.data.paused);
   if(e.data.kind==='skip')window.Training139.onSkip?.();
+  if(e.data.kind==='revealed')window.Training139.onRevealed?.();
   if(e.data.kind==='voice'){const speaking=e.data.state==='speaking';document.body.classList.toggle('listening',speaking);if(!speaking){pendingVoice?.onend?.();pendingVoice=null;}}
  });
  document.addEventListener('click',e=>{

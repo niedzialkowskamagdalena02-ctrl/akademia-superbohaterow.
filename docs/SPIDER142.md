@@ -1,0 +1,14 @@
+# V142 — Spider-Man i trafienia w bazie
+
+Podstawa: działająca V141. Dostarczona paczka: SpiderMan_Misja_na_Dachu_Wspinaczka_i_Final.zip. Przeczytano Prompt_wdrozenia.txt i Generator_zadan_AI.txt; wykorzystano zewnętrzne pliki gry i wszystkie 30 oryginalnych grafik bez zmiany bajtów, w tym pełne APNG, oddzielne klatki i stopklatki. Samodzielne demonstracje HTML z osadzonymi kopiami obrazów nie trafiają do aplikacji.
+
+- Spider-Man w treningach polskiego i matematyki dla poziomu P oraz klas 1–3. Dostępność zależy od poziomu edukacji, nie imienia. Katalog i uruchamianie omijają dawny wariant wspinaczki. Pozostałe blokady i podgląd mamy pozostają zgodne z V140.
+- Dziesięć numerowanych pięter, osobny parter i dach; strzał do wybranego okna, wspinaczka, upadek i nowa misja po błędzie. Na telefonie aktywne odpowiedzi są w pionie. Pięć finałów i osobne powtórki scenek.
+- Zachowana baza z paczki i istniejące sprawdzone pytania aplikacji. P: liczby do pięciu, litery, obrazki; klasy 1–3: matematyka, polski, ortografia. W klasie pierwszej bez mnożenia i dzielenia. W pytaniach o literę cel jest wyłącznie w nagranym poleceniu na żądanie. Dziesięć różnych zadań w misji, mieszanie kategorii i historia ostatnich czterech misji; przy wyczerpaniu kategorii powtarzane są najmniej niedawne pytania.
+- AI pobiera zadania w tle przez istniejącego mentora. Nowe działania są obliczane lokalnie; fakty językowe i obrazkowe muszą odpowiadać sprawdzonej bazie. Brak sieci nie blokuje gry. Istniejące pytania z materiału są włączane do puli, pozostałe kategorie uzupełniane bazą ogólną zgodnie z promptem.
+- Zapis zadania, piętra, wariantu krajobrazu, losowań i identyfikatora misji w dotychczasowym zapisie treningów, osobno dla profilu, poziomu, przedmiotu i materiału. Podgląd mamy nie zapisuje postępów. Jedna nagroda za całą niezależnie ukończoną wspinaczkę, bez ponawiania po odświeżeniu/powtórce finału. Odsłonięcie odpowiedzi przez mentora wyklucza tę nagrodę.
+- Śladami Ślimaka: odblokowanie oryginalnej gry dla przedszkola, bez przebudowy.
+- Sieć, laser, tarcza i młot: punkt trafienia wyliczony z oryginalnej klatki kontaktu oraz geometrii podłogi, ścian i dachu. Rozbłysk i trwały ślad korzystają z tego samego punktu świata. Pajęczyna zaczyna powstawać przy kontakcie; punkt zaczepienia uwzględnia rzeczywisty początek każdej z sześciu sekwencji. Ruch kamery nie przesuwa zapisanego trafienia. Grafiki, klatki i gesty pozostają oryginalne.
+- Instalator nakłada zmiany na V141, zachowując pozostałe funkcje aplikacji, hol V141 oraz dane dzieci. Nowy numer i klucze pamięci podręcznej V142. Brak dodatkowych kopii projektu; poprzednia wersja pozostaje w Git.
+
+Weryfikacja: test symulowanego DOM i zegara, test natywnego płótna na oryginalnych PNG oraz test nakładania instalatora. Renderowanie na fizycznym telefonie wymaga sprawdzenia po publikacji.

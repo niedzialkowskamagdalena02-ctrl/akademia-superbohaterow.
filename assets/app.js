@@ -1,5 +1,5 @@
-import {trainingCatalog139,trainingReady139,decorateTasks139,schoolTasks139} from './training139-catalog.js?v=140';
-import {mountTrainingPackage139,materialTasks139,trainingScope139} from './training139-player.js?v=141';
+import {trainingCatalog139,trainingReady139,decorateTasks139,schoolTasks139} from './training139-catalog.js?v=142';
+import {mountTrainingPackage139,materialTasks139,trainingScope139} from './training139-player.js?v=142';
 import {training124Picker,voice124,art124,pageCount124} from './interface124.js?v=124';
 import {training119Range} from './interface119.js?v=124';
 import {gamePreview99, hangarPaint99} from './game-art99.js?v=130';
@@ -16,7 +16,7 @@ import {syncAdapter} from './sync.js?v=81';
 import {BASE_ITEMS,baseMarkup,migrateBase} from './base.js?v=119';
 import {mountArcade,stopArcade} from './arcade.js?v=93';
 import {mountBaseScene84} from './base-scene84.js?v=117';
-import {baseWalkMarkup,mountBaseWalk,resetBaseWalk,openWalkRoom87,focusWalkCase88,walkRoomId93} from './base-walk85.js?v=141';
+import {baseWalkMarkup,mountBaseWalk,resetBaseWalk,openWalkRoom87,focusWalkCase88,walkRoomId93} from './base-walk85.js?v=142';
 import {HQ_SLOTS,hqItems,hqRead,hqBalances,hqEarnToken,hqSpendToken,hqRecordCrystals,hqBuyWithGems,hqPlaced,hqPlace,hqDisplayPurchase88,hqPet,hqChoosePet88,hqPaint,hqEarnFood,hqMarkup,hqWallet,hqShop,hqFoodQuiz88} from './headquarters84.js?v=117';
 import {petRoom86,petCareMarkup86,petPicker88,mountPetCare86,setPetCare86,servePet87} from './pet-care86.js?v=117';
 import {flightMarkup88,mountNounFlight88} from './noun-flight88.js?v=103';
@@ -83,7 +83,7 @@ const select=(id,label,options,value)=>`<label for="${id}">${label}</label><sele
 const grades=[['P','Przedszkole'],...Array.from({length:12},(_,i)=>[String(i+1),`Klasa ${i+1}`])];
 const people=[['pawel','Paweł'],['patryk','Patryk']];
 const note=t=>{const n=$('hq85-notice')||$('notice');if(!n){console.warn('Powiadomienie:',t);return}n.textContent=t;n.classList.add('visible');setTimeout(()=>{if(n.isConnected)n.classList.remove('visible')},4500)};
-const ACADEMY_RELEASE=141;
+const ACADEMY_RELEASE=142;
 async function checkAcademyUpdate(button){
  if(!button||button.disabled)return;
  const label=button.textContent,controller=new AbortController();
@@ -1678,14 +1678,16 @@ function mountTraining95(p){
  const material=scoped.map(page=>page.text).join('\n');
  const sourceRows=scoped.flatMap(page=>{const book=data.books.find(b=>b.id===page.bookId);return book?bookBankItems(book).filter(row=>v75BankMatchesPage(row,page)).map(row=>({...row.task,sourcePageId:page.id,sourceTitle:book.title,sourceExcerpt:page.text})):[];});
  const prepared=materialTasks139(sourceRows);
- const frameKinds=['letters','numbers','order','rhymes','trace','rally','camera','dino','rail','closet'];
+ const frameKinds=['letters','numbers','order','rhymes','trace','rally','camera','dino','rail','closet','web-climber'];
  if(ready&&frameKinds.includes(g.kind)){
   if(scoped.length&&grade!=='P'&&['dino','closet'].includes(g.kind)&&!prepared.length){note('W wybranym materiale nie ma jeszcze gotowych pytań do tej gry.');onBack();return;}
-  const tasks=prepared.length?prepared:schoolTasks139(g.subject,grade);
+  const tasks=g.kind==='web-climber'?prepared:prepared.length?prepared:schoolTasks139(g.subject,grade);
+  const spiderChild142=who;
   const session=mountTrainingPackage139(root,{
    game:g,grade,subject:g.subject,child:who,preview:testMode,tasks,material,oneRound:mixed,onFinish:advance,onBack,speak:say,stopAudio:()=>stopVoice(),onMic:()=>microphone(),
    askHelp:async(question,exercise,signal,current)=>{let reply='';await trainingReply82(question,exercise,()=>!signal.aborted&&root.isConnected&&current(),text=>{reply=text;});return reply;},
-   generate:async(prompt,signal)=>askMentorAI(prompt,p.mentor||'tech',[],signal)
+   generate:async(prompt,signal)=>askMentorAI(prompt,p.mentor||'tech',[],signal),
+   onComplete:async(attempt)=>{if(testMode)return;const key='v82-mission:'+spiderChild142+':spider142:'+attempt;if(data.history.some(h=>h.key===key&&h.child===spiderChild142))return;const progressed=recordEnergy86(data.profiles[spiderChild142],key,true);const ok=await grant(spiderChild142,1,'Trening · Spider-Man · Misja na dachu',key);if(!ok&&progressed)await save();if(ok)note('🏆 +1 złoty do portfela!');}
   });
   stopMission95=session.dispose;return session;
  }

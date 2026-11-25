@@ -1,0 +1,159 @@
+*{box-sizing:border-box}body{margin:0;background:#080e24;color:#f5f7ff;font:16px system-ui,sans-serif}main{width:min(100% - 20px,820px);margin:18px auto}header,.brief,footer{display:flex;justify-content:space-between;align-items:center;gap:10px}small,#category{color:#92d8ff;font-size:.72rem;font-weight:800;letter-spacing:.05em}h1{font-size:clamp(21px,5vw,39px);margin:4px 0 8px;color:#ffe0a0;line-height:1.08}#level{white-space:nowrap;color:#a3dcff;font-size:.8rem}progress{width:100%;height:10px;accent-color:#64dcff}.brief{padding:10px 12px;margin:9px 0;background:#17254b;border:1px solid #45628e;border-radius:12px;min-height:72px}h2{margin:2px 0 0;font-size:clamp(16px,3vw,22px);line-height:1.25}button{font:inherit;font-weight:750;color:#fff;background:#234276;border:1px solid #7ca8e5;border-radius:8px;min-height:38px;padding:4px 8px;cursor:pointer}button:focus-visible{outline:3px solid #ffce68;outline-offset:1px}#read{flex-shrink:0;font-size:.8rem}.scene{position:relative;isolation:isolate;overflow:hidden;padding:17px 10% 16px 15%;background:linear-gradient(#2981d4,#a9e4ff 79%);border:1px solid #47689f;border-radius:16px}.cloud{position:absolute;width:19%;height:19px;background:#fff;border-radius:50%;opacity:.88;filter:drop-shadow(0 5px 4px #cde4f2)}.cloud:before,.cloud:after{content:'';position:absolute;background:inherit;border-radius:50%;width:52%;height:29px;bottom:0;left:14%}.cloud:after{left:42%;height:24px}.one{left:-3%;top:14%}.two{right:-3%;top:30%}.skyline{position:absolute;inset:auto 0 30px;height:39%;background:linear-gradient(#7d9fc8,#a6bbd2);clip-path:polygon(0 30%,6% 30%,6% 17%,12% 17%,12% 50%,18% 50%,18% 10%,28% 10%,28% 60%,77% 60%,77% 25%,84% 25%,84% 54%,94% 54%,94% 35%,100% 35%,100% 100%,0 100%)}.lawn{position:absolute;inset:auto 0 0;height:35px;background:linear-gradient(#62a443,#347334);border-top:2px solid #c1da73}.tower{position:relative;margin:auto;max-width:385px;background:repeating-linear-gradient(#825d52 0 9px,#9a7567 10px 11px);border:3px solid #443945;border-top:0;box-shadow:9px 5px #43547380}.roof{margin:0 -8px;padding:2px 0;text-align:center;font-size:.64rem;font-weight:900;letter-spacing:.14em;color:#ffe7ad;background:#453d52;border-bottom:4px solid #cea47f}.floor{display:grid;grid-template-columns:19px repeat(3,minmax(0,1fr));gap:4px;padding:2px 5px;align-items:stretch;border-bottom:2px solid #c29b7d;min-height:27px}.floor.active{min-height:44px;background:#f0cc9880}.number{align-self:center;text-align:center;font-weight:900;font-size:.65rem;background:#382f3f;border-radius:4px}.window,.dummy{border:1px solid #b6b2b4;border-radius:3px;background:linear-gradient(155deg,#466c89,#172e4e 76%);box-shadow:inset 0 0 0 2px #252c43}.dummy{background:linear-gradient(90deg,transparent 48%,#657f99 50%,transparent 52%),linear-gradient(150deg,#638cae,#274966)}.visited .dummy{background:#e2b96c}.window{font-size:clamp(10px,2.8vw,16px);min-height:38px;padding:2px;overflow-wrap:anywhere}.window.hit{background:#14634e}.window.miss{background:#893e48}.entry{height:20px;width:45px;margin:auto;background:linear-gradient(90deg,#243650 48%,#9aafbf 50%,#243650 53%);border:2px solid #bcb2aa;border-bottom:0}#hero{position:absolute;left:var(--hero-x);top:var(--hero-y);width:clamp(30px,7vw,59px);transform:translate(-50%,-90%);z-index:2;pointer-events:none;filter:drop-shadow(0 3px 3px #0008)}canvas{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none}footer{flex-wrap:wrap;margin-top:8px}footer p{flex:1 1 210px;margin:0;color:#d4e6ff;font-size:.9rem}#next{background:#ffdb87;color:#24183a}[hidden]{display:none!important}
+.scene{padding-top:clamp(55px,12vw,94px)}.roof{position:relative}.roof:before{content:'';position:absolute;bottom:100%;right:11%;width:18%;height:13px;background:#514659;border:2px solid #cea47f;border-bottom:0}
+
+#hero{aspect-ratio:88/149;background:none}
+.sprite,.limb{display:block;position:absolute;inset:0;width:100%;height:100%}
+.limb{visibility:hidden;background:url("grafiki/spider-man.png") center/100% 100% no-repeat}
+#hero.climb .limb,#hero.dance .limb{visibility:visible}
+#hero.climb .sprite,#hero.dance .sprite{clip-path:polygon(0 0,100% 0,100% 40%,69% 41%,65% 68%,70% 72%,30% 72%,35% 66%,31% 41%,0 40%)}
+.arm.left{clip-path:polygon(0 46%,31% 41%,36% 49%,26% 68%,24% 82%,0 82%);transform-origin:28% 47%;animation:reach .42s ease-in-out infinite alternate}
+.arm.right{clip-path:polygon(68% 41%,100% 43%,100% 82%,80% 82%,75% 68%,64% 49%);transform-origin:72% 47%;animation:reach .42s -.42s ease-in-out infinite alternate-reverse}
+.leg.left{clip-path:polygon(30% 65%,53% 68%,48% 100%,13% 100%,18% 87%);transform-origin:43% 70%;animation:kick .42s ease-in-out infinite alternate}
+.leg.right{clip-path:polygon(50% 67%,72% 65%,88% 100%,54% 100%);transform-origin:58% 70%;animation:kick .42s ease-in-out infinite alternate-reverse}
+@keyframes reach{from{rotate:-22deg}to{rotate:25deg}}
+@keyframes kick{from{rotate:14deg}to{rotate:-17deg}}
+#hero.dance{animation:roof-dance .44s ease-in-out 5 alternate}
+@keyframes roof-dance{0%{transform:translate(-50%,-90%) rotate(-12deg)}100%{transform:translate(-50%,-110%) rotate(12deg)}}
+.dummy{display:grid;place-items:center;position:relative;min-width:0}
+.cameo{display:block;font-size:clamp(14px,3vw,22px);line-height:1;animation:peek 1.55s ease-in-out both;pointer-events:none}
+@keyframes peek{0%,100%{opacity:0;transform:translateY(8px) rotate(-22deg)}22%,76%{opacity:1;transform:translateY(0) rotate(14deg)}43%,64%{transform:rotate(-15deg)}}
+#roof-gag{position:absolute;left:calc(var(--roof-x) + 22px);top:calc(var(--roof-y) - 29px);z-index:4;white-space:nowrap;font-size:clamp(17px,4vw,30px);pointer-events:none}
+#roof-gag span{display:inline-block;animation:snatch 1.8s ease-in-out both}
+@keyframes snatch{0%{transform:translate(72px,-23px)}45%{transform:translate(-12px,0)}100%{transform:translate(55px,-34px) rotate(-15deg)}}
+.sandwich{animation:take-away 1.8s steps(1) both}
+#roof-gag i{font-style:normal;font-size:.55em;position:absolute;left:0;top:.65em;animation:carry 1.8s steps(1) both}
+@keyframes take-away{46%,100%{opacity:0}}@keyframes carry{0%{opacity:0}46%,100%{opacity:1}}
+@media(prefers-reduced-motion:reduce){.sandwich,#roof-gag i{animation:none}#roof-gag i{display:none}}
+@media(prefers-reduced-motion:reduce){#hero.dance,.limb,.cameo,#roof-gag span{animation:none}}
+
+.scene{background:linear-gradient(var(--sky,#3098df),var(--horizon,#bbecff) 82%)}
+.scene[data-background="park"]{--sky:#32b1cc;--horizon:#f4ffc2;--ground:#478e44;--ground-light:#91cb60;--distant:#4d9d66}
+.scene[data-background="coast"]{--sky:#2f90da;--horizon:#cef6ff;--ground:#23928a;--ground-light:#78d5b9;--distant:#399dc1}
+.scene[data-background="hills"]{--sky:#635ec2;--horizon:#ffd5ed;--ground:#527525;--ground-light:#a6bf57;--distant:#8485bb}
+.scene[data-background="sunset"]{--sky:#713e9d;--horizon:#ffb574;--ground:#45612d;--ground-light:#8ea64e;--distant:#765b99}
+.skyline{background:linear-gradient(var(--distant,#79a0bf),color-mix(in srgb,var(--distant,#79a0bf),white 35%))}
+.scene[data-background="park"] .skyline,.scene[data-background="hills"] .skyline{clip-path:polygon(0 59%,10% 43%,24% 20%,38% 48%,56% 23%,71% 9%,88% 40%,100% 22%,100% 100%,0 100%)}
+.scene[data-background="coast"] .skyline{height:18%;clip-path:none;background:repeating-linear-gradient(176deg,#70c7e3 0 8px,#54b7d7 9px 10px)}
+.scene[data-background="sunset"] .two{background:#ffcf9b}
+.lawn{background:linear-gradient(var(--ground-light,#76b557),var(--ground,#347334))}
+.tower{box-shadow:22px 14px 30px #0d1b4566;background:repeating-linear-gradient(0deg,#0000 0 8px,#e9c0aa25 9px 10px),linear-gradient(100deg,#625167,#a38378 36%,#69596c);border-left:4px solid #ab928e;border-right:4px solid #4b394e}
+.tower:after{content:'';position:absolute;left:100%;width:clamp(11px,4.2vw,37px);top:3px;bottom:0;transform-origin:left center;transform:skewY(20deg);background:repeating-linear-gradient(0deg,#4f526a 0 15px,#343649 16px 18px);border-right:3px solid #2d3045;pointer-events:none}
+.roof{background:linear-gradient(#72677b,#3a354a);box-shadow:0 5px 7px #18142691}
+.floor{border-bottom:2px solid #dac2a583;box-shadow:0 2px 3px #301f30a0}
+.window,.dummy{box-shadow:inset 0 0 0 2px #21263d,inset 0 6px 8px #b1dfff29,0 2px 2px #342334}
+
+/* The rendered building sits behind the live answer grid. */
+.scene[data-background]{background:var(--landscape) center bottom / cover no-repeat #6eb7e5}
+.scene .cloud,.scene .skyline,.scene .lawn{display:none}
+.scene[data-background="park"]{--landscape:url("grafiki/tla/park.webp")}
+.scene[data-background="wybrzeze"]{--landscape:url("grafiki/tla/wybrzeze.webp")}
+.scene[data-background="gory"]{--landscape:url("grafiki/tla/gory.webp")}
+.scene[data-background="zachod"]{--landscape:url("grafiki/tla/zachod.webp")}
+.tower{isolation:isolate;background:transparent;box-shadow:none;border:0}
+.tower:after{content:none}
+.tower:before{content:"";position:absolute;z-index:-1;inset:-9% -30% -5% -4%;background:url("grafiki/wiezowiec.webp") center/100% 100% no-repeat;filter:drop-shadow(7px 9px 7px #27312466)}
+.roof{background:linear-gradient(#6c4950,#46313b);border-bottom-color:#edc598}
+.roof:before{display:none}
+.floor{box-shadow:none;border-bottom-color:#bd8a6733}
+.floor.active{background:#ffd59b63}
+.window,.dummy{border:2px solid #c79772;background:linear-gradient(135deg,#567c9e,#19324d 63%);box-shadow:inset 0 0 0 2px #273b55,inset 0 3px 8px #c3eaff66,0 3px 4px #41221fb3}
+.window.hit{background:#14634e}.window.miss{background:#893e48}.visited .dummy{background:#e2b96c}
+.scene .cameo{position:absolute;z-index:2;bottom:0;left:50%;width:34px;height:25px;display:grid;place-items:center;translate:-50% 0}
+.cameo img{max-width:100%;max-height:25px;object-fit:contain;filter:drop-shadow(0 1px 2px #0007)}
+.cameo .wave{position:absolute;top:1px;right:-3px;font-size:12px;transform-origin:30% 90%;animation:wave-hand .24s infinite alternate}
+@keyframes wave-hand{from{rotate:-24deg}to{rotate:23deg}}
+@media(prefers-reduced-motion:reduce){.cameo .wave{animation:none}}
+
+.scene .cameo.acted{width:clamp(38px,8vw,66px);height:clamp(31px,7vw,55px);bottom:0;animation:acted-peek 1.9s ease-in-out both}
+.cameo.acted img{max-height:100%}
+@keyframes acted-peek{0%,100%{opacity:0;transform:translateY(8px)}12%,88%{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.scene .cameo.acted{animation:none}}
+
+#finale-effect{position:absolute;left:calc(var(--roof-x) + 20px);top:calc(var(--roof-y) - 54px);font-size:26px;z-index:4;animation:peek 2.25s both}
+#hero.bathroom{animation:bathroom 4.35s both}
+#hero.pigeon{animation:reach-for-snack 2s ease both}
+#hero.confetti{animation:duck-confetti 1.6s ease both}
+#hero.selfie{animation:selfie-pose 1.8s ease both}
+@keyframes reach-for-snack{0%,100%{transform:translate(-50%,-90%)}40%{transform:translate(-28%,-94%) rotate(15deg)}65%{transform:translate(-62%,-90%) rotate(-8deg)}}
+@keyframes duck-confetti{0%,100%{transform:translate(-50%,-90%)}25%,58%{transform:translate(-50%,-79%) scale(.96,.85)}76%{transform:translate(-50%,-103%) rotate(-8deg)}}
+@keyframes selfie-pose{0%,100%{transform:translate(-50%,-90%)}27%,74%{transform:translate(-50%,-90%) rotate(13deg) scale(1.1)}}
+@media(prefers-reduced-motion:reduce){#hero.pigeon,#hero.confetti,#hero.selfie{animation:none}}
+@keyframes bathroom{
+ 0%,100%{transform:translate(-50%,-90%)}
+ 10%{transform:translate(-50%,-108%) rotate(-12deg)}
+ 21%{transform:translate(-50%,-90%) scaleX(.82) rotate(5deg)}
+ 30%{transform:translate(-5%,-93%) scaleX(.75) rotate(-6deg)}
+ 37%{transform:translate(34%,-90%) perspective(270px) rotateY(42deg) rotate(4deg)}
+ 44%,83%{transform:translate(70%,-90%) perspective(270px) rotateY(57deg)}
+ 94%{transform:translate(40%,-96%) rotate(-7deg)}
+}
+#hero.bathroom .sprite{animation:pose 4.35s step-end both}
+@keyframes pose{
+ 17%{content:var(--need-pose)}
+ 29%{content:var(--walk-pose)}
+ 44%{content:var(--side-pose)}
+ 0%,84%,100%{content:normal}
+}
+#stream{position:absolute;left:calc(var(--roof-x) + clamp(31px,8vw,72px));top:calc(var(--roof-y) - 13px);bottom:15px;width:clamp(16px,5vw,39px);z-index:4;pointer-events:none;border:solid #ffd34d;border-width:2px 2px 0 0;border-radius:40% 32px 0 0;transform-origin:top left;animation:stream 4.35s both}
+@keyframes stream{0%,43%,84%,100%{opacity:0;transform:scaleY(.02)}49%{opacity:1;transform:scaleY(.65) skewX(2deg)}58%,80%{opacity:1;transform:scaleY(1)}}
+@media(prefers-reduced-motion:reduce){#hero.bathroom,#hero.bathroom .sprite,#finale-effect,#stream{animation:none}#stream{display:none}}
+
+#hero.bathroom .sprite{animation:none;clip-path:polygon(0 0,100% 0,100% 40%,69% 41%,65% 68%,70% 72%,30% 72%,35% 66%,31% 41%,0 40%)}
+#hero.bathroom .limb{visibility:visible;animation-duration:4.35s;animation-iteration-count:1;animation-fill-mode:both}
+#hero.bathroom .arm.left{animation-name:hold-left}
+#hero.bathroom .arm.right{animation-name:hold-right}
+#hero.bathroom .leg.left{animation-name:knees-left}
+#hero.bathroom .leg.right{animation-name:knees-right}
+@keyframes hold-left{0%,100%{rotate:0deg}16%,85%{rotate:-44deg}}
+@keyframes hold-right{0%,100%{rotate:0deg}16%,85%{rotate:44deg}}
+@keyframes knees-left{0%,100%{rotate:0deg}18%,32%,46%,82%{rotate:-14deg}29%,40%{rotate:16deg}}
+@keyframes knees-right{0%,100%{rotate:0deg}18%,29%,40%,82%{rotate:14deg}32%,46%{rotate:-17deg}}
+@media(prefers-reduced-motion:reduce){#hero.bathroom .limb{visibility:hidden;animation:none}#hero.bathroom .sprite{clip-path:none}}
+
+.floor{padding:2px 7px 3px;gap:6px}
+.window,.dummy{position:relative;border:2px solid #a97651;border-radius:3px 3px 1px 1px;
+ box-shadow:0 2px 0 #eee0b0,0 4px 2px #44251f,inset 0 0 0 2px #1d293b;
+ background:linear-gradient(150deg,#a9d4ee 0 11%,#426c8e 12% 33%,#142c43 34% 80%,#243e59)}
+.dummy{background:linear-gradient(90deg,transparent 47%,#c3a581 48% 53%,transparent 54%),linear-gradient(0deg,transparent 27%,#a1846b 28% 34%,transparent 35%),linear-gradient(147deg,#8bc4e4,#284460 67%);overflow:visible}
+.visited .dummy{background:linear-gradient(90deg,transparent 47%,#896341 48% 53%,transparent 54%),linear-gradient(0deg,transparent 28%,#9b754b 29% 36%,transparent 37%),linear-gradient(#ffe4a4,#ca9356)}
+.window.hit{background:#18634a}.window.miss{background:#873f49}
+.scene .cameo.acted{width:clamp(39px,9vw,76px);height:clamp(36px,8vw,62px);animation:acted-peek 2.2s ease-in-out both}
+.cameo.acted img{width:auto;height:auto;max-height:100%;max-width:100%;object-fit:contain}
+.cameo-kaczka img{animation:duck-hop .48s ease-in-out 4 alternate}
+.cameo-ufo img{animation:ufo-wiggle .5s ease-in-out 4 alternate}
+.cameo-paczek img{animation:donut-spin .56s ease-in-out 3 alternate}
+@keyframes duck-hop{to{transform:translateY(-8px) rotate(17deg)}}
+@keyframes ufo-wiggle{to{transform:translate(6px,-8px) rotate(-17deg)}}
+@keyframes donut-spin{to{transform:rotate(28deg) scale(.81,1.12)}}
+#roof-gag{left:clamp(80px,calc(var(--roof-x) + 27px),calc(100% - 115px));top:calc(var(--roof-y) - 19px);width:1px;height:1px}
+#roof-gag .picnic,#roof-gag .stolen,#roof-gag .bird,#roof-gag .pigeon-flight{display:block;position:absolute}
+#roof-gag .picnic,#roof-gag .stolen{width:25px;height:16px;background:url("grafiki/dach/kanapka.png") center/contain no-repeat}
+#roof-gag .picnic{left:0;top:0;animation:picnic 2.65s step-end both}
+#roof-gag .stolen{left:0;top:12px;animation:stolen 2.65s step-end both}
+#roof-gag .bird{left:0;top:0;width:54px;height:39px;background:center/contain no-repeat;animation:wingbeat .23s step-end infinite}
+#roof-gag .pigeon-flight{animation:pigeon-flight 2.65s ease-in-out both}
+@keyframes wingbeat{0%{background-image:url("grafiki/dach/golab_gora.png")}50%{background-image:url("grafiki/dach/golab_dol.png")}}
+@keyframes picnic{0%{opacity:1}45%,100%{opacity:0}}
+@keyframes stolen{0%{opacity:0}45%,100%{opacity:1}}
+@keyframes pigeon-flight{0%{transform:translate(100px,-90px);opacity:0}15%{opacity:1}42%,49%{transform:translate(0,-12px);opacity:1}85%{transform:translate(-75px,-80px);opacity:1}100%{transform:translate(-145px,-105px);opacity:0}}
+@media(prefers-reduced-motion:reduce){
+ .cameo img,.scene .cameo.acted,#roof-gag .picnic,#roof-gag .stolen,#roof-gag .bird,#roof-gag .pigeon-flight{animation:none}
+ #roof-gag .picnic{display:none}#roof-gag .bird{background-image:url("grafiki/dach/golab_gora.png")}#roof-gag .pigeon-flight{transform:translate(15px,-15px)}
+}
+
+#hero.climb{transform:translate(-50%,-77%);filter:drop-shadow(2px 3px 2px #1e1413a0);animation:wall-weight .36s ease-in-out infinite alternate}
+#hero.climb .arm.left{animation:wall-hand-l .36s ease-in-out infinite alternate}
+#hero.climb .arm.right{animation:wall-hand-r .36s ease-in-out infinite alternate}
+#hero.climb .leg.left{animation:wall-foot-l .36s ease-in-out infinite alternate}
+#hero.climb .leg.right{animation:wall-foot-r .36s ease-in-out infinite alternate}
+@keyframes wall-weight{from{transform:translate(-53%,-77%) rotate(-6deg)}to{transform:translate(-47%,-77%) rotate(6deg)}}
+@keyframes wall-hand-l{from{transform:translate(-5%,-17%) rotate(25deg)}to{transform:translate(-2%,7%) rotate(-12deg)}}
+@keyframes wall-hand-r{from{transform:translate(2%,7%) rotate(12deg)}to{transform:translate(5%,-17%) rotate(-25deg)}}
+@keyframes wall-foot-l{from{transform:translate(-6%,0) rotate(15deg)}to{transform:translate(-2%,-9%) rotate(-14deg)}}
+@keyframes wall-foot-r{from{transform:translate(2%,-9%) rotate(14deg)}to{transform:translate(6%,0) rotate(-15deg)}}
+/* The stream travels down the visible right side of the building. */
+#stream{left:calc(var(--roof-x) + clamp(29px,7vw,62px));z-index:5}
+
+/* The supplied scene and sprites are unchanged; stack only the active answers. */
+button{min-height:44px}.training139-paused *{animation-play-state:paused!important}
+@media(max-width:600px){main{width:calc(100% - 12px);margin:8px auto}.brief{flex-wrap:wrap}.brief>div{flex:1 1 220px}.scene{padding-left:17%;padding-right:7%}.floor.active{grid-template-columns:19px minmax(0,1fr);gap:4px}.floor.active .number{grid-row:1/4}.floor.active .window{grid-column:2;font-size:16px;min-height:44px;padding:5px;line-height:1.15}.floor:not(.active){min-height:23px}.tower{max-width:100%}#level{font-size:12px}header{align-items:flex-start}#hero{width:clamp(32px,9vw,48px)}}

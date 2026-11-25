@@ -1,4 +1,4 @@
-import {frameRect127} from './hero-animation127.js?v=131';
+import {frameRect127} from './hero-animation127.js?v=142';
 
 export const DOUBLE_TAP130=250;
 // Existing inventory IDs, including the older training-web item.
